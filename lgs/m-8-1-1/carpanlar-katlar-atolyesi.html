@@ -1,0 +1,729 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}html,body{margin:0;padding:0}body{font:15px Arimo,Arial,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Çarpanlar ve Katlar Atölyesi</title>
+<script>document.documentElement.lang='tr'</script>
+<style>
+:root{
+  --bg:#f6f4f8; --card:#ffffff; --ink:#1c2433; --muted:#5b6478; --line:#dcd6e4; --soft:#f7eef3;
+  --acc:#c2255c; --acc2:#e8590c; --acc3:#1f7a4c; --acc4:#1f7a8c; --bad:#c0392b; --grid:rgba(194,37,92,.05); --onacc:#fff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ color-scheme:dark;
+    --bg:#15121a; --card:#1f1a25; --ink:#ede8f3; --muted:#a79fb4; --line:#3a3246; --soft:#2a2231;
+    --acc:#f06595; --acc2:#ff922b; --acc3:#51cf66; --acc4:#66d9e8; --bad:#ff6b6b; --grid:rgba(240,101,149,.06); --onacc:#15121a; }
+}
+:root[data-theme="dark"]{ color-scheme:dark;
+  --bg:#15121a; --card:#1f1a25; --ink:#ede8f3; --muted:#a79fb4; --line:#3a3246; --soft:#2a2231;
+  --acc:#f06595; --acc2:#ff922b; --acc3:#51cf66; --acc4:#66d9e8; --bad:#ff6b6b; --grid:rgba(240,101,149,.06); --onacc:#15121a; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:18px 48px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);font-weight:700}
+h1{font-family:Bitter,Georgia,serif;font-weight:800;font-size:clamp(26px,4vw,34px);margin:2px 0 6px;color:var(--acc);line-height:1.1;text-wrap:balance}
+h2{font-family:Bitter,Georgia,serif;font-weight:800;font-size:22px;margin:0;line-height:1.2;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 16px;max-width:68ch}
+.index{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px;padding:0;list-style:none}
+.index a{display:flex;gap:8px;align-items:flex-start;text-decoration:none;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:4px;padding:8px 10px;min-height:58px}
+.index a:hover{border-color:var(--acc)}
+.index a[aria-current="true"]{border-color:var(--acc);background:var(--soft)}
+.index .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:var(--onacc);font-weight:700;font-size:14px}
+.index .t{font-weight:600;font-size:15px;line-height:1.25}
+.index .s{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px}
+.ph{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.code{font-size:12.5px;font-weight:700;color:var(--acc3);letter-spacing:.04em}
+.intro{color:var(--muted);margin:4px 0 12px;max-width:72ch}
+svg{display:block;user-select:none;touch-action:manipulation;max-width:100%;height:auto}
+svg text{font-family:"Source Sans 3",sans-serif;fill:var(--ink)}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:10px}
+.primary{font:inherit;font-weight:700;background:var(--acc);color:var(--onacc);border:0;padding:8px 16px;border-radius:4px;cursor:pointer}
+.ghost{font:inherit;background:var(--card);color:var(--ink);border:1.5px solid var(--line);padding:7px 14px;border-radius:4px;cursor:pointer}
+.ghost[aria-pressed="true"]{border-color:var(--acc);background:var(--soft);font-weight:700}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+input.ans{font:inherit;font-size:18px;width:110px;padding:5px 8px;border:1.5px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums}
+input[type=range]{accent-color:var(--acc);width:220px;max-width:100%}
+.fb{border-radius:4px;padding:9px 12px;margin-top:10px}
+.fb.ok{background:color-mix(in srgb,var(--acc3) 16%,transparent)} .fb.no{background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.task{font-size:18px;margin:0 0 8px}
+.task b{color:var(--acc2)}
+.score{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 2px;font-weight:700}
+.frac span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:4px;padding:3px 9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;min-width:44px;padding:6px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+.chip.ok{background:color-mix(in srgb,var(--acc3) 22%,var(--card));border-color:var(--acc3)}
+.chip.no{background:color-mix(in srgb,var(--bad) 18%,var(--card));border-color:var(--bad)}
+.chip.off{opacity:.35;text-decoration:line-through}
+.list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.list span{background:var(--soft);border-radius:99px;padding:2px 10px;font-weight:600;font-variant-numeric:tabular-nums}
+table.t{border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.t th,table.t td{border:1px solid var(--line);padding:6px 10px;text-align:center;min-width:40px}
+table.t th{background:var(--soft)}
+table.t td.pick{cursor:pointer}
+table.t td.on{background:color-mix(in srgb,var(--acc) 30%,var(--card))}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.adimlbl{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--onacc);background:var(--acc2);border-radius:999px;padding:2px 10px;margin-bottom:6px}
+.tah p,.acik p{margin:4px 0 8px;font-size:17px}
+.grp{margin-top:18px}
+.grp h3{font-family:Bitter,Georgia,serif;font-size:15px;margin:0 0 6px;color:var(--muted)}
+.big{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.qrnote{font-size:13px;color:var(--muted);margin-top:14px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
+:root{--kb1:#1864ab;--kb2:#0b7285;--acc:#1864ab;--kbr:12px;
+  --p1:#e03131;--p2:#f08c00;--p3:#2f9e44;--p4:#1c7ed6;--p5:#7048e8;--p6:#d6336c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--acc:#4dabf7}}
+:root[data-theme="dark"]{--acc:#4dabf7}
+body{background:var(--bg);background-image:radial-gradient(circle at 12% -10%,color-mix(in srgb,var(--kb1) 14%,transparent),transparent 45%),radial-gradient(circle at 100% 0,color-mix(in srgb,var(--kb2) 12%,transparent),transparent 40%);background-attachment:fixed}
+.wrap{max-width:1320px}
+.kb-hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 26px 20px;margin:4px 0 18px;color:#fff;
+  background:linear-gradient(125deg,var(--kb1),var(--kb2));box-shadow:0 10px 30px -14px color-mix(in srgb,var(--kb1) 70%,transparent)}
+.kb-hero::after{content:"+ − × ÷ = √ π Δ < >";position:absolute;right:-10px;bottom:-18px;font:800 64px/1 Bitter,Georgia,serif;letter-spacing:.2em;color:rgba(255,255,255,.12);white-space:nowrap;pointer-events:none}
+.kb-hero .eyebrow{color:rgba(255,255,255,.88)}
+.kb-hero h1{color:#fff;font-size:clamp(28px,4.2vw,42px)}
+.kb-hero .lead{color:rgba(255,255,255,.92);margin-bottom:10px;max-width:80ch}
+.kb-ilerleme{position:relative;z-index:1;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;max-width:460px}
+.kb-bar{flex:1;height:10px;border-radius:99px;background:rgba(255,255,255,.28);overflow:hidden}
+.kb-bar i{display:block;height:100%;width:0;border-radius:99px;background:#fff;transition:width .5s}
+.kb-duzen{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.kb-yan{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:4px;scrollbar-width:thin}
+.kb-yan .index{grid-template-columns:1fr;gap:6px}
+.kb-yan .grp h3{font:800 14px/1.2 Bitter,Georgia,serif;margin:12px 2px 6px;color:var(--acc)}
+.kb-yan .grp:first-child h3{margin-top:0}
+.index a{border-radius:10px;min-height:0;transition:transform .15s,border-color .15s;border-width:2px}
+.index a:hover{transform:translateX(3px)}
+.index a[aria-current="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card));box-shadow:0 4px 14px -8px var(--acc)}
+.index li:nth-child(6n+1) .n{background:var(--p1)} .index li:nth-child(6n+2) .n{background:var(--p2)}
+.index li:nth-child(6n+3) .n{background:var(--p3)} .index li:nth-child(6n+4) .n{background:var(--p4)}
+.index li:nth-child(6n+5) .n{background:var(--p5)} .index li:nth-child(6n+6) .n{background:var(--p6)}
+.index .n{color:#fff!important}
+.index a.kb-tamam .n{background:var(--acc3)!important}
+.index a.kb-tamam .n::after{content:"✓";position:absolute;font-size:15px}
+.index a.kb-tamam .n{font-size:0;position:relative}
+.panel{border-radius:16px;border:0;box-shadow:0 12px 34px -18px rgba(20,30,60,.35);padding:20px 22px 22px;position:relative;overflow:hidden}
+.panel::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--kb1),var(--kb2),var(--p2))}
+#panel h2{color:var(--acc);font-size:26px}
+.panel .code{background:color-mix(in srgb,var(--acc3) 14%,transparent);padding:2px 8px;border-radius:99px}
+.intro{font-size:17px}
+.task{font-size:19px}
+.primary{border-radius:99px;padding:9px 20px;background:linear-gradient(135deg,var(--kb1),var(--kb2));color:#fff;box-shadow:0 6px 14px -8px var(--kb1);transition:transform .12s}
+.primary:hover{transform:translateY(-1px)} .primary:active{transform:translateY(1px)}
+.ghost{border-radius:99px;border-width:2px}
+.fb{border-radius:12px;padding:11px 14px;font-weight:600;border-left:5px solid transparent}
+.fb.ok{border-left-color:var(--acc3)} .fb.no{border-left-color:var(--bad)}
+.cardi,.opts button,.mini button,.seg button{border-radius:10px}
+input.ans{border-radius:10px;border-width:2px}
+.kb-gezinti{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.kb-gezinti span{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.kb-duzen{grid-template-columns:1fr}.kb-yan{position:static;max-height:none}
+  .kb-yan .index{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.kb-hero{padding:18px 16px}.kb-hero::after{font-size:40px}}
+
+/* Tek düğme ve menü */
+.kb-dugme{position:fixed;top:14px;right:14px;z-index:60;width:56px;height:56px;border-radius:50%;border:3px solid #fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--kb1),var(--kb2));color:#fff;display:grid;place-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);transition:transform .15s}
+.kb-dugme:hover{transform:scale(1.06)} .kb-dugme svg{width:28px;height:28px}
+.kb-dugme[aria-expanded="true"]{transform:rotate(90deg)}
+.kb-dugme .kb-sessiz{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:var(--bad);border:2px solid #fff;display:none;place-items:center}
+.kb-dugme .kb-sessiz svg{width:12px;height:12px}
+html.kb-sesyok .kb-dugme .kb-sessiz{display:grid}
+.kb-menu{position:fixed;top:80px;right:14px;z-index:60;width:min(330px,calc(100vw - 28px));max-height:calc(100vh - 96px);overflow:auto;
+  background:var(--card);color:var(--ink);border-radius:18px;box-shadow:0 20px 50px -18px rgba(0,0,0,.5);border:1px solid var(--line);padding:16px}
+.kb-menu[hidden]{display:none}
+.kb-menu h4{margin:0 0 10px;font:800 16px/1.2 Bitter,Georgia,serif;color:var(--acc)}
+.kb-menu h5{margin:14px 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.kb-yuvarlak{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.kb-yuvarlak button{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px}
+.kb-yuvarlak b{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:var(--soft);transition:.15s}
+.kb-yuvarlak svg{width:26px;height:26px}
+.kb-yuvarlak button[aria-pressed="true"] b{background:linear-gradient(135deg,var(--kb1),var(--kb2));border-color:transparent;color:#fff}
+.kb-yuvarlak button:hover b{border-color:var(--acc)}
+.kb-satir{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.kb-satir:first-of-type{border-top:0}
+.kb-anahtar{width:46px;height:26px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer;flex:none}
+.kb-anahtar::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.kb-anahtar[aria-checked="true"]{background:var(--acc3)} .kb-anahtar[aria-checked="true"]::after{left:23px}
+.kb-seg{display:flex;border:2px solid var(--line);border-radius:99px;overflow:hidden}
+.kb-seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:none;color:var(--ink);padding:4px 10px;cursor:pointer}
+.kb-seg button[aria-pressed="true"]{background:var(--acc);color:#fff}
+.kb-alt{display:flex;gap:8px;margin-top:14px}
+.kb-alt button{flex:1;font:inherit;font-size:14px;font-weight:600;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px;cursor:pointer}
+.kb-yonerge{border:0;border-radius:18px;padding:0;max-width:min(620px,calc(100vw - 28px));width:100%;color:var(--ink);background:var(--card);box-shadow:0 30px 70px -20px rgba(0,0,0,.6)}
+.kb-yonerge::backdrop{background:rgba(10,15,30,.55)}
+.kb-yonerge header{padding:16px 20px;color:#fff;background:linear-gradient(125deg,var(--kb1),var(--kb2));font:800 20px/1.2 Bitter,Georgia,serif}
+.kb-yonerge .ic{padding:14px 20px 4px;font-size:17px}
+.kb-yonerge .ic ol{padding-left:20px;margin:8px 0} .kb-yonerge .ic li{margin:4px 0}
+.kb-yonerge .ic .gorev{background:var(--soft);border-radius:12px;padding:10px 14px;font-weight:500;border-left:5px solid var(--acc)}
+.kb-yonerge footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px 18px}
+.kb-kutlama{position:fixed;pointer-events:none;z-index:70}
+.kb-kutlama i{position:absolute;width:9px;height:9px;border-radius:2px;animation:kbpat .8s ease-out forwards}
+@keyframes kbpat{to{transform:translate(var(--x),var(--y)) rotate(260deg);opacity:0}}
+.kb-gizli{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Erişilebilirlik sınıfları */
+html.kb-y1 .wrap{zoom:1.15} html.kb-y2 .wrap{zoom:1.3}
+html.kb-rahat body{letter-spacing:.03em;word-spacing:.12em;line-height:1.85}
+html.kb-karsit{--ink:#000;--muted:#111;--line:#000;--bg:#fff;--card:#fff;--soft:#fff7cc;--acc:#0030b8;--acc3:#006b2e;--bad:#b00000;--grid:transparent}
+html.kb-karsit .panel{box-shadow:none;border:3px solid #000}
+html.kb-karsit .index a,html.kb-karsit .ghost,html.kb-karsit input.ans{border-color:#000}
+html.kb-karsit button:focus-visible,html.kb-karsit a:focus-visible{outline:4px solid #ff9f00}
+html.kb-azhareket *,html.kb-azhareket *::before,html.kb-azhareket *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+
+/* tek kareli zemin: kutuların arka plan ızgarası kapatılır, çizim alanları düz zemin üzerinde durur (iki ızgara üst üste binmez) */
+.panel,.card,.stage,.tahta,.sahne,.board,.kutu,.alan{background-image:none!important}
+svg.gsvg,.stage svg,.tahta svg{background:var(--card,#fff);border-radius:6px}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">LGS · 8. Sınıf · Çarpanlar ve Katlar · M.8.1.1.1 – M.8.1.1.3</div>
+  <h1>Çarpanlar ve Katlar Atölyesi</h1>
+  <p class="lead">Çarpanlar, asal çarpanlara ayırma, EBOB, EKOK ve aralarında asal sayılar için altmış etkinlik. Önce tahmin edin, sonra keşfedin, en sonda açıklayın. Kitaptaki karekodlar doğrudan ilgili etkinliği açar.</p>
+  <div id="index"></div>
+  <section class="panel" id="panel" aria-live="polite"></section>
+  <p class="qrnote">Çoğu etkinlikte "Yeni soru" düğmesi farklı sayılarla yeni bir durum oluşturur.</p>
+</div>
+<script>
+(function(){
+/* ---------- yardımcılar ---------- */
+const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuf = a => a.slice().sort(()=>Math.random()-.5);
+const gcd = (a,b) => { a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b,a%b]; } return a; };
+const lcm = (a,b) => a/gcd(a,b)*b;
+const divs = n => { const d=[]; for(let i=1;i<=n;i++) if(n%i===0) d.push(i); return d; };
+const isP = n => { if(n<2) return false; for(let k=2;k*k<=n;k++) if(n%k===0) return false; return true; };
+const fac = n => { const f={}; let p=2; while(n>1){ while(n%p===0){ f[p]=(f[p]||0)+1; n/=p; } p++; } return f; };
+const sup = e => e>1 ? `<sup>${e}</sup>` : "";
+const uslu = f => Object.keys(f).map(Number).sort((a,b)=>a-b).map(p=>`${p}${sup(f[p])}`).join(" · ");
+const frac = (a,b) => `<span class="frac"><span>${a}</span><span>${b}</span></span>`;
+function fb(box, ok, msg){ box.className = "fb " + (ok ? "ok" : "no"); box.innerHTML = msg; box.hidden = false; }
+const NS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function h(html){ const d=document.createElement("div"); d.innerHTML=html; return d; }
+/* üç adım: tahmin → keşfet → açıkla */
+function adim3(p, tahminSoru, tahminSec, kesfetHTML, init){
+  p.innerHTML = `<div class="tah"><span class="adimlbl">1 · Tahmin et</span><p>${tahminSoru}</p><div class="seg t3">${tahminSec.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div></div>
+    <div class="kes" hidden><span class="adimlbl" style="margin-top:12px">2 · Keşfet</span>${kesfetHTML}</div><div class="acik" hidden></div>`;
+  let tah = null;
+  p.querySelectorAll(".t3 button").forEach(b=>b.onclick=()=>{ p.querySelectorAll(".t3 button").forEach(x=>{x.setAttribute("aria-pressed",x===b); x.disabled=true;}); tah=+b.dataset.i; p.querySelector(".kes").hidden=false; init(p.querySelector(".kes"), ()=>tah); });
+}
+function acikla(p, soru, secs, dogru, ok){
+  const box = p.querySelector(".acik"); box.hidden = false;
+  box.innerHTML = `<span class="adimlbl" style="margin-top:12px">3 · Açıkla</span><p>${soru}</p><div class="seg">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div><div class="fbx" hidden></div>`;
+  const f = box.querySelector(".fbx");
+  box.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ box.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b)); fb(f, +b.dataset.i===dogru, +b.dataset.i===dogru ? ok : "Keşfettiklerinize yeniden bakınız ve başka bir açıklama seçiniz."); });
+}
+function svgEl(w,h){ const s=document.createElementNS(NS,"svg"); s.setAttribute("viewBox",`0 0 ${w} ${h}`); s.style.width="100%"; s.style.maxWidth=w+"px"; return s; }
+
+/* ===================== M.8.1.1.1 ===================== */
+/* E1 · Dikdörtgen kur: alanı n olan bütün dikdörtgenler */
+const dikdortgen = n => p => {
+  const pairs = divs(n).filter(d=>d*d<=n);
+  adim3(p, `Alanı <b>${n}</b> birimkare olan ve kenarları doğal sayı olan kaç farklı dikdörtgen vardır?`, [String(pairs.length-1), String(pairs.length), String(pairs.length+2), String(divs(n).length)],
+   `<p class="task">Kaydırıcıyla bir kenarı seçiniz. Diğer kenar doğal sayı olursa dikdörtgen kurulur ve listeye eklenir.</p>
+    <div class="row"><label>Kısa kenar: <b class="v">1</b></label><input type="range" min="1" max="${Math.floor(Math.sqrt(n))}" value="1"></div>
+    <div class="stage"></div><div class="list"></div><p class="score"></p><div class="fb" hidden></div>`,
+   (k, tah) => {
+    const inp = k.querySelector("input"), st = k.querySelector(".stage"), li = k.querySelector(".list"), sc = k.querySelector(".score"), f = k.querySelector(".fb");
+    const bulunan = new Set();
+    function ciz(){ const a = +inp.value; k.querySelector(".v").textContent = a; const b = n/a, tam = Number.isInteger(b);
+      const s = Math.min(300/(tam?b:n/a), 14), W = 330, H = Math.max(80, a*s+40);
+      const sv = svgEl(W, H);
+      if (tam) { sv.innerHTML = `<rect x="10" y="10" width="${b*s}" height="${a*s}" fill="${css('--soft')}" stroke="${css('--acc')}" stroke-width="2"/>` +
+        (s>=8 ? Array.from({length:b-1},(_,i)=>`<line x1="${10+(i+1)*s}" y1="10" x2="${10+(i+1)*s}" y2="${10+a*s}" stroke="${css('--line')}"/>`).join("") + Array.from({length:a-1},(_,i)=>`<line x1="10" y1="${10+(i+1)*s}" x2="${10+b*s}" y2="${10+(i+1)*s}" stroke="${css('--line')}"/>`).join("") : "") +
+        `<text x="${10+b*s/2}" y="${a*s+30}" text-anchor="middle" font-weight="700">${b}</text><text x="${Math.min(W-20,20+b*s)}" y="${10+a*s/2+5}" font-weight="700">${a}</text>`;
+        bulunan.add(a); }
+      else sv.innerHTML = `<text x="10" y="40" font-size="16" fill="${css('--bad')}">${n} : ${a} doğal sayı değil; bu kenarla dikdörtgen kurulamaz.</text>`;
+      st.replaceChildren(sv);
+      li.innerHTML = [...bulunan].sort((x,y)=>x-y).map(x=>`<span>${x} × ${n/x}</span>`).join("");
+      sc.textContent = `Bulunan: ${bulunan.size} / ?`;
+      if (bulunan.size === pairs.length) { fb(f, true, `Bütün dikdörtgenleri buldunuz: ${pairs.length} tane. Tahmininiz ${tah()===1?"doğruydu":"farklıydı"}.`);
+        acikla(p, "Dikdörtgen sayısını belirleyen nedir?", ["Sayının çarpan çiftlerinin sayısı", "Sayının basamak sayısı", "Sayının asal olup olmaması"], 0,
+          `Doğru. Her dikdörtgen bir çarpan çiftidir: kısa kenar × uzun kenar = ${n}. ${n}'${n%10===0?"un":""} ${divs(n).length} çarpanı ${pairs.length} çift oluşturur${Number.isInteger(Math.sqrt(n))?" (kare kenar kendisiyle eşleşir)":""}.`); } }
+    inp.oninput = ciz; ciz(); });
+};
+
+/* E2 · Bölen avı */
+const bolenAvi = n => p => {
+  const d = divs(n);
+  p.innerHTML = `<p class="task"><b>${n}</b> sayısının bütün pozitif çarpanlarını seçiniz.</p><div class="chips"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost ipucu">İpucu: çiftleri göster</button></div><div class="fb" hidden></div><div class="list"></div>`;
+  const ch = p.querySelector(".chips"), f = p.querySelector(".fb");
+  for (let i=1;i<=n;i++){ const b=document.createElement("button"); b.className="chip"; b.textContent=i; b.setAttribute("aria-pressed","false"); b.onclick=()=>b.setAttribute("aria-pressed", b.getAttribute("aria-pressed")!=="true"); ch.appendChild(b); }
+  p.querySelector(".ipucu").onclick = () => { p.querySelector(".list").innerHTML = d.filter(x=>x*x<=n).map(x=>`<span>${x} · ${n/x}</span>`).join(""); };
+  p.querySelector(".k").onclick = () => { const sec = [...ch.children].filter(b=>b.getAttribute("aria-pressed")==="true").map(b=>+b.textContent);
+    const eksik = d.filter(x=>!sec.includes(x)), fazla = sec.filter(x=>!d.includes(x));
+    [...ch.children].forEach(b=>{ const v=+b.textContent; b.classList.toggle("ok", sec.includes(v)&&d.includes(v)); b.classList.toggle("no", fazla.includes(v)); });
+    if (!eksik.length && !fazla.length) fb(f, true, `Tam! ${n}'in ${d.length} çarpanı var. Çarpanlar çift çift eşleşir: ${d.filter(x=>x*x<=n).map(x=>x+" · "+n/x).join(", ")}.`);
+    else fb(f, false, (fazla.length?`${fazla.join(", ")} sayısı ${n}'i kalansız bölmez. `:"") + (eksik.length?`${eksik.length} çarpan eksik. Her bulduğunuz çarpanın eşini de düşününüz.`:"")); };
+};
+
+/* E3 · Çarpan ağacı kur */
+const agacKur = n => p => {
+  p.innerHTML = `<p class="task"><b>${n}</b> sayısının çarpan ağacını kurunuz: Asal olmayan bir sayıya dokununca çarpan çiftleri çıkar, birini seçiniz. Bütün yapraklar asal olunca üslü yazımı tamamlayınız.</p><div class="stage"></div><div class="row sec"></div><div class="son" hidden><p>Asal çarpanlar: <b class="yap"></b></p><p>Üslü yazım: <span class="usl"></span> <button class="primary k">Kontrol et</button></p></div><div class="fb" hidden></div>`;
+  const st=p.querySelector(".stage"), sec=p.querySelector(".row.sec"), f=p.querySelector(".fb");
+  const kok={v:n,c:null};
+  function yapraklar(d,out=[]){ if(d.c){ yapraklar(d.c[0],out); yapraklar(d.c[1],out); } else out.push(d.v); return out; }
+  function derin(d){ return d.c?1+Math.max(derin(d.c[0]),derin(d.c[1])):1; }
+  function ciz(){ const D=derin(kok), W=520, H=D*62+10; const sv=svgEl(W,H); let s=""; const liste=[], xs=[];
+    (function yer(d,x,y,dx){ if(d.c){ s+=`<line x1="${x}" y1="${y}" x2="${x-dx}" y2="${y+62}" stroke="${css('--muted')}"/><line x1="${x}" y1="${y}" x2="${x+dx}" y2="${y+62}" stroke="${css('--muted')}"/>`; yer(d.c[0],x-dx,y+62,dx*.55); yer(d.c[1],x+dx,y+62,dx*.55); }
+      const pr=isP(d.v), id=liste.length; liste.push(d); xs.push(x); s+=`<g data-id="${id}" style="cursor:${pr||d.c?'default':'pointer'}"><circle cx="${x}" cy="${y}" r="19" fill="${pr?css('--soft'):css('--card')}" stroke="${pr?css('--acc'):css('--ink')}" stroke-width="${pr?2.4:1.4}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-weight="700">${d.v}</text></g>`; })(kok, W/2, 26, 130);
+    const x0=Math.min(...xs)-24, x1=Math.max(...xs)+24; sv.setAttribute("viewBox",`${x0} 0 ${x1-x0} ${H}`); sv.style.maxWidth=(x1-x0)+"px";
+    sv.innerHTML=s; st.replaceChildren(sv);
+    sv.querySelectorAll("g[data-id]").forEach(g=>{ const d=liste[+g.dataset.id];
+      if(!isP(d.v)&&!d.c) g.addEventListener("click",()=>{ sec.innerHTML=divs(d.v).filter(x=>x>1&&x*x<=d.v).map(x=>`<button class="ghost">${x} · ${d.v/x}</button>`).join("");
+        sec.querySelectorAll("button").forEach(b=>b.onclick=()=>{ const [a,c]=b.textContent.split(" · ").map(Number); d.c=[{v:a,c:null},{v:c,c:null}]; sec.innerHTML=""; ciz(); }); }); });
+    const y=yapraklar(kok);
+    if(y.every(isP)){ const son=p.querySelector(".son"); son.hidden=false; p.querySelector(".yap").textContent=y.sort((a,b)=>a-b).join(" · ");
+      const ps=[...new Set(y)]; p.querySelector(".usl").innerHTML=ps.map(q=>`${q}<sup><input class="ans" data-p="${q}" style="width:44px;font-size:14px" inputmode="numeric"></sup>`).join(" · ");
+      p.querySelector(".k").onclick=()=>{ const ff=fac(n); const ok=ps.every(q=>+p.querySelector(`input[data-p="${q}"]`).value===ff[q]);
+        fb(f, ok, ok?`Doğru: ${n} = ${uslu(ff)}. Farklı çiftlerle başlasaydınız da aynı asal çarpanlara ulaşırdınız.`:"Her asal çarpanın ağaçta kaç kez geçtiğini sayınız; üs o sayıdır."); }; } }
+  ciz();
+};
+
+/* E4 · Asal eleği */
+const elek = (N, soru) => p => {
+  p.innerHTML = `<p class="task">1'den ${N}'e kadar sayılar. Asal olduğunu bildiğiniz bir sayıya dokunun: katları (kendisi hariç) üstü çizilir. 1 asal değildir.</p><div class="chips" style="max-width:640px"></div><div class="row"><span>Kaç asal sayı kaldı?</span><input class="ans" inputmode="numeric"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  const ch=p.querySelector(".chips"), f=p.querySelector(".fb");
+  for(let i=1;i<=N;i++){ const b=document.createElement("button"); b.className="chip"+(i===1?" off":""); b.textContent=i; b.onclick=()=>{ if(b.classList.contains("off")) return; if(!isP(i)) return fb(f,false,`${i} asal değil: ${Object.keys(fac(i)).join(", ")} ile bölünür. Önce asal bir sayı seçiniz.`);
+      b.setAttribute("aria-pressed","true"); [...ch.children].forEach(x=>{ const v=+x.textContent; if(v>i&&v%i===0) x.classList.add("off"); }); f.hidden=true; }; ch.appendChild(b); }
+  p.querySelector(".k").onclick=()=>{ const g=[...Array(N)].map((_,i)=>i+1).filter(isP).length; const v=+p.querySelector(".ans").value;
+    fb(f, v===g, v===g?`Doğru: 1–${N} arasında ${g} asal sayı var. ${soru}`:`Eleği bitiriniz: 2, 3, 5, 7'nin katlarını çizdikten sonra kalanları sayınız.`); };
+};
+
+/* E5 · Bölme yöntemi */
+const bolmeY = n => p => {
+  p.innerHTML = `<p class="task"><b>${n}</b> sayısını bölme yöntemiyle asal çarpanlarına ayırınız: Her satırda sayıyı bölen <b>en küçük asal</b> sayıyı seçiniz.</p><table class="t"><tbody></tbody></table><div class="row sec"></div><div class="fb" hidden></div>`;
+  const tb=p.querySelector("tbody"), sec=p.querySelector(".sec"), f=p.querySelector(".fb"); let cur=n, bolenler=[];
+  function satir(){ tb.innerHTML=[...bolenler.map((b,i)=>{ const v=n/bolenler.slice(0,i).reduce((a,c)=>a*c,1); return `<tr><td>${v}</td><td style="border-left:2px solid var(--ink);color:var(--acc);font-weight:700">${b}</td></tr>`; }), `<tr><td>${cur}</td><td style="border-left:2px solid var(--ink)"></td></tr>`].join("");
+    if(cur===1){ sec.innerHTML=""; const ff=fac(n); fb(f,true,`Bitti: ${n} = ${bolenler.join(" · ")} = ${uslu(ff)}.`); return; }
+    sec.innerHTML=[2,3,5,7,11,13].map(q=>`<button class="ghost">${q}</button>`).join("");
+    sec.querySelectorAll("button").forEach(b=>b.onclick=()=>{ const q=+b.textContent; const enk=Object.keys(fac(cur)).map(Number)[0];
+      if(cur%q) return fb(f,false,`${cur} sayısı ${q}'e kalansız bölünmez.`); if(q!==enk) return fb(f,false,`${q} böler ama önce en küçük asal böleni (${enk}) kullanınız; tablo düzenli kalır.`);
+      f.hidden=true; bolenler.push(q); cur/=q; satir(); }); }
+  satir();
+};
+
+/* E6 · Tam kareye tamamla */
+const tamKare = n => p => {
+  const ff=fac(n); const gerek=Object.keys(ff).map(Number).filter(q=>ff[q]%2).reduce((a,c)=>a*c,1);
+  adim3(p, `<b>${n}</b> sayısını tam kare yapmak için en küçük hangi sayıyla çarpmak gerekir? Önce tahmin ediniz.`, shuf([String(gerek), String(gerek*2), String(n), "2"].filter((v,i,a)=>a.indexOf(v)===i)).slice(0,4),
+   `<p class="task">${n} = ${uslu(ff)}. Çarpılacak sayıyı asal çarpanlardan oluşturunuz; üslerin hepsi çift olunca sayı tam karedir.</p><div class="row cs"></div><p class="big sonuc"></p><div class="fb" hidden></div>`,
+   (k, tah) => { const ek={}; const cs=k.querySelector(".cs"), s=k.querySelector(".sonuc"), f=k.querySelector(".fb");
+     cs.innerHTML=[2,3,5,7].map(q=>`<span>${q}: <button class="ghost m" data-q="${q}">−</button> <b data-e="${q}">0</b> <button class="ghost a" data-q="${q}">+</button></span>`).join(" ");
+     function yaz(){ const t={...ff}; for(const q in ek) t[q]=(t[q]||0)+ek[q]; const carp=Object.keys(ek).reduce((a,q)=>a*q**ek[q],1);
+       s.innerHTML=`${n} · ${carp} = ${uslu(t)}`; const kare=Object.values(t).every(e=>e%2===0);
+       if(kare&&carp===gerek){ fb(f,true,`Tam kare oldu: ${n*carp} = ${Math.sqrt(n*carp)}². En küçük çarpan ${gerek}.`); acikla(k.parentElement, "Neden yalnızca üssü tek olan asal çarpanları ekledik?", ["Tam karede her asal çarpanın üssü çifttir", "Tam kareler hep çifttir", "Tek sayılar tam kare olamaz"], 0, "Doğru. Tam kare a · a biçimindedir; her asal çarpan iki eşit gruba bölünmelidir, bu yüzden üsler çifttir."); }
+       else if(kare) fb(f,false,`Tam kare oldu ama çarpan ${carp} en küçük değil. Gereksiz çarpanları azaltınız.`); else f.hidden=true; }
+     cs.querySelectorAll("button").forEach(b=>b.onclick=()=>{ const q=+b.dataset.q; ek[q]=Math.max(0,(ek[q]||0)+(b.classList.contains("a")?1:-1)); if(!ek[q]) delete ek[q]; cs.querySelector(`[data-e="${q}"]`).textContent=ek[q]||0; yaz(); }); yaz(); });
+};
+
+/* E7 · Çarpan sayısı keşfi */
+const carpanSay = () => p => {
+  adim3(p, "Pozitif çarpan sayısı <b>tek</b> olan sayılar hangileridir? Tahmin ediniz.", ["Asal sayılar", "Tam kare sayılar", "Tek sayılar"],
+   `<p class="task">Bir sayı seçiniz; çarpanları çiftler hâlinde gösterilir. Çarpan sayısı tek olanları not ediniz.</p><div class="row"><input type="range" min="1" max="60" value="12"><b class="v big">12</b></div><div class="list"></div><p class="sayi"></p><div class="list tekler"></div>`,
+   (k) => { const inp=k.querySelector("input"), li=k.querySelector(".list"), sy=k.querySelector(".sayi"), tk=k.querySelector(".tekler"); const tekler=new Set(); let adim=0;
+     function yaz(){ const n=+inp.value; k.querySelector(".v").textContent=n; const d=divs(n); li.innerHTML=d.filter(x=>x*x<=n).map(x=>`<span>${x}${x*x===n?" · "+x+" (kendisiyle)":" · "+n/x}</span>`).join("");
+       sy.innerHTML=`Çarpan sayısı: <b>${d.length}</b> (${d.length%2?"tek":"çift"})`; if(d.length%2){ tekler.add(n); } tk.innerHTML="Çarpan sayısı tek bulunanlar: "+[...tekler].sort((a,b)=>a-b).map(x=>`<span>${x}</span>`).join("");
+       if(tekler.size>=4 && !adim){ adim=1; acikla(k.parentElement, "Çarpan sayısı neden bu sayılarda tektir?", ["Bir çarpan kendisiyle eşleşir, çifti yoktur", "Bu sayılar asaldır", "Bu sayıların hepsi tektir"], 0, "Doğru. Çarpanlar çift çift eşleşir; tam karelerde ortadaki çarpan kendisiyle eşleştiği için bir tane fazla kalır (36: 6 · 6)."); } }
+     inp.oninput=yaz; yaz(); });
+};
+
+/* ===================== M.8.1.1.2 ===================== */
+/* E8 · Karo döşeme (EBOB) */
+const karo = (a,b) => p => {
+  const g=gcd(a,b);
+  adim3(p, `${a} birim × ${b} birim bir zemine, kesmeden ve boşluk bırakmadan kare karolar döşenecek. En büyük karo kenarı ne olabilir?`, shuf([String(g), String(g/2), String(Math.min(a,b)), String(lcm(a,b))].filter((v,i,x)=>x.indexOf(v)===i)),
+   `<p class="task">Karo kenarını değiştiriniz. Karolar zemine tam oturunca çerçeve yeşil olur.</p><div class="row"><label>Karo kenarı: <b class="v"></b></label><input type="range" min="1" max="${Math.min(a,b)}" value="1"></div><div class="stage"></div><p class="durum"></p><div class="list uy"></div><div class="fb" hidden></div>`,
+   (k) => { const inp=k.querySelector("input"), st=k.querySelector(".stage"), du=k.querySelector(".durum"), uy=k.querySelector(".uy"), f=k.querySelector(".fb"); const uygun=new Set();
+     function ciz(){ const t=+inp.value; k.querySelector(".v").textContent=t; const s=Math.min(440/a, 260/b); const sv=svgEl(a*s+20,b*s+20); let o="";
+       const tam = a%t===0 && b%t===0;
+       for(let x=0;x+t<=a;x+=t) for(let y=0;y+t<=b;y+=t) o+=`<rect x="${10+x*s}" y="${10+y*s}" width="${t*s}" height="${t*s}" fill="${css('--soft')}" stroke="${css('--acc')}" stroke-width="1"/>`;
+       o+=`<rect x="10" y="10" width="${a*s}" height="${b*s}" fill="none" stroke="${tam?css('--acc3'):css('--bad')}" stroke-width="3"/>`; sv.innerHTML=o; st.replaceChildren(sv);
+       du.innerHTML = tam ? `Tam oturdu: ${a/t} × ${b/t} = <b>${a/t*b/t}</b> karo.` : `Oturmadı: ${a%t?`${a}, ${t}'e bölünmüyor. `:""}${b%t?`${b}, ${t}'e bölünmüyor.`:""}`;
+       if(tam){ uygun.add(t); uy.innerHTML="Oturan karo kenarları: "+[...uygun].sort((x,y)=>x-y).map(x=>`<span>${x}</span>`).join(""); }
+       if(tam && t===g){ fb(f,true,`En büyük karo ${g} birim; ${a/g*b/g} karo yeterli.`); acikla(k.parentElement, "Oturan karo kenarlarının ortak özelliği nedir?", [`Hepsi ${a} ile ${b}'nin ortak bölenidir`, `Hepsi ${a}'nın katıdır`, "Hepsi asal sayıdır"], 0, `Doğru. Karo kenarı iki kenarı da bölmelidir; ortak bölenlerin en büyüğü EBOB(${a}, ${b}) = ${g}'dir.`); } }
+     inp.oninput=ciz; ciz(); });
+};
+
+/* E9 · Dikdörtgenlerden kare pano (EKOK) */
+const pano = (a,b) => p => {
+  const L=lcm(a,b);
+  adim3(p, `${a} × ${b} birimlik eş kartlar aynı yönde dizilerek kare bir pano yapılacak. Karenin kenarı en az kaç birim olur?`, shuf([String(L), String(a*b), String(a+b), String(Math.max(a,b))].filter((v,i,x)=>x.indexOf(v)===i)),
+   `<p class="task">Yan yana ve alt alta kart sayısını değiştiriniz. Pano kare olunca çerçeve yeşil olur.</p><div class="row"><label>Yan yana: <b class="vx">1</b></label><input class="ix" type="range" min="1" max="${b}" value="1"><label>Alt alta: <b class="vy">1</b></label><input class="iy" type="range" min="1" max="${a}" value="1"></div><div class="stage"></div><p class="durum"></p><div class="fb" hidden></div>`,
+   (k) => { const ix=k.querySelector(".ix"), iy=k.querySelector(".iy"), st=k.querySelector(".stage"), du=k.querySelector(".durum"), f=k.querySelector(".fb");
+     function ciz(){ const nx=+ix.value, ny=+iy.value; k.querySelector(".vx").textContent=nx; k.querySelector(".vy").textContent=ny; const W=nx*a, H=ny*b; const s=Math.min(420/W, 280/H); const sv=svgEl(W*s+20,H*s+20); let o="";
+       for(let i=0;i<nx;i++) for(let j=0;j<ny;j++) o+=`<rect x="${10+i*a*s}" y="${10+j*b*s}" width="${a*s}" height="${b*s}" fill="${(i+j)%2?css('--soft'):css('--card')}" stroke="${css('--acc4')}"/>`;
+       o+=`<rect x="10" y="10" width="${W*s}" height="${H*s}" fill="none" stroke="${W===H?css('--acc3'):css('--muted')}" stroke-width="3"/>`; sv.innerHTML=o; st.replaceChildren(sv);
+       du.innerHTML=`Pano: ${W} × ${H} birim · ${nx*ny} kart`;
+       if(W===H){ fb(f, W===L, W===L?`Kare oldu: kenar ${L} birim, ${nx*ny} kart.`:`Kare oldu ama kenar ${W}; daha küçük bir kare de mümkün.`);
+         if(W===L) acikla(k.parentElement, "Karenin kenarı neden bu sayıdır?", [`${a} ile ${b}'nin en küçük ortak katıdır`, `${a} ile ${b}'nin çarpımıdır`, `${a} ile ${b}'nin toplamıdır`], 0, `Doğru. Kenar hem ${a}'nın hem ${b}'nin katı olmalı; en küçüğü EKOK(${a}, ${b}) = ${L}.`); } else f.hidden=true; }
+     ix.oninput=ciz; iy.oninput=ciz; ciz(); });
+};
+
+/* E10 · Yanıp sönen lambalar (EKOK) */
+const lambalar = (p1,p2) => p => {
+  const L=lcm(p1,p2);
+  adim3(p, `K lambası ${p1} saniyede, L lambası ${p2} saniyede bir yanıyor. 0. saniyede birlikte yandılar. İlk kez yeniden kaçıncı saniyede birlikte yanarlar?`, shuf([String(L), String(p1*p2), String(p1+p2), String(Math.max(p1,p2)*2)].filter((v,i,x)=>x.indexOf(v)===i)),
+   `<p class="task">"Başlat" ile zamanı ilerletiniz; iki lamba birlikte yanınca durdurunuz.</p><div class="stage"></div><div class="row"><button class="primary go">Başlat</button><button class="ghost dur">Durdur</button><span class="big zam">0 s</span></div><div class="fb" hidden></div>`,
+   (k) => { const st=k.querySelector(".stage"), z=k.querySelector(".zam"), f=k.querySelector(".fb"); let t=0, tim=null;
+     function ciz(){ const W=520, H=150, T=Math.max(L*1.5, 30), sx=(W-60)/T; const sv=svgEl(W,H); let o="";
+       [[p1,"K",css('--acc')],[p2,"L",css('--acc4')]].forEach(([pp,ad,col],r)=>{ const y=30+r*40; o+=`<text x="10" y="${y+5}" font-weight="700" fill="${col}">${ad}</text><line x1="40" y1="${y}" x2="${W-10}" y2="${y}" stroke="${css('--line')}"/>`;
+         for(let s=0;s<=t;s+=pp) o+=`<circle cx="${40+s*sx}" cy="${y}" r="6" fill="${col}"/>`;
+         const yan = t%pp===0; o+=`<circle cx="${W-20}" cy="${y}" r="10" fill="${yan?col:css('--card')}" stroke="${col}" stroke-width="2"/>`; });
+       o+=`<line x1="${40+t*sx}" y1="12" x2="${40+t*sx}" y2="${H-20}" stroke="${css('--acc2')}" stroke-dasharray="4 3"/>`; sv.innerHTML=o; st.replaceChildren(sv); z.textContent=t+" s"; }
+     k.querySelector(".go").onclick=()=>{ if(tim) return; tim=setInterval(()=>{ t++; ciz(); if(t>=L*1.5){ clearInterval(tim); tim=null; } }, 260); };
+     k.querySelector(".dur").onclick=()=>{ clearInterval(tim); tim=null; const ok=t===L; fb(f, ok, ok?`Evet! ${L}. saniyede birlikte yandılar.`: t%p1===0&&t%p2===0?`Birlikte yandılar ama bu ilk buluşma değil; daha erken bir an var.`:`${t}. saniyede ${t%p1===0?"yalnız K":t%p2===0?"yalnız L":"hiçbiri"} yanıyor. Sıfırlayıp yeniden deneyiniz.`);
+       if(ok) acikla(k.parentElement, "İlk buluşma anı nasıl bulunur?", [`${p1} ile ${p2}'nin en küçük ortak katı`, `${p1} ile ${p2}'nin çarpımı`, `${p1} ile ${p2}'nin en büyük ortak böleni`], 0, `Doğru. Buluşma anları hem ${p1}'in hem ${p2}'nin katıdır; ilki EKOK(${p1}, ${p2}) = ${L}.${L!==p1*p2?` Çarpım (${p1*p2}) da ortak kattır ama ilk değildir.`:""}`);
+       else setTimeout(()=>{ t=0; ciz(); }, 900); };
+     ciz(); });
+};
+
+/* E11 · Dişliler */
+const dis = (a,b) => p => {
+  const L=lcm(a,b);
+  adim3(p, `${a} dişli ve ${b} dişli iki çarkın işaretli dişleri karşı karşıya. Büyük çark kaç tur dönünce işaretli dişler yeniden buluşur?`, shuf([String(L/Math.max(a,b)), String(L/Math.min(a,b)), String(Math.min(a,b)), "1"].filter((v,i,x)=>x.indexOf(v)===i)),
+   `<p class="task">"Bir diş ilerlet" ya da "Bir tur" ile çarkları döndürünüz. İşaretli dişler buluşunca kontrol ediniz.</p><div class="stage"></div><div class="row"><button class="ghost d1">Bir diş ilerlet</button><button class="ghost d10">10 diş</button><button class="primary k">Buluştular mı?</button><span class="sayac"></span></div><div class="fb" hidden></div>`,
+   (k) => { const st=k.querySelector(".stage"), f=k.querySelector(".fb"), sy=k.querySelector(".sayac"); let s=0; const A=Math.max(a,b), B=Math.min(a,b);
+     function cark(n,r,cx,cy,off,col,yon){ let o=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${css('--soft')}" stroke="${col}" stroke-width="2"/>`;
+       for(let i=0;i<n;i++){ const ang=(i-off)*2*Math.PI/n*yon + Math.PI*(yon>0?0:1); const x=cx+(r+6)*Math.cos(ang), y=cy+(r+6)*Math.sin(ang); o+=`<circle cx="${x}" cy="${y}" r="${i===0?6:3.2}" fill="${i===0?css('--acc2'):col}"/>`; } return o; }
+     function ciz(){ const sv=svgEl(420,230); const rA=80, rB=80*B/A; sv.innerHTML=cark(A,rA,120,115,s%A,css('--acc'),1)+cark(B,rB,120+rA+rB+12,115,s%B,css('--acc4'),-1)+`<text x="120" y="222" text-anchor="middle" font-weight="700">${A} diş</text><text x="${120+rA+rB+12}" y="222" text-anchor="middle" font-weight="700">${B} diş</text>`;
+       st.replaceChildren(sv); sy.textContent=`Geçen diş: ${s} · büyük çark ${Math.floor(s/A)} tur, küçük çark ${Math.floor(s/B)} tur`; }
+     k.querySelector(".d1").onclick=()=>{ s++; ciz(); }; k.querySelector(".d10").onclick=()=>{ s+=10; ciz(); };
+     k.querySelector(".k").onclick=()=>{ const ok=s>0&&s%A===0&&s%B===0; fb(f, ok&&s===L, ok? (s===L?`Buluştular: ${L} diş geçti; büyük çark ${L/A}, küçük çark ${L/B} tur döndü.`:`Buluştular ama daha önce de buluşuyorlardı (${L} diş).`) : `Henüz buluşmadılar: ${s} sayısı ${s%A?A:B}'nin katı değil.`);
+       if(ok&&s===L) acikla(k.parentElement, "Geçen diş sayısını hangi kavram verir?", [`EKOK(${A}, ${B})`, `EBOB(${A}, ${B})`, `${A} · ${B}`], 0, `Doğru. Dişlerin buluşması için geçen diş sayısı hem ${A}'nın hem ${B}'nin katı olmalı: en küçüğü ${L}.`); };
+     ciz(); });
+};
+
+/* E12 · Kurdele kesme (EBOB problemleri) */
+const kurdele = (arr) => p => {
+  const g=arr.reduce(gcd);
+  p.innerHTML=`<p class="task">Uzunlukları ${arr.join(" cm, ")} cm olan kurdeleler hiç artmadan eşit parçalara kesilecek. Parça uzunluğunu seçiniz; <b>en az parça</b> sayısını bulunuz.</p><div class="row"><label>Parça: <b class="v"></b> cm</label><input type="range" min="1" max="${Math.min(...arr)}" value="1"></div><div class="stage"></div><p class="durum"></p><div class="row"><span>En az parça sayısı:</span><input class="ans" inputmode="numeric"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  const inp=p.querySelector("input[type=range]"), st=p.querySelector(".stage"), du=p.querySelector(".durum"), f=p.querySelector(".fb");
+  function ciz(){ const t=+inp.value; p.querySelector(".v").textContent=t; const M=Math.max(...arr), s=480/M; const sv=svgEl(500, arr.length*34+10); let o="";
+    arr.forEach((L,i)=>{ const y=10+i*34; for(let x=0;x<L;x+=t){ const w=Math.min(t,L-x); o+=`<rect x="${10+x*s}" y="${y}" width="${w*s}" height="22" fill="${w<t?css('--bad'):(x/t)%2?css('--soft'):css('--card')}" stroke="${css('--acc')}"/>`; } });
+    sv.innerHTML=o; st.replaceChildren(sv); const ok=arr.every(L=>L%t===0); du.innerHTML= ok?`Artık yok: ${arr.map(L=>L/t).join(" + ")} = <b>${arr.reduce((a,L)=>a+L/t,0)}</b> parça.`:"Kırmızı parçalar artıyor; bu uzunluk bütün kurdeleleri bölmüyor."; }
+  inp.oninput=ciz; ciz();
+  p.querySelector(".k").onclick=()=>{ const v=+p.querySelector(".ans").value, dog=arr.reduce((a,L)=>a+L/g,0); fb(f, v===dog, v===dog?`Doğru: parça EBOB = ${g} cm olunca en az ${dog} parça çıkar.`:"Parça uzunluğu büyüdükçe parça sayısı azalır. Artık kalmayan en büyük uzunluğu bulunuz."); };
+};
+
+/* E13 · EBOB · EKOK = a · b */
+const carpimIliski = () => p => {
+  adim3(p, "İki sayının EBOB'u ile EKOK'unun çarpımı ile bu sayıların çarpımı arasında nasıl bir ilişki vardır?", ["Eşittir", "EBOB · EKOK daha büyüktür", "Sayılara göre değişir"],
+   `<p class="task">İki sayıyı değiştiriniz ve tabloyu izleyiniz. En az dört farklı çift deneyiniz.</p><div class="row"><label>a = <b class="va">12</b></label><input class="ia" type="range" min="2" max="60" value="12"><label>b = <b class="vb">18</b></label><input class="ib" type="range" min="2" max="60" value="18"></div><table class="t"><tr><th>EBOB</th><th>EKOK</th><th>EBOB · EKOK</th><th>a · b</th></tr><tr class="s"></tr></table><p class="sayac score"></p>`,
+   (k) => { const ia=k.querySelector(".ia"), ib=k.querySelector(".ib"), sa=k.querySelector(".s"), sy=k.querySelector(".sayac"); const denenen=new Set(); let bitti=0;
+     function yaz(){ const a=+ia.value, b=+ib.value; k.querySelector(".va").textContent=a; k.querySelector(".vb").textContent=b; const g=gcd(a,b), L=lcm(a,b);
+       sa.innerHTML=`<td>${g}</td><td>${L}</td><td>${g*L}</td><td>${a*b}</td>`; denenen.add(a+"-"+b); sy.textContent=`Denenen çift: ${denenen.size}`;
+       if(denenen.size>=4&&!bitti){ bitti=1; acikla(k.parentElement, "Bu eşitlik neden her zaman doğrudur?", ["EBOB ortak çarpanları bir kez, EKOK kalan çarpanları alır; ikisi birlikte a ile b'nin bütün asal çarpanlarını içerir", "Tesadüfen böyle çıkar", "Yalnız asal sayılarda doğrudur"], 0, "Doğru. Her asal çarpan için küçük üs EBOB'a, büyük üs EKOK'a gider; toplamda iki sayının üsleri eksiksiz kullanılır: EBOB · EKOK = a · b."); } }
+     ia.oninput=yaz; ib.oninput=yaz; yaz(); });
+};
+
+/* E14 · Bölme yöntemiyle EBOB ve EKOK */
+const ortakBolme = (a,b) => p => {
+  p.innerHTML=`<p class="task"><b>${a}</b> ve <b>${b}</b> sayılarını birlikte bölünüz. Bir asal sayı iki sayıyı da bölüyorsa "ortak" olarak işaretlenir. Sonunda EBOB ve EKOK'u yazınız.</p><table class="t"><tbody></tbody></table><div class="row sec"></div><div class="row son" hidden><span>EBOB =</span><input class="ans g"><span>EKOK =</span><input class="ans l"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  const tb=p.querySelector("tbody"), sec=p.querySelector(".sec"), f=p.querySelector(".fb"); let x=a, y=b; const satirlar=[];
+  function yaz(){ tb.innerHTML=satirlar.map(s=>`<tr><td>${s[0]}</td><td>${s[1]}</td><td style="border-left:2px solid var(--ink);font-weight:700;color:${s[3]?css('--acc3'):css('--muted')}">${s[2]}${s[3]?" ✓":""}</td></tr>`).join("")+`<tr><td>${x}</td><td>${y}</td><td style="border-left:2px solid var(--ink)"></td></tr>`;
+    if(x===1&&y===1){ sec.innerHTML=""; p.querySelector(".son").hidden=false; return; }
+    sec.innerHTML=[2,3,5,7,11,13].map(q=>`<button class="ghost">${q}</button>`).join("");
+    sec.querySelectorAll("button").forEach(bt=>bt.onclick=()=>{ const q=+bt.textContent; if(x%q&&y%q) return fb(f,false,`${q} ikisini de bölmüyor.`);
+      const enk=Math.min(...[x,y].filter(v=>v>1).map(v=>+Object.keys(fac(v))[0])); if(q!==enk) return fb(f,false,`Önce en küçük asal böleni (${enk}) kullanınız.`);
+      f.hidden=true; satirlar.push([x,y,q,x%q===0&&y%q===0]); if(x%q===0) x/=q; if(y%q===0) y/=q; yaz(); }); }
+  p.querySelector(".k").onclick=()=>{ const G=+p.querySelector(".g").value, L=+p.querySelector(".l").value, ok=G===gcd(a,b)&&L===lcm(a,b);
+    fb(f, ok, ok?`Doğru. EBOB: yalnız ✓ işaretli bölenlerin çarpımı (${gcd(a,b)}); EKOK: bütün bölenlerin çarpımı (${lcm(a,b)}).`:"EBOB için yalnız iki sayıyı birlikte bölen (✓) bölenleri, EKOK için bütün bölenleri çarpınız."); };
+  yaz();
+};
+
+/* ===================== M.8.1.1.3 ===================== */
+/* E15 · Yıldız çizimi */
+const yildiz = n => p => {
+  adim3(p, `Çemberde ${n} nokta var. Kaç atlamalı çizimler bütün noktalardan geçer? Tahmin ediniz: Atlama sayısı ile ${n} arasında nasıl bir ilişki olmalı?`, ["Atlama sayısı tek olmalı", `Atlama sayısı ile ${n} aralarında asal olmalı`, "Atlama sayısı asal olmalı"],
+   `<p class="task">Atlama sayısını seçiniz; çizim başlangıca dönünce durur.</p><div class="seg ks"></div><div class="stage"></div><p class="durum"></p><div class="list tam"></div>`,
+   (k) => { const ks=k.querySelector(".ks"), st=k.querySelector(".stage"), du=k.querySelector(".durum"), tm=k.querySelector(".tam"); const tamlar=new Set(), denen=new Set(); let bitti=0;
+     ks.innerHTML=Array.from({length:n-1},(_,i)=>`<button aria-pressed="false">${i+1}</button>`).join("");
+     function ciz(kk){ const R=110, cx=130, cy=130; const pts=[...Array(n)].map((_,i)=>[cx+R*Math.sin(2*Math.PI*i/n), cy-R*Math.cos(2*Math.PI*i/n)]); const sv=svgEl(260,260); let o=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${css('--line')}"/>`;
+       let i=0; const gez=new Set([0]); do { const j=(i+kk)%n; o+=`<line x1="${pts[i][0]}" y1="${pts[i][1]}" x2="${pts[j][0]}" y2="${pts[j][1]}" stroke="${css('--acc')}" stroke-width="2.2"/>`; i=j; gez.add(i); } while(i!==0);
+       pts.forEach((q,ii)=>o+=`<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="${gez.has(ii)?css('--acc2'):css('--muted')}"/>`); sv.innerHTML=o; st.replaceChildren(sv);
+       du.innerHTML=`${kk} atlama: ${gez.size} / ${n} noktadan geçildi. EBOB(${n}, ${kk}) = ${gcd(n,kk)}`; denen.add(kk); if(gez.size===n) tamlar.add(kk);
+       tm.innerHTML="Bütün noktalardan geçenler: "+[...tamlar].sort((a,b)=>a-b).map(x=>`<span>${x}</span>`).join("");
+       if(denen.size>=Math.min(n-1,5)&&!bitti){ bitti=1; acikla(k.parentElement, "Hangi atlama sayıları bütün noktalardan geçer?", [`${n} ile aralarında asal olanlar`, "Tek olanlar", "Asal olanlar"], 0, `Doğru. Atlama sayısı ${n} ile ortak bölene sahipse kalem yalnız ${n} : EBOB kadar noktaya uğrar. EBOB 1 ise bütün noktalardan geçer.`); } }
+     ks.querySelectorAll("button").forEach(b=>b.onclick=()=>{ ks.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); ciz(+b.textContent); }); });
+};
+
+/* E16 · Tablo boyama */
+const tabloBoya = (sat, sut) => p => {
+  p.innerHTML=`<p class="task">Satır başındaki sayı ile sütun başındaki sayı <b>aralarında asalsa</b> kutuyu boyayınız (dokununuz).</p><table class="t"><tr><th></th>${sut.map(s=>`<th>${s}</th>`).join("")}</tr>${sat.map((a,i)=>`<tr><th>${a}</th>${sut.map((b,j)=>`<td class="pick" data-a="${a}" data-b="${b}"></td>`).join("")}</tr>`).join("")}</table><div class="row"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  p.querySelectorAll("td.pick").forEach(td=>td.onclick=()=>td.classList.toggle("on"));
+  p.querySelector(".k").onclick=()=>{ let hata=0; p.querySelectorAll("td.pick").forEach(td=>{ const ok=gcd(+td.dataset.a,+td.dataset.b)===1; td.textContent=""; if(ok!==td.classList.contains("on")){ hata++; td.textContent=gcd(+td.dataset.a,+td.dataset.b); } });
+    fb(p.querySelector(".fb"), !hata, hata?`${hata} kutuda hata var; yanlış kutulara iki sayının EBOB'u yazıldı. EBOB 1 ise aralarında asaldır.`:"Hepsi doğru. Ortak asal çarpanı olmayan çiftler aralarında asaldır."); };
+};
+
+/* E17 · Sadeleşmeyen kesirler */
+const sadeKesir = d => p => {
+  const dog=[...Array(d-1)].map((_,i)=>i+1).filter(a=>gcd(a,d)===1);
+  adim3(p, `Paydası ${d} olan, 0 ile 1 arasındaki kesirlerden kaç tanesi sadeleşmez?`, shuf([String(dog.length), String(dog.length+2), String(d-1), String(Math.floor(d/2))].filter((v,i,x)=>x.indexOf(v)===i)),
+   `<p class="task">Sadeleşmeyen kesirleri seçiniz.</p><div class="chips"></div><div class="row"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`,
+   (k) => { const ch=k.querySelector(".chips"), f=k.querySelector(".fb");
+     for(let a=1;a<d;a++){ const b=document.createElement("button"); b.className="chip"; b.innerHTML=frac(a,d); b.dataset.a=a; b.setAttribute("aria-pressed","false"); b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"); ch.appendChild(b); }
+     k.querySelector(".k").onclick=()=>{ const sec=[...ch.children].filter(b=>b.getAttribute("aria-pressed")==="true").map(b=>+b.dataset.a);
+       [...ch.children].forEach(b=>{ const a=+b.dataset.a; b.classList.toggle("ok", sec.includes(a)&&dog.includes(a)); b.classList.toggle("no", sec.includes(a)&&!dog.includes(a)); });
+       const ok=sec.length===dog.length&&sec.every(a=>dog.includes(a)); fb(f, ok, ok?`Doğru: ${dog.length} kesir.`:"Pay ile payda ortak bölene sahipse kesir sadeleşir. Kırmızıları kaldırıp eksikleri ekleyiniz.");
+       if(ok) acikla(k.parentElement, "Bir kesir ne zaman sadeleşmez?", ["Pay ile payda aralarında asalsa", "Pay tek sayıysa", "Payda asal sayıysa"], 0, `Doğru. Pay ile paydanın 1'den başka ortak böleni yoksa kesir en sade biçimdedir. ${d} = ${uslu(fac(d))} olduğundan pay bu asal çarpanları içermemelidir.`); }; });
+};
+
+/* E18 · Hafta döngüsü */
+const hafta = d => p => {
+  const G=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"]; const tum=gcd(d,7)===1;
+  adim3(p, `Bir kurs ${d} günde bir yapılıyor ve pazartesi başladı. Kurs zamanla haftanın her gününe denk gelir mi?`, ["Evet, her güne denk gelir", "Hayır, bazı günlere hiç denk gelmez"],
+   `<p class="task">"Sonraki kurs" düğmesiyle takvimde ilerleyiniz; kursun denk geldiği günler boyanır.</p><div class="stage"></div><div class="row"><button class="primary s">Sonraki kurs</button><span class="gun"></span></div><div class="fb" hidden></div>`,
+   (k, tah) => { const st=k.querySelector(".stage"), gn=k.querySelector(".gun"), f=k.querySelector(".fb"); let gun=0; const boy=new Set([0]); let bitti=0;
+     function ciz(){ const sv=svgEl(420,70); sv.innerHTML=G.map((g,i)=>`<rect x="${6+i*58}" y="8" width="52" height="44" rx="6" fill="${boy.has(i)?css('--acc'):css('--card')}" stroke="${css('--line')}"/><text x="${32+i*58}" y="36" text-anchor="middle" font-weight="700" ${boy.has(i)?'style="fill:#fff"':''}>${g}</text>`).join(""); st.replaceChildren(sv); gn.textContent=`${gun}. gün (${G[gun%7]})`; }
+     k.querySelector(".s").onclick=()=>{ gun+=d; boy.add(gun%7); ciz();
+       if((gun%7===0)&&!bitti){ bitti=1; fb(f, (tah()===0)===tum, `Kurs yeniden pazartesiye ${gun}. günde döndü: EKOK(${d}, 7) = ${lcm(d,7)}. ${boy.size} farklı güne denk geldi.`);
+         acikla(k.parentElement, "Hangi durumda kurs haftanın her gününe denk gelir?", ["Kurs aralığı ile 7 aralarında asalsa", "Kurs aralığı çift sayıysa", "Kurs aralığı 7'den büyükse"], 0, "Doğru. Aralık ile 7'nin ortak böleni yoksa pazartesiye dönüş 7 kursta olur ve arada 7 farklı güne uğranır."); } };
+     ciz(); });
+};
+
+/* E19 · Aralarında asal çift avı */
+const ciftAvi = kartlar => p => {
+  const dog=[]; for(let i=0;i<kartlar.length;i++) for(let j=i+1;j<kartlar.length;j++) if(gcd(kartlar[i],kartlar[j])===1) dog.push(kartlar[i]+"-"+kartlar[j]);
+  p.innerHTML=`<p class="task">Kartlardan iki tane seçerek aralarında asal çiftleri bulunuz. Toplam <b>${dog.length}</b> çift var.</p><div class="chips"></div><div class="list"></div><div class="fb" hidden></div>`;
+  const ch=p.querySelector(".chips"), li=p.querySelector(".list"), f=p.querySelector(".fb"); let sec=[]; const bul=new Set();
+  kartlar.forEach(v=>{ const b=document.createElement("button"); b.className="chip"; b.textContent=v; b.setAttribute("aria-pressed","false"); b.onclick=()=>{ b.setAttribute("aria-pressed","true"); sec.push(v);
+    if(sec.length===2){ const [x,y]=sec.sort((a,b)=>kartlar.indexOf(a)-kartlar.indexOf(b)); const ok=gcd(x,y)===1; if(ok) bul.add(x+"-"+y);
+      fb(f, ok, ok?`${x} ve ${y} aralarında asal.`:`${x} ve ${y}'nin ortak böleni ${gcd(x,y)}.`); li.innerHTML=[...bul].map(s=>`<span>${s.replace("-"," ve ")}</span>`).join("");
+      if(bul.size===dog.length) fb(f,true,`Hepsini buldunuz: ${dog.length} çift. Ortak asal çarpanı olmayan çiftler aralarında asaldır.`);
+      sec=[]; setTimeout(()=>ch.querySelectorAll("button").forEach(z=>z.setAttribute("aria-pressed","false")),500); } }; ch.appendChild(b); });
+};
+
+/* E20 · Asal döngü (ağustos böceği) */
+const bocek = () => p => {
+  adim3(p, "Bir böcek türü yer altında birkaç yıl kalıp yeryüzüne çıkıyor. Avcıların döngüsü 2, 3, 4, 5 ya da 6 yıl. Böceğin döngüsü hangisi olursa avcılarla en seyrek karşılaşır?", ["12 yıl", "13 yıl", "15 yıl"],
+   `<p class="task">Böceğin döngüsünü seçiniz; her avcı döngüsüyle kaç yılda bir karşılaştığı gösterilir.</p><div class="seg bs"></div><table class="t"><tr><th>Avcı döngüsü</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr><tr class="s"></tr></table><p class="toplam score"></p>`,
+   (k, tah) => { const bs=k.querySelector(".bs"), s=k.querySelector(".s"), tp=k.querySelector(".toplam"); const denen=new Set(); let bitti=0;
+     bs.innerHTML=[12,13,14,15,16,17].map(x=>`<button aria-pressed="false">${x} yıl</button>`).join("");
+     bs.querySelectorAll("button").forEach(b=>b.onclick=()=>{ bs.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); const c=parseInt(b.textContent);
+       s.innerHTML=`<td>Karşılaşma aralığı</td>`+[2,3,4,5,6].map(a=>`<td style="${gcd(a,c)===1?'':'color:var(--bad);font-weight:700'}">${lcm(a,c)} yıl</td>`).join("");
+       tp.textContent=`100 yılda toplam karşılaşma: ${[2,3,4,5,6].reduce((t,a)=>t+Math.floor(100/lcm(a,c)),0)}`; denen.add(c);
+       if(denen.size>=3&&!bitti){ bitti=1; acikla(k.parentElement, "Asal döngünün üstünlüğü nedir?", ["Asal sayı, avcı döngülerinin hepsiyle aralarında asaldır; karşılaşma aralığı çarpım kadar uzar", "Asal sayılar küçüktür", "Asal döngüde avcı yoktur"], 0, "Doğru. 13 ve 17, 2–6 arasındaki bütün sayılarla aralarında asaldır; EKOK çarpıma eşit olur ve karşılaşmalar seyrekleşir. 12 gibi bölenleri çok olan döngüler ise avcılarla sık karşılaşır."); } }); });
+};
+
+/* E21 · Her zaman doğru mu? */
+const hepMi = (ifade, test, ornek) => p => {
+  p.innerHTML=`<p class="task">İfade: <b>${ifade}</b></p><p class="intro">İki sayı yazıp deneyiniz. Bir karşı örnek bulursanız ifade her zaman doğru değildir.</p><div class="row"><input class="ans a" inputmode="numeric" placeholder="a"><input class="ans b" inputmode="numeric" placeholder="b"><button class="primary k">Dene</button></div><div class="list"></div><div class="row"><span>Karar:</span><button class="ghost e">Her zaman doğru</button><button class="ghost h">Her zaman doğru değil</button></div><div class="fb" hidden></div>`;
+  const li=p.querySelector(".list"), f=p.querySelector(".fb"); let karsi=null;
+  p.querySelector(".k").onclick=()=>{ const a=+p.querySelector(".a").value, b=+p.querySelector(".b").value; if(!(a>0&&b>0)) return; const r=test(a,b); if(r===null) return fb(f,false,"Bu çift ifadenin koşuluna uymuyor; başka bir çift deneyiniz."); f.hidden=true; if(!r) karsi=[a,b];
+    li.innerHTML+=`<span style="${r?'':'background:color-mix(in srgb,var(--bad) 20%,transparent)'}">${a}, ${b}: ${r?"sağlıyor":"sağlamıyor"}</span>`; };
+  p.querySelector(".e").onclick=()=>fb(f, ornek===null, ornek===null?"Doğru. Bu ifade her zaman doğrudur.":`Karşı örnek var: ${ornek}.`);
+  p.querySelector(".h").onclick=()=>fb(f, ornek!==null, ornek!==null?`Doğru. ${karsi?`Sizin karşı örneğiniz: ${karsi.join(" ve ")}.`:`Örneğin ${ornek}.`}`:"Deneyeceğiniz her çift ifadeyi sağlar; karşı örnek yoktur.");
+};
+
+/* ---------- etkinlik listesi ---------- */
+const ACT = [
+ ["M.8.1.1.1 · Çarpanlar ve asal çarpanlara ayırma", [
+  ["Dikdörtgen kur: 24","M.8.1.1.1",dikdortgen(24)],["Dikdörtgen kur: 36","M.8.1.1.1",dikdortgen(36)],["Dikdörtgen kur: 48","M.8.1.1.1",dikdortgen(48)],
+  ["Bölen avı: 30","M.8.1.1.1",bolenAvi(30)],["Bölen avı: 64","M.8.1.1.1",bolenAvi(64)],["Bölen avı: 90","M.8.1.1.1",bolenAvi(90)],
+  ["Çarpan ağacı: 120","M.8.1.1.1",agacKur(120)],["Çarpan ağacı: 252","M.8.1.1.1",agacKur(252)],["Çarpan ağacı: 360","M.8.1.1.1",agacKur(360)],
+  ["Asal elek: 1–50","M.8.1.1.1",elek(50,"Asal sayılar sayı büyüdükçe seyrekleşir.")],["Asal elek: 1–100","M.8.1.1.1",elek(100,"7'nin katlarını çizdikten sonra 100'e kadar asal olmayan sayı kalmaz; çünkü 11 · 11 = 121 > 100.")],["Asal elek: 1–70","M.8.1.1.1",elek(70,"İki basamaklı asal sayıların birler basamağı 1, 3, 7 ya da 9'dur.")],
+  ["Bölme yöntemi: 180","M.8.1.1.1",bolmeY(180)],["Bölme yöntemi: 504","M.8.1.1.1",bolmeY(504)],["Bölme yöntemi: 1000","M.8.1.1.1",bolmeY(1000)],
+  ["Tam kareye tamamla: 72","M.8.1.1.1",tamKare(72)],["Tam kareye tamamla: 540","M.8.1.1.1",tamKare(540)],["Tam kareye tamamla: 1200","M.8.1.1.1",tamKare(1200)],
+  ["Çarpan sayısı tek olan sayılar","M.8.1.1.1",carpanSay()],["Bölen avı: 100","M.8.1.1.1",bolenAvi(100)] ]],
+ ["M.8.1.1.2 · EBOB ve EKOK", [
+  ["Karo döşe: 48 × 36","M.8.1.1.2",karo(48,36)],["Karo döşe: 72 × 60","M.8.1.1.2",karo(72,60)],["Karo döşe: 90 × 126","M.8.1.1.2",karo(126,90)],
+  ["Kare pano: 6 × 10","M.8.1.1.2",pano(6,10)],["Kare pano: 8 × 12","M.8.1.1.2",pano(8,12)],["Kare pano: 9 × 15","M.8.1.1.2",pano(9,15)],
+  ["Lambalar: 4 ve 6 saniye","M.8.1.1.2",lambalar(4,6)],["Lambalar: 6 ve 15 saniye","M.8.1.1.2",lambalar(6,15)],["Lambalar: 8 ve 12 saniye","M.8.1.1.2",lambalar(8,12)],
+  ["Dişliler: 18 ve 30","M.8.1.1.2",dis(30,18)],["Dişliler: 12 ve 20","M.8.1.1.2",dis(20,12)],["Dişliler: 16 ve 24","M.8.1.1.2",dis(24,16)],
+  ["Kurdele kes: 84 ve 126","M.8.1.1.2",kurdele([84,126])],["Kurdele kes: 90 ve 150","M.8.1.1.2",kurdele([90,150])],["Kurdele kes: 72 ve 120","M.8.1.1.2",kurdele([72,120])],
+  ["EBOB · EKOK ile a · b","M.8.1.1.2",carpimIliski()],["Birlikte bölme: 60 ve 84","M.8.1.1.2",ortakBolme(60,84)],["Birlikte bölme: 72 ve 90","M.8.1.1.2",ortakBolme(72,90)],["Birlikte bölme: 45 ve 105","M.8.1.1.2",ortakBolme(45,105)],["Birlikte bölme: 36 ve 56","M.8.1.1.2",ortakBolme(36,56)] ]],
+ ["M.8.1.1.3 · Aralarında asal sayılar", [
+  ["Yıldız çiz: 8 nokta","M.8.1.1.3",yildiz(8)],["Yıldız çiz: 9 nokta","M.8.1.1.3",yildiz(9)],["Yıldız çiz: 12 nokta","M.8.1.1.3",yildiz(12)],
+  ["Tablo boya 1","M.8.1.1.3",tabloBoya([6,10,15],[7,9,14,25])],["Tablo boya 2","M.8.1.1.3",tabloBoya([8,9,21],[10,16,25,49])],["Tablo boya 3","M.8.1.1.3",tabloBoya([12,35,26],[5,13,18,77])],
+  ["Sadeleşmeyen kesirler: 12","M.8.1.1.3",sadeKesir(12)],["Sadeleşmeyen kesirler: 15","M.8.1.1.3",sadeKesir(15)],["Sadeleşmeyen kesirler: 20","M.8.1.1.3",sadeKesir(20)],
+  ["Hafta döngüsü: 10 gün","M.8.1.1.3",hafta(10)],["Hafta döngüsü: 14 gün","M.8.1.1.3",hafta(14)],["Hafta döngüsü: 9 gün","M.8.1.1.3",hafta(9)],
+  ["Çift avı 1","M.8.1.1.3",ciftAvi([4,9,10,21,25])],["Çift avı 2","M.8.1.1.3",ciftAvi([6,14,15,35,11])],["Çift avı 3","M.8.1.1.3",ciftAvi([8,12,27,49,55])],
+  ["Asal döngülü böcekler","M.8.1.1.3",bocek()],
+  ["Her zaman doğru mu? Ardışık sayılar","M.8.1.1.3",hepMi("Ardışık iki doğal sayı aralarında asaldır.",(a,b)=>Math.abs(a-b)!==1?null:gcd(a,b)===1,null)],
+  ["Her zaman doğru mu? İki tek sayı","M.8.1.1.3",hepMi("İki tek sayı aralarında asaldır.",(a,b)=>(a%2&&b%2)?gcd(a,b)===1:null,"9 ve 15")],
+  ["Her zaman doğru mu? Asal olmayanlar","M.8.1.1.3",hepMi("Asal olmayan iki sayı aralarında asal olamaz.",(a,b)=>(!isP(a)&&!isP(b))?gcd(a,b)!==1:null,"8 ve 9")],
+  ["Her zaman doğru mu? Farkı 2 olan tekler","M.8.1.1.3",hepMi("Farkı 2 olan iki tek sayı aralarında asaldır.",(a,b)=>(Math.abs(a-b)===2&&a%2&&b%2)?gcd(a,b)===1:null,null)] ]]
+];
+const FLAT = []; ACT.forEach((g,gi)=>g[1].forEach(a=>FLAT.push([...a, gi])));
+const idx = document.getElementById("index"), panel = document.getElementById("panel");
+let n = 0; idx.innerHTML = ACT.map(g=>`<div class="grp"><h3>${g[0]}</h3><ol class="index">${g[1].map(a=>{ n++; return `<li><a role="button" tabindex="0" style="cursor:pointer" data-i="${n-1}"><span class="n">${n}</span><span class="t">${a[0]}<span class="s">${a[1]}</span></span></a></li>`; }).join("")}</ol></div>`).join("");
+function show(i){ const a = FLAT[i];
+  panel.innerHTML = `<div class="ph"><h2>${i+1}. ${a[0]}</h2><span class="code">${a[1]}</span></div><div id="act"></div>`;
+  a[2](panel.querySelector("#act")); idx.querySelectorAll("a").forEach(x=>x.setAttribute("aria-current", +x.dataset.i === i));
+  try { localStorage.setItem("lgs811-last", i); } catch(e) {} }
+function route(){ const m = location.hash.match(/^#e(\d+)$/); let i = m ? +m[1]-1 : null;
+  if (i === null || !(i >= 0 && i < FLAT.length)) { i = 0; try { const s = localStorage.getItem("lgs811-last"); if (s !== null && +s >= 0 && +s < FLAT.length) i = +s; } catch(e) {} }
+  show(i); }
+idx.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.closest("a")) { e.preventDefault(); e.target.closest("a").click(); } });
+idx.addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); try { history.replaceState(null, "", "#e" + (+a.dataset.i + 1)); } catch (_) {} show(+a.dataset.i); panel.scrollIntoView({behavior:"smooth", block:"start"}); });
+window.addEventListener("hashchange", route); route();
+window.__N__ = FLAT.length;
+window.__ACT__ = FLAT.map(a=>[a[0],a[1]]);
+})();
+
+</script>
+<!--KABUK-->
+<button class="kb-dugme" id="kbDugme" aria-label="Ayarlar ve yardım" aria-expanded="false" aria-controls="kbMenu">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>
+ <span class="kb-sessiz" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></span>
+</button>
+<div class="kb-menu" id="kbMenu" role="dialog" aria-label="Ayarlar ve yardım" hidden>
+ <h4>Ayarlar ve Yardım</h4>
+ <div class="kb-yuvarlak">
+  <button id="kbSes" aria-pressed="true"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="off" d="M16 9l5 6M21 9l-5 6" style="display:none"/></svg></b><span id="kbSesY">Ses açık</span></button>
+  <button id="kbYon" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></b><span>Yönerge</span></button>
+  <button id="kbOku" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 11v2"/></svg></b><span>Sesli oku</span></button>
+ </div>
+ <h5>Erişilebilirlik</h5>
+ <div class="kb-satir"><span>Yazı boyutu</span><div class="kb-seg" id="kbBoy"><button data-v="0" aria-label="Normal">A</button><button data-v="1" aria-label="Büyük">A+</button><button data-v="2" aria-label="Çok büyük">A++</button></div></div>
+ <div class="kb-satir"><span>Yüksek karşıtlık</span><button class="kb-anahtar" role="switch" data-k="karsit" aria-label="Yüksek karşıtlık"></button></div>
+ <div class="kb-satir"><span>Rahat okuma (geniş aralık)</span><button class="kb-anahtar" role="switch" data-k="rahat" aria-label="Rahat okuma"></button></div>
+ <div class="kb-satir"><span>Hareketi azalt</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azalt"></button></div>
+ <div class="kb-satir"><span>Tema</span><div class="kb-seg" id="kbTema"><button data-v="">Oto</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
+ <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dön</button></div>
+</div>
+<dialog class="kb-yonerge" id="kbYonerge" aria-labelledby="kbYB"><header id="kbYB">Yönerge</header><div class="ic" id="kbYIc"></div>
+ <footer><button class="ghost" id="kbYOku">Sesli oku</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
+<div class="kb-gizli" aria-live="polite" id="kbDuyuru"></div>
+<script>
+(function(){
+const D=document, H=D.documentElement, $=s=>D.querySelector(s);
+const ANAHTAR="kb-ayar", ILR="kb-ilerleme:"+(D.title||location.pathname);
+const oku=(k,v)=>{try{const s=localStorage.getItem(k);return s===null?v:JSON.parse(s)}catch(e){return v}};
+const yaz=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const VARS={ses:true,boy:0,karsit:false,rahat:false,azhareket:matchMedia("(prefers-reduced-motion: reduce)").matches,tema:""};
+let A=Object.assign({},VARS,oku(ANAHTAR,{}));
+
+/* --- Düzen: başlık bandı, yan liste, gezinti --- */
+const wrap=$(".wrap");
+if(wrap){
+  const h1=wrap.querySelector("h1"); let ust=h1; while(ust&&ust.parentElement!==wrap)ust=ust.parentElement;
+  let hero;
+  if(ust&&ust!==h1&&!ust.matches(".eyebrow,.lead")){ hero=ust; hero.classList.add("kb-hero"); wrap.prepend(hero); }
+  else { hero=D.createElement("header"); hero.className="kb-hero";
+    [...wrap.children].filter(e=>e.matches(".eyebrow,h1,.lead")).forEach(e=>hero.appendChild(e)); wrap.prepend(hero); }
+  const idx=$("#index"), pan=$("#panel");
+  if(idx&&pan){
+    const d=D.createElement("div"); d.className="kb-duzen";
+    const yan=D.createElement("aside"); yan.className="kb-yan"; yan.setAttribute("aria-label","Etkinlik listesi");
+    const ana=D.createElement("main");
+    pan.before(d); yan.appendChild(idx); ana.appendChild(pan); d.append(yan,ana);
+    const g=D.createElement("nav"); g.className="kb-gezinti"; g.setAttribute("aria-label","Etkinlikler arası geçiş");
+    g.innerHTML='<button class="ghost" id="kbOnce">‹ Önceki</button><span id="kbSira"></span><button class="primary" id="kbSonra">Sonraki ›</button>';
+    ana.appendChild(g);
+    const pr=D.createElement("div"); pr.className="kb-ilerleme"; pr.innerHTML='<div class="kb-bar"><i id="kbBar"></i></div><span id="kbSay"></span>'; hero.appendChild(pr);
+  }
+}
+const linkler=()=>[...D.querySelectorAll("#index a[data-i]")];
+const simdiki=()=>{const a=$('#index a[aria-current="true"]');return a?+a.dataset.i:-1};
+let tamam=new Set(oku(ILR,[]));
+function ilerleme(){const L=linkler(); if(!L.length)return;
+  L.forEach(a=>a.classList.toggle("kb-tamam",tamam.has(+a.dataset.i)));
+  const n=L.filter(a=>tamam.has(+a.dataset.i)).length;
+  const b=$("#kbBar"); if(b)b.style.width=(100*n/L.length)+"%";
+  const s=$("#kbSay"); if(s)s.textContent=n+" / "+L.length+" etkinlik tamamlandı";
+  const i=simdiki(), r=$("#kbSira"); if(r)r.textContent=(i+1)+" / "+L.length;
+  const o=$("#kbOnce"), z=$("#kbSonra"); if(o)o.disabled=i<=0; if(z)z.disabled=i>=L.length-1;}
+let gecis=0;
+function git(d){const L=linkler(), i=simdiki()+d; if(L[i]){gecis=Date.now(); L[i].click();}}
+$("#kbOnce")&&($("#kbOnce").onclick=()=>git(-1)); $("#kbSonra")&&($("#kbSonra").onclick=()=>git(1));
+const idx=$("#index"); if(idx){ idx.addEventListener("click",()=>{gecis=Date.now()},true);
+  new MutationObserver(()=>setTimeout(ilerleme,0)).observe(idx,{subtree:true,attributes:true,attributeFilter:["aria-current"]}); }
+window.addEventListener("hashchange",()=>{gecis=Date.now()});
+setTimeout(ilerleme,50);
+
+/* --- Ses --- */
+let ac=null;
+function ton(f,t0,sure,tip,hacim){const c=ac;const o=c.createOscillator(),g=c.createGain();o.type=tip;o.frequency.setValueAtTime(f[0],c.currentTime+t0);
+  if(f[1])o.frequency.exponentialRampToValueAtTime(f[1],c.currentTime+t0+sure);
+  g.gain.setValueAtTime(0.0001,c.currentTime+t0);g.gain.exponentialRampToValueAtTime(hacim,c.currentTime+t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+t0+sure);
+  o.connect(g).connect(c.destination);o.start(c.currentTime+t0);o.stop(c.currentTime+t0+sure+0.02);}
+function sesCal(tur){ if(!A.ses)return; try{ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended")ac.resume();
+  if(tur==="ok"){ton([659],0,.13,"sine",.22);ton([880],.11,.16,"sine",.22);ton([1319],.22,.22,"sine",.12);}
+  else if(tur==="no"){ton([260,180],0,.28,"triangle",.2);}
+  else ton([1200],0,.04,"sine",.06); }catch(e){} }
+function kutla(el){ if(A.azhareket||!el)return; const r=el.getBoundingClientRect(); const k=D.createElement("div"); k.className="kb-kutlama";
+  k.style.left=(r.left+Math.min(60,r.width/2))+"px"; k.style.top=(r.top+r.height/2)+"px";
+  const renk=["var(--p1)","var(--p2)","var(--p3)","var(--p4)","var(--p5)","var(--p6)"];
+  for(let i=0;i<18;i++){const p=D.createElement("i");const a=Math.random()*Math.PI*2,m=50+Math.random()*70;
+    p.style.background=renk[i%6];p.style.setProperty("--x",Math.cos(a)*m+"px");p.style.setProperty("--y",(Math.sin(a)*m-30)+"px");k.appendChild(p);}
+  D.body.appendChild(k); setTimeout(()=>k.remove(),900); }
+
+/* Doğru / yanlış geri bildirimini yakala: etkinlik kodu fb(...) ya da .ok/.no sınıfı kullanır */
+let sonEylem=0; ["click","keydown"].forEach(t=>D.addEventListener(t,e=>{ if(t==="click"||e.key==="Enter"||e.key===" ")sonEylem=Date.now(); },true));
+let kuyruk=[], zam=null;
+const has=(s,t)=>(" "+(s||"")+" ").includes(" "+t+" ");
+new MutationObserver(ms=>{ const now=Date.now(); if(now-sonEylem>900||now-gecis<450)return;
+  ms.forEach(m=>{ const el=m.target; if(!(el instanceof Element)||el.closest(".kb-menu,.kb-yonerge,#index"))return;
+    const fb=el.classList.contains("fb"), ok=el.classList.contains("ok"), no=el.classList.contains("no");
+    if(!ok&&!no)return; if(!fb&&((ok&&has(m.oldValue,"ok"))||(no&&has(m.oldValue,"no"))))return;
+    kuyruk.push({el,fb,ok}); });
+  if(kuyruk.length&&!zam)zam=setTimeout(()=>{ const f=kuyruk.filter(x=>x.fb).pop(); let ok, el;
+      if(f){ok=f.ok;el=f.el}else{ok=!kuyruk.some(x=>!x.ok);el=kuyruk[kuyruk.length-1].el}
+      kuyruk=[];zam=null; sesCal(ok?"ok":"no");
+      if(ok){ kutla(el); const i=simdiki(); if(i>=0&&(f||!$("#panel .fb"))){tamam.add(i);yaz(ILR,[...tamam]);ilerleme();} }
+      const d=$("#kbDuyuru"); if(d)d.textContent=ok?"Doğru.":"Yeniden deneyiniz."; },110);
+}).observe(D.body,{subtree:true,attributes:true,attributeFilter:["class"],attributeOldValue:true});
+
+/* --- Ayarları uygula --- */
+function uygula(){ H.classList.toggle("kb-sesyok",!A.ses);
+  ["karsit","rahat","azhareket"].forEach(k=>H.classList.toggle("kb-"+k,!!A[k]));
+  H.classList.toggle("kb-y1",A.boy===1); H.classList.toggle("kb-y2",A.boy===2);
+  if(A.tema)H.setAttribute("data-theme",A.tema); else H.removeAttribute("data-theme");
+  const s=$("#kbSes"); s.setAttribute("aria-pressed",A.ses); $("#kbSesY").textContent=A.ses?"Ses açık":"Ses kapalı";
+  s.querySelector(".on").style.display=A.ses?"":"none"; s.querySelector(".off").style.display=A.ses?"none":"";
+  D.querySelectorAll(".kb-anahtar").forEach(b=>b.setAttribute("aria-checked",!!A[b.dataset.k]));
+  D.querySelectorAll("#kbBoy button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===A.boy));
+  D.querySelectorAll("#kbTema button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===A.tema));
+  yaz(ANAHTAR,A); }
+uygula();
+const dug=$("#kbDugme"), men=$("#kbMenu");
+function menu(ac_){ men.hidden=!ac_; dug.setAttribute("aria-expanded",ac_); if(ac_)men.querySelector("button").focus(); }
+dug.onclick=()=>menu(men.hidden);
+D.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!men.hidden){menu(false);dug.focus();} });
+D.addEventListener("click",e=>{ if(!men.hidden&&!men.contains(e.target)&&!dug.contains(e.target))menu(false); });
+$("#kbSes").onclick=()=>{A.ses=!A.ses;uygula();sesCal("ok");};
+D.querySelectorAll(".kb-anahtar").forEach(b=>b.onclick=()=>{A[b.dataset.k]=!A[b.dataset.k];uygula();});
+D.querySelectorAll("#kbBoy button").forEach(b=>b.onclick=()=>{A.boy=+b.dataset.v;uygula();});
+D.querySelectorAll("#kbTema button").forEach(b=>b.onclick=()=>{A.tema=b.dataset.v;uygula();});
+$("#kbSifir").onclick=()=>{A=Object.assign({},VARS);uygula();};
+const tam=$("#kbTam"); if(!D.fullscreenEnabled)tam.hidden=true;
+tam.onclick=()=>{ try{ D.fullscreenElement?D.exitFullscreen():H.requestFullscreen(); }catch(e){} };
+
+/* --- Yönerge ve sesli okuma --- */
+const metin=el=>{ if(!el)return ""; const c=el.cloneNode(true); c.querySelectorAll(".frac").forEach(f=>{const s=f.querySelectorAll("span"); if(s.length>1)f.replaceWith(s[0].textContent+"/"+s[1].textContent);}); return c.textContent.replace(/\s+/g," ").trim(); };
+const PAYDA={2:"ikide",3:"üçte",4:"dörtte",5:"beşte",6:"altıda",7:"yedide",8:"sekizde",9:"dokuzda",10:"onda",12:"on ikide",20:"yirmide",100:"yüzde"};
+const okunus=t=>String(t).replace(/(−|-)?(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?"eksi ":"")+(PAYDA[b]||b+"'te")+" "+a).replace(/\|([^|]+)\|/g,"$1'in mutlak değeri").replace(/(^|[\s(])−\s?(\d)/g,"$1eksi $2").replace(/°C/g," derece");
+const kesH=t=>String(t).replace(/(−|-)?(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?"−":"")+'<span class="frac"><span>'+a+'</span><span>'+b+'</span></span>');
+const sesPuan=v=>(/natural|online|neural/i.test(v.name)?4:/google/i.test(v.name)?3:/enhanced|premium|geliş|siri/i.test(v.name)?3:1);
+function yonergeMetni(){ const p=$("#panel")||D.body, h=p.querySelector("h2"), g=[];
+  p.querySelectorAll(".intro,.task").forEach(e=>{const t=metin(e); if(t&&!g.includes(t)&&g.length<2)g.push(t);});
+  if(!g.length&&$(".lead"))g.push(metin($(".lead")));
+  return {baslik:metin(h)||D.title, gorev:g}; }
+function yonergeAc(){ const y=yonergeMetni(); $("#kbYB").textContent=y.baslik;
+  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol et</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
+  $("#kbYIc .gorev").innerHTML=kesH(y.gorev.join(" ").replace(/[<>&]/g,""));
+  const d=$("#kbYonerge"); menu(false); if(d.showModal)d.showModal(); else d.setAttribute("open",""); }
+$("#kbYon").onclick=yonergeAc;
+$("#kbYKapat").onclick=()=>{ const d=$("#kbYonerge"); speechSynthesis&&speechSynthesis.cancel(); d.close?d.close():d.removeAttribute("open"); };
+const konusabilir="speechSynthesis" in window;
+function sesliOku(t){ if(!konusabilir)return; speechSynthesis.cancel();
+  const v=speechSynthesis.getVoices().filter(v=>/^tr/i.test(v.lang)).sort((a,b)=>sesPuan(b)-sesPuan(a))[0];
+  (okunus(t).match(/[^.!?]+[.!?]?/g)||[t]).forEach(c=>{ const u=new SpeechSynthesisUtterance(c.trim()); u.lang="tr-TR"; u.rate=.95; if(v)u.voice=v; speechSynthesis.speak(u); }); }
+function okuPanel(){ const y=yonergeMetni(); sesliOku(y.baslik+". "+y.gorev.join(" ")); }
+if(!konusabilir){ $("#kbOku").hidden=true; $("#kbYOku").hidden=true; }
+$("#kbOku").onclick=()=>{ const b=$("#kbOku"); if(b.getAttribute("aria-pressed")==="true"){speechSynthesis.cancel();b.setAttribute("aria-pressed","false");return;}
+  b.setAttribute("aria-pressed","true"); okuPanel(); const t=setInterval(()=>{ if(!speechSynthesis.speaking){b.setAttribute("aria-pressed","false");clearInterval(t);} },400); };
+$("#kbYOku").onclick=()=>sesliOku(metin($("#kbYB"))+". "+metin($("#kbYIc")));
+})();
+</script>
+<!--/KABUK-->
+
+</body></html>
