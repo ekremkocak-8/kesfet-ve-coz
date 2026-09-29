@@ -1,0 +1,924 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}html,body{margin:0;padding:0}body{font:15px Arimo,Arial,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Yansıma Atölyesi</title>
+<script>document.documentElement.lang='tr'</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1c2433; --muted:#5b6478; --line:#d6ddec; --soft:#eef3fc;
+  --acc:#2451b7; --acc2:#d0700f; --acc3:#23875c; --bad:#c0392b; --grid:rgba(36,81,183,.06); --onacc:#fff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ color-scheme:dark;
+    --bg:#10141d; --card:#181e2b; --ink:#e8edf7; --muted:#9ba6bd; --line:#2c3548; --soft:#1f2738;
+    --acc:#7ea2f0; --acc2:#f5a04a; --acc3:#4cc491; --bad:#ef6b5c; --grid:rgba(126,162,240,.07); --onacc:#10141d; }
+}
+:root[data-theme="dark"]{ color-scheme:dark;
+  --bg:#10141d; --card:#181e2b; --ink:#e8edf7; --muted:#9ba6bd; --line:#2c3548; --soft:#1f2738;
+  --acc:#7ea2f0; --acc2:#f5a04a; --acc3:#4cc491; --bad:#ef6b5c; --grid:rgba(126,162,240,.07); --onacc:#10141d; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:18px 48px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);font-weight:700}
+h1{font-family:Bitter,Georgia,serif;font-weight:800;font-size:clamp(26px,4vw,34px);margin:2px 0 6px;color:var(--acc);line-height:1.1;text-wrap:balance}
+h2{font-family:Bitter,Georgia,serif;font-weight:800;font-size:22px;margin:0;line-height:1.2;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 16px;max-width:68ch}
+.index{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px;padding:0;list-style:none}
+.index a{display:flex;gap:8px;align-items:flex-start;text-decoration:none;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:4px;padding:8px 10px;min-height:58px}
+.index a:hover{border-color:var(--acc)}
+.index a[aria-current="true"]{border-color:var(--acc);background:var(--soft)}
+.index .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:var(--onacc);font-weight:700;font-size:14px}
+.index .t{font-weight:600;font-size:15px;line-height:1.25}
+.index .s{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.ph{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.code{font-size:12.5px;font-weight:700;color:var(--acc3);letter-spacing:.04em}
+.intro{color:var(--muted);margin:4px 0 12px;max-width:72ch}
+.scroll{overflow-x:auto}
+svg{display:block;user-select:none;touch-action:manipulation}
+svg text{font-family:"Source Sans 3",sans-serif;fill:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:10px}
+.primary{font:inherit;font-weight:700;background:var(--acc);color:var(--onacc);border:0;padding:8px 16px;border-radius:4px;cursor:pointer}
+.ghost{font:inherit;background:var(--card);color:var(--ink);border:1.5px solid var(--line);padding:7px 14px;border-radius:4px;cursor:pointer}
+.ghost[aria-pressed="true"]{border-color:var(--acc);background:var(--soft);font-weight:700}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+input.ans{font:inherit;font-size:18px;width:110px;padding:5px 8px;border:1.5px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums}
+.fb{border-radius:4px;padding:9px 12px;margin-top:10px}
+.fb.ok{background:color-mix(in srgb,var(--acc3) 16%,transparent)} .fb.no{background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.task{font-size:18px;margin:0 0 8px}
+.task b{color:var(--acc2)}
+.score{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 2px;font-weight:700}
+.frac span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.cardi{border:1.5px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--card)}
+.cardi.ok{border-color:var(--acc3)} .cardi.no{border-color:var(--bad)}
+.cardi p{margin:0 0 6px;font-weight:600}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:4px;padding:3px 9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+table.t{border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.t th,table.t td{border:1px solid var(--line);padding:6px 10px;text-align:center}
+table.t th{background:var(--soft)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.qrnote{font-size:13px;color:var(--muted);margin-top:14px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.gsvg{width:100%;max-width:560px;height:auto;display:block;touch-action:none;cursor:crosshair}
+.adimlbl{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--onacc);background:var(--acc2);border-radius:999px;padding:2px 10px;margin-bottom:6px}
+.tah p,.acik p{margin:4px 0 8px;font-size:17px}
+.gsvg .gl{stroke:var(--line);stroke-width:1}
+.gsvg .sym{stroke:var(--acc2);stroke-width:2.6;stroke-dasharray:9 6}
+.gsvg .shp{fill:color-mix(in srgb,var(--acc) 22%,transparent);stroke:var(--acc);stroke-width:2.4;stroke-linejoin:round}
+.gsvg .img{fill:color-mix(in srgb,var(--acc3) 22%,transparent);stroke:var(--acc3);stroke-width:2.4;stroke-linejoin:round}
+.gsvg .ghost{fill:none;stroke:var(--acc3);stroke-width:2;stroke-dasharray:5 4}
+.gsvg .usr{fill:var(--acc2)}
+.gsvg .bad{fill:var(--bad)}
+.gsvg text{font-weight:700;font-size:15px}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.opts button{font:inherit;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:4px;padding:6px 12px;cursor:pointer}
+.opts button.ok{border-color:var(--acc3);background:color-mix(in srgb,var(--acc3) 15%,var(--card))}
+.opts button.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--card))}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
+.mini button{background:var(--card);border:1.5px solid var(--line);border-radius:4px;padding:6px;cursor:pointer;color:var(--ink);font:inherit}
+.mini button.ok{border-color:var(--acc3)} .mini button.no{border-color:var(--bad)}
+.steps2{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.letter{font-size:40px;font-weight:700;font-family:"Source Sans 3",Arial,sans-serif;text-align:center;line-height:1.1}
+.grp{margin-top:18px}
+.grp h3{font-family:Bitter,Georgia,serif;font-size:15px;margin:0 0 6px;color:var(--muted)}
+
+/* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
+:root{--kb1:#5f3dc4;--kb2:#1c7ed6;--acc:#5f3dc4;--kbr:12px;
+  --p1:#e03131;--p2:#f08c00;--p3:#2f9e44;--p4:#1c7ed6;--p5:#7048e8;--p6:#d6336c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--acc:#9775fa}}
+:root[data-theme="dark"]{--acc:#9775fa}
+body{background:var(--bg);background-image:radial-gradient(circle at 12% -10%,color-mix(in srgb,var(--kb1) 14%,transparent),transparent 45%),radial-gradient(circle at 100% 0,color-mix(in srgb,var(--kb2) 12%,transparent),transparent 40%);background-attachment:fixed}
+.wrap{max-width:1320px}
+.kb-hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 26px 20px;margin:4px 0 18px;color:#fff;
+  background:linear-gradient(125deg,var(--kb1),var(--kb2));box-shadow:0 10px 30px -14px color-mix(in srgb,var(--kb1) 70%,transparent)}
+.kb-hero::after{content:"+ − × ÷ = √ π Δ < >";position:absolute;right:-10px;bottom:-18px;font:800 64px/1 Bitter,Georgia,serif;letter-spacing:.2em;color:rgba(255,255,255,.12);white-space:nowrap;pointer-events:none}
+.kb-hero .eyebrow{color:rgba(255,255,255,.88)}
+.kb-hero h1{color:#fff;font-size:clamp(28px,4.2vw,42px)}
+.kb-hero .lead{color:rgba(255,255,255,.92);margin-bottom:10px;max-width:80ch}
+.kb-ilerleme{position:relative;z-index:1;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;max-width:460px}
+.kb-bar{flex:1;height:10px;border-radius:99px;background:rgba(255,255,255,.28);overflow:hidden}
+.kb-bar i{display:block;height:100%;width:0;border-radius:99px;background:#fff;transition:width .5s}
+.kb-duzen{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.kb-yan{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:4px;scrollbar-width:thin}
+.kb-yan .index{grid-template-columns:1fr;gap:6px}
+.kb-yan .grp h3{font:800 14px/1.2 Bitter,Georgia,serif;margin:12px 2px 6px;color:var(--acc)}
+.kb-yan .grp:first-child h3{margin-top:0}
+.index a{border-radius:10px;min-height:0;transition:transform .15s,border-color .15s;border-width:2px}
+.index a:hover{transform:translateX(3px)}
+.index a[aria-current="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card));box-shadow:0 4px 14px -8px var(--acc)}
+.index li:nth-child(6n+1) .n{background:var(--p1)} .index li:nth-child(6n+2) .n{background:var(--p2)}
+.index li:nth-child(6n+3) .n{background:var(--p3)} .index li:nth-child(6n+4) .n{background:var(--p4)}
+.index li:nth-child(6n+5) .n{background:var(--p5)} .index li:nth-child(6n+6) .n{background:var(--p6)}
+.index .n{color:#fff!important}
+.index a.kb-tamam .n{background:var(--acc3)!important}
+.index a.kb-tamam .n::after{content:"✓";position:absolute;font-size:15px}
+.index a.kb-tamam .n{font-size:0;position:relative}
+.panel{border-radius:16px;border:0;box-shadow:0 12px 34px -18px rgba(20,30,60,.35);padding:20px 22px 22px;position:relative;overflow:hidden}
+.panel::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--kb1),var(--kb2),var(--p2))}
+#panel h2{color:var(--acc);font-size:26px}
+.panel .code{background:color-mix(in srgb,var(--acc3) 14%,transparent);padding:2px 8px;border-radius:99px}
+.intro{font-size:17px}
+.task{font-size:19px}
+.primary{border-radius:99px;padding:9px 20px;background:linear-gradient(135deg,var(--kb1),var(--kb2));color:#fff;box-shadow:0 6px 14px -8px var(--kb1);transition:transform .12s}
+.primary:hover{transform:translateY(-1px)} .primary:active{transform:translateY(1px)}
+.ghost{border-radius:99px;border-width:2px}
+.fb{border-radius:12px;padding:11px 14px;font-weight:600;border-left:5px solid transparent}
+.fb.ok{border-left-color:var(--acc3)} .fb.no{border-left-color:var(--bad)}
+.cardi,.opts button,.mini button,.seg button{border-radius:10px}
+input.ans{border-radius:10px;border-width:2px}
+.kb-gezinti{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.kb-gezinti span{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.kb-duzen{grid-template-columns:1fr}.kb-yan{position:static;max-height:none}
+  .kb-yan .index{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.kb-hero{padding:18px 16px}.kb-hero::after{font-size:40px}}
+
+/* Tek düğme ve menü */
+.kb-dugme{position:fixed;top:14px;right:14px;z-index:60;width:56px;height:56px;border-radius:50%;border:3px solid #fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--kb1),var(--kb2));color:#fff;display:grid;place-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);transition:transform .15s}
+.kb-dugme:hover{transform:scale(1.06)} .kb-dugme svg{width:28px;height:28px}
+.kb-dugme[aria-expanded="true"]{transform:rotate(90deg)}
+.kb-dugme .kb-sessiz{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:var(--bad);border:2px solid #fff;display:none;place-items:center}
+.kb-dugme .kb-sessiz svg{width:12px;height:12px}
+html.kb-sesyok .kb-dugme .kb-sessiz{display:grid}
+.kb-menu{position:fixed;top:80px;right:14px;z-index:60;width:min(330px,calc(100vw - 28px));max-height:calc(100vh - 96px);overflow:auto;
+  background:var(--card);color:var(--ink);border-radius:18px;box-shadow:0 20px 50px -18px rgba(0,0,0,.5);border:1px solid var(--line);padding:16px}
+.kb-menu[hidden]{display:none}
+.kb-menu h4{margin:0 0 10px;font:800 16px/1.2 Bitter,Georgia,serif;color:var(--acc)}
+.kb-menu h5{margin:14px 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.kb-yuvarlak{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.kb-yuvarlak button{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px}
+.kb-yuvarlak b{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:var(--soft);transition:.15s}
+.kb-yuvarlak svg{width:26px;height:26px}
+.kb-yuvarlak button[aria-pressed="true"] b{background:linear-gradient(135deg,var(--kb1),var(--kb2));border-color:transparent;color:#fff}
+.kb-yuvarlak button:hover b{border-color:var(--acc)}
+.kb-satir{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.kb-satir:first-of-type{border-top:0}
+.kb-anahtar{width:46px;height:26px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer;flex:none}
+.kb-anahtar::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.kb-anahtar[aria-checked="true"]{background:var(--acc3)} .kb-anahtar[aria-checked="true"]::after{left:23px}
+.kb-seg{display:flex;border:2px solid var(--line);border-radius:99px;overflow:hidden}
+.kb-seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:none;color:var(--ink);padding:4px 10px;cursor:pointer}
+.kb-seg button[aria-pressed="true"]{background:var(--acc);color:#fff}
+.kb-alt{display:flex;gap:8px;margin-top:14px}
+.kb-alt button{flex:1;font:inherit;font-size:14px;font-weight:600;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px;cursor:pointer}
+.kb-yonerge{border:0;border-radius:18px;padding:0;max-width:min(620px,calc(100vw - 28px));width:100%;color:var(--ink);background:var(--card);box-shadow:0 30px 70px -20px rgba(0,0,0,.6)}
+.kb-yonerge::backdrop{background:rgba(10,15,30,.55)}
+.kb-yonerge header{padding:16px 20px;color:#fff;background:linear-gradient(125deg,var(--kb1),var(--kb2));font:800 20px/1.2 Bitter,Georgia,serif}
+.kb-yonerge .ic{padding:14px 20px 4px;font-size:17px}
+.kb-yonerge .ic ol{padding-left:20px;margin:8px 0} .kb-yonerge .ic li{margin:4px 0}
+.kb-yonerge .ic .gorev{background:var(--soft);border-radius:12px;padding:10px 14px;font-weight:500;border-left:5px solid var(--acc)}
+.kb-yonerge footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px 18px}
+.kb-kutlama{position:fixed;pointer-events:none;z-index:70}
+.kb-kutlama i{position:absolute;width:9px;height:9px;border-radius:2px;animation:kbpat .8s ease-out forwards}
+@keyframes kbpat{to{transform:translate(var(--x),var(--y)) rotate(260deg);opacity:0}}
+.kb-gizli{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Erişilebilirlik sınıfları */
+html.kb-y1 .wrap{zoom:1.15} html.kb-y2 .wrap{zoom:1.3}
+html.kb-rahat body{letter-spacing:.03em;word-spacing:.12em;line-height:1.85}
+html.kb-karsit{--ink:#000;--muted:#111;--line:#000;--bg:#fff;--card:#fff;--soft:#fff7cc;--acc:#0030b8;--acc3:#006b2e;--bad:#b00000;--grid:transparent}
+html.kb-karsit .panel{box-shadow:none;border:3px solid #000}
+html.kb-karsit .index a,html.kb-karsit .ghost,html.kb-karsit input.ans{border-color:#000}
+html.kb-karsit button:focus-visible,html.kb-karsit a:focus-visible{outline:4px solid #ff9f00}
+html.kb-azhareket *,html.kb-azhareket *::before,html.kb-azhareket *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+
+/* tek kareli zemin: kutuların arka plan ızgarası kapatılır, çizim alanları düz zemin üzerinde durur (iki ızgara üst üste binmez) */
+.panel,.card,.stage,.tahta,.sahne,.board,.kutu,.alan{background-image:none!important}
+svg.gsvg,.stage svg,.tahta svg{background:var(--card,#fff);border-radius:6px}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">7. Sınıf · Dönüşüm · MAT.7.3.1 – MAT.7.3.2</div>
+  <h1>Yansıma Atölyesi</h1>
+  <p class="lead">Yansıma dönüşümü, simetri doğrusu, orta dikme ve açıortay için otuz altı etkinlik. Kitaptaki karekodlar doğrudan ilgili etkinliği açar; buradan da birini seçerek başlayabilirsiniz.</p>
+  <div id="index"></div>
+  <section class="panel" id="panel" aria-live="polite"></section>
+  <p class="qrnote">Çoğu etkinlikte “Yeni soru” düğmesi yeni bir durum oluşturur. Kareli zeminde noktaya dokunarak işaretleme yaparsınız.</p>
+</div>
+
+<script>
+(function(){
+const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuf = a => a.slice().sort(()=>Math.random()-.5);
+function fb(box, ok, msg){ box.className = "fb " + (ok ? "ok" : "no"); box.innerHTML = msg; box.hidden = false; }
+const LN = { v:"dikey", h:"yatay", d:"eğik", a:"eğik" };
+/* Yansıma: v: x=c, h: y=c, d: y=x+c, a: y=-x+c */
+function refl(p, L){ const [x,y] = p, c = L.c;
+  if (L.t === "v") return [2*c - x, y]; if (L.t === "h") return [x, 2*c - y];
+  if (L.t === "d") return [y - c, x + c]; return [c - y, c - x]; }
+function onL(p, L){ const [x,y] = p, c = L.c; return L.t === "v" ? x === c : L.t === "h" ? y === c : L.t === "d" ? y === x + c : y === -x + c; }
+function side(p, L){ const [x,y] = p, c = L.c; return Math.sign(L.t === "v" ? x - c : L.t === "h" ? y - c : L.t === "d" ? y - x - c : y + x - c); }
+const eq = (a,b) => a[0] === b[0] && a[1] === b[1];
+const inB = (p, g) => p[0] >= 0 && p[1] >= 0 && p[0] <= g.cols && p[1] <= g.rows;
+const Lp = "ABCDEFGH";
+
+/* ---------- Kareli zemin ---------- */
+function Grid(host, cols, rows, opt = {}){
+  const s = opt.s || 34, pad = 16, W = cols*s + 2*pad, H = rows*s + 2*pad;
+  const X = x => pad + x*s, Y = y => pad + (rows - y)*s;
+  const g = { cols, rows, s, X, Y, layers: [], onClick: null };
+  const id = "c" + Math.random().toString(36).slice(2,7);
+  host.innerHTML = `<svg class="gsvg" viewBox="0 0 ${W} ${H}" style="max-width:${Math.min(W,620)}px"><defs><clipPath id="${id}"><rect x="${pad}" y="${pad}" width="${cols*s}" height="${rows*s}"/></clipPath></defs><g class="bg"></g><g class="fg"></g></svg>`;
+  const svg = host.querySelector("svg"), bg = svg.querySelector(".bg"), fg = svg.querySelector(".fg");
+  let b = "";
+  for (let i = 0; i <= cols; i++) b += opt.dots ? "" : `<line class="gl" x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(rows)}"/>`;
+  for (let j = 0; j <= rows; j++) b += opt.dots ? "" : `<line class="gl" x1="${X(0)}" y1="${Y(j)}" x2="${X(cols)}" y2="${Y(j)}"/>`;
+  if (opt.dots) for (let i = 0; i <= cols; i++) for (let j = 0; j <= rows; j++) b += `<circle cx="${X(i)}" cy="${Y(j)}" r="2" fill="var(--muted)"/>`;
+  bg.innerHTML = b;
+  g.line = (L, cls = "sym") => { let p, q; const c = L.c, M = cols + rows;
+    if (L.t === "v") { p = [c, -1]; q = [c, rows + 1]; } else if (L.t === "h") { p = [-1, c]; q = [cols + 1, c]; }
+    else if (L.t === "d") { p = [-M, -M + c]; q = [M, M + c]; } else { p = [-M, M + c]; q = [M, -M + c]; }
+    return `<line class="${cls}" clip-path="url(#${id})" x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(q[0])}" y2="${Y(q[1])}"/>`; };
+  g.seg = (p, q, st = 'stroke="var(--ink)" stroke-width="2"') => `<line x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(q[0])}" y2="${Y(q[1])}" ${st}/>`;
+  g.poly = (pts, cls) => `<polygon class="${cls}" points="${pts.map(p=>X(p[0])+","+Y(p[1])).join(" ")}"/>`;
+  g.dot = (p, cls = "usr", r = 6) => `<circle class="${cls}" cx="${X(p[0])}" cy="${Y(p[1])}" r="${r}"/>`;
+  g.lab = (p, t, dx = 9, dy = -9, col = "var(--ink)") => `<text x="${X(p[0]) + dx}" y="${Y(p[1]) + dy}" fill="${col}" paint-order="stroke" stroke="var(--card)" stroke-width="4">${t}</text>`;
+  g.cell = (i, j, fill) => `<rect x="${X(i)+1}" y="${Y(j+1)+1}" width="${s-2}" height="${s-2}" fill="${fill}"/>`;
+  g.draw = h => { fg.innerHTML = h; };
+  g.svg = svg;
+  svg.addEventListener("pointerdown", e => { if (!g.onClick) return; const r = svg.getBoundingClientRect(), k = W / r.width;
+    const px = (e.clientX - r.left) * k, py = (e.clientY - r.top) * k;
+    const x = Math.round((px - pad) / s), y = Math.round(rows - (py - pad) / s);
+    const cx = Math.floor((px - pad) / s), cy = Math.floor(rows - (py - pad) / s);
+    if (x < 0 || y < 0 || x > cols || y > rows) return; g.onClick([x, y], [cx, cy], [(px - pad)/s, rows - (py - pad)/s]); });
+  return g;
+}
+function shell(p, task, extra = ""){
+  p.innerHTML = `<p class="task">${task}</p><div class="g"></div><div class="row">${extra}</div><div class="f" hidden></div>`;
+  return { g: p.querySelector(".g"), row: p.querySelector(".row"), f: p.querySelector(".f"), t: p.querySelector(".task") };
+}
+function btn(t, cls = "ghost"){ const b = document.createElement("button"); b.className = cls; b.textContent = t; return b; }
+
+/* ---------- 1. Noktayı yansıt ---------- */
+function reflectPoint(kind){ return p => {
+  const S = shell(p, ""); const g = Grid(S.g, 12, 10); let L, A, done;
+  const nb = btn("Yeni soru"); S.row.append(nb);
+  function nq(){ done = false; S.f.hidden = true;
+    const lines = { v:{t:"v",c:R(4,8)}, h:{t:"h",c:R(4,6)}, d:{t:"d",c:R(-2,2)}, a:{t:"a",c:R(9,13)} };
+    L = lines[kind]; do { A = [R(1,11), R(1,9)]; } while (onL(A, L) || !inB(refl(A, L), g) || side(A,L) === 0);
+    S.t.innerHTML = `A noktasının turuncu kesikli <b>${LN[L.t]}</b> doğruya göre yansımasını zeminde işaretleyiniz.`;
+    g.draw(g.line(L) + g.dot(A, "shp") + g.lab(A, "A")); }
+  g.onClick = (q) => { if (done) return; const I = refl(A, L), ok = eq(q, I);
+    let h = g.line(L) + g.dot(A, "shp") + g.lab(A, "A") + g.dot(q, ok ? "img" : "bad");
+    if (!ok) h += g.dot(I, "ghost") ; h += g.seg(A, I, 'stroke="var(--acc3)" stroke-width="1.6" stroke-dasharray="4 3"') + g.lab(I, "A′", 9, -9, "var(--acc3)");
+    g.draw(h); done = true;
+    fb(S.f, ok, ok ? "Doğru. A ile A′ doğruya eşit uzaklıktadır ve AA′ doğru parçası simetri doğrusuna diktir." :
+      "Kesikli yeşil çember doğru yeri gösteriyor. Noktanın doğruya olan uzaklığını, doğruya dik yönde sayınız; aynı uzaklığı öbür tarafta da sayınız."); };
+  nb.onclick = nq; nq(); }; }
+
+/* ---------- 2. Şekli yansıt ---------- */
+const SHAPES = {
+  tri_v: { L:{t:"v",c:6}, P:[[2,2],[4,7],[5,3]] },
+  quad_h: { L:{t:"h",c:5}, P:[[2,6],[6,8],[9,7],[7,6]] },
+  touch: { L:{t:"v",c:6}, P:[[6,2],[6,7],[3,5]] },
+  diag: { L:{t:"d",c:0}, P:[[3,1],[7,2],[6,4]] },
+  far: { L:{t:"h",c:4}, P:[[1,6],[3,8],[5,7]] },
+  Lsh: { L:{t:"v",c:6}, P:[[1,2],[1,8],[3,8],[3,4],[5,4],[5,2]] },
+  anti: { L:{t:"a",c:10}, P:[[1,2],[4,2],[1,5]] },
+};
+function reflectShape(key, text){ return p => {
+  const sh = SHAPES[key]; const S = shell(p, `${text} Görüntünün köşelerini <b>${Lp.slice(0, sh.P.length).split("").join(", ")}</b> sırasıyla, her köşenin görüntüsüne dokunarak işaretleyiniz.`);
+  const g = Grid(S.g, 12, 10); let U = [];
+  const ub = btn("Geri al"), rb = btn("Baştan başla"); S.row.append(ub, rb);
+  const I = sh.P.map(q => refl(q, sh.L));
+  function draw(res){ let h = g.line(sh.L) + g.poly(sh.P, "shp") + sh.P.map((q,i)=>g.lab(q, Lp[i], -16, -8)).join("");
+    if (U.length > 1) h += `<polyline points="${U.map(q=>g.X(q[0])+","+g.Y(q[1])).join(" ")}" fill="none" stroke="var(--acc2)" stroke-width="2"/>`;
+    if (res) { h += g.poly(I, res.ok ? "img" : "ghost"); I.forEach((q,i)=> h += g.lab(q, Lp[i]+"′", 8, -8, "var(--acc3)")); }
+    U.forEach((q,i)=> h += g.dot(q, res && !eq(q, I[i]) ? "bad" : "usr"));
+    g.draw(h); }
+  g.onClick = q => { if (U.length >= I.length) return; U.push(q); draw();
+    if (U.length === I.length) { const ok = U.every((q,i)=>eq(q, I[i])); const wrong = U.map((q,i)=>eq(q,I[i]) ? null : Lp[i]+"′").filter(Boolean);
+      draw({ok}); fb(S.f, ok, ok ? "Doğru. Şekil ile görüntüsü eştir; karşılıklı köşeler simetri doğrusuna eşit uzaklıktadır." + (sh.P.some(q=>onL(q, sh.L)) ? " Doğru üzerindeki köşeler yerinde kalır." : "") :
+        `Yanlış işaretlenen köşeler: ${wrong.join(", ")}. Kesikli yeşil şekil doğru görüntüdür.`); } };
+  ub.onclick = () => { U.pop(); S.f.hidden = true; draw(); }; rb.onclick = () => { U = []; S.f.hidden = true; draw(); }; draw(); }; }
+
+/* ---------- 3. Simetri doğrusunu bul ---------- */
+const PAIRS = [ {L:{t:"v",c:6}, P:[[2,2],[4,6],[5,3]]}, {L:{t:"h",c:5}, P:[[2,6],[5,9],[7,7]]}, {L:{t:"d",c:0}, P:[[4,1],[8,2],[7,4]]}, {L:{t:"v",c:5}, P:[[1,3],[1,7],[3,7],[4,4]]}, {L:{t:"a",c:10}, P:[[1,1],[5,2],[2,4]]} ];
+function findLine(which){ return p => {
+  const S = shell(p, "Mavi şekil ile yeşil görüntüsü bir doğruya göre simetriktir. Simetri doğrusunun geçtiği <b>iki noktaya</b> dokununuz.");
+  const g = Grid(S.g, 12, 10); let U = [], k = 0;
+  const nb = btn("Yeni soru"); S.row.append(nb);
+  function cur(){ return PAIRS[which[k % which.length]]; }
+  function draw(res){ const c = cur(); let h = g.poly(c.P, "shp") + g.poly(c.P.map(q=>refl(q,c.L)), "img");
+    if (U.length === 2) h += g.line(lineThrough(U[0],U[1]) || {t:"v",c:-5}, res && !res.ok ? "ghost" : "sym");
+    if (res && !res.ok) h += g.line(c.L, "sym");
+    U.forEach(q => h += g.dot(q)); g.draw(h); }
+  function lineThrough(a, b){ if (eq(a,b)) return null; const dx = b[0]-a[0], dy = b[1]-a[1];
+    if (dx === 0) return {t:"v",c:a[0]}; if (dy === 0) return {t:"h",c:a[1]}; if (dx === dy) return {t:"d",c:a[1]-a[0]}; if (dx === -dy) return {t:"a",c:a[1]+a[0]}; return {t:"x"}; }
+  g.onClick = q => { if (U.length >= 2) U = []; U.push(q); S.f.hidden = true;
+    if (U.length === 2) { const L = lineThrough(U[0], U[1]), c = cur(); const ok = L && L.t === c.L.t && L.c === c.L.c; draw({ok});
+      fb(S.f, ok, ok ? "Doğru. Karşılıklı köşeleri birleştiren doğru parçalarının orta noktaları bu doğru üzerindedir." : "Bu doğru değil (turuncu kesikli doğru doğru cevaptır). İpucu: Karşılıklı iki köşeyi birleştiren doğru parçasının orta noktasını bulunuz; simetri doğrusu buradan geçer ve bu doğru parçasına diktir."); }
+    else draw(); };
+  nb.onclick = () => { k++; U = []; S.f.hidden = true; draw(); }; draw(); }; }
+
+/* ---------- 4. Simetrik mi? ---------- */
+function isSym(set){ return p => {
+  const S = shell(p, "İki eş şekil verilmiştir. Bu şekiller kesikli doğruya göre simetrik midir?");
+  const g = Grid(S.g, 12, 10); const o = document.createElement("div"); o.className = "opts"; o.innerHTML = `<button data-a="1">Evet, simetriktir</button><button data-a="0">Hayır, simetrik değildir</button>`; S.row.before(o);
+  const nb = btn("Yeni soru"); S.row.append(nb); let c, done;
+  const BASE = [[[1,1],[4,2],[2,4]], [[1,2],[3,4],[4,1]], [[2,1],[4,4],[1,3]]];
+  const make = () => { const vert = Math.random() < .5, L = vert ? {t:"v",c:6} : {t:"h",c:4}; const b = pick(BASE);
+    const P = vert ? b.map(([x,y])=>[x, y+2]) : b.map(([x,y])=>[x+3, y+4]); const kind = pick(set); let Q;
+    if (kind === "yes") Q = P.map(q=>refl(q,L));
+    else if (kind === "slide") Q = P.map(q=>refl(q,L)).map(([x,y])=> vert ? [x, y+1] : [x+1, y]);
+    else { const xs = P.map(q=>q[0]), ys = P.map(q=>q[1]); Q = vert ? P.map(([x,y])=>[x + 2*L.c - (Math.min(...xs)+Math.max(...xs)), y]) : P.map(([x,y])=>[x, y + 2*L.c - (Math.min(...ys)+Math.max(...ys))]); }
+    return { L, P, Q, yes: kind === "yes", kind }; };
+  function nq(){ do { c = make(); } while (!c.Q.every(q=>inB(q,g)) || c.P.some(q=>side(q,c.L)===0) || c.Q.some(q=>side(q,c.L)===0)); done = false; S.f.hidden = true;
+    o.querySelectorAll("button").forEach(b=>b.className=""); g.draw(g.line(c.L) + g.poly(c.P, "shp") + g.poly(c.Q, "img")); }
+  o.onclick = e => { const b = e.target.closest("button"); if (!b || done) return; done = true; const ok = (b.dataset.a === "1") === c.yes; b.className = ok ? "ok" : "no";
+    g.draw(g.line(c.L) + g.poly(c.P, "shp") + g.poly(c.Q, "img") + (c.yes ? "" : g.poly(c.P.map(q=>refl(q,c.L)), "ghost")));
+    fb(S.f, ok, c.yes ? "Şekiller simetriktir: her köşe ile karşılığı doğruya eşit uzaklıkta ve doğruya dik bir doğru parçası üzerindedir." :
+      "Şekiller eştir ama simetrik değildir. Kesikli yeşil şekil gerçek yansımayı gösteriyor. " + (c.kind === "slide" ? "Görüntü doğru yerden bir birim kaydırılmış." : "Görüntü yansıtılmamış, kaydırılmış; köşelerin sırası (yönü) değişmemiş.")); };
+  nb.onclick = nq; nq(); }; }
+
+/* ---------- 5. Ayna çizimi ---------- */
+function mirrorDraw(p){
+  const S = shell(p, "Sol taraftaki karelere dokunarak bir desen oluşturunuz. Aynadaki görüntü kendiliğinden çizilir. İkinci doğruyu açarak dört parçalı desen yapabilirsiniz.");
+  const g = Grid(S.g, 12, 10); let F = new Set(), both = false;
+  const tb = btn("Yatay doğruyu aç"), cb = btn("Temizle"); S.row.append(tb, cb);
+  const draw = () => { let h = ""; F.forEach(k => { const [i,j] = k.split(",").map(Number); const cells = [[i,j],[11-i,j]]; if (both) cells.push([i,9-j],[11-i,9-j]);
+      cells.forEach(([a,b],n)=> h += g.cell(a,b, n === 0 ? "var(--acc)" : "var(--acc3)")); });
+    h += g.line({t:"v",c:6}); if (both) h += g.line({t:"h",c:5}); g.draw(h); };
+  g.onClick = (q, c) => { const [i,j] = c; if (i < 0 || i > 5 || j < 0 || j > 9 || (both && j < 5)) return; const k = i+","+j; F.has(k) ? F.delete(k) : F.add(k); draw(); };
+  tb.onclick = () => { both = !both; tb.textContent = both ? "Yatay doğruyu kapat" : "Yatay doğruyu aç"; draw(); };
+  cb.onclick = () => { F.clear(); draw(); }; ["2,2","3,3","4,4","5,5","4,6","3,7","5,3"].forEach(k=>F.add(k)); draw();
+  fb(S.f, true, "Görüntüdeki her kare, simetri doğrusuna aslıyla aynı uzaklıktadır. Doğruya yapışık kareler görüntüsüyle birleşir."); }
+
+/* ---------- 6. Katla ve aç ---------- */
+function foldUnfold(p){
+  const cases = [ {half:[[6,1],[6,8],[3,8],[3,5],[5,5],[5,1]], L:{t:"v",c:6}}, {half:[[2,5],[4,9],[7,9],[7,5]], L:{t:"h",c:5}}, {half:[[6,2],[2,4],[6,8]], L:{t:"v",c:6}}, {half:[[6,1],[3,3],[4,6],[6,9]], L:{t:"v",c:6}} ];
+  p.innerHTML = `<p class="task">Kâğıt kesikli doğrudan katlanıyor ve mavi parça kesilip çıkarılıyor. Kesilen parça açıldığında hangi şekil elde edilir?</p><div class="g"></div><div class="mini"></div><div class="row"><button class="ghost nb">Yeni soru</button></div><div class="f" hidden></div>`;
+  const g = Grid(p.querySelector(".g"), 12, 10, {s:28}); const m = p.querySelector(".mini"), f = p.querySelector(".f"); let c, k = R(0,3), done;
+  const thumb = polys => `<svg viewBox="-0.5 -0.5 13 11" width="140">` + polys.map(pts=>`<polygon points="${pts.map(q=>q[0]+","+(10-q[1])).join(" ")}" fill="color-mix(in srgb,var(--acc) 25%,transparent)" stroke="var(--acc)" stroke-width=".18"/>`).join("") + `</svg>`;
+  function nq(){ c = cases[k++ % cases.length]; done = false; f.hidden = true; g.draw(g.line(c.L) + g.poly(c.half, "shp"));
+    const I = c.half.map(q=>refl(q,c.L)); const v = c.L.t === "v";
+    const xs = c.half.map(q=>q[0]), ys = c.half.map(q=>q[1]);
+    const T = v ? c.half.map(([x,y])=>[x + (Math.max(...xs)-Math.min(...xs)), y]) : c.half.map(([x,y])=>[x, y - (Math.max(...ys)-Math.min(...ys))]);
+    const F2 = v ? c.half.map(([x,y])=>[x, 10-y]) : c.half.map(([x,y])=>[12-x, y]);
+    const opts = shuf([[[c.half, I],1],[[c.half, T],0],[[c.half, F2.map(q=>refl(q,c.L))],0]]);
+    m.innerHTML = opts.map(o=>`<button data-ok="${o[1]}">${thumb(o[0])}</button>`).join(""); }
+  m.onclick = e => { const b = e.target.closest("button"); if (!b || done) return; done = true; const ok = b.dataset.ok === "1"; b.className = ok ? "ok" : "no"; if (!ok) m.querySelector('[data-ok="1"]').className = "ok";
+    fb(f, ok, ok ? "Doğru. Açılan şekil katlama çizgisine göre simetriktir." : "Katlama çizgisi açılan şeklin simetri doğrusu olur; parçanın yansıması çizginin öbür tarafına gelir (yeşil çerçeveli seçenek)."); };
+  p.querySelector(".nb").onclick = nq; nq(); }
+
+/* ---------- 7. Dik ortalama ---------- */
+function perpExplorer(p){
+  const S = shell(p, "A noktasını zemin üzerinde bir yere dokunarak taşıyınız. Görüntü ve uzaklıklar değişir; neyin değişmediğini gözleyiniz.");
+  const g = Grid(S.g, 12, 10); let A = [3,2]; const L = {t:"d", c:0};
+  const lb = btn("Doğruyu değiştir"); S.row.append(lb); let Ls = [{t:"d",c:0},{t:"v",c:6},{t:"a",c:10},{t:"h",c:5}], li = 0;
+  function draw(){ const Lc = Ls[li % Ls.length]; const I = refl(A, Lc); const M = [(A[0]+I[0])/2, (A[1]+I[1])/2];
+    const d = Math.hypot(A[0]-M[0], A[1]-M[1]);
+    let h = g.line(Lc) + g.seg(A, I, 'stroke="var(--acc3)" stroke-width="2"') + g.dot(A, "shp") + g.lab(A, "A") + g.dot(I, "img") + g.lab(I, "A′", 9, -9, "var(--acc3)") + g.dot(M, "usr", 4) + g.lab(M, "O", 8, 18, "var(--acc2)");
+    g.draw(h);
+    S.f.className = "fb ok"; S.f.hidden = false;
+    S.f.innerHTML = onL(A, Lc) ? "A doğru üzerinde: görüntüsü kendisidir." : `|AO| = |OA′| = ${(Math.round(d*100)/100).toString().replace(".",",")} birim. AA′ doğru parçası simetri doğrusunu O noktasında <b>dik keser</b> ve iki eş parçaya ayırır.`; }
+  g.onClick = q => { const I = refl(q, Ls[li % Ls.length]); if (!inB(I, g)) return; A = q; draw(); };
+  lb.onclick = () => { li++; let I = refl(A, Ls[li % Ls.length]); if (!inB(I,g)) A = [3,2]; draw(); }; draw(); }
+
+/* ---------- 8. Harfler ---------- */
+function letters(p){
+  const D = {A:"v",B:"h",C:"h",D:"h",E:"h",H:"vh",K:"h",M:"v",O:"vh",T:"v",U:"v",V:"v",Y:"v",Z:"",N:"",S:"",L:"",F:"",P:"",R:""};
+  p.innerHTML = `<p class="task">Her harf için dikey ya da yatay simetri doğrusu varsa işaretleyiniz. Hiçbiri yoksa boş bırakınız. (Harfler bu sayfadaki yazı tipiyle düşünülmüştür.)</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost nb">Yeni harfler</button></div><div class="f" hidden></div>`;
+  const box = p.querySelector(".cards"), f = p.querySelector(".f"); let set;
+  function nq(){ set = shuf(Object.keys(D)).slice(0, 8); f.hidden = true;
+    box.innerHTML = set.map(l=>`<div class="cardi" data-l="${l}"><div class="letter">${l}</div><div class="seg"><button data-k="v" aria-pressed="false">Dikey</button><button data-k="h" aria-pressed="false">Yatay</button></div></div>`).join(""); }
+  box.onclick = e => { const b = e.target.closest("button"); if (!b) return; b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); b.closest(".cardi").classList.remove("ok","no"); };
+  p.querySelector(".k").onclick = () => { let ok = 0; box.querySelectorAll(".cardi").forEach(c => { const ans = D[c.dataset.l]; const got = [...c.querySelectorAll('button[aria-pressed="true"]')].map(b=>b.dataset.k).sort().join("");
+      const g_ = got === ans.split("").sort().join(""); c.classList.toggle("ok", g_); c.classList.toggle("no", !g_); if (g_) ok++; });
+    fb(f, ok === 8, ok === 8 ? "Hepsi doğru." : `${ok} / 8 doğru. Harfi zihninizde simetri doğrusundan katlayınız: iki yarı üst üste gelmeli.`); };
+  p.querySelector(".nb").onclick = nq; nq(); }
+
+/* ---------- 9. Kaç simetri doğrusu ---------- */
+function countLines(p){
+  const reg = n => Array.from({length:n},(_,i)=>{ const a = -Math.PI/2 + 2*Math.PI*i/n; return [Math.cos(a), Math.sin(a)]; });
+  const SH = [["Kare",[[-1,-1],[1,-1],[1,1],[-1,1]],4],["Dikdörtgen",[[-1.5,-.8],[1.5,-.8],[1.5,.8],[-1.5,.8]],2],["Eşkenar üçgen",reg(3),3],["İkizkenar üçgen",[[0,-1],[.7,.9],[-.7,.9]],1],
+   ["Eşkenar dörtgen",[[0,-1.2],[.7,0],[0,1.2],[-.7,0]],2],["Düzgün beşgen",reg(5),5],["Düzgün altıgen",reg(6),6],["Paralelkenar",[[-1.4,.8],[.6,.8],[1.4,-.8],[-.6,-.8]],0],["İkizkenar yamuk",[[-1.4,.8],[1.4,.8],[.7,-.8],[-.7,-.8]],1],["Çeşitkenar üçgen",[[-1.2,.9],[1.3,.9],[-.3,-1]],0]];
+  p.innerHTML = `<p class="task"></p><div class="g" style="max-width:260px"></div><div class="opts"></div><div class="row"><button class="ghost nb">Yeni şekil</button></div><div class="f" hidden></div>`;
+  const f = p.querySelector(".f"), o = p.querySelector(".opts"); let c, done;
+  function nq(){ c = pick(SH); done = false; f.hidden = true; p.querySelector(".task").innerHTML = `<b>${c[0]}</b> kaç simetri doğrusuna sahiptir?`;
+    p.querySelector(".g").innerHTML = `<svg viewBox="-1.8 -1.5 3.6 3" width="100%"><polygon points="${c[1].map(q=>q.join(",")).join(" ")}" fill="color-mix(in srgb,var(--acc) 22%,transparent)" stroke="var(--acc)" stroke-width=".05"/><g class="ax"></g></svg>`;
+    o.innerHTML = [0,1,2,3,4,5,6].map(n=>`<button data-n="${n}">${n}</button>`).join(""); }
+  o.onclick = e => { const b = e.target.closest("button"); if (!b || done) return; done = true; const ok = +b.dataset.n === c[2]; b.className = ok ? "ok" : "no";
+    fb(f, ok, ok ? "Doğru." : `Doğru cevap ${c[2]}. Şekli her simetri doğrusundan katladığınızda iki yarısı tam olarak üst üste gelir.` + (c[0] === "Paralelkenar" ? " Paralelkenar köşegeninden katlandığında yarılar üst üste gelmez." : "")); };
+  p.querySelector(".nb").onclick = nq; nq(); }
+
+/* ---------- 10. Önermeler ---------- */
+function statements(p){
+  const ST = [["Bir şekil ile yansıma dönüşümü altındaki görüntüsü eştir.",1],["Simetri doğrusu, bir noktayı görüntüsüne birleştiren doğru parçasını dik ortalar.",1],["Simetri doğrusu üzerindeki bir noktanın görüntüsü kendisidir.",1],
+    ["Birbirine eş olan iki şekil her zaman bir doğruya göre simetriktir.",0],["Bir nokta ile görüntüsü arasındaki uzaklık, noktanın simetri doğrusuna uzaklığına eşittir.",0],["Yansımada kenar uzunlukları ve açı ölçüleri değişmez.",1],
+    ["Simetri doğrusu bir şeklin içinden geçemez.",0],["Yansımada köşelerin dolanma yönü tersine döner.",1],["Bir şeklin görüntüsü, şekil simetri doğrusundan uzaklaştıkça küçülür.",0],["Simetri doğrusuna dik olan bir doğru parçasının görüntüsü de simetri doğrusuna diktir.",1]];
+  p.innerHTML = `<p class="task">Önermelerin doğru mu yanlış mı olduğuna karar veriniz.</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost nb">Yeni önermeler</button></div><div class="f" hidden></div>`;
+  const box = p.querySelector(".cards"), f = p.querySelector(".f"); let set;
+  function nq(){ set = shuf(ST).slice(0,5); f.hidden = true; box.innerHTML = set.map((s,i)=>`<div class="cardi" data-i="${i}"><p>${s[0]}</p><div class="seg"><button data-a="1" aria-pressed="false">Doğru</button><button data-a="0" aria-pressed="false">Yanlış</button></div></div>`).join(""); }
+  box.onclick = e => { const b = e.target.closest("button"); if (!b) return; b.parentNode.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x === b)); b.closest(".cardi").classList.remove("ok","no"); };
+  p.querySelector(".k").onclick = () => { let ok = 0; box.querySelectorAll(".cardi").forEach(c => { const b = c.querySelector('button[aria-pressed="true"]'); const g_ = b && +b.dataset.a === set[+c.dataset.i][1]; c.classList.toggle("ok", !!g_); c.classList.toggle("no", !g_); if (g_) ok++; });
+    fb(f, ok === 5, ok === 5 ? "Hepsi doğru." : `${ok} / 5 doğru. Yanlış olan önermeler için bir karşı örnek düşününüz.`); };
+  p.querySelector(".nb").onclick = nq; nq(); }
+
+/* ---------- 11. Üçgenden dörtgen ---------- */
+function triQuad(p){
+  const C = [ {n:"İkizkenar dik üçgen, hipotenüsüne göre", P:[[2,2],[6,2],[2,6]], L:{t:"a",c:8}, a:"Kare"},
+    {n:"Eşkenar olmayan ikizkenar üçgen, tabanına göre", P:[[2,4],[8,4],[5,8]], L:{t:"h",c:4}, a:"Eşkenar dörtgen"},
+    {n:"Dik üçgen, dik kenarlarından birine göre", P:[[6,2],[6,8],[9,2]], L:{t:"v",c:6}, a:"İkizkenar üçgen"},
+    {n:"Dik kenarları farklı uzunlukta dik üçgen, hipotenüsüne göre", P:[[2,2],[8,2],[2,5]], L:{t:"x"}, a:"Deltoid"} ];
+  p.innerHTML = `<p class="task"></p><div class="g"></div><div class="opts"></div><div class="row"><button class="ghost nb">Yeni üçgen</button></div><div class="f" hidden></div>`;
+  const g = Grid(p.querySelector(".g"), 12, 10), o = p.querySelector(".opts"), f = p.querySelector(".f"); let c, k = 0, done;
+  function reflGeneral(q, A, B){ const dx = B[0]-A[0], dy = B[1]-A[1], t = ((q[0]-A[0])*dx + (q[1]-A[1])*dy)/(dx*dx+dy*dy); const F = [A[0]+t*dx, A[1]+t*dy]; return [2*F[0]-q[0], 2*F[1]-q[1]]; }
+  function nq(){ c = C[k++ % C.length]; done = false; f.hidden = true; p.querySelector(".task").innerHTML = `${c.n} yansıtılıyor. Üçgen ile görüntüsünün birleşimi hangi şekli oluşturur?`;
+    g.draw(g.poly(c.P, "shp") + (c.L.t === "x" ? g.seg([8,2],[2,5],'stroke="var(--acc2)" stroke-width="2.6" stroke-dasharray="9 6"') : g.line(c.L)));
+    o.innerHTML = shuf(["Kare","Eşkenar dörtgen","İkizkenar üçgen","Deltoid"]).map(t=>`<button>${t}</button>`).join(""); }
+  o.onclick = e => { const b = e.target.closest("button"); if (!b || done) return; done = true; const ok = b.textContent === c.a; b.className = ok ? "ok" : "no";
+    const I = c.L.t === "x" ? c.P.map(q=>reflGeneral(q,[8,2],[2,5])) : c.P.map(q=>refl(q,c.L));
+    g.draw(g.poly(c.P, "shp") + `<polygon class="img" points="${I.map(q=>g.X(q[0])+","+g.Y(q[1])).join(" ")}"/>` + (c.L.t === "x" ? "" : g.line(c.L)));
+    fb(f, ok, (ok ? "Doğru. " : `Doğru cevap: ${c.a}. `) + "Simetri doğrusu üzerindeki kenar ortak kenar olur; diğer kenarlar eş kenar çiftleri oluşturur."); };
+  p.querySelector(".nb").onclick = nq; nq(); }
+
+/* ---------- 12. Motif tamamla ---------- */
+function motif(p){
+  const S = shell(p, "Kilim motifinin sol üst çeyreği verilmiştir. Motif iki kesikli doğruya göre simetriktir. Eksik kareleri boyayınız.");
+  const g = Grid(S.g, 10, 10, {s:30}); const base = [[0,9],[1,8],[2,7],[3,6],[4,5],[1,9],[0,7],[3,9],[4,8],[2,5]];
+  const want = new Set(); base.forEach(([i,j]) => [[i,j],[9-i,j],[i,9-j],[9-i,9-j]].forEach(q=>want.add(q.join(","))));
+  let U = new Set();
+  const kb = btn("Kontrol et","primary"), cb = btn("Temizle"); S.row.append(kb, cb);
+  const isBase = k => base.some(q=>q.join(",") === k);
+  function draw(show){ let h = ""; base.forEach(([i,j])=> h += g.cell(i,j,"var(--acc)")); U.forEach(k=>{ const [i,j] = k.split(",").map(Number); h += g.cell(i,j, show && !want.has(k) ? "var(--bad)" : "var(--acc3)"); });
+    if (show) want.forEach(k=>{ if (!U.has(k) && !isBase(k)) { const [i,j] = k.split(",").map(Number); h += `<rect x="${g.X(i)+4}" y="${g.Y(j+1)+4}" width="${g.s-8}" height="${g.s-8}" fill="none" stroke="var(--acc3)" stroke-width="2" stroke-dasharray="4 3"/>`; } });
+    h += g.line({t:"v",c:5}) + g.line({t:"h",c:5}); g.draw(h); }
+  g.onClick = (q, c) => { const k = c.join(","); if (c[0] < 0 || c[1] < 0 || c[0] > 9 || c[1] > 9 || isBase(k)) return; U.has(k) ? U.delete(k) : U.add(k); S.f.hidden = true; draw(); };
+  kb.onclick = () => { const need = [...want].filter(k=>!isBase(k)); const ok = need.every(k=>U.has(k)) && [...U].every(k=>want.has(k)); draw(true);
+    fb(S.f, ok, ok ? "Motif tamam. Her çeyrek komşu çeyreğin yansımasıdır." : "Kesikli yeşil çerçeveler eksik kareleri, kırmızı kareler fazla boyananları gösteriyor."); };
+  cb.onclick = () => { U.clear(); S.f.hidden = true; draw(); }; draw(); }
+
+/* ---------- 13. Orta dikme inşası ---------- */
+function geo(p, w = 560, h = 360){ p.innerHTML += `<svg class="gsvg" viewBox="0 0 ${w} ${h}" style="max-width:${w}px;cursor:default"></svg>`; return p.querySelector("svg:last-of-type"); }
+function constructPB(p){
+  p.innerHTML = `<p class="task">A ve B noktalarını birleştiren doğru parçasının orta dikmesini pergel ve ölçüsüz cetvelle inşa ediniz. Önce pergelin açıklığını seçiniz.</p>`;
+  const svg = geo(p); p.insertAdjacentHTML("beforeend", `<div class="row"><label>Pergel açıklığı <input type="range" min="40" max="260" value="120" class="r"></label><button class="ghost s1">A merkezli yay</button><button class="ghost s2">B merkezli yay</button><button class="ghost s3">Kesişim noktalarını birleştir</button><button class="ghost s0">Baştan</button></div><div class="f" hidden></div>`);
+  const A = [150,200], B = [410,200], f = p.querySelector(".f"); let st = {a:null, b:null, done:false};
+  const d = Math.hypot(B[0]-A[0], B[1]-A[1]);
+  function draw(){ const r = +p.querySelector(".r").value; let h = `<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--ink)" stroke-width="2.4"/>`;
+    [[A,"A"],[B,"B"]].forEach(([q,t])=> h += `<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="var(--ink)"/><text x="${q[0]-6}" y="${q[1]+24}">${t}</text>`);
+    if (st.a) h += `<circle cx="${A[0]}" cy="${A[1]}" r="${st.a}" fill="none" stroke="var(--acc)" stroke-width="1.6"/>`;
+    if (st.b) h += `<circle cx="${B[0]}" cy="${B[1]}" r="${st.b}" fill="none" stroke="var(--acc)" stroke-width="1.6"/>`;
+    if (!st.a && !st.b) h += `<circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="none" stroke="var(--muted)" stroke-dasharray="3 4"/>`;
+    if (st.done) { const x = (A[0]+B[0])/2, hh = Math.sqrt(st.a*st.a - (d/2)**2);
+      h += `<line x1="${x}" y1="${A[1]-hh-40}" x2="${x}" y2="${A[1]+hh+40}" stroke="var(--acc2)" stroke-width="2.6"/><circle cx="${x}" cy="${A[1]-hh}" r="4.5" fill="var(--acc2)"/><circle cx="${x}" cy="${A[1]+hh}" r="4.5" fill="var(--acc2)"/>
+        <text x="${x+8}" y="${A[1]-hh-6}">P</text><text x="${x+8}" y="${A[1]+hh+18}">R</text><path d="M${x},${A[1]-14} h14 v14" fill="none" stroke="var(--ink)"/><text x="${x+6}" y="${A[1]+24}">O</text>`; }
+    svg.innerHTML = h; }
+  p.querySelector(".r").oninput = () => { if (!st.a && !st.b) draw(); };
+  p.querySelector(".s1").onclick = () => { st.a = +p.querySelector(".r").value; draw(); };
+  p.querySelector(".s2").onclick = () => { const r = +p.querySelector(".r").value; if (st.a && r !== st.a) return fb(f, false, "İki yay aynı pergel açıklığıyla çizilmelidir. Pergelin açıklığını değiştirmeyiniz."); st.b = r; draw(); };
+  p.querySelector(".s3").onclick = () => { if (!st.a || !st.b) return fb(f, false, "Önce iki yayı da çiziniz.");
+    if (st.a <= d/2) return fb(f, false, `Yaylar kesişmiyor. Pergel açıklığı |AB| doğru parçasının yarısından (${Math.round(d/2)} birim) büyük olmalıdır. “Baştan” düğmesiyle yeniden deneyiniz.`);
+    st.done = true; draw(); fb(f, true, "Orta dikme inşa edildi. PR doğrusu [AB]'yi O noktasında dik keser ve iki eş parçaya ayırır; [AB]'nin simetri doğrusudur. |PA| = |PB| olduğuna dikkat ediniz."); };
+  p.querySelector(".s0").onclick = () => { st = {a:null,b:null,done:false}; f.hidden = true; draw(); }; draw(); }
+
+/* ---------- 14. Orta dikme üzerindeki noktalar ---------- */
+function pbProperty(p){
+  const S = shell(p, "P noktasını zemin üzerinde taşıyınız. P, A ve B'ye ne zaman eşit uzaklıkta oluyor?");
+  const g = Grid(S.g, 12, 10); const A = [3,3], B = [9,7]; let P = [2,8], show = false;
+  const sb = btn("Orta dikmeyi göster"); S.row.append(sb);
+  const L = {t:"a", c:NaN};
+  function draw(){ const da = Math.hypot(P[0]-A[0],P[1]-A[1]), db = Math.hypot(P[0]-B[0],P[1]-B[1]), same = Math.abs(da-db) < 1e-9;
+    let h = g.seg(A, B, 'stroke="var(--ink)" stroke-width="2.4"') + g.dot(A,"shp") + g.lab(A,"A",-18,16) + g.dot(B,"shp") + g.lab(B,"B",8,16);
+    if (show) h += g.seg([8/3,10],[28/3,0], 'stroke="var(--acc2)" stroke-width="2.4" stroke-dasharray="9 6"');
+    h += g.seg(P, A, `stroke="${same?"var(--acc3)":"var(--muted)"}" stroke-width="2"`) + g.seg(P, B, `stroke="${same?"var(--acc3)":"var(--muted)"}" stroke-width="2"`) + g.dot(P, same ? "img" : "usr") + g.lab(P, "P");
+    g.draw(h); const fm = v => (Math.round(v*100)/100).toString().replace(".",",");
+    fb(S.f, same, `|PA| ≈ ${fm(da)} birim, |PB| ≈ ${fm(db)} birim. ` + (same ? "Eşit! P, [AB]'nin orta dikmesi üzerindedir." : "Eşit değil. P'yi başka bir noktaya taşıyınız.")); }
+  g.onClick = q => { P = q; draw(); }; sb.onclick = () => { show = !show; sb.textContent = show ? "Orta dikmeyi gizle" : "Orta dikmeyi göster"; draw(); }; draw(); }
+
+/* ---------- 15. Açıortay inşası ---------- */
+function constructAB(p){
+  p.innerHTML = `<p class="task">AOB açısının açıortayını inşa ediniz: Önce O merkezli bir yayla kollar üzerinde K ve L noktalarını belirleyiniz, sonra [KL]'nin orta dikmesini çiziniz.</p>`;
+  const svg = geo(p); p.insertAdjacentHTML("beforeend", `<div class="row"><label>Pergel açıklığı <input type="range" min="40" max="240" value="140" class="r"></label><button class="ghost s1">O merkezli yay (K, L)</button><button class="ghost s2">K ve L merkezli yaylar</button><button class="ghost s3">O ile kesişimi birleştir</button><button class="ghost s0">Baştan</button></div><div class="f" hidden></div>`);
+  const O = [90,300], a1 = 0, a2 = -62*Math.PI/180, f = p.querySelector(".f"); let st = {r1:null, r2:null, done:false};
+  const pt = (r, a) => [O[0] + r*Math.cos(a), O[1] + r*Math.sin(a)];
+  function draw(){ let h = ""; const E1 = pt(460, a1), E2 = pt(330, a2);
+    h += `<line x1="${O[0]}" y1="${O[1]}" x2="${E1[0]}" y2="${E1[1]}" stroke="var(--ink)" stroke-width="2.4"/><line x1="${O[0]}" y1="${O[1]}" x2="${E2[0]}" y2="${E2[1]}" stroke="var(--ink)" stroke-width="2.4"/>`;
+    h += `<text x="${O[0]-18}" y="${O[1]+6}">O</text><text x="${E1[0]-10}" y="${E1[1]+22}">A</text><text x="${E2[0]+8}" y="${E2[1]}">B</text>`;
+    if (st.r1) { const K = pt(st.r1, a1), L = pt(st.r1, a2);
+      h += `<path d="M${pt(st.r1, 0.12)} A${st.r1},${st.r1} 0 0 0 ${pt(st.r1, a2-0.12)}" fill="none" stroke="var(--acc)" stroke-width="1.6"/>`.replace(/,(?=\d)/g, ",");
+      h += `<circle cx="${K[0]}" cy="${K[1]}" r="4.5" fill="var(--acc)"/><circle cx="${L[0]}" cy="${L[1]}" r="4.5" fill="var(--acc)"/><text x="${K[0]-4}" y="${K[1]+22}">K</text><text x="${L[0]-22}" y="${L[1]}">L</text>`;
+      if (st.r2) { h += `<circle cx="${K[0]}" cy="${K[1]}" r="${st.r2}" fill="none" stroke="var(--acc3)" stroke-width="1.4" opacity=".8"/><circle cx="${L[0]}" cy="${L[1]}" r="${st.r2}" fill="none" stroke="var(--acc3)" stroke-width="1.4" opacity=".8"/>`; } }
+    if (st.done) { const E = pt(470, a2/2); h += `<line x1="${O[0]}" y1="${O[1]}" x2="${E[0]}" y2="${E[1]}" stroke="var(--acc2)" stroke-width="2.6"/><text x="${E[0]-30}" y="${E[1]-8}">açıortay</text>`; }
+    svg.innerHTML = h; }
+  const r = () => +p.querySelector(".r").value;
+  p.querySelector(".s1").onclick = () => { st.r1 = r(); st.r2 = null; st.done = false; draw(); fb(f, true, "K ve L noktaları O'ya eşit uzaklıkta: |OK| = |OL|. Şimdi pergel açıklığını seçip K ve L merkezli yayları çiziniz."); };
+  p.querySelector(".s2").onclick = () => { if (!st.r1) return fb(f, false, "Önce O merkezli yayı çiziniz."); const KL = 2*st.r1*Math.sin(31*Math.PI/180);
+    st.r2 = r(); draw(); if (st.r2 <= KL/2) fb(f, false, `Yaylar kesişmiyor. Açıklık |KL|'nin yarısından (${Math.round(KL/2)}) büyük olmalıdır.`); else fb(f, true, "Yaylar kesişti. Kesişim noktasını O ile birleştiriniz."); };
+  p.querySelector(".s3").onclick = () => { if (!st.r2 || st.r2 <= st.r1*Math.sin(31*Math.PI/180)) return fb(f, false, "Önce kesişen iki yay çiziniz.");
+    st.done = true; draw(); fb(f, true, "Açıortay inşa edildi. Bu doğru, [KL]'nin orta dikmesidir ve açıyı iki eş açıya ayırır. Açının simetri doğrusu, açıortayıdır."); };
+  p.querySelector(".s0").onclick = () => { st = {r1:null,r2:null,done:false}; f.hidden = true; draw(); }; draw(); }
+
+/* ---------- 16. Açıortay üzerindeki noktalar ---------- */
+function abProperty(p){
+  p.innerHTML = `<p class="task">Açının içinde bir noktaya dokununuz. Noktanın iki kola olan uzaklıkları ne zaman eşit olur?</p>`;
+  const svg = geo(p, 560, 340); p.insertAdjacentHTML("beforeend", `<div class="row"><button class="ghost sb">Açıortayı göster</button></div><div class="f" hidden></div>`);
+  const O = [60,170], th = 28*Math.PI/180, f = p.querySelector(".f"); let P = [330,120], show = false;
+  const u1 = [Math.cos(-th), Math.sin(-th)], u2 = [Math.cos(th), Math.sin(th)];
+  function foot(q, u){ const t = (q[0]-O[0])*u[0] + (q[1]-O[1])*u[1]; return [O[0]+t*u[0], O[1]+t*u[1]]; }
+  function draw(){ const F1 = foot(P,u1), F2 = foot(P,u2), d1 = Math.hypot(P[0]-F1[0],P[1]-F1[1]), d2 = Math.hypot(P[0]-F2[0],P[1]-F2[1]); const same = Math.abs(d1-d2) < 5;
+    let h = `<line x1="${O[0]}" y1="${O[1]}" x2="${O[0]+520*u1[0]}" y2="${O[1]+520*u1[1]}" stroke="var(--ink)" stroke-width="2.4"/><line x1="${O[0]}" y1="${O[1]}" x2="${O[0]+520*u2[0]}" y2="${O[1]+520*u2[1]}" stroke="var(--ink)" stroke-width="2.4"/>`;
+    if (show) h += `<line x1="${O[0]}" y1="${O[1]}" x2="${O[0]+520}" y2="${O[1]}" stroke="var(--acc2)" stroke-width="2.4" stroke-dasharray="9 6"/>`;
+    const col = same ? "var(--acc3)" : "var(--muted)";
+    h += `<line x1="${P[0]}" y1="${P[1]}" x2="${F1[0]}" y2="${F1[1]}" stroke="${col}" stroke-width="2"/><line x1="${P[0]}" y1="${P[1]}" x2="${F2[0]}" y2="${F2[1]}" stroke="${col}" stroke-width="2"/><circle cx="${P[0]}" cy="${P[1]}" r="6" fill="${same?"var(--acc3)":"var(--acc2)"}"/><text x="${P[0]+8}" y="${P[1]-8}">P</text><text x="${O[0]-18}" y="${O[1]+6}">O</text>`;
+    svg.innerHTML = h; fb(f, same, `Kollara uzaklıklar: ${Math.round(d1/10)} ve ${Math.round(d2/10)} birim. ` + (same ? "Eşit! P açıortay üzerindedir." : "Eşit değil."));
+  }
+  svg.style.cursor = "crosshair";
+  svg.addEventListener("pointerdown", e => { const r = svg.getBoundingClientRect(), k = 560 / r.width; let q = [(e.clientX-r.left)*k, (e.clientY-r.top)*k];
+    const a = Math.atan2(q[1]-O[1], q[0]-O[0]); if (Math.abs(a) >= th || q[0] <= O[0]) return; if (Math.abs(q[1]-O[1]) < 7) q[1] = O[1]; P = q; draw(); });
+  p.querySelector(".sb").onclick = () => { show = !show; draw(); }; draw(); }
+
+/* ---------- 17. Hatalı adım ---------- */
+function wrongStep(kind){ return p => {
+  const SETS = kind === "pb" ? [
+    [["Pergel A noktasına konur, açıklık |AB|'nin yarısından büyük alınır ve yay çizilir.",1],["Pergelin açıklığı küçültülür, B merkezli yay çizilir.",0],["Yayların kesiştiği iki nokta cetvelle birleştirilir.",1],["Elde edilen doğru [AB]'nin orta dikmesidir.",1]],
+    [["Pergel açıklığı |AB|'nin yarısından küçük alınır ve A merkezli yay çizilir.",0],["Aynı açıklıkla B merkezli yay çizilir.",1],["Yayların kesiştiği noktalar birleştirilir.",1],["Bu doğru [AB]'yi dik ortalar.",1]],
+    [["A ve B merkezli, aynı yarıçaplı ve kesişen iki yay çizilir.",1],["Kesişim noktalarından yalnızca biri A noktası ile birleştirilir.",0],["Oluşan doğru orta dikme kabul edilir.",1],["Orta dikme [AB]'yi iki eş parçaya ayırır.",1]] ] : [
+    [["O merkezli bir yay çizilerek kollar üzerinde K ve L işaretlenir.",1],["K merkezli yay çizilir; pergel açıklığı değiştirilerek L merkezli yay çizilir.",0],["Yayların kesişim noktası O ile birleştirilir.",1],["Oluşan ışın açıortaydır.",1]],
+    [["Kollar üzerinde |OK| ≠ |OL| olacak şekilde K ve L noktaları işaretlenir.",0],["[KL]'nin orta dikmesi inşa edilir.",1],["Orta dikme O'dan geçen ışın olarak çizilir.",1],["Bu ışın açıyı iki eş açıya ayırır.",1]],
+    [["O merkezli yay ile K ve L noktaları bulunur.",1],["K ve L merkezli, aynı açıklıkla kesişen yaylar çizilir.",1],["Kesişim noktası K ile birleştirilir.",0],["Oluşan doğru açıortay kabul edilir.",1]] ];
+  p.innerHTML = `<p class="task">${kind === "pb" ? "Bir öğrenci [AB]'nin orta dikmesini" : "Bir öğrenci AOB açısının açıortayını"} inşa ederken aşağıdaki adımları izlemiştir. <b>Hatalı</b> olan adımı seçiniz.</p><div class="opts" style="flex-direction:column;align-items:stretch"></div><div class="row"><button class="ghost nb">Yeni soru</button></div><div class="f" hidden></div>`;
+  const o = p.querySelector(".opts"), f = p.querySelector(".f"); let k = R(0,2), done;
+  function nq(){ const s = SETS[k++ % 3]; done = false; f.hidden = true; o.innerHTML = s.map((x,i)=>`<button data-ok="${x[1]}" style="text-align:left">${i+1}. adım: ${x[0]}</button>`).join(""); }
+  o.onclick = e => { const b = e.target.closest("button"); if (!b || done) return; done = true; const ok = b.dataset.ok === "0"; b.className = ok ? "ok" : "no"; if (!ok) o.querySelector('[data-ok="0"]').className = "ok";
+    fb(f, ok, ok ? "Doğru. Bu adımla elde edilen doğru simetri doğrusu olmaz." : "Yeşil çerçeveli adım hatalıdır. İnşada iki yay aynı açıklıkla çizilmeli ve kesişim noktaları doğru noktalarla birleştirilmelidir."); };
+  p.querySelector(".nb").onclick = nq; nq(); }; }
+
+/* ---------- 18. Açıyı katla ---------- */
+function foldAngle(p){
+  p.innerHTML = `<p class="task">Kesikli katlama çizgisini sürgüyle döndürünüz. OA kolunun yansıması OB koluyla çakıştığında katlama çizgisi neyi gösterir?</p>`;
+  const svg = geo(p, 560, 330); p.insertAdjacentHTML("beforeend", `<div class="row"><label>Katlama çizgisi <input type="range" min="0" max="80" value="15" class="r"></label><span class="score s"></span></div><div class="f" hidden></div>`);
+  const O = [70,290], A0 = 0, B0 = 64, f = p.querySelector(".f");
+  const pt = (r, deg) => [O[0] + r*Math.cos(-deg*Math.PI/180), O[1] + r*Math.sin(-deg*Math.PI/180)];
+  function draw(){ const t = +p.querySelector(".r").value, img = 2*t - A0;
+    const E = (deg, r=440) => pt(r, deg); let h = "";
+    h += `<line x1="${O[0]}" y1="${O[1]}" x2="${E(A0)[0]}" y2="${E(A0)[1]}" stroke="var(--ink)" stroke-width="2.4"/><line x1="${O[0]}" y1="${O[1]}" x2="${E(B0,330)[0]}" y2="${E(B0,330)[1]}" stroke="var(--ink)" stroke-width="2.4"/>`;
+    h += `<line x1="${O[0]}" y1="${O[1]}" x2="${E(img,400)[0]}" y2="${E(img,400)[1]}" stroke="var(--acc3)" stroke-width="2.4" stroke-dasharray="6 4"/>`;
+    h += `<line x1="${O[0]}" y1="${O[1]}" x2="${E(t,460)[0]}" y2="${E(t,460)[1]}" stroke="var(--acc2)" stroke-width="2.4" stroke-dasharray="10 6"/>`;
+    h += `<text x="${E(A0,440)[0]-12}" y="${E(A0)[1]+22}">A</text><text x="${E(B0,330)[0]+6}" y="${E(B0,330)[1]}">B</text><text x="${O[0]-18}" y="${O[1]+6}">O</text>`;
+    svg.innerHTML = h; p.querySelector(".s").textContent = `Katlama çizgisi ile OA arasındaki açı: ${t}°`;
+    const ok = img === B0; if (ok) fb(f, true, "Kollar çakıştı. Katlama çizgisi açıyı 32° + 32° olarak iki eş açıya ayırıyor: bu çizgi açının simetri doğrusu, yani <b>açıortayıdır</b>."); else f.hidden = true; }
+  p.querySelector(".r").oninput = draw; draw(); }
+
+/* ---------- 19. Daire dilimi ---------- */
+function sector(p){
+  p.innerHTML = `<p class="task">Daire diliminin simetri doğrusu hangisidir? Seçtikten sonra inşa adımlarını inceleyiniz.</p>`;
+  const svg = geo(p, 520, 330); p.insertAdjacentHTML("beforeend", `<div class="opts"><button data-k="a">a doğrusu</button><button data-k="b">b doğrusu</button><button data-k="c">c doğrusu</button></div><div class="f" hidden></div>`);
+  const O = [260,300], R0 = 240, a1 = -150, a2 = -60, f = p.querySelector(".f"); const rad = d => d*Math.PI/180; const pt = (r, d) => [O[0] + r*Math.cos(rad(d)), O[1] + r*Math.sin(rad(d))];
+  function draw(show){ const K = pt(R0,a1), L = pt(R0,a2), mid = (a1+a2)/2; let h = `<path d="M${O} L${K} A${R0},${R0} 0 0 1 ${L} Z" fill="color-mix(in srgb,var(--acc) 18%,transparent)" stroke="var(--acc)" stroke-width="2.4"/>`;
+    const ln = (d, t, col) => { const E = pt(290, d); return `<line x1="${O[0]}" y1="${O[1]}" x2="${E[0]}" y2="${E[1]}" stroke="${col}" stroke-width="2" stroke-dasharray="8 5"/><text x="${E[0]+4}" y="${E[1]}">${t}</text>`; };
+    h += ln(mid - 20, "a", "var(--muted)") + ln(mid, "b", "var(--muted)") + `<line x1="${K[0]}" y1="${K[1]}" x2="${L[0]}" y2="${L[1]}" stroke="var(--muted)" stroke-width="2" stroke-dasharray="8 5"/><text x="${(K[0]+L[0])/2-4}" y="${(K[1]+L[1])/2+20}">c</text>`;
+    if (show) { h += `<circle cx="${K[0]}" cy="${K[1]}" r="130" fill="none" stroke="var(--acc3)" opacity=".7"/><circle cx="${L[0]}" cy="${L[1]}" r="130" fill="none" stroke="var(--acc3)" opacity=".7"/>` + ln(mid, "", "var(--acc2)"); }
+    h += `<text x="${K[0]-18}" y="${K[1]}">K</text><text x="${L[0]+6}" y="${L[1]}">L</text><text x="${O[0]-6}" y="${O[1]+20}">O</text>`; svg.innerHTML = h; }
+  p.querySelector(".opts").onclick = e => { const b = e.target.closest("button"); if (!b) return; const ok = b.dataset.k === "b"; b.className = ok ? "ok" : "no"; draw(true);
+    fb(f, ok, (ok ? "Doğru. " : "Doğru cevap b doğrusudur. ") + "K ve L merkezli, aynı yarıçaplı yaylar çizilir; kesişim noktası O ile birleştirilir. Bu doğru hem KOL açısının açıortayı hem de [KL]'nin orta dikmesidir."); };
+  draw(false); }
+
+/* ---------- 20. Adımları sırala ---------- */
+function orderSteps(p){
+  const SETS = [["Orta dikme", ["A ve B noktaları işaretlenip cetvelle birleştirilir.","Pergel açıklığı |AB|'nin yarısından büyük seçilir.","Aynı açıklıkla A ve B merkezli yaylar çizilir.","Yayların kesiştiği iki nokta cetvelle birleştirilir."]],
+    ["Açıortay", ["Açının köşesi O'ya pergel konur ve kolları kesen bir yay çizilir.","Kolları kesen noktalar K ve L olarak adlandırılır.","Aynı açıklıkla K ve L merkezli kesişen yaylar çizilir.","Yayların kesişim noktası O ile birleştirilir."]]];
+  p.innerHTML = `<p class="task"></p><div class="opts" style="flex-direction:column;align-items:stretch"></div><div class="row"><button class="ghost rs">Baştan</button><button class="ghost nb">Diğer inşa</button></div><div class="f" hidden></div>`;
+  const o = p.querySelector(".opts"), f = p.querySelector(".f"); let k = 0, cur, seq;
+  function nq(){ cur = SETS[k++ % 2]; seq = []; f.hidden = true; p.querySelector(".task").innerHTML = `<b>${cur[0]}</b> inşasının adımlarını doğru sırayla seçiniz.`;
+    o.innerHTML = shuf(cur[1].map((t,i)=>[t,i])).map(([t,i])=>`<button data-i="${i}" style="text-align:left">${t}</button>`).join(""); }
+  o.onclick = e => { const b = e.target.closest("button"); if (!b || b.disabled) return; const i = +b.dataset.i; const ok = i === seq.length;
+    if (!ok) { b.className = "no"; setTimeout(()=>b.className = "", 700); return fb(f, false, "Bu adım şimdi yapılamaz. Önce gerekli olan adımı düşününüz."); }
+    seq.push(i); b.className = "ok"; b.disabled = true; b.textContent = `${seq.length}. ${b.textContent}`;
+    if (seq.length === 4) fb(f, true, "Sıralama doğru. İnşada yalnızca pergel ve ölçüsüz cetvel kullanılır."); else f.hidden = true; };
+  p.querySelector(".rs").onclick = () => { k--; nq(); }; p.querySelector(".nb").onclick = nq; nq(); }
+
+/* ---------- 21. Eş çemberlerin kesişimi ---------- */
+function circleGap(p){
+  p.innerHTML = `<p class="task">|AB| = 8 birimdir. A ve B merkezli eş çemberlerin yarıçapını değiştiriniz. Çemberler hangi yarıçaplarda kesişiyor?</p>`;
+  const svg = geo(p, 560, 300); p.insertAdjacentHTML("beforeend", `<div class="row"><label>Yarıçap <input type="range" min="1" max="8" step="0.5" value="3" class="r"></label><b class="v"></b></div><div class="f" hidden></div>`);
+  const u = 28, A = [168,150], B = [168+8*u,150], f = p.querySelector(".f");
+  function draw(){ const r = +p.querySelector(".r").value; p.querySelector(".v").textContent = r.toString().replace(".",",") + " birim";
+    let h = `<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--ink)" stroke-width="2"/><circle cx="${A[0]}" cy="${A[1]}" r="${r*u}" fill="none" stroke="var(--acc)" stroke-width="2"/><circle cx="${B[0]}" cy="${B[1]}" r="${r*u}" fill="none" stroke="var(--acc)" stroke-width="2"/><text x="${A[0]-6}" y="${A[1]+22}">A</text><text x="${B[0]-6}" y="${B[1]+22}">B</text>`;
+    if (r > 4) { const hh = Math.sqrt(r*r - 16)*u, x = (A[0]+B[0])/2; h += `<line x1="${x}" y1="${A[1]-hh}" x2="${x}" y2="${A[1]+hh}" stroke="var(--acc2)" stroke-width="2.4"/><circle cx="${x}" cy="${A[1]-hh}" r="4" fill="var(--acc2)"/><circle cx="${x}" cy="${A[1]+hh}" r="4" fill="var(--acc2)"/>`; }
+    svg.innerHTML = h;
+    fb(f, r > 4, r > 4 ? "Çemberler iki noktada kesişiyor; bu noktaları birleştiren doğru [AB]'nin orta dikmesidir." : r === 4 ? "Çemberler yalnızca bir noktada değiyor. Tek nokta ile doğru çizilemez; yarıçap 4 birimden büyük olmalı." : "Çemberler kesişmiyor. Yarıçap |AB|'nin yarısından (4 birim) büyük olmalı."); }
+  p.querySelector(".r").oninput = draw; draw(); }
+
+/* ---------- 22. İnşa mı ölçme mi ---------- */
+function toolsQuiz(p){
+  const Q = [["Açıölçerle açıyı ölçüp yarısını işaretlemek", 0],["Pergel ile kollarda eşit uzaklıkta iki nokta almak", 1],["Cetvelin santimetre çizgileriyle orta noktayı bulmak", 0],["Aynı pergel açıklığıyla iki yay çizmek", 1],["Ölçüsüz cetvelle iki noktayı birleştirmek", 1],["Gönyeyle dik açı çizmek", 0]];
+  p.innerHTML = `<p class="task">Pergel ve ölçüsüz cetvelle yapılan <b>inşa</b> adımlarını seçiniz. Ölçme gerektiren adımları seçmeyiniz.</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol et</button></div><div class="f" hidden></div>`;
+  const box = p.querySelector(".cards"), f = p.querySelector(".f");
+  box.innerHTML = shuf(Q).map(q=>`<div class="cardi" data-a="${q[1]}"><p>${q[0]}</p><div class="seg"><button aria-pressed="false">İnşa adımıdır</button></div></div>`).join("");
+  box.onclick = e => { const b = e.target.closest("button"); if (!b) return; b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); b.closest(".cardi").classList.remove("ok","no"); };
+  p.querySelector(".k").onclick = () => { let ok = 0; box.querySelectorAll(".cardi").forEach(c=>{ const s = c.querySelector("button").getAttribute("aria-pressed") === "true"; const g_ = s === (c.dataset.a === "1"); c.classList.toggle("ok",g_); c.classList.toggle("no",!g_); if (g_) ok++; });
+    fb(f, ok === 6, ok === 6 ? "Hepsi doğru. İnşada uzunluk ve açı ölçülmez; yalnızca pergel ve ölçüsüz cetvel kullanılır." : `${ok} / 6 doğru.`); }; }
+
+/* ---------- Liste ---------- */
+/* ---------- ortak: tahmin → keşfet → açıkla ---------- */
+function yTahmin(box, soru, secs, cb){
+  box.innerHTML = `<div class="tah"><div class="adimlbl">1 · Tahmin et</div><p>${soru}</p><div class="seg">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div></div>`;
+  box.querySelectorAll("button").forEach(b=>b.onclick=()=>{ box.querySelectorAll("button").forEach(x=>{x.setAttribute("aria-pressed",x===b);x.disabled=true;}); cb(+b.dataset.i); }); }
+function yAcikla(box, soru, secs, dogru, aciklama){ box.hidden = false;
+  box.innerHTML = `<div class="acik"><div class="adimlbl">3 · Açıkla</div><p>${soru}</p><div class="seg">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div><div class="fbx" hidden></div></div>`;
+  const fk = box.querySelector(".fbx");
+  box.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ box.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    fb(fk, +b.dataset.i === dogru, +b.dataset.i === dogru ? aciklama : "Çiziminize yeniden bakınız ve başka bir açıklama seçiniz."); }); }
+function svgNokta(svg, e){ const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const q = pt.matrixTransform(svg.getScreenCTM().inverse()); return [q.x, q.y]; }
+const uz = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1]);
+function cemberKesisim(c1, c2){ const [x1,y1] = c1.m, [x2,y2] = c2.m, d = uz(c1.m, c2.m);
+  if (d < 1e-6 || d > c1.r + c2.r || d < Math.abs(c1.r - c2.r)) return [];
+  const a = (c1.r*c1.r - c2.r*c2.r + d*d) / (2*d), h = Math.sqrt(Math.max(0, c1.r*c1.r - a*a)), mx = x1 + a*(x2-x1)/d, my = y1 + a*(y2-y1)/d;
+  return [[mx + h*(y2-y1)/d, my - h*(x2-x1)/d], [mx - h*(y2-y1)/d, my + h*(x2-x1)/d]]; }
+
+/* ---------- 35. Pergel ve cetvelle serbest inşa ---------- */
+function freeCompass(p){
+  const A = [170,210], B = [430,210], BR = 20; let cem = [], cizgi = [], mod = "pergel", surt = null, fare = null, secili = [], tah;
+  p.innerHTML = `<div class="t35"></div><div class="w35" hidden><div class="adimlbl" style="margin-top:10px">2 · Keşfet</div>
+    <p class="task">Pergeli <b>A</b> ya da <b>B</b> noktasına yerleştirip sürükleyerek yay çiziniz. Yayların kesişim noktaları belirir. Sonra cetvelle iki noktayı birleştirerek [AB]'nin orta dikmesini inşa ediniz.</p>
+    <div class="seg" role="group" aria-label="Araç"><button data-m="pergel" aria-pressed="true">Pergel</button><button data-m="cetvel" aria-pressed="false">Ölçüsüz cetvel</button><button class="geri">Son adımı geri al</button><button class="sil">Temizle</button></div>
+    <svg class="gsvg s35" viewBox="0 0 600 400" style="max-width:640px;cursor:crosshair;touch-action:none"></svg>
+    <p class="score o35"></p><div class="row"><button class="primary k">Kontrol et</button></div><div class="f" hidden></div></div><div class="x35" hidden></div>`;
+  const svg = p.querySelector(".s35"), f = p.querySelector(".f"), olc = p.querySelector(".o35");
+  yTahmin(p.querySelector(".t35"), "Orta dikmeyi inşa ederken A ve B merkezli yayların pergel açıklıkları nasıl olmalıdır?", ["Eşit olmalıdır","Farklı olmalıdır","Fark etmez"], t=>{ tah = t; p.querySelector(".w35").hidden = false; ciz(); });
+  const noktalar = () => { const k = []; for (let i = 0; i < cem.length; i++) for (let j = i+1; j < cem.length; j++) cemberKesisim(cem[i], cem[j]).forEach(q => k.push(q)); return k; };
+  function ciz(){ let h = "";
+    for (let x = 0; x <= 600; x += BR) h += `<line x1="${x}" y1="0" x2="${x}" y2="400" class="gl" opacity=".5"/>`;
+    for (let y = 0; y <= 400; y += BR) h += `<line x1="0" y1="${y}" x2="600" y2="${y}" class="gl" opacity=".5"/>`;
+    h += `<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--ink)" stroke-width="3"/>`;
+    cem.forEach((c,i) => h += `<circle cx="${c.m[0]}" cy="${c.m[1]}" r="${c.r}" fill="none" stroke="${i%2 ? "var(--acc3)" : "var(--acc)"}" stroke-width="1.8"/>`);
+    if (surt) h += `<circle cx="${surt.m[0]}" cy="${surt.m[1]}" r="${surt.r}" fill="none" stroke="var(--acc2)" stroke-width="1.8" stroke-dasharray="5 4"/><line x1="${surt.m[0]}" y1="${surt.m[1]}" x2="${fare[0]}" y2="${fare[1]}" stroke="var(--acc2)" stroke-width="1.5"/>`;
+    cizgi.forEach(l => { const dx = l[1][0]-l[0][0], dy = l[1][1]-l[0][1], L = Math.hypot(dx,dy) || 1, k = 700/L;
+      h += `<line x1="${l[0][0]-dx*k}" y1="${l[0][1]-dy*k}" x2="${l[1][0]+dx*k}" y2="${l[1][1]+dy*k}" stroke="var(--acc2)" stroke-width="2.6"/>`; });
+    const K = noktalar(); K.forEach((q,i) => h += `<circle cx="${q[0]}" cy="${q[1]}" r="${secili.some(s=>uz(s,q)<1) ? 8 : 6}" fill="var(--bad)" stroke="#fff" stroke-width="1.5"/><text x="${q[0]+9}" y="${q[1]-8}" font-size="15" font-weight="700">${"PRSTUV"[i] || ""}</text>`);
+    [[A,"A",-22],[B,"B",10]].forEach(([q,t,dx]) => h += `<circle cx="${q[0]}" cy="${q[1]}" r="6" fill="var(--ink)"/><text x="${q[0]+dx}" y="${q[1]+26}" font-size="17" font-weight="700">${t}</text>`);
+    svg.innerHTML = h;
+    const r = cem.map((c,i) => `${uz(c.m,A) < 1 ? "A" : "B"} merkezli yay: ${(c.r/BR).toFixed(1)} birim`).join(" · ");
+    olc.innerHTML = (surt ? `Pergel açıklığı: <b>${(surt.r/BR).toFixed(1)} birim</b> · ` : "") + (r || "Henüz yay çizilmedi.") + ` · |AB| = ${(uz(A,B)/BR).toFixed(1)} birim`; }
+  p.querySelectorAll(".seg [data-m]").forEach(b => b.onclick = () => { mod = b.dataset.m; secili = []; p.querySelectorAll(".seg [data-m]").forEach(x=>x.setAttribute("aria-pressed", x===b)); svg.style.cursor = mod === "pergel" ? "crosshair" : "pointer"; ciz(); });
+  p.querySelector(".geri").onclick = () => { if (cizgi.length) cizgi.pop(); else cem.pop(); secili = []; ciz(); };
+  p.querySelector(".sil").onclick = () => { cem = []; cizgi = []; secili = []; f.hidden = true; ciz(); };
+  svg.addEventListener("pointerdown", e => { const q = svgNokta(svg, e);
+    if (mod === "pergel") { const m = uz(q,A) < 22 ? A : uz(q,B) < 22 ? B : null;
+      if (!m) return fb(f, false, "Pergelin sivri ucunu A ya da B noktasına yerleştiriniz (noktaya dokunup sürükleyiniz).");
+      if (cem.length >= 4) return fb(f, false, "En fazla dört yay çizebilirsiniz. Son adımı geri alınız ya da temizleyiniz.");
+      surt = {m, r:0}; fare = q; svg.setPointerCapture(e.pointerId); f.hidden = true; ciz(); }
+    else { const K = noktalar().concat([A,B]); const y = K.find(k => uz(k,q) < 14);
+      if (!y) return; secili.push(y); if (secili.length === 2) { if (uz(secili[0], secili[1]) > 2) cizgi.push(secili.slice()); secili = []; } ciz(); } });
+  svg.addEventListener("pointermove", e => { if (!surt) return; fare = svgNokta(svg, e); surt.r = Math.round(uz(surt.m, fare) / (BR/5)) * (BR/5); ciz(); });
+  svg.addEventListener("pointerup", () => { if (!surt) return; if (surt.r > 5) cem.push(surt); surt = null; ciz(); });
+  p.querySelector(".k").onclick = () => { const M = [(A[0]+B[0])/2, (A[1]+B[1])/2];
+    const iyi = cizgi.find(l => Math.abs(l[0][0]-l[1][0]) < 0.8 && Math.abs(l[0][0]-M[0]) < 0.8);
+    if (iyi) { const PA = uz(iyi[0],A), PB = uz(iyi[0],B);
+      fb(f, true, `Orta dikme inşa edildi. Çizdiğiniz doğru [AB]'yi tam ortasından dik keser. Kesişim noktası için |PA| = ${(PA/BR).toFixed(1)} birim ve |PB| = ${(PB/BR).toFixed(1)} birimdir.`);
+      yAcikla(p.querySelector(".x35"), `Tahmininiz: <b>${["eşit olmalı","farklı olmalı","fark etmez"][tah]}</b>. İki yayın açıklığı neden eşit olmalıdır?`,
+        ["Çünkü kesişim noktaları A ve B'ye eşit uzaklıkta olmalıdır; bu noktalar orta dikmenin üzerindedir.","Çünkü eşit yaylar daha güzel görünür.","Çünkü açıklık |AB| kadar olmalıdır."], 0,
+        "Doğru. Eşit açıklıkla çizilen yayların kesişim noktaları A ve B'ye eşit uzaklıktadır. Bu noktaları birleştiren doğru, A ile B'nin simetri doğrusu yani orta dikmedir."); return; }
+    if (!cizgi.length) return fb(f, false, cem.length < 2 ? "Önce A ve B merkezli birer yay çiziniz." : noktalar().length ? "Kesişim noktalarını cetvelle birleştiriniz." : "Yaylar kesişmiyor. Pergel açıklığı |AB|'nin yarısından büyük olmalıdır.");
+    const r = cem.map(c=>c.r); const esit = r.length >= 2 && r.every(x => Math.abs(x - r[0]) < 1);
+    fb(f, false, esit ? "Çizdiğiniz doğru orta dikme değil. A ve B merkezli iki yayın kesişim noktalarını birleştiriniz." :
+      "Yaylarınızın açıklıkları farklı. Kesişim noktaları A ve B'ye eşit uzaklıkta olmadığı için doğru [AB]'nin ortasından geçmez. Aynı açıklıkla yeniden deneyiniz."); };
+}
+
+/* ---------- 36. Açı ölçerle açıortay ---------- */
+function protractorBisector(p){
+  const O = [300,320], R0 = 210; let a1, a2, c, surt = false, yasla = false, tah, bitti = false;
+  p.innerHTML = `<div class="t36"></div><div class="w36" hidden><div class="adimlbl" style="margin-top:10px">2 · Keşfet</div>
+    <p class="task">Turuncu ışının ucundaki C noktasını sürükleyerek AOB açısını iki eş açıya ayırınız. Açı ölçer iki açıyı anlık ölçer.</p>
+    <div class="row"><button class="ghost ys" aria-pressed="false">Açı ölçeri 1°'ye yasla</button><button class="ghost yeni">Yeni açı</button></div>
+    <svg class="gsvg s36" viewBox="0 0 600 360" style="max-width:640px;touch-action:none"></svg>
+    <div class="row o36" style="font-size:18px"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost dg" hidden>Pergelle doğrula</button></div><div class="f" hidden></div></div><div class="x36" hidden></div>`;
+  const svg = p.querySelector(".s36"), f = p.querySelector(".f");
+  yTahmin(p.querySelector(".t36"), "Açıortay üzerinde alınan bir noktanın açının iki koluna olan uzaklıkları için ne söylenebilir?", ["Eşittir","Yakın kola daha azdır","Nokta nerede olursa olsun farklıdır"], t=>{ tah = t; p.querySelector(".w36").hidden = false; yeni(); });
+  const der = r => r*180/Math.PI, rad = d => d*Math.PI/180, uc = (a, r) => [O[0] + r*Math.cos(rad(a)), O[1] - r*Math.sin(rad(a))];
+  function yeni(){ a1 = R(0, 3)*5; a2 = a1 + R(8, 30)*5; c = a1 + (a2 - a1) * (Math.random() < .5 ? .3 : .72); bitti = false; f.hidden = true; p.querySelector(".x36").hidden = true; p.querySelector(".dg").hidden = true; ciz(); }
+  function ciz(insa){ let h = "";
+    // açı ölçer (OA koluna hizalı yarım daire)
+    h += `<g transform="rotate(${-a1} ${O[0]} ${O[1]})"><path d="M${O[0]-R0},${O[1]} A${R0},${R0} 0 0 1 ${O[0]+R0},${O[1]} Z" fill="color-mix(in srgb,var(--acc) 10%,transparent)" stroke="var(--acc)" stroke-width="1.2"/>`;
+    for (let d = 0; d <= 180; d += 5) { const L = d % 10 ? 8 : 14, x1 = O[0] + R0*Math.cos(rad(d)), y1 = O[1] - R0*Math.sin(rad(d)), x2 = O[0] + (R0-L)*Math.cos(rad(d)), y2 = O[1] - (R0-L)*Math.sin(rad(d));
+      h += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--acc)" stroke-width="1"/>`;
+      if (d % 20 === 0) { const tx = O[0] + (R0-26)*Math.cos(rad(d)), ty = O[1] - (R0-26)*Math.sin(rad(d)); h += `<text x="${tx}" y="${ty+4}" font-size="11" text-anchor="middle" fill="var(--acc)" transform="rotate(${a1} ${tx} ${ty})">${d}</text>`; } }
+    h += `</g>`;
+    const m1 = c - a1, m2 = a2 - c;
+    [[a1, a1 + m1, "var(--acc3)", 46], [c, a2, "var(--acc2)", 58]].forEach(([s, e, col, r]) => { const p1 = uc(s, r), p2 = uc(e, r);
+      h += `<path d="M${O[0]},${O[1]} L${p1[0]},${p1[1]} A${r},${r} 0 0 0 ${p2[0]},${p2[1]} Z" fill="${col}" opacity=".28"/>`; });
+    if (insa) { const r1 = 120, P1 = uc(a1, r1), P2 = uc(a2, r1), Q = cemberKesisim({m:P1, r:110}, {m:P2, r:110}).sort((x,y)=>uz(y,O)-uz(x,O))[0];
+      h += `<path d="M${uc(a1-8,r1)[0]},${uc(a1-8,r1)[1]} A${r1},${r1} 0 0 0 ${uc(a2+8,r1)[0]},${uc(a2+8,r1)[1]}" fill="none" stroke="var(--muted)" stroke-dasharray="4 4"/>`;
+      if (Q) h += `<circle cx="${P1[0]}" cy="${P1[1]}" r="110" fill="none" stroke="var(--muted)" stroke-dasharray="3 5" opacity=".6"/><circle cx="${P2[0]}" cy="${P2[1]}" r="110" fill="none" stroke="var(--muted)" stroke-dasharray="3 5" opacity=".6"/><circle cx="${Q[0]}" cy="${Q[1]}" r="5" fill="var(--bad)"/>`; }
+    [[a1,"A"],[a2,"B"]].forEach(([a,t]) => { const e = uc(a, 290), l = uc(a, 300); h += `<line x1="${O[0]}" y1="${O[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--ink)" stroke-width="3"/><text x="${l[0]}" y="${l[1]}" font-size="17" font-weight="700">${t}</text>`; });
+    const ce = uc(c, 250); h += `<line x1="${O[0]}" y1="${O[1]}" x2="${ce[0]}" y2="${ce[1]}" stroke="var(--acc2)" stroke-width="3"/><circle cx="${ce[0]}" cy="${ce[1]}" r="11" fill="var(--acc2)" stroke="#fff" stroke-width="2" style="cursor:grab"/><text x="${ce[0]+14}" y="${ce[1]-10}" font-size="17" font-weight="700">C</text>`;
+    if (bitti) { const K = uc(c, 170), d1 = [K, uc(a1, 170*Math.cos(rad(c-a1)))], d2 = [K, uc(a2, 170*Math.cos(rad(a2-c)))];
+      [d1, d2].forEach(([s,e]) => h += `<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--acc3)" stroke-width="2" stroke-dasharray="5 4"/>`);
+      h += `<circle cx="${K[0]}" cy="${K[1]}" r="5" fill="var(--acc3)"/><text x="${K[0]+8}" y="${K[1]+18}" font-size="15" font-weight="700">K</text>`; }
+    h += `<circle cx="${O[0]}" cy="${O[1]}" r="5" fill="var(--ink)"/><text x="${O[0]-8}" y="${O[1]+24}" font-size="17" font-weight="700">O</text>`;
+    svg.innerHTML = h;
+    p.querySelector(".o36").innerHTML = `<span>m(AOC) = <b style="color:var(--acc3)">${m1.toFixed(1)}°</b></span><span>m(COB) = <b style="color:var(--acc2)">${m2.toFixed(1)}°</b></span><span class="score">m(AOB) = ${(a2-a1).toFixed(0)}°</span>`; }
+  svg.addEventListener("pointerdown", e => { const q = svgNokta(svg, e); if (uz(q, uc(c, 250)) < 26) { surt = true; svg.setPointerCapture(e.pointerId); } });
+  svg.addEventListener("pointermove", e => { if (!surt) return; const q = svgNokta(svg, e); let a = der(Math.atan2(O[1]-q[1], q[0]-O[0])); if (a < -90) a += 360;
+    a = Math.max(a1 + 1, Math.min(a2 - 1, a)); c = yasla ? Math.round(a) : Math.round(a*10)/10; ciz(); });
+  svg.addEventListener("pointerup", () => { surt = false; });
+  p.querySelector(".ys").onclick = e => { yasla = !yasla; e.target.setAttribute("aria-pressed", yasla); };
+  p.querySelector(".yeni").onclick = yeni;
+  p.querySelector(".dg").onclick = () => ciz(true);
+  p.querySelector(".k").onclick = () => { const fark = Math.abs((c - a1) - (a2 - c));
+    if (fark < 0.6) { bitti = true; ciz(); p.querySelector(".dg").hidden = false;
+      fb(f, true, `Açıortayı buldunuz: iki açı da ${((a2-a1)/2).toFixed(1)}°. OC ışını açının simetri doğrusudur. "Pergelle doğrula" ile aynı ışının pergelle de elde edildiğini görünüz.`);
+      yAcikla(p.querySelector(".x36"), `Tahmininiz: <b>${["eşittir","yakın kola daha az","farklıdır"][tah]}</b>. Yeşil kesikli çizgiler K noktasından kollara çizilen dik uzaklıklardır. Ne gözlemliyorsunuz?`,
+        ["İki uzaklık eşittir; açıortay üzerindeki her nokta kollara eşit uzaklıktadır.","A koluna olan uzaklık her zaman daha kısadır.","Uzaklıklar yalnız O noktasında eşittir."], 0,
+        "Doğru. Açıortay açının simetri doğrusudur; üzerindeki her noktanın iki kola uzaklığı eşittir. İnşada pergel kullanmamızın nedeni de budur."); }
+    else fb(f, false, `İki açı arasında ${fark.toFixed(1)}° fark var. Büyük olan açıya doğru C'yi biraz daha çekiniz. İpucu: m(AOB)'nin yarısı ${((a2-a1)/2).toFixed(1)}°'dir.`); };
+}
+
+const ACT = [
+ ["Yansıma", [
+  ["Noktayı yansıt: dikey doğru","a",reflectPoint("v")],["Noktayı yansıt: yatay doğru","b",reflectPoint("h")],["Noktayı yansıt: eğik doğru (1)","b",reflectPoint("d")],["Noktayı yansıt: eğik doğru (2)","b",reflectPoint("a")],
+  ["Ayna çizimi","a",mirrorDraw],["Katla, kes, aç","a",foldUnfold],["Dik ortalama","ç",perpExplorer],
+  ["Üçgeni yansıt","b",reflectShape("tri_v","Mavi üçgenin kesikli doğruya göre yansımasını oluşturunuz.")],["Dörtgeni yansıt","b",reflectShape("quad_h","Mavi dörtgenin kesikli doğruya göre yansımasını oluşturunuz.")],
+  ["Kenarı doğru üzerinde olan üçgen","b",reflectShape("touch","Üçgenin bir kenarı simetri doğrusu üzerindedir.")],["Doğruya uzak şekil","b",reflectShape("far","Şekil simetri doğrusundan ayrık konumdadır.")],
+  ["L biçimli şekil","b",reflectShape("Lsh","Altı köşeli şeklin kesikli doğruya göre yansımasını oluşturunuz.")],["Eğik doğruda yansıma (1)","b",reflectShape("diag","Üçgenin eğik doğruya göre yansımasını oluşturunuz.")],
+  ["Eğik doğruda yansıma (2)","b",reflectShape("anti","Üçgenin eğik doğruya göre yansımasını oluşturunuz.")] ]],
+ ["Simetri doğrusu ve önermeler", [
+  ["Simetri doğrusunu bul (dikey, yatay)","c",findLine([0,1,3])],["Simetri doğrusunu bul (eğik)","c",findLine([2,4])],["Simetrik mi, sadece eş mi?","d",isSym(["yes","no","slide"])],["Kaydırılmış görüntü","d",isSym(["slide","yes"])],
+  ["Harflerin simetri doğruları","d",letters],["Kaç simetri doğrusu var?","d",countLines],["Doğru mu, yanlış mı?","ç",statements],["Üçgenden yeni şekil","ç",triQuad],["Kilim motifi","b",motif] ]],
+ ["Orta dikme ve açıortay", [
+  ["Eş çemberler ne zaman kesişir?","a",circleGap],["Orta dikme inşası","b",constructPB],["Orta dikmenin özelliği","b",pbProperty],["Açıyı katla","a",foldAngle],["Açıortay inşası","b",constructAB],
+  ["Açıortayın özelliği","b",abProperty],["Hatalı adım: orta dikme","c",wrongStep("pb")],["Hatalı adım: açıortay","c",wrongStep("ab")],["Daire diliminin simetri doğrusu","c",sector],["İnşa adımlarını sırala","b",orderSteps],["İnşa mı, ölçme mi?","c",toolsQuiz],["Pergel ve cetvelle serbest inşa","b",freeCompass],["Açı ölçerle açıortay","b",protractorBisector] ]]
+];
+const FLAT = []; ACT.forEach((g,gi)=>g[1].forEach(a=>FLAT.push([...a, gi])));
+const idx = document.getElementById("index"), panel = document.getElementById("panel");
+let n = 0; idx.innerHTML = ACT.map(g=>`<div class="grp"><h3>${g[0]}</h3><ol class="index">${g[1].map(a=>{ n++; return `<li><a role="button" tabindex="0" style="cursor:pointer" data-i="${n-1}"><span class="n">${n}</span><span class="t">${a[0]}<span class="s">${FLAT[n-1][3] === 2 ? "MAT.7.3.2" : "MAT.7.3.1"}.${a[1]}</span></span></a></li>`; }).join("")}</ol></div>`).join("");
+function show(i){ const a = FLAT[i];
+  panel.innerHTML = `<div class="ph"><h2>${i+1}. ${a[0]}</h2><span class="code">${a[3] === 2 ? "MAT.7.3.2" : "MAT.7.3.1"}.${a[1]}</span></div><div id="act"></div>`;
+  a[2](panel.querySelector("#act")); idx.querySelectorAll("a").forEach(x=>x.setAttribute("aria-current", +x.dataset.i === i));
+  try { localStorage.setItem("ya-last", i); } catch(e) {} }
+function route(){ const m = location.hash.match(/^#e(\d+)$/); let i = m ? +m[1]-1 : null;
+  if (i === null || !(i >= 0 && i < FLAT.length)) { i = 0; try { const s = localStorage.getItem("ya-last"); if (s !== null && +s >= 0 && +s < FLAT.length) i = +s; } catch(e) {} }
+  show(i); }
+idx.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.closest("a")) { e.preventDefault(); e.target.closest("a").click(); } });
+idx.addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); try { history.replaceState(null, "", "#e" + (+a.dataset.i + 1)); } catch (_) {} show(+a.dataset.i); panel.scrollIntoView({behavior:"smooth", block:"start"}); });
+window.addEventListener("hashchange", route); route();
+window.__N__ = FLAT.length;
+})();
+</script>
+<!--KABUK-->
+<button class="kb-dugme" id="kbDugme" aria-label="Ayarlar ve yardım" aria-expanded="false" aria-controls="kbMenu">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>
+ <span class="kb-sessiz" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></span>
+</button>
+<div class="kb-menu" id="kbMenu" role="dialog" aria-label="Ayarlar ve yardım" hidden>
+ <h4>Ayarlar ve Yardım</h4>
+ <div class="kb-yuvarlak">
+  <button id="kbSes" aria-pressed="true"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="off" d="M16 9l5 6M21 9l-5 6" style="display:none"/></svg></b><span id="kbSesY">Ses açık</span></button>
+  <button id="kbYon" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></b><span>Yönerge</span></button>
+  <button id="kbOku" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 11v2"/></svg></b><span>Sesli oku</span></button>
+ </div>
+ <h5>Erişilebilirlik</h5>
+ <div class="kb-satir"><span>Yazı boyutu</span><div class="kb-seg" id="kbBoy"><button data-v="0" aria-label="Normal">A</button><button data-v="1" aria-label="Büyük">A+</button><button data-v="2" aria-label="Çok büyük">A++</button></div></div>
+ <div class="kb-satir"><span>Yüksek karşıtlık</span><button class="kb-anahtar" role="switch" data-k="karsit" aria-label="Yüksek karşıtlık"></button></div>
+ <div class="kb-satir"><span>Rahat okuma (geniş aralık)</span><button class="kb-anahtar" role="switch" data-k="rahat" aria-label="Rahat okuma"></button></div>
+ <div class="kb-satir"><span>Hareketi azalt</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azalt"></button></div>
+ <div class="kb-satir"><span>Tema</span><div class="kb-seg" id="kbTema"><button data-v="">Oto</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
+ <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dön</button></div>
+</div>
+<dialog class="kb-yonerge" id="kbYonerge" aria-labelledby="kbYB"><header id="kbYB">Yönerge</header><div class="ic" id="kbYIc"></div>
+ <footer><button class="ghost" id="kbYOku">Sesli oku</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
+<div class="kb-gizli" aria-live="polite" id="kbDuyuru"></div>
+<script>
+(function(){
+const D=document, H=D.documentElement, $=s=>D.querySelector(s);
+const ANAHTAR="kb-ayar", ILR="kb-ilerleme:"+(D.title||location.pathname);
+const oku=(k,v)=>{try{const s=localStorage.getItem(k);return s===null?v:JSON.parse(s)}catch(e){return v}};
+const yaz=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const VARS={ses:true,boy:0,karsit:false,rahat:false,azhareket:matchMedia("(prefers-reduced-motion: reduce)").matches,tema:""};
+let A=Object.assign({},VARS,oku(ANAHTAR,{}));
+
+/* --- Düzen: başlık bandı, yan liste, gezinti --- */
+const wrap=$(".wrap");
+if(wrap){
+  const h1=wrap.querySelector("h1"); let ust=h1; while(ust&&ust.parentElement!==wrap)ust=ust.parentElement;
+  let hero;
+  if(ust&&ust!==h1&&!ust.matches(".eyebrow,.lead")){ hero=ust; hero.classList.add("kb-hero"); wrap.prepend(hero); }
+  else { hero=D.createElement("header"); hero.className="kb-hero";
+    [...wrap.children].filter(e=>e.matches(".eyebrow,h1,.lead")).forEach(e=>hero.appendChild(e)); wrap.prepend(hero); }
+  const idx=$("#index"), pan=$("#panel");
+  if(idx&&pan){
+    const d=D.createElement("div"); d.className="kb-duzen";
+    const yan=D.createElement("aside"); yan.className="kb-yan"; yan.setAttribute("aria-label","Etkinlik listesi");
+    const ana=D.createElement("main");
+    pan.before(d); yan.appendChild(idx); ana.appendChild(pan); d.append(yan,ana);
+    const g=D.createElement("nav"); g.className="kb-gezinti"; g.setAttribute("aria-label","Etkinlikler arası geçiş");
+    g.innerHTML='<button class="ghost" id="kbOnce">‹ Önceki</button><span id="kbSira"></span><button class="primary" id="kbSonra">Sonraki ›</button>';
+    ana.appendChild(g);
+    const pr=D.createElement("div"); pr.className="kb-ilerleme"; pr.innerHTML='<div class="kb-bar"><i id="kbBar"></i></div><span id="kbSay"></span>'; hero.appendChild(pr);
+  }
+}
+const linkler=()=>[...D.querySelectorAll("#index a[data-i]")];
+const simdiki=()=>{const a=$('#index a[aria-current="true"]');return a?+a.dataset.i:-1};
+let tamam=new Set(oku(ILR,[]));
+function ilerleme(){const L=linkler(); if(!L.length)return;
+  L.forEach(a=>a.classList.toggle("kb-tamam",tamam.has(+a.dataset.i)));
+  const n=L.filter(a=>tamam.has(+a.dataset.i)).length;
+  const b=$("#kbBar"); if(b)b.style.width=(100*n/L.length)+"%";
+  const s=$("#kbSay"); if(s)s.textContent=n+" / "+L.length+" etkinlik tamamlandı";
+  const i=simdiki(), r=$("#kbSira"); if(r)r.textContent=(i+1)+" / "+L.length;
+  const o=$("#kbOnce"), z=$("#kbSonra"); if(o)o.disabled=i<=0; if(z)z.disabled=i>=L.length-1;}
+let gecis=0;
+function git(d){const L=linkler(), i=simdiki()+d; if(L[i]){gecis=Date.now(); L[i].click();}}
+$("#kbOnce")&&($("#kbOnce").onclick=()=>git(-1)); $("#kbSonra")&&($("#kbSonra").onclick=()=>git(1));
+const idx=$("#index"); if(idx){ idx.addEventListener("click",()=>{gecis=Date.now()},true);
+  new MutationObserver(()=>setTimeout(ilerleme,0)).observe(idx,{subtree:true,attributes:true,attributeFilter:["aria-current"]}); }
+window.addEventListener("hashchange",()=>{gecis=Date.now()});
+setTimeout(ilerleme,50);
+
+/* --- Ses --- */
+let ac=null;
+function ton(f,t0,sure,tip,hacim){const c=ac;const o=c.createOscillator(),g=c.createGain();o.type=tip;o.frequency.setValueAtTime(f[0],c.currentTime+t0);
+  if(f[1])o.frequency.exponentialRampToValueAtTime(f[1],c.currentTime+t0+sure);
+  g.gain.setValueAtTime(0.0001,c.currentTime+t0);g.gain.exponentialRampToValueAtTime(hacim,c.currentTime+t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+t0+sure);
+  o.connect(g).connect(c.destination);o.start(c.currentTime+t0);o.stop(c.currentTime+t0+sure+0.02);}
+function sesCal(tur){ if(!A.ses)return; try{ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended")ac.resume();
+  if(tur==="ok"){ton([659],0,.13,"sine",.22);ton([880],.11,.16,"sine",.22);ton([1319],.22,.22,"sine",.12);}
+  else if(tur==="no"){ton([260,180],0,.28,"triangle",.2);}
+  else ton([1200],0,.04,"sine",.06); }catch(e){} }
+function kutla(el){ if(A.azhareket||!el)return; const r=el.getBoundingClientRect(); const k=D.createElement("div"); k.className="kb-kutlama";
+  k.style.left=(r.left+Math.min(60,r.width/2))+"px"; k.style.top=(r.top+r.height/2)+"px";
+  const renk=["var(--p1)","var(--p2)","var(--p3)","var(--p4)","var(--p5)","var(--p6)"];
+  for(let i=0;i<18;i++){const p=D.createElement("i");const a=Math.random()*Math.PI*2,m=50+Math.random()*70;
+    p.style.background=renk[i%6];p.style.setProperty("--x",Math.cos(a)*m+"px");p.style.setProperty("--y",(Math.sin(a)*m-30)+"px");k.appendChild(p);}
+  D.body.appendChild(k); setTimeout(()=>k.remove(),900); }
+
+/* Doğru / yanlış geri bildirimini yakala: etkinlik kodu fb(...) ya da .ok/.no sınıfı kullanır */
+let sonEylem=0; ["click","keydown"].forEach(t=>D.addEventListener(t,e=>{ if(t==="click"||e.key==="Enter"||e.key===" ")sonEylem=Date.now(); },true));
+let kuyruk=[], zam=null;
+const has=(s,t)=>(" "+(s||"")+" ").includes(" "+t+" ");
+new MutationObserver(ms=>{ const now=Date.now(); if(now-sonEylem>900||now-gecis<450)return;
+  ms.forEach(m=>{ const el=m.target; if(!(el instanceof Element)||el.closest(".kb-menu,.kb-yonerge,#index"))return;
+    const fb=el.classList.contains("fb"), ok=el.classList.contains("ok"), no=el.classList.contains("no");
+    if(!ok&&!no)return; if(!fb&&((ok&&has(m.oldValue,"ok"))||(no&&has(m.oldValue,"no"))))return;
+    kuyruk.push({el,fb,ok}); });
+  if(kuyruk.length&&!zam)zam=setTimeout(()=>{ const f=kuyruk.filter(x=>x.fb).pop(); let ok, el;
+      if(f){ok=f.ok;el=f.el}else{ok=!kuyruk.some(x=>!x.ok);el=kuyruk[kuyruk.length-1].el}
+      kuyruk=[];zam=null; sesCal(ok?"ok":"no");
+      if(ok){ kutla(el); const i=simdiki(); if(i>=0&&(f||!$("#panel .fb"))){tamam.add(i);yaz(ILR,[...tamam]);ilerleme();} }
+      const d=$("#kbDuyuru"); if(d)d.textContent=ok?"Doğru.":"Yeniden deneyiniz."; },110);
+}).observe(D.body,{subtree:true,attributes:true,attributeFilter:["class"],attributeOldValue:true});
+
+/* --- Ayarları uygula --- */
+function uygula(){ H.classList.toggle("kb-sesyok",!A.ses);
+  ["karsit","rahat","azhareket"].forEach(k=>H.classList.toggle("kb-"+k,!!A[k]));
+  H.classList.toggle("kb-y1",A.boy===1); H.classList.toggle("kb-y2",A.boy===2);
+  if(A.tema)H.setAttribute("data-theme",A.tema); else H.removeAttribute("data-theme");
+  const s=$("#kbSes"); s.setAttribute("aria-pressed",A.ses); $("#kbSesY").textContent=A.ses?"Ses açık":"Ses kapalı";
+  s.querySelector(".on").style.display=A.ses?"":"none"; s.querySelector(".off").style.display=A.ses?"none":"";
+  D.querySelectorAll(".kb-anahtar").forEach(b=>b.setAttribute("aria-checked",!!A[b.dataset.k]));
+  D.querySelectorAll("#kbBoy button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===A.boy));
+  D.querySelectorAll("#kbTema button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===A.tema));
+  yaz(ANAHTAR,A); }
+uygula();
+const dug=$("#kbDugme"), men=$("#kbMenu");
+function menu(ac_){ men.hidden=!ac_; dug.setAttribute("aria-expanded",ac_); if(ac_)men.querySelector("button").focus(); }
+dug.onclick=()=>menu(men.hidden);
+D.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!men.hidden){menu(false);dug.focus();} });
+D.addEventListener("click",e=>{ if(!men.hidden&&!men.contains(e.target)&&!dug.contains(e.target))menu(false); });
+$("#kbSes").onclick=()=>{A.ses=!A.ses;uygula();sesCal("ok");};
+D.querySelectorAll(".kb-anahtar").forEach(b=>b.onclick=()=>{A[b.dataset.k]=!A[b.dataset.k];uygula();});
+D.querySelectorAll("#kbBoy button").forEach(b=>b.onclick=()=>{A.boy=+b.dataset.v;uygula();});
+D.querySelectorAll("#kbTema button").forEach(b=>b.onclick=()=>{A.tema=b.dataset.v;uygula();});
+$("#kbSifir").onclick=()=>{A=Object.assign({},VARS);uygula();};
+const tam=$("#kbTam"); if(!D.fullscreenEnabled)tam.hidden=true;
+tam.onclick=()=>{ try{ D.fullscreenElement?D.exitFullscreen():H.requestFullscreen(); }catch(e){} };
+
+/* --- Yönerge ve sesli okuma --- */
+const metin=el=>{ if(!el)return ""; const c=el.cloneNode(true); c.querySelectorAll(".frac").forEach(f=>{const s=f.querySelectorAll("span"); if(s.length>1)f.replaceWith(s[0].textContent+"/"+s[1].textContent);}); return c.textContent.replace(/\s+/g," ").trim(); };
+const PAYDA={2:"ikide",3:"üçte",4:"dörtte",5:"beşte",6:"altıda",7:"yedide",8:"sekizde",9:"dokuzda",10:"onda",12:"on ikide",20:"yirmide",100:"yüzde"};
+const okunus=t=>String(t).replace(/(−|-)?(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?"eksi ":"")+(PAYDA[b]||b+"'te")+" "+a).replace(/\|([^|]+)\|/g,"$1'in mutlak değeri").replace(/(^|[\s(])−\s?(\d)/g,"$1eksi $2").replace(/°C/g," derece");
+const kesH=t=>String(t).replace(/(−|-)?(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?"−":"")+'<span class="frac"><span>'+a+'</span><span>'+b+'</span></span>');
+const sesPuan=v=>(/natural|online|neural/i.test(v.name)?4:/google/i.test(v.name)?3:/enhanced|premium|geliş|siri/i.test(v.name)?3:1);
+function yonergeMetni(){ const p=$("#panel")||D.body, h=p.querySelector("h2"), g=[];
+  p.querySelectorAll(".intro,.task").forEach(e=>{const t=metin(e); if(t&&!g.includes(t)&&g.length<2)g.push(t);});
+  if(!g.length&&$(".lead"))g.push(metin($(".lead")));
+  return {baslik:metin(h)||D.title, gorev:g}; }
+function yonergeAc(){ const y=yonergeMetni(); $("#kbYB").textContent=y.baslik;
+  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol et</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
+  $("#kbYIc .gorev").innerHTML=kesH(y.gorev.join(" ").replace(/[<>&]/g,""));
+  const d=$("#kbYonerge"); menu(false); if(d.showModal)d.showModal(); else d.setAttribute("open",""); }
+$("#kbYon").onclick=yonergeAc;
+$("#kbYKapat").onclick=()=>{ const d=$("#kbYonerge"); speechSynthesis&&speechSynthesis.cancel(); d.close?d.close():d.removeAttribute("open"); };
+const konusabilir="speechSynthesis" in window;
+function sesliOku(t){ if(!konusabilir)return; speechSynthesis.cancel();
+  const v=speechSynthesis.getVoices().filter(v=>/^tr/i.test(v.lang)).sort((a,b)=>sesPuan(b)-sesPuan(a))[0];
+  (okunus(t).match(/[^.!?]+[.!?]?/g)||[t]).forEach(c=>{ const u=new SpeechSynthesisUtterance(c.trim()); u.lang="tr-TR"; u.rate=.95; if(v)u.voice=v; speechSynthesis.speak(u); }); }
+function okuPanel(){ const y=yonergeMetni(); sesliOku(y.baslik+". "+y.gorev.join(" ")); }
+if(!konusabilir){ $("#kbOku").hidden=true; $("#kbYOku").hidden=true; }
+$("#kbOku").onclick=()=>{ const b=$("#kbOku"); if(b.getAttribute("aria-pressed")==="true"){speechSynthesis.cancel();b.setAttribute("aria-pressed","false");return;}
+  b.setAttribute("aria-pressed","true"); okuPanel(); const t=setInterval(()=>{ if(!speechSynthesis.speaking){b.setAttribute("aria-pressed","false");clearInterval(t);} },400); };
+$("#kbYOku").onclick=()=>sesliOku(metin($("#kbYB"))+". "+metin($("#kbYIc")));
+})();
+</script>
+<!--/KABUK-->
+
+</body></html>
