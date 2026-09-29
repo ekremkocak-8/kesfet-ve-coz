@@ -1,0 +1,1546 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}html,body{margin:0;padding:0}body{font:15px Arimo,Arial,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Sayılar Atölyesi 7</title>
+<script>document.documentElement.lang='tr'</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Source+Sans+3:wght@400;600;700&display=swap&subset=latin-ext" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap&subset=latin-ext" rel="stylesheet">
+<style id="yazi-tipi">body,body *{font-family:Arimo,Arial,"Liberation Sans",sans-serif!important}body{font-variant-numeric:lining-nums}table,table *,.frac,.frac *{font-variant-numeric:lining-nums tabular-nums}:is(.ok,.no,.dogru,.yanlis,.ev,.hy):not(.fb):not(.dyr){border-width:3px!important}.fb.ok,.fb.no{border-left-width:6px!important}</style>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1c2433; --muted:#5b6478; --line:#d6ddec; --soft:#eef3fc;
+  --acc:#2451b7; --acc2:#d0700f; --acc3:#23875c; --bad:#c0392b; --grid:rgba(36,81,183,.06); --onacc:#fff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ color-scheme:dark;
+    --bg:#10141d; --card:#181e2b; --ink:#e8edf7; --muted:#9ba6bd; --line:#2c3548; --soft:#1f2738;
+    --acc:#7ea2f0; --acc2:#f5a04a; --acc3:#4cc491; --bad:#ef6b5c; --grid:rgba(126,162,240,.07); --onacc:#10141d; }
+}
+:root[data-theme="dark"]{ color-scheme:dark;
+  --bg:#10141d; --card:#181e2b; --ink:#e8edf7; --muted:#9ba6bd; --line:#2c3548; --soft:#1f2738;
+  --acc:#7ea2f0; --acc2:#f5a04a; --acc3:#4cc491; --bad:#ef6b5c; --grid:rgba(126,162,240,.07); --onacc:#10141d; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:18px 48px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);font-weight:700}
+h1{font-family:Bitter,Georgia,serif;font-weight:800;font-size:clamp(26px,4vw,34px);margin:2px 0 6px;color:var(--acc);line-height:1.1;text-wrap:balance}
+h2{font-family:Bitter,Georgia,serif;font-weight:800;font-size:22px;margin:0;line-height:1.2;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 16px;max-width:68ch}
+.index{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:16px;padding:0;list-style:none}
+.index a{display:flex;gap:8px;align-items:flex-start;text-decoration:none;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:4px;padding:8px 10px;min-height:58px}
+.index a:hover{border-color:var(--acc)}
+.index a[aria-current="true"]{border-color:var(--acc);background:var(--soft)}
+.index .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:var(--onacc);font-weight:700;font-size:14px}
+.index .t{font-weight:600;font-size:15px;line-height:1.25}
+.index .s{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.ph{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.code{font-size:12.5px;font-weight:700;color:var(--acc3);letter-spacing:.04em}
+.intro{color:var(--muted);margin:4px 0 12px;max-width:72ch}
+.scroll{overflow-x:auto;contain:inline-size;max-width:100%}
+#panel,#act{min-width:0}
+svg{display:block;user-select:none;touch-action:manipulation}
+svg text{font-family:"Source Sans 3",sans-serif}
+svg text:not([fill]):not([style*="fill"]){fill:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:10px}
+.primary{font:inherit;font-weight:700;background:var(--acc);color:var(--onacc);border:0;padding:8px 16px;border-radius:4px;cursor:pointer}
+.ghost{font:inherit;background:var(--card);color:var(--ink);border:1.5px solid var(--line);padding:7px 14px;border-radius:4px;cursor:pointer}
+.ghost[aria-pressed="true"]{border-color:var(--acc);background:var(--soft);font-weight:700}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+input.ans{font:inherit;font-size:18px;width:110px;padding:5px 8px;border:1.5px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums}
+.fb{border-radius:4px;padding:9px 12px;margin-top:10px}
+.fb.ok{background:color-mix(in srgb,var(--acc3) 16%,transparent)} .fb.no{background:color-mix(in srgb,var(--bad) 14%,transparent)} .fb.bilgi{background:var(--soft)}
+.task{font-size:18px;margin:0 0 8px}
+.task b{color:var(--acc2)}
+.score{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 2px;font-weight:700}
+.frac span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.cardi{border:1.5px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--card)}
+.cardi.ok{border-color:var(--acc3)} .cardi.no{border-color:var(--bad)}
+.cardi p{margin:0 0 6px;font-weight:600}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:4px;padding:3px 9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+table.t{border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.t th,table.t td{border:1px solid var(--line);padding:6px 10px;text-align:center}
+table.t th{background:var(--soft)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.qrnote{font-size:13px;color:var(--muted);margin-top:14px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.kg{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;gap:3px;margin:0 4px}
+.kg i{display:block;width:100%;height:2px;background:var(--ink);border-radius:2px}
+.kg input{width:70px;padding:3px 6px;font-size:17px}
+.kgi{display:inline-flex;align-items:center;gap:6px;margin:0 4px}
+.kgo{display:inline-flex;align-items:center;gap:6px;margin:0 4px}.kgo .virg{font-size:26px;line-height:1;align-self:flex-end;margin-bottom:6px}
+.adim3{margin:10px 0 4px;font-size:1.02rem;line-height:1.5}.adim3 b{color:var(--acc)}
+.isr{display:inline-flex;flex-direction:column;gap:3px}
+.isr button{font:inherit;font-weight:800;font-size:18px;width:36px;height:30px;border-radius:8px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;line-height:1}
+.isr button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#fff}
+.asama{border:2px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0;background:var(--card)}
+.bloklar{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.butun{display:flex;gap:3px;border:3px solid var(--acc);border-radius:8px;padding:3px;background:var(--card);min-width:150px}
+.parca{flex:1;min-width:14px;height:40px;border:1.5px solid var(--line);border-radius:4px;background:var(--card);cursor:pointer;padding:0}
+.parca.dolu{background:var(--acc3);border-color:var(--acc3)}
+.parca:hover{border-color:var(--acc2)}
+.zbar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0}
+.zbar i{display:block;height:100%;width:100%;background:var(--acc3);transition:width 1s linear}
+.secenek4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.secenek4 button.ok{border-color:var(--acc3);background:color-mix(in srgb,var(--acc3) 16%,var(--card))}
+.secenek4 button.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--card))}
+.parla{animation:parla .4s 3}
+@keyframes parla{50%{outline:4px solid var(--acc3);outline-offset:2px}}
+@media (max-width:600px){.secenek4{grid-template-columns:1fr 1fr}}
+.tah,.acik{border:2px dashed var(--acc2);border-radius:12px;padding:10px 14px;margin:6px 0 10px;background:color-mix(in srgb,var(--acc2) 7%,var(--card))}
+.acik{border-color:var(--acc3);background:color-mix(in srgb,var(--acc3) 7%,var(--card))}
+.tah p,.acik p{margin:4px 0 8px}
+.adimlbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--acc2)}
+.acik .adimlbl{color:var(--acc3)}
+.tahnot{font-size:14px;color:var(--muted)}
+.seg button:disabled{cursor:default;opacity:.85}
+/* yönerge kartı (Ne? Nasıl? Ne zaman biter?) */
+.yon{border:2px solid color-mix(in srgb,var(--acc) 30%,var(--line));border-radius:12px;padding:10px 16px;margin:6px 0 14px;background:color-mix(in srgb,var(--acc) 5%,var(--card))}
+.yon .intro{margin:0 0 4px;color:var(--ink)}
+.yon ol{margin:4px 0;padding-left:22px} .yon li{margin:3px 0}
+.yon .bitis{margin:4px 0 0;color:var(--muted);font-size:15px}
+/* aşama çerçeveleri */
+.asm{border:2px solid var(--line);border-radius:12px;margin:10px 0;background:var(--card);overflow:hidden}
+.asm>header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--soft);font-weight:700;flex-wrap:wrap}
+.asm .asn{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:var(--onacc);font-weight:800;flex:none}
+.asm .asi{padding:10px 14px 12px}
+.asm .asi>p:first-child{margin-top:0}
+.asm .kilit{padding:6px 14px 8px;color:var(--muted);font-size:15px}
+.asm.kilitli{opacity:.55} .asm.kilitli .asi{display:none} .asm:not(.kilitli) .kilit{display:none}
+.asm.etkin{border-color:var(--acc)}
+.asm.tamam{border-color:var(--acc3)} .asm.tamam .asn{background:var(--acc3)}
+.asm.tamam>header::after{content:"✓ Tamamlandı";margin-left:auto;color:var(--acc3);font-size:14px}
+.tah.kucuk{padding:6px 12px;margin:0 0 10px;border-width:1.5px}
+.tah.kucuk p{margin:2px 0 6px;font-size:15px}
+.tah.kucuk .tahnot{margin:6px 0 0}
+.liste{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;align-items:center}
+.liste>span{border:1.5px solid var(--acc3);border-radius:10px;padding:3px 10px;background:color-mix(in srgb,var(--acc3) 10%,var(--card));font-weight:600}
+.adim{display:inline-flex;align-items:center;gap:6px}
+.adim button{font:inherit;font-weight:800;font-size:18px;width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.adim b{min-width:30px;text-align:center;font-size:21px}
+.kurallar{margin:6px 0;padding-left:22px;text-align:left} .kurallar li{margin:4px 0}
+.ornek{border:1.5px dashed var(--acc);border-radius:12px;padding:8px 12px;margin:8px 0;text-align:left}
+.durum{display:flex;flex-wrap:wrap;gap:8px 18px;font-weight:700;font-size:17px;align-items:center}
+.durum .seri i{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--acc3);margin-left:3px;vertical-align:-1px}
+.durum .seri i.d{background:var(--acc3)}
+/* dikey seçenekler (açıklama soruları) */
+.seg.dikey{flex-direction:column;align-items:stretch}
+.seg.dikey button{text-align:left;font-size:16px;padding:7px 12px}
+/* durum kutucukları: ayrı bilgiler "·" ile değil ayrı kutularla yazılır */
+.dzs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.dz{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:10px;padding:4px 12px;background:var(--card);font-size:16px}
+.dz.ok{border-color:var(--acc3);color:var(--acc3);font-weight:700}
+.skor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 8px}
+.skor>div{border:2px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--card);text-align:center}
+.skor small{display:block;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.04em}
+.skor b{font-size:22px;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.skor{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.seviyeler{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.seviyeler button{font:inherit;text-align:left;display:flex;flex-direction:column;justify-content:flex-start;border:2px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--card);color:var(--ink);cursor:pointer}
+.seviyeler button[aria-pressed="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,var(--card))}
+.seviyeler button b{display:block;font-size:18px;margin-bottom:2px}
+.seviyeler ul{margin:2px 0 0;padding-left:18px;font-size:15px} .seviyeler li{margin:1px 0}
+@media (max-width:640px){.seviyeler{grid-template-columns:1fr}}
+.ctab td,.ctab th{font-size:15px}
+
+/* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
+:root{--kb1:#5f3dc4;--kb2:#1c7ed6;--acc:#5f3dc4;--kbr:12px;
+  --p1:#e03131;--p2:#f08c00;--p3:#2f9e44;--p4:#1c7ed6;--p5:#7048e8;--p6:#d6336c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--acc:#9775fa}}
+:root[data-theme="dark"]{--acc:#9775fa}
+body{background:var(--bg);background-image:radial-gradient(circle at 12% -10%,color-mix(in srgb,var(--kb1) 14%,transparent),transparent 45%),radial-gradient(circle at 100% 0,color-mix(in srgb,var(--kb2) 12%,transparent),transparent 40%);background-attachment:fixed}
+.wrap{max-width:1320px}
+.kb-hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 26px 20px;margin:4px 0 18px;color:#fff;
+  background:linear-gradient(125deg,var(--kb1),var(--kb2));box-shadow:0 10px 30px -14px color-mix(in srgb,var(--kb1) 70%,transparent)}
+.kb-hero::after{content:"+ − × ÷ = √ π Δ < >";position:absolute;right:-10px;bottom:-18px;font:800 64px/1 "Nunito","Segoe UI",system-ui,sans-serif;letter-spacing:.2em;color:rgba(255,255,255,.12);white-space:nowrap;pointer-events:none}
+.kb-hero .eyebrow{color:rgba(255,255,255,.88)}
+.kb-hero h1{color:#fff;font-size:clamp(28px,4.2vw,42px)}
+.kb-hero .lead{color:rgba(255,255,255,.92);margin-bottom:10px;max-width:80ch}
+.kb-ilerleme{position:relative;z-index:1;display:flex;align-items:center;gap:12px;font-weight:700;font-size:14px;max-width:460px}
+.kb-bar{flex:1;height:10px;border-radius:99px;background:rgba(255,255,255,.28);overflow:hidden}
+.kb-bar i{display:block;height:100%;width:0;border-radius:99px;background:#fff;transition:width .5s}
+.kb-duzen{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.kb-yan{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:4px;scrollbar-width:thin}
+.kb-yan .index{grid-template-columns:1fr;gap:6px}
+.kb-yan .grp h3{font:800 14px/1.2 "Nunito","Segoe UI",system-ui,sans-serif;margin:12px 2px 6px;color:var(--acc)}
+.kb-yan .grp:first-child h3{margin-top:0}
+.index a{border-radius:10px;min-height:0;transition:transform .15s,border-color .15s;border-width:2px}
+.index a:hover{transform:translateX(3px)}
+.index a[aria-current="true"]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card));box-shadow:0 4px 14px -8px var(--acc)}
+.index li:nth-child(6n+1) .n{background:var(--p1)} .index li:nth-child(6n+2) .n{background:var(--p2)}
+.index li:nth-child(6n+3) .n{background:var(--p3)} .index li:nth-child(6n+4) .n{background:var(--p4)}
+.index li:nth-child(6n+5) .n{background:var(--p5)} .index li:nth-child(6n+6) .n{background:var(--p6)}
+.index .n{color:#fff!important}
+.index a.kb-tamam .n{background:var(--acc3)!important}
+.index a.kb-tamam .n::after{content:"✓";position:absolute;font-size:15px}
+.index a.kb-tamam .n{font-size:0;position:relative}
+.panel{border-radius:16px;border:0;box-shadow:0 12px 34px -18px rgba(20,30,60,.35);padding:20px 22px 22px;position:relative;overflow:hidden}
+.panel::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--kb1),var(--kb2),var(--p2))}
+#panel h2{color:var(--acc);font-size:26px}
+.panel .code{background:color-mix(in srgb,var(--acc3) 14%,transparent);padding:2px 8px;border-radius:99px}
+.intro{font-size:17px}
+.task{font-size:19px}
+.primary{border-radius:99px;padding:9px 20px;background:linear-gradient(135deg,var(--kb1),var(--kb2));color:#fff;box-shadow:0 6px 14px -8px var(--kb1);transition:transform .12s}
+.primary:hover{transform:translateY(-1px)} .primary:active{transform:translateY(1px)}
+.ghost{border-radius:99px;border-width:2px}
+.fb{border-radius:12px;padding:11px 14px;font-weight:600;border-left:5px solid transparent}
+.fb.ok{border-left-color:var(--acc3)} .fb.no{border-left-color:var(--bad)}
+.cardi,.opts button,.mini button,.seg button{border-radius:10px}
+input.ans{border-radius:10px;border-width:2px}
+.kb-gezinti{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.kb-gezinti span{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.kb-duzen{grid-template-columns:1fr}.kb-yan{position:static;max-height:none}
+  .kb-yan .index{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.kb-hero{padding:18px 16px}.kb-hero::after{font-size:40px}}
+
+/* Tek düğme ve menü */
+.kb-dugme{position:fixed;top:14px;right:14px;z-index:60;width:56px;height:56px;border-radius:50%;border:3px solid #fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--kb1),var(--kb2));color:#fff;display:grid;place-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);transition:transform .15s}
+.kb-dugme:hover{transform:scale(1.06)} .kb-dugme svg{width:28px;height:28px}
+.kb-dugme[aria-expanded="true"]{transform:rotate(90deg)}
+.kb-dugme .kb-sessiz{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:var(--bad);border:2px solid #fff;display:none;place-items:center}
+.kb-dugme .kb-sessiz svg{width:12px;height:12px}
+html.kb-sesyok .kb-dugme .kb-sessiz{display:grid}
+.kb-menu{position:fixed;top:80px;right:14px;z-index:60;width:min(330px,calc(100vw - 28px));max-height:calc(100vh - 96px);overflow:auto;
+  background:var(--card);color:var(--ink);border-radius:18px;box-shadow:0 20px 50px -18px rgba(0,0,0,.5);border:1px solid var(--line);padding:16px}
+.kb-menu[hidden]{display:none}
+.kb-menu h4{margin:0 0 10px;font:800 16px/1.2 "Nunito","Segoe UI",system-ui,sans-serif;color:var(--acc)}
+.kb-menu h5{margin:14px 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.kb-yuvarlak{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.kb-yuvarlak button{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px}
+.kb-yuvarlak b{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:var(--soft);transition:.15s}
+.kb-yuvarlak svg{width:26px;height:26px}
+.kb-yuvarlak button[aria-pressed="true"] b{background:linear-gradient(135deg,var(--kb1),var(--kb2));border-color:transparent;color:#fff}
+.kb-yuvarlak button:hover b{border-color:var(--acc)}
+.kb-satir{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.kb-satir:first-of-type{border-top:0}
+.kb-anahtar{width:46px;height:26px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer;flex:none}
+.kb-anahtar::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.kb-anahtar[aria-checked="true"]{background:var(--acc3)} .kb-anahtar[aria-checked="true"]::after{left:23px}
+.kb-seg{display:flex;border:2px solid var(--line);border-radius:99px;overflow:hidden}
+.kb-seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:none;color:var(--ink);padding:4px 10px;cursor:pointer}
+.kb-seg button[aria-pressed="true"]{background:var(--acc);color:#fff}
+.kb-alt{display:flex;gap:8px;margin-top:14px}
+.kb-alt button{flex:1;font:inherit;font-size:14px;font-weight:600;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:7px;cursor:pointer}
+.kb-yonerge{border:0;border-radius:18px;padding:0;max-width:min(620px,calc(100vw - 28px));width:100%;color:var(--ink);background:var(--card);box-shadow:0 30px 70px -20px rgba(0,0,0,.6)}
+.kb-yonerge::backdrop{background:rgba(10,15,30,.55)}
+.kb-yonerge header{padding:16px 20px;color:#fff;background:linear-gradient(125deg,var(--kb1),var(--kb2));font:800 20px/1.2 "Nunito","Segoe UI",system-ui,sans-serif}
+.kb-yonerge .ic{padding:14px 20px 4px;font-size:17px}
+.kb-yonerge .ic ol{padding-left:20px;margin:8px 0} .kb-yonerge .ic li{margin:4px 0}
+.kb-yonerge .ic .gorev{background:var(--soft);border-radius:12px;padding:10px 14px;font-weight:500;border-left:5px solid var(--acc)}
+.kb-yonerge footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px 18px}
+.kb-kutlama{position:fixed;pointer-events:none;z-index:70}
+.kb-kutlama i{position:absolute;width:9px;height:9px;border-radius:2px;animation:kbpat .8s ease-out forwards}
+@keyframes kbpat{to{transform:translate(var(--x),var(--y)) rotate(260deg);opacity:0}}
+.kb-gizli{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Erişilebilirlik sınıfları */
+html.kb-y1 .wrap{zoom:1.15} html.kb-y2 .wrap{zoom:1.3}
+html.kb-rahat body{letter-spacing:.03em;word-spacing:.12em;line-height:1.85}
+html.kb-karsit{--ink:#000;--muted:#111;--line:#000;--bg:#fff;--card:#fff;--soft:#fff7cc;--acc:#0030b8;--acc3:#006b2e;--bad:#b00000;--grid:transparent}
+html.kb-karsit .panel{box-shadow:none;border:3px solid #000}
+html.kb-karsit .index a,html.kb-karsit .ghost,html.kb-karsit input.ans{border-color:#000}
+html.kb-karsit button:focus-visible,html.kb-karsit a:focus-visible{outline:4px solid #ff9f00}
+html.kb-azhareket *,html.kb-azhareket *::before,html.kb-azhareket *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+
+/* tek kareli zemin: kutuların arka plan ızgarası kapatılır, çizim alanları düz zemin üzerinde durur (iki ızgara üst üste binmez) */
+.panel,.card,.stage,.tahta,.sahne,.board,.kutu,.alan{background-image:none!important}
+svg.gsvg,.stage svg,.tahta svg{background:var(--card,#fff);border-radius:6px}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">7. Sınıf · Sayılar ve Nicelikler · MAT.7.1.1</div>
+  <h1>Sayılar Atölyesi</h1>
+  <p class="lead">Tam sayılar, rasyonel sayılar ve mutlak değer için yirmi iki etkinlik. Etkinlikler aşama aşama ilerler; bazılarında başlamadan isteğe bağlı bir tahmin yapar, sonunda keşfettiğinizi açıklarsınız. Kitaptaki karekodlar doğrudan ilgili etkinliği açar; buradan da birini seçerek başlayabilirsiniz.</p>
+  <ol class="index" id="index"></ol>
+  <section class="panel" id="panel" aria-live="polite"></section>
+  <p class="qrnote">Etkinliklerdeki sayılar her “Yeni soru” düğmesinde değişir. Sonuçlar yalnızca bu cihazda tutulur.</p>
+</div>
+
+<script>
+(function(){
+const M = "−";
+const fmt = v => { if (Object.is(v,-0)) v = 0; const s = (Math.round(v*1000)/1000).toString().replace(".", ","); return v < 0 ? M + s.slice(1) : s; };
+const sgn = v => v > 0 ? "+" + fmt(v) : fmt(v);
+const parse = s => { s = String(s).trim().replace(/−/g,"-").replace(/\s/g,"").replace(",","."); if (s==="") return NaN;
+  const f = s.match(/^([+-]?)(\d+)\/(\d+)$/); if (f) { const v = (+f[2])/(+f[3]); return f[1]==="-" ? -v : v; } return Number(s); };
+const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const gcd = (a,b) => { a=Math.abs(a); b=Math.abs(b); while(b){[a,b]=[b,a%b];} return a; };
+const FR = (p,q) => (p<0?M:"") + `<span class="frac"><span>${Math.abs(p)}</span><span>${q}</span></span>`;
+const el = (h) => { const d = document.createElement("div"); d.innerHTML = h; return d; };
+const NS = "http://www.w3.org/2000/svg";
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function fb(box, ok, msg){ box.className = "fb " + (ok ? "ok" : "no"); box.innerHTML = msg; box.hidden = false; }
+
+/* Yatay sayı doğrusu çizici */
+/* Etkinlik alanının genişliği: çizimler telefonda küçülüp okunmaz hâle gelmesin diye bu genişlikte (1:1) çizilir */
+const actW = () => { const a = document.querySelector("#act"); const w = a ? a.clientWidth : 0; return w > 200 ? Math.min(760, w) : 760; };
+function hline(o){
+  const pad = 34, H = o.H || 110, y = o.y || 56, aw = actW();
+  const W = o.W || Math.max(aw, Math.round((o.max - o.min) * 30 + 2*pad));
+  const X = v => pad + (v - o.min) / (o.max - o.min) * (W - 2*pad);
+  const aralik = (W - 2*pad) / (o.max - o.min), seyrek = aralik < 30; /* dar ekranda tam sayı etiketleri ikişer ikişer */
+  const fs = aralik < 44 ? 16 : 18;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${W > aw ? W : 0}px" role="img" aria-label="${o.label||"Sayı doğrusu"}">`;
+  s += `<line x1="${pad-18}" y1="${y}" x2="${W-pad+18}" y2="${y}" stroke="var(--ink)" stroke-width="2"/>`;
+  s += `<path d="M${W-pad+24},${y} l-10,-5 v10z M${pad-24},${y} l10,-5 v10z" fill="var(--ink)"/>`;
+  const sub = o.sub || 1;
+  for (let k = 0; k <= (o.max - o.min) * sub; k++) {
+    const v = o.min + k / sub, major = Math.abs(v - Math.round(v)) < 1e-9 && (o.majorEvery ? Math.round(v) % o.majorEvery === 0 : true);
+    const L = major ? 9 : 5;
+    s += `<line x1="${X(v)}" y1="${y-L}" x2="${X(v)}" y2="${y+L}" stroke="var(--ink)" stroke-width="${major?2:1.3}"/>`;
+    if (major && o.nums !== false && (!o.hideNums || !o.hideNums.includes(Math.round(v))) && (!seyrek || Math.round(v) % 2 === 0)) s += `<text x="${X(v)}" y="${y+28}" text-anchor="middle" font-size="${fs}" font-weight="600">${fmt(Math.round(v))}</text>`;
+  }
+  (o.marks||[]).forEach(m => {
+    s += `<circle cx="${X(m.v)}" cy="${y}" r="${m.r||6}" fill="${m.c||"var(--acc2)"}" stroke="var(--card)" stroke-width="2"/>`;
+    if (m.t) s += `<text x="${X(m.v)}" y="${y-16}" text-anchor="middle" font-size="18" font-weight="700" fill="${m.tc||"var(--ink)"}">${m.t}</text>`;
+    if (m.b) s += `<text x="${X(m.v)}" y="${y+30}" text-anchor="middle" font-size="18" font-weight="700">${m.b}</text>`;
+  });
+  (o.extra||[]).forEach(e => s += e(X, y));
+  if (o.hits) for (let k = 0; k <= (o.max - o.min) * o.hits; k++) { const v = o.min + k/o.hits;
+    s += `<rect data-v="${v}" x="${X(v)-9}" y="${y-22}" width="18" height="44" fill="transparent" style="cursor:pointer" tabindex="0" role="button" aria-label="${fmt(v)}"/>`; }
+  return s + "</svg>";
+}
+
+/* ============================================================ 1 */
+function e1(p){
+  const items = [["Boş bir tartının gösterdiği 0 kg","n"],["Deniz seviyesinin 0 m kabul edilmesi","r"],["Termometrede 0 °C","r"],["Alışveriş merkezinde giriş katının 0 olması","r"],
+    ["Boş bir su deposundaki 0 L su","n"],["Cetvelin 0 cm çizgisi","n"],["Tarih şeridinde 0 yılı","r"],["Boş bir bellekteki 0 MB veri","n"]];
+  p.innerHTML = `<div class="two" style="margin-bottom:10px"><div class="cardi" style="background:var(--soft);border-style:dashed"><p style="margin:0">Hiç yok</p><span>Nicelik hiç yoktur; 0'ın altına inilemez. Örnek: boş kutudaki 0 kalem.</span></div>
+     <div class="cardi" style="background:var(--soft);border-style:dashed"><p style="margin:0">Başlangıç noktası</p><span>0 bir anlaşmayla seçilmiş bir yerdir; altı ve üstü vardır, bu yüzden negatif sayılar gerekir.</span></div></div>
+   <div id="as1"></div>`;
+  const A = asamalar(p.querySelector("#as1"), [
+    ["Kartları ayır", `<p>Her kartta 0 ne anlatıyor? Kartlardaki iki düğmeden birini seçiniz. Sekiz kartı da işaretleyince “Kontrol et” düğmesine basınız.</p>
+      <div class="cards" id="c1"></div><div class="row"><button class="primary" id="k1">Kontrol et</button><button class="ghost" id="r1">Kartları karıştır</button></div><div id="f1" hidden></div>`],
+    ["Kuralı bul", `<div id="a1"></div>`]]);
+  let st = {};
+  function draw(){ const box = p.querySelector("#c1"); const list = items.slice().sort(()=>Math.random()-.5); st = {};
+    box.innerHTML = list.map((it,i)=>`<div class="cardi" data-k="${it[1]}" data-i="${i}"><p>${it[0]}</p><div class="seg"><button data-a="n" aria-pressed="false">Hiç yok</button><button data-a="r" aria-pressed="false">Başlangıç noktası</button></div></div>`).join("");
+    p.querySelector("#f1").hidden = true; A.ac(1); }
+  p.querySelector("#c1").addEventListener("click", e => { const b = e.target.closest(".seg button"); if (!b) return; const c = b.closest(".cardi");
+    c.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); st[c.dataset.i] = b.dataset.a; c.classList.remove("ok","no"); });
+  p.querySelector("#k1").onclick = () => { let ok = 0, n = 0; p.querySelectorAll(".cardi").forEach(c => { const a = st[c.dataset.i]; if (!a) return; n++;
+      const g = a === c.dataset.k; c.classList.toggle("ok", g); c.classList.toggle("no", !g); if (g) ok++; });
+    fb(p.querySelector("#f1"), ok === items.length, n < items.length ? `Önce bütün kartları işaretleyiniz. (${n} / ${items.length})` : ok === items.length ? "Hepsi doğru. Sıcaklık, deniz seviyesi, kat ve tarihte 0 seçilmiş bir başlangıç noktasıdır; bu yüzden bu durumlarda negatif sayılar kullanılır." : `${ok} / ${items.length} kart doğru. Kırmızı kenarlı kartlarda kendinize sorunuz: Bu durumda 0'ın altında bir değer olabilir mi? Olabiliyorsa 0 bir başlangıç noktasıdır.`);
+    if (ok === items.length && A.n === 1) { A.ac(2);
+      acikla(p.querySelector("#a1"), "Negatif sayılar hangi durumlarda kullanılabilir?", ["0'ın “hiç yok” anlamına geldiği durumlarda (boş kutudaki kalem gibi)","0'ın seçilmiş bir başlangıç noktası olduğu durumlarda (sıcaklık, kat, deniz seviyesi gibi)","Her durumda kullanılabilir"], 1,
+        "Doğru. 0 bir başlangıç noktasıysa onun altı da vardır; 0'ın altındaki değerler negatif sayılarla gösterilir. “Hiç yok” anlamındaki 0'ın altına inilemez.", () => A.bitir(),
+        ["Boş kutuda 0 kalem varsa −2 kalem olabilir mi? “Hiç yok” anlamındaki 0'ın altına inilemez.", null, "Boş bir su deposunda −5 L su olabilir mi? Bazı durumlarda 0'ın altı yoktur."]); } };
+  p.querySelector("#r1").onclick = draw; draw();
+}
+
+/* ============================================================ 2 */
+function e2(p){
+  const F = {4:"teras",3:"sinema",2:"yemek katı",1:"mağazalar",0:"giriş",[-1]:"market",[-2]:"otopark",[-3]:"otopark"};
+  let cur = 0, task, sel = [], puan = 0, sayildi = false;
+  p.innerHTML = `<div id="as2"></div>`;
+  const A = asamalar(p.querySelector("#as2"), [
+    ["Üç görevi tamamla", `<div class="two"><div><svg id="b2" viewBox="0 0 330 380" width="100%" style="max-width:320px"></svg></div>
+    <div><p class="task" id="t2"></p><p class="intro">Asansör panelindeki düğmeye basınız. Bazı görevlerde iki kat seçmeniz gerekir. Sonra “Kontrol et” düğmesine basınız.</p>
+    <div class="seg" id="pad" style="max-width:260px"></div><div class="row"><button class="primary" id="k2">Kontrol et</button><button class="ghost" id="n2">Yeni görev</button></div><div id="f2" hidden></div><div class="dzs" id="s2"></div></div></div>`],
+    ["Kuralı bul", `<div id="a2"></div>`]]);
+  const pad = p.querySelector("#pad");
+  pad.innerHTML = [4,3,2,1,0,-1,-2,-3].map(v=>`<button data-v="${v}" aria-pressed="false" style="width:56px">${v>0?"+"+v:fmt(v)}</button>`).join("");
+  function draw(){ const y = v => 30 + (4 - v) * 42; let s = "";
+    for (let v = 4; v >= -3; v--) { const sel_ = sel.includes(v);
+      s += `<rect x="70" y="${y(v)}" width="200" height="40" fill="${v<0?"color-mix(in srgb,var(--acc2) 12%,var(--card))":"var(--soft)"}" stroke="var(--line)"/>`;
+      s += `<text x="100" y="${y(v)+26}" font-size="15">${F[v]}</text><text x="255" y="${y(v)+26}" text-anchor="end" font-size="17" font-weight="700" fill="${sel_?"var(--acc2)":"var(--ink)"}">${v>0?"+"+v:fmt(v)}</text>`; }
+    s += `<line x1="60" y1="${y(0)+40}" x2="285" y2="${y(0)+40}" stroke="var(--acc3)" stroke-width="4"/><text x="290" y="${y(0)+44}" font-size="13" fill="var(--acc3)">zemin</text>`;
+    s += `<rect x="20" y="30" width="44" height="336" fill="none" stroke="var(--muted)" stroke-dasharray="4 3"/>`;
+    s += `<rect x="24" y="${y(cur)+4}" width="36" height="32" rx="3" fill="var(--acc)" style="transition:y .5s"/>`;
+    p.querySelector("#b2").innerHTML = s; }
+  function newTask(){ sel = []; sayildi = false; pad.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed","false")); p.querySelector("#f2").hidden = true;
+    const kind = pick(["go","go","eq","far"]);
+    if (kind === "go") { const v = pick([3,2,-1,-2]); task = {kind, ans:[v]}; p.querySelector("#t2").innerHTML = `Asansörü <b>${F[v]}</b> katına gönderiniz.`; }
+    if (kind === "eq") { const d = pick([1,2,3]); task = {kind, ans:[d,-d]}; p.querySelector("#t2").innerHTML = `Giriş katına <b>${d} kat</b> uzaklıktaki iki katı seçiniz.`; }
+    if (kind === "far") { task = {kind, ans:[4]}; p.querySelector("#t2").innerHTML = `Giriş katına <b>en uzak</b> olan katı seçiniz.`; }
+    draw(); }
+  pad.onclick = e => { const b = e.target.closest("button"); if (!b) return; const v = +b.dataset.v;
+    if (task.kind === "eq") { if (sel.includes(v)) sel = sel.filter(x=>x!==v); else sel = [...sel, v].slice(-2); } else sel = [v];
+    cur = v; pad.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", sel.includes(+x.dataset.v))); draw(); };
+  p.querySelector("#k2").onclick = () => { const ok = sel.length === task.ans.length && task.ans.every(a=>sel.includes(a));
+    let m = ok ? `Doğru. ${F[task.ans[0]]} katı ${sgn(task.ans[0])} ile gösterilir: giriş katının ${Math.abs(task.ans[0])} kat ${task.ans[0] > 0 ? "üstündedir" : "altındadır"}.` : !sel.length ? "Önce paneldeki düğmelerden birine basınız." : `Seçtiğiniz kat ${F[sel[0]]} (${sgn(sel[0])}). ${F[task.ans[0]]} katı giriş katının ${task.ans[0] > 0 ? "üstünde" : "altında"}dır; binada o kata bakınız.`;
+    if (task.kind === "eq") m = ok ? `Doğru. ${sgn(task.ans[0])} ve ${fmt(task.ans[1])} katları girişe eşit uzaklıktadır; biri yukarıda, biri aşağıdadır.` : "İki kat da girişe aynı sayıda kat uzaklıkta olmalı: biri yukarıda, biri aşağıda.";
+    if (task.kind === "far") m = ok ? "Doğru. +4 girişe 4 kat, −3 ise 3 kat uzaklıktadır." : "Her katın giriş katına kaç kat uzaklıkta olduğunu sayınız. Aşağıdaki katlar da, yukarıdaki katlar da uzaklık olarak pozitif sayılır.";
+    if (ok && !sayildi) { sayildi = true; puan++; }
+    if (ok && A.n === 1) m += puan < 3 ? " “Yeni görev” düğmesiyle devam ediniz." : "";
+    fb(p.querySelector("#f2"), ok, m); sayac(p.querySelector("#s2"), puan, 3);
+    if (puan >= 3 && A.n === 1) { A.ac(2);
+      acikla(p.querySelector("#a2"), "Giriş katı 0 ile gösterildiğine göre, girişin altındaki katlar hangi sayılarla gösterilir?", ["Pozitif tam sayılarla","Negatif tam sayılarla","0 ile"], 1,
+        "Doğru. 0 başlangıç noktasıdır: üstündeki katlar pozitif (+1, +2 …), altındaki katlar negatif (−1, −2 …) tam sayılarla gösterilir. Sayının büyüklüğü, girişten kaç kat uzakta olunduğunu söyler.", () => A.bitir(),
+        ["Binaya bakınız: +1, +2 … girişin üstündeki katlardır.", null, "0 yalnız giriş katıdır; diğer katlar girişten uzaktadır."]); } };
+  p.querySelector("#n2").onclick = newTask; newTask(); sayac(p.querySelector("#s2"), 0, 3);
+}
+
+/* ============================================================ 3 */
+function e3(p){
+  let val, step, lo, hi, ok = 0, n = 0, sayildi = false;
+  p.innerHTML = `<div id="as3"></div>`;
+  const A = asamalar(p.querySelector("#as3"), [
+    ["Üç termometre oku", `<div class="two"><div><svg id="th" viewBox="0 0 170 400" width="100%" style="max-width:190px;margin:auto"></svg></div>
+    <div><p class="task">Termometreyi iki adımda okuyunuz.</p>
+    <p class="adim3"><b>1. adım · Bir parça kaç derece?</b><br>İki büyük çizgi arasının kaç eş parçaya bölündüğünü sayınız. Bir parçanın (iki küçük çizgi arasının) kaç °C olduğunu yazınız. Cevap bir doğal sayı ya da ondalık gösterim olabilir (ör. 1 ya da 0,5).</p>
+    <div class="row"><label>Bir parça = <input class="ans" id="b3" inputmode="decimal" aria-label="Bir parçanın değeri" style="width:80px"> °C</label><button class="primary" id="kb3">Kontrol et</button></div>
+    <div id="fb3" hidden></div>
+    <div id="ik3" hidden><p class="adim3"><b>2. adım · Sıcaklığı yazınız.</b><br>Sıcaklığı ondalık gösterimle yazınız: önce <b>+</b> ya da <b>−</b> düğmesiyle işareti seçiniz, sonra <b>tam kısmı</b> ve <b>ondalık kısmı</b> ayrı kutulara yazınız. Sıcaklık tam sayıysa ondalık kısım kutusunu boş bırakınız.</p>
+    <div class="row"><span style="font-size:20px">Sıcaklık =</span><span class="kgo"><span class="isr" id="a3s" role="group" aria-label="işaret"><button type="button" data-s="1" aria-pressed="true">+</button><button type="button" data-s="-1" aria-pressed="false">−</button></span><input class="ans" id="a3t" inputmode="numeric" aria-label="tam kısım" placeholder="tam" style="width:64px"><b class="virg">,</b><input class="ans" id="a3o" inputmode="numeric" aria-label="ondalık kısım" placeholder="ondalık" style="width:96px"></span><span>°C</span><button class="primary" id="k3">Kontrol et</button></div></div>
+    <div class="row"><button class="ghost" id="n3">Yeni termometre</button></div>
+    <div id="f3" hidden></div><div class="dzs" id="s3"></div></div></div>`],
+    ["Kuralı bul", `<div id="x3"></div>`]]);
+  function draw(){ const Y = v => 360 - (v - lo) / (hi - lo) * 320; let s = `<rect x="55" y="${Y(hi)-14}" width="22" height="${Y(lo)-Y(hi)+30}" rx="11" fill="var(--card)" stroke="var(--muted)" stroke-width="2"/>`;
+    s += `<circle cx="66" cy="${Y(lo)+30}" r="17" fill="var(--bad)"/><rect x="61" y="${Y(val)}" width="10" height="${Y(lo)+20-Y(val)}" fill="var(--bad)"/>`;
+    const sub = Math.round(1/step);
+    for (let k = 0; k <= (hi-lo)*sub; k++) { const v = lo + k/sub, maj = Math.abs(v-Math.round(v))<1e-9;
+      s += `<line x1="80" y1="${Y(v)}" x2="${maj?98:90}" y2="${Y(v)}" stroke="var(--ink)" stroke-width="${maj?1.8:1}"/>`;
+      if (maj) s += `<text x="104" y="${Y(v)+5}" font-size="15" font-weight="600">${fmt(Math.round(v))}</text>`; }
+    s += `<text x="104" y="${Y(hi)-18}" font-size="13" fill="var(--muted)">°C</text>`;
+    p.querySelector("#th").innerHTML = s; }
+  function nq(){ step = pick([1,0.5,0.2]); const sub = Math.round(1/step); lo = pick([-8,-6,-5,-4]); hi = lo + (step === 1 ? 10 : 6);
+    do { val = lo + R(1, (hi-lo)*sub - 1) / sub; } while (Math.abs(val) < 1e-9 || (step !== 1 && Math.abs(val-Math.round(val))<1e-9));
+    ["#b3","#a3t","#a3o"].forEach(i => p.querySelector(i).value = ""); p.querySelectorAll("#a3s button").forEach(x => x.setAttribute("aria-pressed", x.dataset.s === "1"));
+    ["#f3","#fb3","#ik3"].forEach(i => p.querySelector(i).hidden = true); sayildi = false; draw(); }
+  p.querySelector("#kb3").onclick = () => { const b = parse(p.querySelector("#b3").value), f = p.querySelector("#fb3"), sub = Math.round(1/step);
+    if (isNaN(b)) return fb(f, false, "Bir parçanın kaç °C olduğunu yazınız.");
+    if (Math.abs(b - step) > 1e-9) return fb(f, false, `İki büyük çizgi arası 1 °C'dir. Bu aralık ${sub === 1 ? "bölünmemiştir; her çizgi bir büyük çizgidir" : sub + " eş parçaya bölünmüştür"}. 1 °C'yi parça sayısına bölünüz.`);
+    fb(f, true, sub === 1 ? "Doğru: çizgiler arası 1 °C'dir." : `Doğru: 1 °C, ${sub} eş parçaya bölünmüş; bir parça ${FR(1,sub)} = ${fmt(step)} °C'dir.`); p.querySelector("#ik3").hidden = false; };
+  p.querySelector("#k3").onclick = () => { const t = p.querySelector("#a3t").value.trim(), o = p.querySelector("#a3o").value.trim();
+    if (t === "" || !/^\d+$/.test(t) || (o !== "" && !/^\d+$/.test(o))) return fb(p.querySelector("#f3"), false, "Tam kısım kutusuna bir doğal sayı yazınız; ondalık kısım kutusuna yalnız rakam yazınız (gerekmiyorsa boş bırakınız).");
+    const isr = +(p.querySelector('#a3s [aria-pressed="true"]') || {dataset:{s:1}}).dataset.s, a = isr * parseFloat(t + "." + (o || "0"));
+    const g = Math.abs(a - val) < 1e-6; if (g && !sayildi) { ok++; sayildi = true; }
+    fb(p.querySelector("#f3"), g, g ? `Doğru: ${fmt(val)} °C. Sıvının ucu 0'ın ${val < 0 ? "altında olduğu için sıcaklık negatiftir" : "üstünde olduğu için sıcaklık pozitiftir"}.${ok < 3 ? " “Yeni termometre” ile devam ediniz." : ""}` : (Math.abs(a + val) < 1e-6 ? "Tam kısım ve ondalık kısım doğru ama işaret yanlış. Sıvı 0'ın altında mı, üstünde mi? İşaret düğmesini değiştiriniz." : `Tekrar sayınız. Bir parça ${fmt(step)} °C'dir. Yazdığınız değer, sıvının ucunun ${a > val ? "üstünde" : "altında"} kalıyor.`));
+    sayac(p.querySelector("#s3"), ok, 3);
+    if (ok >= 3 && A.n === 1) { A.ac(2);
+      acikla(p.querySelector("#x3"), "−3 °C ile −7 °C'den hangisi daha soğuktur?", ["−3 °C; çünkü 3, 7'den küçüktür","−7 °C; çünkü termometrede 0'ın daha aşağısındadır","İkisi aynı sıcaklıktır"], 1,
+        "Doğru. Termometre dikey bir sayı doğrusudur: aşağı indikçe sayılar küçülür. −7, −3'ün 4 çizgi altındadır; bu yüzden −7 °C daha soğuktur.", () => A.bitir(),
+        ["Termometrede −3 ve −7'nin yerini düşününüz: hangisi 0'ın daha aşağısında?", null, "İşaretleri aynı ama 0'a uzaklıkları farklı; termometrede farklı çizgilerdedir."]); } };
+  sayac(p.querySelector("#s3"), 0, 3);
+  p.querySelector("#n3").onclick = nq; p.querySelector("#a3o").addEventListener("keydown", e => { if (e.key === "Enter") p.querySelector("#k3").click(); }); nq();
+}
+
+/* ============================================================ 4 */
+function e4(p){
+  let a, n, s, qi; const L = "KLMNPRST";
+  p.innerHTML = `<p class="task" id="t4"></p><div class="scroll" id="l4"></div><div id="as4"></div>
+   <div class="row"><button class="ghost" id="n4">Yeni soru</button></div>`;
+  const A = asamalar(p.querySelector("#as4"), [
+    ["Bir sıçrayış kaç birim?", `<p>Başlangıç ile bitiş arasındaki uzaklığı bulup sıçrayış sayısına bölünüz.</p>
+      <div class="row"><label>Bir sıçrayış <input class="ans" id="a4a" inputmode="numeric" aria-label="Bir sıçrayışın uzunluğu"> birim</label><button class="primary" id="k4a">Kontrol et</button></div><div id="f4a" hidden></div>`],
+    ["Noktadaki sayı", `<p id="q4"></p><div class="row"><label><span id="lb4"></span> <input class="ans" id="a4b" inputmode="numeric"></label><button class="primary" id="k4b">Kontrol et</button></div><div id="f4b" hidden></div>`]]);
+  function draw(show){ const end = a + n*s; const min = Math.min(a, 0) - 1, max = Math.max(end, 0) + 1;
+    const marks = [{v:a,b:fmt(a),c:"var(--acc)"},{v:end,b:sgn(end),c:"var(--acc)"}];
+    for (let k = 1; k < n; k++) marks.push({v:a+k*s,b:L[k-1],c:k===qi?"var(--acc2)":"var(--muted)"});
+    const extra = show ? [ (X,y)=>{ let r=""; for(let k=0;k<n;k++){ const x1=X(a+k*s), x2=X(a+(k+1)*s);
+      r+=`<path d="M${x1},${y-8} Q${(x1+x2)/2},${y-50} ${x2},${y-8}" fill="none" stroke="var(--acc3)" stroke-width="2" stroke-dasharray="5 4"/><text x="${(x1+x2)/2}" y="${y-34}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--acc3)">${s}</text>`;} return r; } ] : [];
+    p.querySelector("#l4").innerHTML = hline({min, max, nums:false, marks, extra, H:112, y:68}); }
+  function nq(){ n = R(3,6); s = R(1,4); a = -R(3, 12); if (a + n*s < 1) s = Math.ceil((1 - a)/n) + R(0,1); qi = R(1, n-1);
+    p.querySelector("#t4").innerHTML = `Çekirge <b>${fmt(a)}</b> noktasından başlıyor ve eşit uzunlukta <b>${n}</b> sıçrayışla <b>${sgn(a+n*s)}</b> noktasına ulaşıyor. Aradaki harfler çekirgenin konduğu noktalardır; tam sayılar yazılmamıştır.`;
+    ["#a4a","#a4b"].forEach(i=>p.querySelector(i).value=""); ["#f4a","#f4b"].forEach(i=>p.querySelector(i).hidden = true);
+    A.ac(1); draw(false); }
+  p.querySelector("#k4a").onclick = () => { const x = parse(p.querySelector("#a4a").value), end = a + n*s, f = p.querySelector("#f4a");
+    if (isNaN(x)) return fb(f, false, "Bir sayı yazınız.");
+    if (x === s) { fb(f, true, `Doğru. ${fmt(a)} ile ${sgn(end)} arası ${end - a} birimdir; ${n} eş sıçrayışta her sıçrayış ${s} birim olur.`); draw(true);
+      p.querySelector("#q4").innerHTML = `<b>${L[qi-1]}</b> noktası başlangıçtan kaç sıçrayış sonra geliyor? O noktadaki sayıyı yazınız.`;
+      p.querySelector("#lb4").textContent = `${L[qi-1]} noktasındaki sayı:`; A.ac(2); return; }
+    fb(f, false, x === end - a ? `${end - a} birim, başlangıç ile bitiş arasındaki toplam uzaklıktır. Bunu sıçrayış sayısına (${n}) bölünüz.` :
+      `Uzaklığı iki parçada bulunuz: ${fmt(a)} ile 0 arası ${-a} birim, 0 ile ${end} arası ${end} birim. Toplamı ${n} sıçrayışa bölünüz.`); };
+  p.querySelector("#k4b").onclick = () => { const y = parse(p.querySelector("#a4b").value), w = a + qi*s, f = p.querySelector("#f4b");
+    if (isNaN(y)) return fb(f, false, "Bir sayı yazınız. Negatif sayılarda − işaretini unutmayınız.");
+    if (y === w) { fb(f, true, `Doğru. ${L[qi-1]} noktası başlangıçtan ${qi} sıçrayış sonra gelir: ${fmt(a)} noktasından ${qi} · ${s} = ${qi*s} birim sağa gidilir ve ${fmt(w)} bulunur.`); A.bitir(); return; }
+    fb(f, false, y === -w ? `Sayının büyüklüğü doğru ama işareti yanlış. ${L[qi-1]} noktası 0'ın ${w < 0 ? "solunda" : "sağında"} mı?` :
+      `${fmt(a)} noktasından başlayıp ${L[qi-1]} noktasına kadar sıçrayışları sayınız; her sıçrayış ${s} birimdir.`); };
+  p.querySelector("#n4").onclick = nq; nq();
+}
+
+/* ============================================================ 5 */
+function e5(p){
+  let n, v0, st, i, j, q, goster = false;
+  p.innerHTML = `<p class="task">Sayı doğrusunda ardışık noktalar arası uzaklıklar eşittir. Yalnız iki noktanın sayısı yazılıdır. <b>K</b> noktasına karşılık gelen tam sayıyı bulunuz.</p><div class="scroll" id="l5"></div>
+   <div id="as5"></div><div class="row"><button class="ghost" id="n5">Yeni soru</button></div>`;
+  const A = asamalar(p.querySelector("#as5"), [
+    ["Bir parça kaç birim?", `<p>Yazılı iki sayının arasında kaç eş parça (boşluk) var? İki sayının farkını parça sayısına bölünüz.</p>
+      <div class="row"><label>Parça sayısı <input class="ans" id="c5" inputmode="numeric" style="width:70px"></label><label>Bir parça <input class="ans" id="b5" inputmode="numeric" style="width:70px"> birim</label><button class="primary" id="k5a">Kontrol et</button></div><div id="f5a" hidden></div>`],
+    ["K'nin sayısı", `<p id="q5"></p><div class="row"><label>K = <input class="ans" id="a5" inputmode="numeric"></label><button class="primary" id="k5">Kontrol et</button></div><div id="f5" hidden></div>`]]);
+  function ciz(){ const W = 760, pad = 40, X = k => pad + k/n*(W-2*pad), y = 62;
+    let s = `<svg viewBox="0 0 ${W} 112" width="100%" style="min-width:560px" role="img" aria-label="Eşit aralıklı sayı doğrusu"><line x1="18" y1="${y}" x2="${W-18}" y2="${y}" stroke="var(--ink)" stroke-width="2"/><path d="M${W-12},${y} l-10,-5 v10z M12,${y} l10,-5 v10z" fill="var(--ink)"/>`;
+    if (goster) for (let k = i; k < j; k++) { const x1 = X(k), x2 = X(k+1); s += `<path d="M${x1},${y-7} Q${(x1+x2)/2},${y-34} ${x2},${y-7}" fill="none" stroke="var(--acc3)" stroke-width="1.8"/><text x="${(x1+x2)/2}" y="${y-24}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--acc3)">${st}</text>`; }
+    for (let k = 0; k <= n; k++) { const known = k===i || k===j, isq = k===q;
+      s += `<circle cx="${X(k)}" cy="${y}" r="${known||isq?6:4}" fill="${isq?"var(--acc2)":known?"var(--acc)":"var(--muted)"}"/>`;
+      if (known) s += `<text x="${X(k)}" y="${y+30}" text-anchor="middle" font-size="17" font-weight="700">${fmt(v0+k*st)}</text>`;
+      if (isq) s += `<text x="${X(k)}" y="${y+30}" text-anchor="middle" font-size="18" font-weight="800" fill="var(--acc2)">K</text>`; }
+    p.querySelector("#l5").innerHTML = s + "</svg>"; }
+  function nq(){ n = R(6,10); st = R(1,4); v0 = -st * R(2, n-2); i = R(0, 2); j = R(n-3, n); do { q = R(0,n); } while (q===i || q===j);
+    goster = false; ["#a5","#b5","#c5"].forEach(x=>p.querySelector(x).value = ""); ["#f5","#f5a"].forEach(x=>p.querySelector(x).hidden = true); A.ac(1); ciz(); }
+  p.querySelector("#k5a").onclick = () => { const f = p.querySelector("#f5a"), c = parse(p.querySelector("#c5").value), b = parse(p.querySelector("#b5").value), N = j - i, fark = N*st;
+    if (isNaN(c)) return fb(f, false, "Önce yazılı iki sayının arasındaki parça (boşluk) sayısını yazınız.");
+    if (c !== N) return fb(f, false, c === N + 1 ? "Noktaları saydınız. İki yazılı nokta arasındaki boşlukları sayınız; boşluk sayısı nokta sayısından 1 eksiktir." : "Yazılı iki nokta arasındaki boşlukları yeniden sayınız.");
+    if (isNaN(b)) return fb(f, false, "Parça sayısı doğru. Şimdi bir parçanın kaç birim olduğunu yazınız.");
+    if (b !== st) return fb(f, false, b === fark ? `${fark} birim, iki sayı arasındaki toplam uzaklıktır. Bunu ${N} parçaya bölünüz.` : `İki sayı arasındaki uzaklık: ${fmt(v0+j*st)} − (${fmt(v0+i*st)}) = ${fark} birim. Bunu ${N} eş parçaya bölünüz.`);
+    goster = true; ciz(); fb(f, true, `Doğru. İki sayı arası ${fark} birim; ${N} eş parçanın her biri ${st} birimdir. Parçalar doğrunun üstünde gösterildi.`);
+    p.querySelector("#q5").innerHTML = `Yazılı sayılardan birinden başlayıp K'ye kadar parçaları sayınız. Her parça <b>${st} birim</b>; sağa gidince sayı büyür, sola gidince küçülür.`; A.ac(2); };
+  p.querySelector("#k5").onclick = () => { const a = parse(p.querySelector("#a5").value), ans = v0 + q*st, g = a === ans, f = p.querySelector("#f5");
+    if (isNaN(a)) return fb(f, false, "Bir tam sayı yazınız. Negatif sayılarda − işaretini unutmayınız.");
+    const r = Math.abs(q - i) <= Math.abs(q - j) ? i : j;
+    if (g) { A.bitir(); return fb(f, true, `Doğru: K = ${fmt(ans)}. ${fmt(v0+r*st)} sayısından ${Math.abs(q-r)} parça ${q > r ? "sağa" : "sola"} gidilir: ${Math.abs(q-r)} · ${st} = ${Math.abs(q-r)*st} birim.`); }
+    fb(f, false, a === -ans ? "Büyüklük doğru ama işaret yanlış. K, 0'ın hangi yanında?" : `${fmt(v0+r*st)} sayısından K'ye kadar ${q > r ? "sağa" : "sola"} doğru parçaları sayınız; her parça ${st} birimdir.`); };
+  p.querySelector("#n5").onclick = nq; p.querySelector("#a5").addEventListener("keydown", e => { if (e.key === "Enter") p.querySelector("#k5").click(); }); nq();
+}
+
+/* ============================================================ 6 */
+function e6(p){
+  const HED = [[1,2],[1,3],[2,3],[1,4],[3,4],[2,5],[3,5],[4,5],[1,6],[5,6]];
+  const RENK = ["var(--acc2)","var(--acc3)"];
+  let T, rows, bulundu, puan = 0, liste = [], dokundu = false;
+  p.innerHTML = `<div id="as6"></div>`;
+  const A = asamalar(p.querySelector("#as6"), [
+    ["Aynı noktayı bul", `<p class="task" id="t6"></p><div id="h6"></div><div id="r6"></div>
+     <div id="f6" class="fb no"></div><div class="liste" id="liste6"></div><div class="row"><button class="ghost" id="n6">Yeni kesir</button><span class="dz" id="s6">Tamamlanan kesir: 0</span></div>`],
+    ["Kuralı bul", `<div id="a6"></div>`]]);
+  const box = p.querySelector("#r6");
+  function yeni(){
+    let y; do { y = HED[Math.floor(Math.random()*HED.length)]; } while (T && y[0]===T[0] && y[1]===T[1]);
+    T = y; rows = [[0,T[1]],[0,T[1]]]; bulundu = false; dokundu = false;
+    p.querySelector("#t6").innerHTML = `Üstteki sayı doğrusunda ${FR(T[0],T[1])} gösterilmiştir. Aşağıdaki iki doğruda payda ve payı değiştirerek <b>aynı noktayı gösteren iki farklı kesir</b> bulunuz.`;
+    p.querySelector("#h6").innerHTML = `<div class="asama" style="border-color:var(--acc)"><div class="row" style="margin-top:0"><b>Verilen kesir:</b> <b style="font-size:20px">${FR(T[0],T[1])}</b></div><div class="scroll">${hline({min:0,max:1,sub:T[1],H:90,y:44,marks:[{v:T[0]/T[1],c:"var(--acc)",r:8}]})}</div></div>`;
+    box.innerHTML = rows.map(([a,b],r) => `<div class="asama" style="border-color:${RENK[r]}"><div class="row" style="margin-top:0"><b>${r+1}. kesriniz:</b> <b style="font-size:20px" class="lb"></b><span class="dk" style="font-weight:700"></span></div>
+      <div class="scroll ln"></div>
+      <div class="row" style="margin-top:2px"><span>Payda (1–30):</span>${adim(`q6${r}`, b)}<span style="margin-left:10px">Pay (0–payda):</span>${adim(`p6${r}`, a)}</div></div>`).join("");
+    draw();
+  }
+  function draw(){
+    const lbs = box.querySelectorAll(".lb"), lns = box.querySelectorAll(".ln"), dks = box.querySelectorAll(".dk");
+    const t = T[0]/T[1];
+    const esit = rows.map(([a,b]) => Math.abs(a/b - t) < 1e-9 && !(a===T[0] && b===T[1]));
+    rows.forEach(([a,b],r) => { lbs[r].innerHTML = FR(a,b);
+      box.querySelector(`#q6${r} b`).textContent = b; box.querySelector(`#p6${r} b`).textContent = a;
+      lns[r].innerHTML = hline({min:0,max:1,sub:b,H:90,y:44,marks:[{v:a/b,c:RENK[r],r:7}]});
+      dks[r].textContent = esit[r] ? "✓ Aynı nokta" : (a===T[0] && b===T[1] ? "Verilen kesrin aynısı; farklı bir kesir oluşturunuz." : "");
+      dks[r].style.color = esit[r] ? "var(--acc3)" : "var(--muted)"; });
+    const farkli = !(rows[0][0]===rows[1][0] && rows[0][1]===rows[1][1]);
+    const ok = esit[0] && esit[1] && farkli;
+    const f = p.querySelector("#f6");
+    if (ok) {
+      f.innerHTML = `Doğru! ${FR(T[0],T[1])}, ${FR(rows[0][0],rows[0][1])} ve ${FR(rows[1][0],rows[1][1])} aynı noktayı gösteriyor. Bunlar <b>denk kesirlerdir</b>: pay ve payda aynı sayıyla çarpılınca ya da bölününce nokta değişmez.`;
+      rows.forEach(([a,b]) => { const k = a + "/" + b; if (!liste.some(x => x.k === k)) liste.push({k, a, b, t:T}); });
+      if (!bulundu) { bulundu = true; puan++; }
+      p.querySelector("#s6").textContent = `Tamamlanan kesir: ${puan}`;
+      if (A.n === 1) { A.ac(2);
+        acikla(p.querySelector("#a6"), `Bulduğunuz kesirler ile ${FR(T[0],T[1])} arasında nasıl bir ilişki var?`, ["Pay ve paydaya aynı sayı eklenmiştir.","Pay ve payda aynı sayıyla çarpılmış (ya da bölünmüştür).","Yalnız payda değiştirilmiştir."], 1,
+          "Doğru. Pay ve payda aynı sayıyla çarpılınca ya da bölününce birim daha çok (ya da daha az) eş parçaya bölünür ama nokta yerinden oynamaz. Denk kesirler sayı doğrusunda aynı noktayı gösterir.", () => A.bitir(),
+          [`${FR(1,2)} kesrinin pay ve paydasına 1 eklersek ${FR(2,3)} olur. Bu iki kesir aynı noktayı mı gösteriyor?`, null, "Yalnız payda değişirse parçalar küçülür ama aynı sayıda parça ilerlenir; nokta kayar."]); } }
+    else if (esit[0] && esit[1]) f.innerHTML = "İki doğruda aynı kesri oluşturdunuz. Birini değiştirip başka bir denk kesir bulunuz.";
+    else f.innerHTML = dokundu ? "Henüz aynı nokta değil. Birim, paydadaki sayı kadar eş parçaya bölünür; pay kadar parça ilerlenir. Noktanız üstteki noktayla aynı yerde olmalı." : "Payda ve payı − ve + düğmeleriyle değiştirerek başlayınız.";
+    f.className = "fb " + (ok ? "ok" : dokundu ? "no" : "bilgi");
+    p.querySelector("#liste6").innerHTML = liste.length ? `<b>Bulduğunuz denk kesirler:</b> ` + liste.map(x => `<span>${FR(x.a,x.b)} = ${FR(x.t[0],x.t[1])}</span>`).join("") : "";
+  }
+  box.addEventListener("click", e => { const b = e.target.closest(".adim button"); if (!b) return; const id = b.parentElement.id, r = +id.slice(-1), d = +b.dataset.d;
+    if (id[0] === "q") { rows[r][1] = Math.max(1, Math.min(30, rows[r][1] + d)); rows[r][0] = Math.min(rows[r][0], rows[r][1]); }
+    else rows[r][0] = Math.max(0, Math.min(rows[r][1], rows[r][0] + d));
+    dokundu = true; draw(); });
+  p.querySelector("#n6").onclick = yeni;
+  yeni();
+}
+
+/* ============================================================ 7 */
+function e7(p){
+  let P, Q, iv = null, ok = 0, bitti = false;
+  p.innerHTML = `<p class="task" id="t7"></p><div id="as7"></div>
+   <div class="row"><button class="ghost" id="n7">Yeni sayı</button><span class="dz" id="s7">Yerleştirilen sayı: 0</span></div>`;
+  const A = asamalar(p.querySelector("#as7"), [
+    ["Aralığı bul", `<p>Sayıyı tam sayılı kesre çeviriniz. Tam kısım, sayının hangi iki tam sayı arasında olduğunu söyler. Sayı doğrusunda o aralığa (iki tam sayının arasına) dokununuz.</p><div id="yer7a"></div><div id="f7a" hidden></div>`],
+    ["Doğru çentiği bul", `<p id="q7"></p><div id="yer7b"></div><div id="f7" hidden></div>`]]);
+  const kutu = document.createElement("div"); kutu.className = "scroll"; kutu.id = "l7";
+  const min = -4, max = 4;
+  function draw(mark){ const extra = [];
+    if (mark && mark.k) extra.push((X,y)=>svgKesir(X(mark.v), y-34, mark.k, 19));
+    if (iv !== null) extra.push((X,y)=>{ let r = `<rect x="${X(iv)}" y="${y-14}" width="${X(iv+1)-X(iv)}" height="28" fill="color-mix(in srgb,var(--acc) 12%,transparent)"/>`;
+      for (let k = 1; k < Q; k++) { const v = iv + k/Q; r += `<line x1="${X(v)}" y1="${y-7}" x2="${X(v)}" y2="${y+7}" stroke="var(--acc)" stroke-width="1.6"/>`; } return r; });
+    else for (let k = min; k < max; k++) extra.push((X,y)=>`<rect data-iv="${k}" x="${X(k)+2}" y="${y-26}" width="${X(k+1)-X(k)-4}" height="52" fill="transparent" style="cursor:pointer" tabindex="0" role="button" aria-label="${fmt(k)} ile ${fmt(k+1)} arası"/>`);
+    if (iv !== null && !bitti) extra.push((X,y)=>{ let r=""; for (let k = 0; k <= Q; k++){ const v = iv + k/Q; r += `<rect data-v="${v}" x="${X(v)-9}" y="${y-24}" width="18" height="48" fill="transparent" style="cursor:pointer" tabindex="0" role="button" aria-label="${k}. çentik"/>`; } return r; });
+    kutu.innerHTML = hline({min,max,H:120,y:66,marks: mark ? [mark] : [], extra}); }
+  function nq(){ do { Q = R(2,8); P = R(-4*Q+1, 4*Q-1); } while (P % Q === 0 || gcd(P,Q) !== 1);
+    iv = null; bitti = false; p.querySelector("#t7").innerHTML = `<b style="font-size:22px">${FR(P,Q)}</b> rasyonel sayısını sayı doğrusunda gösteriniz.`;
+    ["#f7","#f7a"].forEach(x=>p.querySelector(x).hidden = true); p.querySelector("#yer7a").appendChild(kutu); A.ac(1); draw(); }
+  function tikla(t){
+    if (t.dataset.iv !== undefined) { const k = +t.dataset.iv, want = Math.floor(P/Q), f = p.querySelector("#f7a");
+      if (k === want) { iv = k; draw(); fb(f, true, `Evet: ${FR(P,Q)} = ${P<0?M:""}${Math.floor(Math.abs(P)/Q)}${FR(Math.abs(P)%Q,Q)}, yani sayı ${fmt(k)} ile ${fmt(k+1)} arasındadır.`);
+        p.querySelector("#q7").innerHTML = `Aralık, paydadaki sayı kadar (<b>${Q}</b>) eş parçaya bölündü; her parça ${FR(1,Q)} birimdir. ${P<0?`<b>${fmt(k+1)}</b> noktasından <b>sola</b> doğru`:`<b>${fmt(k)}</b> noktasından <b>sağa</b> doğru`} kaç parça gideceğinizi bulup o çentiğe dokununuz.`;
+        p.querySelector("#yer7b").appendChild(kutu); A.ac(2); return; }
+      fb(f, false, `${fmt(k)} ile ${fmt(k+1)} arası değil. ${FR(P,Q)} sayısını tam sayılı kesre çeviriniz: tam kısım, sayının hangi iki tam sayı arasında olduğunu gösterir.${P < 0 ? " Negatif sayılar 0'ın solundadır." : ""}`); }
+    else if (t.dataset.v !== undefined) { const v = +t.dataset.v, g = Math.abs(v - P/Q) < 1e-9, f = p.querySelector("#f7");
+      if (g) { bitti = true; ok++; p.querySelector("#s7").textContent = `Yerleştirilen sayı: ${ok}`; A.bitir(); }
+      draw({v, c: g ? "var(--acc3)" : "var(--bad)", r:7, k: g ? FR(P,Q) : ""});
+      const hedefP = P<0 ? Math.abs(P - (iv+1)*Q) : P - iv*Q, sayilan = P<0 ? Math.round((iv+1-v)*Q) : Math.round((v-iv)*Q);
+      fb(f, g, g ? `Doğru nokta. ${P<0?`${fmt(iv+1)} noktasından sola`:`${fmt(iv)} noktasından sağa`} ${hedefP} parça gidildi. Her rasyonel sayı sayı doğrusunda bir noktaya karşılık gelir. “Yeni sayı” ile tekrar ediniz.`
+        : `Bu çentik ${P<0?`${fmt(iv+1)} noktasından sola`:`${fmt(iv)} noktasından sağa`} ${sayilan} parça. Kesrin kesir kısmının payı kadar, yani ${hedefP} parça gitmelisiniz.`); } }
+  kutu.addEventListener("click", e => tikla(e.target));
+  kutu.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tikla(e.target); } });
+  p.querySelector("#n7").onclick = nq; nq();
+}
+
+/* ============================================================ 8 */
+function e8(p){
+  const all = [["−8/2",["t","r"]],["0/5",["d","t","r"]],["7/0",["x"]],["3,4",["r"]],["15/5",["d","t","r"]],["−1",["t","r"]],["−9/7",["r"]],["6/6",["d","t","r"]],["−2 1/2",["r"]],["12",["d","t","r"]],["−3/0",["x"]],["−0,75",["r"]]];
+  const lab = {d:"Doğal sayı",t:"Tam sayı",r:"Rasyonel sayı",x:"Tanımsız"};
+  let set, st;
+  p.innerHTML = `<div id="as8"></div>`;
+  const A = asamalar(p.querySelector("#as8"), [
+    ["Kartları işaretle", `<p class="task">Her sayı için doğru olanların hepsini işaretleyiniz. Altı kartı da işaretleyince “Kontrol et” düğmesine basınız.</p><div class="cards" id="c8"></div>
+   <div class="row"><button class="primary" id="k8">Kontrol et</button><button class="ghost" id="n8">Yeni kartlar</button></div><div id="f8" hidden></div>`],
+    ["Kuralı bul", `<div id="a8"></div>`]]);
+  p.insertAdjacentHTML("beforeend", `<div class="two" style="margin-top:12px"><svg viewBox="0 0 360 200" width="100%" style="max-width:380px">
+     <rect x="3" y="3" width="354" height="194" rx="14" fill="color-mix(in srgb,var(--acc) 8%,var(--card))" stroke="var(--acc)" stroke-width="2"/><text x="180" y="24" text-anchor="middle" font-weight="700" fill="var(--acc)">Rasyonel sayılar</text>
+     <rect x="50" y="36" width="260" height="152" rx="12" fill="color-mix(in srgb,var(--acc2) 10%,var(--card))" stroke="var(--acc2)" stroke-width="2"/><text x="180" y="58" text-anchor="middle" font-weight="700" fill="var(--acc2)">Tam sayılar</text>
+     <rect x="110" y="72" width="140" height="106" rx="10" fill="color-mix(in srgb,var(--acc3) 14%,var(--card))" stroke="var(--acc3)" stroke-width="2"/><text x="180" y="130" text-anchor="middle" font-weight="700" fill="var(--acc3)">Doğal sayılar</text></svg>
+     <p class="intro">Her doğal sayı bir tam sayıdır, her tam sayı da paydası 1 olan bir rasyonel sayıdır. Paydası 0 olan ifadeler tanımsızdır; bir sayı belirtmez.</p></div>`);
+  function draw(){ set = all.slice().sort(()=>Math.random()-.5).slice(0,6); st = set.map(()=>new Set());
+    p.querySelector("#c8").innerHTML = set.map((s,i)=>{ const t = s[0].replace("-", M); const fr_ = t.match(/^(−?)(\d+ )?(\d+)\/(\d+)$/);
+      const disp = fr_ ? `${fr_[1]}${fr_[2]||""}<span class="frac"><span>${fr_[3]}</span><span>${fr_[4]}</span></span>` : t;
+      return `<div class="cardi" data-i="${i}"><p style="font-size:22px">${disp}</p><div class="seg">${Object.keys(lab).map(k=>`<button data-k="${k}" aria-pressed="false">${lab[k]}</button>`).join("")}</div></div>`; }).join("");
+    p.querySelector("#f8").hidden = true; A.ac(1); }
+  p.querySelector("#c8").onclick = e => { const b = e.target.closest("button"); if (!b) return; const c = b.closest(".cardi"), i = +c.dataset.i, k = b.dataset.k;
+    if (st[i].has(k)) st[i].delete(k); else { st[i].add(k); if (k === "x") ["d","t","r"].forEach(z=>st[i].delete(z)); else st[i].delete("x"); }
+    c.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", st[i].has(x.dataset.k))); c.classList.remove("ok","no"); };
+  p.querySelector("#k8").onclick = () => { let ok = 0; set.forEach((s,i)=>{ const g = s[1].length === st[i].size && s[1].every(k=>st[i].has(k)); const c = p.querySelector(`.cardi[data-i="${i}"]`); c.classList.toggle("ok",g); c.classList.toggle("no",!g); if (g) ok++; });
+    fb(p.querySelector("#f8"), ok === set.length, ok === set.length ? "Hepsi doğru. Bir sayı birden fazla türe ait olabilir: 12 hem doğal sayı hem tam sayı hem de rasyonel sayıdır." : `${ok} / ${set.length} doğru. Kırmızı kartlarda önce kesri sadeleştiriniz; sonuç bir doğal sayı ya da tam sayı olabilir. Her tam sayının rasyonel sayı olduğunu unutmayınız.`);
+    if (ok === set.length && A.n === 1) { A.ac(2);
+      acikla(p.querySelector("#a8"), "Bir kesrin tam sayı olup olmadığını nasıl anlarsınız?", ["Pay, paydaya kalansız bölünüyorsa kesir bir tam sayıdır.","Paydası 1'den büyük olan kesir tam sayı olamaz.","Payı negatif olan kesir tam sayı olamaz."], 0,
+        "Doğru. Örneğin 15/5 = 3 ve −8/2 = −4 tam sayıdır. Pay paydaya kalansız bölünmüyorsa (−9/7 gibi) kesir tam sayı değildir ama yine de rasyonel sayıdır.".replace(/(−?)(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?M:"")+FR(+a,+b)), () => A.bitir(),
+        [null, `${FR(15,5)} kesrini düşününüz: paydası 5 ama değeri 3'tür.`, `${M}${FR(8,2)} kesrini düşününüz: değeri −4'tür, yani bir tam sayıdır.`]); } };
+  p.querySelector("#n8").onclick = draw; draw();
+}
+
+/* ============================================================ 9 */
+function e9(p){
+  let data, T;
+  p.innerHTML = `<div id="as9"></div>`;
+  const A = asamalar(p.querySelector("#as9"), [
+    ["Tabloyu doldur", `<p class="task" id="t9"></p><div class="scroll"><table class="t" id="tb9"></table></div>
+   <div class="row"><button class="primary" id="k9">Kontrol et</button><button class="ghost" id="n9">Yeni ölçümler</button></div><div id="f9" hidden></div><div class="scroll" id="l9" style="margin-top:8px"></div>`],
+    ["Kuralı bul", `<div id="a9"></div>`]]);
+  function nq(){ T = pick([250, 500, 1000]); const used = new Set(); data = [];
+    while (data.length < 4) { const d = R(-9, 9); if (d === 0 || used.has(Math.abs(d))) continue; used.add(Math.abs(d)); data.push(T + d); }
+    p.querySelector("#t9").innerHTML = `Bir fabrikada ${T} g'lık paketler dolduran dört makineden birer paket tartılıyor. Paketin hedef kütleden farkını (+ fazla, − eksik) ve hata miktarını yazınız, sonra hatası <b>en az</b> olan makineyi seçiniz.`;
+    p.querySelector("#tb9").innerHTML = `<tr><th>Makine</th><th>Tartım (g)</th><th>Fark (g)</th><th>Hata miktarı (g)</th><th>En az hata</th></tr>` +
+      data.map((w,i)=>`<tr><td>${i+1}. makine</td><td>${w}</td><td><input class="ans" data-i="${i}" data-k="f" inputmode="numeric" style="width:80px"></td><td><input class="ans" data-i="${i}" data-k="h" inputmode="numeric" style="width:80px"></td><td><input type="radio" name="min9" value="${i}" aria-label="${i+1}. makine"></td></tr>`).join("");
+    p.querySelector("#f9").hidden = true; p.querySelector("#l9").innerHTML = ""; A.ac(1); }
+  p.querySelector("#k9").onclick = () => { let bad = 0; const ds = data.map(w=>w-T);
+    p.querySelectorAll("#tb9 input.ans").forEach(inp => { const i = +inp.dataset.i, v = parse(inp.value), want = inp.dataset.k === "f" ? ds[i] : Math.abs(ds[i]);
+      const g = v === want; inp.style.borderColor = g ? "var(--acc3)" : "var(--bad)"; if (!g) bad++; });
+    const r = p.querySelector('input[name="min9"]:checked'); const mi = ds.map(Math.abs).indexOf(Math.min(...ds.map(Math.abs))); const gr = r && +r.value === mi;
+    fb(p.querySelector("#f9"), !bad && gr, !bad && gr ? `Doğru. Hata miktarı farkın mutlak değeridir: |${fmt(ds[mi])}| = ${Math.abs(ds[mi])}. Eksik ya da fazla olması hatanın büyüklüğünü değiştirmez.` : bad ? "Kırmızı kutuları kontrol ediniz. Fark eksikse negatif yazılır; hata miktarı hiçbir zaman negatif olmaz." : "Tablo doğru. En küçük hata miktarına sahip makineyi seçiniz.");
+    p.querySelector("#l9").innerHTML = hline({min:-10,max:10,H:100,y:50,marks: ds.map((d,i)=>({v:d,t:`${i+1}.`,c:i===mi?"var(--acc3)":"var(--acc2)"})),extra:[(X,y)=>`<text x="${X(0)}" y="${y+46}" text-anchor="middle" font-size="13" fill="var(--muted)">hedef (${T} g)</text>`]});
+    if (!bad && gr && A.n === 1) { A.ac(2);
+      acikla(p.querySelector("#a9"), "Fark negatif olabildiği hâlde hata miktarı neden hiçbir zaman negatif olmaz?", ["Çünkü hata miktarı, farkın 0'a olan uzaklığıdır (mutlak değeridir); uzaklık negatif olamaz.","Çünkü eksik paketler hatalı sayılmaz.","Çünkü hata miktarı her zaman tartımdan büyüktür."], 0,
+        "Doğru. 3 g eksik (−3) ile 3 g fazla (+3) paketin hatası aynıdır: |−3| = |+3| = 3. Sayı doğrusunda ikisi de 0'a 3 birim uzaklıktadır.", () => A.bitir(),
+        [null, "Eksik paketin de bir hatası vardır; sayı doğrusunda 0'dan uzaktadır.", "Hata miktarı tartımın kendisi değil, hedeften farkın büyüklüğüdür."]); } };
+  p.querySelector("#n9").onclick = nq; nq();
+}
+
+/* ============================================================ 10 */
+function e10(p){
+  let mode, k, sel, puan = 0, sayildi = false, turler = new Set();
+  p.innerHTML = `<div id="as10"></div>`;
+  const A = asamalar(p.querySelector("#as10"), [
+    ["Üç görevi tamamla", `<p class="task" id="t10"></p><div class="scroll" id="l10"></div>
+   <div class="row"><button class="primary" id="k10">Kontrol et</button><button class="ghost" id="c10">Seçimi temizle</button><button class="ghost" id="n10">Yeni görev</button></div><div id="f10" hidden></div><div class="dzs" id="s10"></div>`],
+    ["Kuralı bul", `<div id="a10"></div>`]]);
+  function draw(show){ const marks = [...sel].map(v=>({v, c:"var(--acc2)", r:7}));
+    const extra = show ? [ (X,y)=>{ let r=""; [...sel].forEach(v=>{ r += `<line x1="${X(0)}" y1="${y-20}" x2="${X(v)}" y2="${y-20}" stroke="var(--acc3)" stroke-width="3"/><text x="${(X(0)+X(v))/2}" y="${y-30}" text-anchor="middle" font-size="14" fill="var(--acc3)" font-weight="700">${Math.abs(v)} birim</text>`; }); return r; } ] : [];
+    p.querySelector("#l10").innerHTML = hline({min:-10,max:10,H:130,y:66,marks,extra,hits:1}); }
+  function nq(){ const kalan = ["eq","lt","gt"].filter(x=>!turler.has(x)); mode = pick(kalan.length && A.n === 1 ? kalan : ["eq","lt","gt"]); k = R(2,7); sel = new Set(); sayildi = false;
+    p.querySelector("#t10").innerHTML = mode === "eq" ? `Mutlak değeri <b>${k}</b> olan sayıları sayı doğrusunda işaretleyiniz.` :
+      mode === "lt" ? `Mutlak değeri <b>${k}'${({1:'den',2:'den',3:'ten',4:'ten',5:'ten',6:'dan',7:'den',8:'den',9:'dan',10:'dan'})[k]||'den'} küçük</b> olan bütün tam sayıları işaretleyiniz.` : `Mutlak değeri ${k} olan sayılardan <b>negatif</b> olanını işaretleyiniz.`;
+    p.querySelector("#f10").hidden = true; draw(false); }
+  p.querySelector("#l10").addEventListener("click", e => { const t = e.target; if (t.dataset.v === undefined) return; const v = +t.dataset.v;
+    if (sel.has(v)) sel.delete(v); else sel.add(v); draw(false); });
+  p.querySelector("#l10").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.dataset.v !== undefined) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent("click",{bubbles:true})); } });
+  p.querySelector("#k10").onclick = () => { let want;
+    if (mode === "eq") want = [k,-k]; else if (mode === "gt") want = [-k]; else { want = []; for (let v = -(k-1); v <= k-1; v++) want.push(v); }
+    const g = want.length === sel.size && want.every(v=>sel.has(v)); draw(true);
+    fb(p.querySelector("#f10"), g, g ? (mode === "lt" ? `Doğru. ${want.length} tam sayı var; 0 da bunlardan biridir çünkü |0| = 0.` : "Doğru. Mutlak değer, sayının 0'a olan uzaklığıdır.") :
+      mode === "lt" ? "0'ın iki yanındaki sayıları ve 0'ı unutmayınız. Uzaklığı tam olarak " + k + " olan sayılar dâhil değildir." : "Yeşil çizgiler seçtiğiniz noktaların 0'a uzaklığını gösteriyor. Uzaklık " + k + " birim olmalı.");
+    if (g && !sayildi) { sayildi = true; puan++; turler.add(mode); }
+    sayac(p.querySelector("#s10"), puan, 3);
+    if (g && puan < 3 && A.n === 1) p.querySelector("#f10").insertAdjacentHTML("beforeend", " “Yeni görev” ile devam ediniz.");
+    if (puan >= 3 && A.n === 1) { A.ac(2);
+      acikla(p.querySelector("#a10"), "0'dan farklı bir sayı seçelim (örneğin 6). Mutlak değeri bu sayıya eşit kaç tam sayı vardır?", ["Bir tane","İki tane: biri pozitif, biri negatif","Sonsuz tane"], 1,
+        "Doğru. |6| = 6 ve |−6| = 6. Mutlak değer 0'a uzaklıktır; 0'ın sağında ve solunda bu uzaklıkta birer nokta vardır. Yalnız mutlak değeri 0 olan tek sayı vardır: 0.", () => A.bitir(),
+        ["Sayı doğrusunda 0'ın solunu da düşününüz: −6 da 0'a 6 birim uzaklıktadır.", null, "0'a tam 6 birim uzaklıkta kaç nokta var? Sağa ve sola birer tane."]); } };
+  sayac(p.querySelector("#s10"), 0, 3);
+  p.querySelector("#c10").onclick = () => { sel = new Set(); draw(false); p.querySelector("#f10").hidden = true; };
+  p.querySelector("#n10").onclick = nq; nq();
+}
+
+/* ============================================================ ORTAK: kesir yazımı (rasyonel sayılar asla "/" ile gösterilmez) */
+function kesHTML(t){ return String(t).replace(/(−|-)?(\d+) (\d+)\/(\d+)/g,(m,sg,w,a,b)=>(sg?M:"")+w+FR(+a,+b)).replace(/(−|-)?(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?M:"")+FR(+a,+b)); }
+function svgKesir(x, y, html, fs){ fs = fs || 13; const m = String(html).match(/^(−?)(\d*)<span class="frac"><span>(\d+)<\/span><span>(\d+)<\/span><\/span>$/);
+  if (!m) return `<text x="${x}" y="${y+fs*0.35}" text-anchor="middle" font-size="${fs}" font-weight="700" pointer-events="none">${html}</text>`;
+  const w = Math.max(m[3].length, m[4].length)*fs*0.6+4, on = m[1]+m[2];
+  return `<g pointer-events="none">${on?`<text x="${x-w/2-2}" y="${y+fs*0.35}" text-anchor="end" font-size="${fs}" font-weight="700">${on}</text>`:""}<text x="${x}" y="${y-fs*0.2}" text-anchor="middle" font-size="${fs}" font-weight="700">${m[3]}</text><line x1="${x-w/2}" y1="${y}" x2="${x+w/2}" y2="${y}" stroke="var(--ink)" stroke-width="1.3"/><text x="${x}" y="${y+fs*0.95}" text-anchor="middle" font-size="${fs}" font-weight="700">${m[4]}</text></g>`; }
+const kg = id => `<span class="kg"><input class="ans" id="${id}p" inputmode="numeric" aria-label="pay" placeholder="pay"><i></i><input class="ans" id="${id}q" inputmode="numeric" aria-label="payda" placeholder="payda"></span>`;
+/* İşaretli kesir kutusu (29.09.2026): işaret düğmesi + pay + payda. Öğrenci işareti ayrı seçer; pay ve payda doğal sayıdır. */
+const kgi = id => `<span class="kgi"><span class="isr" id="${id}s" role="group" aria-label="işaret"><button type="button" data-s="1" aria-pressed="true">+</button><button type="button" data-s="-1" aria-pressed="false">−</button></span><span class="kg"><input class="ans" id="${id}p" inputmode="numeric" aria-label="pay" placeholder="pay"><i></i><input class="ans" id="${id}q" inputmode="numeric" aria-label="payda" placeholder="payda"></span></span>`;
+document.addEventListener("click", e => { const b = e.target.closest(".isr button"); if (!b) return; b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); });
+const kgIsaret = (p, id) => { const g = p.querySelector("#"+id+"s"); if (!g) return 1; const b = g.querySelector('[aria-pressed="true"]'); return b ? +b.dataset.s : 1; };
+const kgDeger = (p, id) => { const a = parse(p.querySelector("#"+id+"p").value), b = parse(p.querySelector("#"+id+"q").value); return (isNaN(a)||isNaN(b)||b===0) ? NaN : kgIsaret(p, id)*a/b; };
+const kgTemizle = (p, id) => { p.querySelector("#"+id+"p").value = ""; p.querySelector("#"+id+"q").value = ""; const g = p.querySelector("#"+id+"s"); if (g) g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.s === "1")); };
+
+/* ============================================================ ORTAK: tahmin ve açıklama adımları */
+/* Tahmin: küçük, isteğe bağlı kutu. Etkinliği gizlemez; asıl içerik baştan görünür (§4.x-2). */
+function tahmin(box, soru, secs, cb){
+  box.innerHTML = `<div class="tah kucuk"><div class="adimlbl">Başlamadan tahmin edin (isteğe bağlı)</div><p>${soru}</p><div class="seg">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div><p class="tahnot" hidden></p></div>`;
+  box.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ box.querySelectorAll(".seg button").forEach(x=>{x.setAttribute("aria-pressed",x===b);x.disabled=true;});
+    const n = box.querySelector(".tahnot"); n.hidden = false; n.textContent = "Tahmininiz kaydedildi. Etkinliğin sonunda kontrol edeceğiz."; cb(+b.dataset.i); });
+}
+const tahY = (t, ad) => t === null || t === undefined ? "Tahmin yapmadınız." : `Tahmininiz: <b>${ad[t]}</b>.`;
+/* Kuralı bulma sorusu. Bir aşama çerçevesinin içindeyse ayrı başlık konmaz. ipuc: yanlış seçenekler için yönlendirici ipuçları (isteğe bağlı), cb: doğru cevapta */
+function acikla(box, soru, secs, dogru, aciklama, cb, ipuc){
+  box.hidden = false; const icte = !!box.closest(".asm");
+  box.innerHTML = `<div class="${icte ? "" : "acik"}">${icte ? "" : `<div class="adimlbl">Son adım: Açıklayınız</div>`}<p style="margin-top:0">${soru}</p><div class="seg dikey">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div><div data-fbx hidden></div></div>`;
+  box.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ box.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    const g = +b.dataset.i === dogru;
+    fb(box.querySelector("[data-fbx]"), g, g ? aciklama : (ipuc && ipuc[+b.dataset.i]) || "Bu açıklama etkinlikte gördüklerinizle uyuşmuyor. Yukarıdaki sonuçlara yeniden bakıp başka bir açıklama seçiniz.");
+    if (g) { box.querySelectorAll(".seg button").forEach(x=>x.disabled = true); if (cb) cb(); } });
+}
+/* Aşama 1'de "art arda / toplam N doğru" sayacı: ayrı kutucuklarda gösterilir */
+/* 29.09.2026: ayrı "Doğru cevap: 0 / 3" kutusu kaldırıldı; ilerleme yalnız doğru geri bildirimin sonunda kısaca yazılır */
+function sayac(el, n, hedef){ el.innerHTML = ""; const f = el.previousElementSibling;
+  if (n > 0 && f && !f.hidden && f.classList.contains("ok") && !f.querySelector(".ilr")) f.insertAdjacentHTML("beforeend", ` <span class="ilr">(${Math.min(n,hedef)}/${hedef})</span>`); }
+const kesir = (p,q) => { if (q < 0) { p = -p; q = -q; } const g = gcd(p,q) || 1; p /= g; q /= g; return q === 1 ? fmt(p) : FR(p,q); };
+const ayir = () => "";
+/* Aşama çerçeveleri: her aşama kendi çerçevesinde; biri tamamlanınca sonraki açılır (§4.x-2) */
+function asamalar(box, list){
+  box.innerHTML = list.map((a,i)=>`<section class="asm ${i ? "kilitli" : "etkin"}"><header><span class="asn">${i+1}</span><span>Aşama ${i+1}: ${a[0]}</span></header><div class="kilit">Önceki aşamayı tamamlayınca açılır.</div><div class="asi">${a[1]}</div></section>`).join("");
+  const S = [...box.querySelectorAll(":scope > .asm")];
+  const o = { n: 1, ac(n){ o.n = n; S.forEach((s,i)=>{ s.classList.toggle("kilitli", i > n-1); s.classList.toggle("etkin", i === n-1); s.classList.toggle("tamam", i < n-1); });
+      if (n > 1 && S[n-1]) try { S[n-1].scrollIntoView({block:"nearest", behavior:"smooth"}); } catch(e) {} },
+    bitir(){ o.n = S.length + 1; S.forEach(s=>{ s.classList.remove("kilitli","etkin"); s.classList.add("tamam"); }); },
+    el: n => S[n-1] };
+  return o;
+}
+/* − sayı + düğmeli değer seçici */
+const adim = (id, v) => `<span class="adim" id="${id}"><button type="button" data-d="-1" aria-label="azalt">−</button><b>${v}</b><button type="button" data-d="1" aria-label="artır">+</button></span>`;
+
+/* ============================================================ 11 · Gelir mi, gider mi? */
+function e11(p){
+  const havuz = [["Kantine 15 TL borçlanmak",-15],["Harçlıktan 40 TL biriktirmek",40],["Dükkânın bu ay 300 TL zarar etmesi",-300],["Fidan satışından 250 TL gelir elde etmek",250],
+    ["Elektrik faturası için 120 TL ödemek",-120],["Ay sonunda ne kâr ne zarar etmek",0],["Arkadaşından 20 TL alacaklı olmak",20],["Kulübün 75 TL gider yazması",-75],
+    ["Kasada kayıtlardan 8 TL fazla para çıkması",8],["Kasada kayıtlardan 6 TL eksik para çıkması",-6],["Hesabın tam kapanması (borç da alacak da yok)",0],["Ürün satışından 90 TL kâr etmek",90]];
+  let set, st;
+  p.innerHTML = `<div id="t11"></div><div id="as11"></div>`;
+  const A = asamalar(p.querySelector("#as11"), [
+    ["Durumları sayıyla göster", `<p class="task">Her durumu bir tam sayıyla gösteriniz: önce işaretini seçiniz, sonra sayıyı yazınız. Altı kartı da doldurunca “Kontrol et” düğmesine basınız.</p><div class="cards" id="c11"></div>
+    <div class="row"><button class="primary" id="k11">Kontrol et</button><button class="ghost" id="n11">Yeni kartlar</button></div><div id="f11" hidden></div>`],
+    ["Kuralı bul", `<div id="a11"></div>`]]);
+  let tah = null;
+  tahmin(p.querySelector("#t11"), "Bir hesapta <b>ne kâr ne zarar</b> edilen durum hangi sayıyla gösterilir?", ["Pozitif bir sayıyla","0 ile","Negatif bir sayıyla"], i=>{ tah = i; });
+  function draw(){ set = havuz.slice().sort(()=>Math.random()-.5).slice(0,6); st = set.map(()=>null);
+    p.querySelector("#c11").innerHTML = set.map((s,i)=>`<div class="cardi" data-i="${i}"><p>${s[0]}</p><div class="seg"><button data-s="+" aria-pressed="false">+ (pozitif)</button><button data-s="0" aria-pressed="false">0</button><button data-s="−" aria-pressed="false">− (negatif)</button></div><input class="ans" data-i="${i}" inputmode="numeric" aria-label="Sayı" style="margin-top:6px;width:120px" placeholder="sayı"></div>`).join("");
+    p.querySelector("#f11").hidden = true; A.ac(1); }
+  p.querySelector("#c11").onclick = e => { const b = e.target.closest(".seg button"); if (!b) return; const c = b.closest(".cardi"), i = +c.dataset.i; st[i] = b.dataset.s;
+    c.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x===b)); c.classList.remove("ok","no");
+    const inp = c.querySelector("input"); if (b.dataset.s === "0") inp.value = "0"; else if (inp.value && !/^[+−-]/.test(inp.value)) inp.value = (b.dataset.s === "−" ? M : "+") + inp.value; };
+  p.querySelector("#k11").onclick = () => { let ok = 0;
+    set.forEach((s,i)=>{ const c = p.querySelector(`.cardi[data-i="${i}"]`), v = parse(c.querySelector("input").value); const sg = s[1] > 0 ? "+" : s[1] < 0 ? "−" : "0";
+      const g = st[i] === sg && v === s[1]; c.classList.toggle("ok", g); c.classList.toggle("no", !g); if (g) ok++; });
+    const all = ok === set.length;
+    fb(p.querySelector("#f11"), all, all ? "Hepsi doğru. Gider, zarar ve borç negatif; gelir, kâr ve alacak pozitif sayıyla gösterilir." : `${ok} / ${set.length} doğru. Kırmızı kartlarda işareti ve sayıyı birlikte kontrol ediniz.`);
+    if (all && A.n === 1) { A.ac(2); acikla(p.querySelector("#a11"), `${tahY(tah, ["pozitif bir sayıyla","0 ile","negatif bir sayıyla"])} Doğrusu: 0 ile. Bu kartlarda 0 neyi anlatıyor?`,
+      ["Hiç para olmadığını","Kazanç ile kaybı ayıran başlangıç noktasını","Küçük bir kazancı"], 1, "Doğru. Parayla ilgili durumlarda 0 denk durumdur (ne kâr ne zarar); kazanç pozitif, kayıp negatif yöndedir.", () => A.bitir(),
+      ["“Ne kâr ne zarar” eden birinin kasasında para olabilir; 0 burada “hiç para yok” demek değildir.", null, "0 ne pozitif ne negatiftir; kazanç da kayıp da değildir."]); } };
+  p.querySelector("#n11").onclick = draw; draw();
+}
+
+/* ============================================================ 12 · Maden ocağı asansörü */
+function e12(p){
+  const TOP = 40, lo = -520, hi = 80, H = 380, Y = v => 20 + (hi - v) / (hi - lo) * (H - 40);
+  let hedef, cur = TOP, tahm = null;
+  p.innerHTML = `<p class="intro">Kömür ocaklarında galerilerin yeri deniz seviyesine göre <b>kot</b> ile belirtilir: "−360 kotu", deniz seviyesinin 360 m altı demektir. Bu ocağın kuyu ağzı deniz seviyesinin 40 m üstündedir (+40 kotu).</p>
+   <p class="task" id="g12"></p>
+   <div class="two" style="align-items:start"><div class="scroll"><svg id="s12" viewBox="0 0 330 ${H}" width="100%" style="max-width:330px;margin:auto" role="img" aria-label="Maden kuyusu"></svg></div><div id="as12"></div></div>
+   <div class="row"><button class="ghost" id="n12">Yeni görev</button></div>`;
+  const A = asamalar(p.querySelector("#as12"), [
+    ["Yolu tahmin et", `<p>Kafes kuyu ağzından galeriye inerken kaç metre yol alır? Tahmininizi yazınız.</p>
+      <div class="row"><input class="ans" id="e12" inputmode="numeric" aria-label="Tahmin edilen yol"> m <button class="primary" id="t12">Tahminimi kaydet</button></div><div id="f12t" hidden></div>`],
+    ["Kafesi indir", `<p>Düğmelerle kafesi hedef galeriye getiriniz, sonra kontrol ediniz.</p>
+      <div class="durum">Kafesin kotu: <span id="v12"></span></div>
+      <div class="row"><button class="ghost" data-m="-100">100 m in</button><button class="ghost" data-m="-10">10 m in</button><button class="ghost" data-m="10">10 m çık</button><button class="ghost" data-m="100">100 m çık</button></div>
+      <div class="row"><button class="primary" id="k12">Kafes galeride, kontrol et</button></div><div id="f12" hidden></div>`],
+    ["Kuralı bul", `<div id="a12"></div>`]]);
+  const svg = p.querySelector("#s12");
+  function draw(){ let s = `<rect x="0" y="${Y(0)}" width="330" height="${H-Y(0)}" fill="color-mix(in srgb,#8a6a44 18%,transparent)"/><rect x="0" y="0" width="330" height="${Y(TOP)}" fill="color-mix(in srgb,var(--acc) 8%,transparent)"/>`;
+    s += `<line x1="0" y1="${Y(0)}" x2="330" y2="${Y(0)}" stroke="var(--acc)" stroke-dasharray="6 5" stroke-width="2"/><text x="326" y="${Y(0)+17}" text-anchor="end" font-size="14" fill="var(--acc)">deniz seviyesi (0)</text>`;
+    s += `<rect x="150" y="${Y(TOP)}" width="36" height="${Y(lo+20)-Y(TOP)}" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="192" y="${Y(TOP)+4}" font-size="14">← kuyu ağzı (+40)</text>`;
+    [-160,-260,-360,-460].forEach(g=>{ const h = g === hedef; s += `<rect x="186" y="${Y(g)-9}" width="136" height="18" fill="color-mix(in srgb,var(--acc2) ${h?45:18}%,var(--card))" stroke="var(--acc2)" stroke-width="${h?2.5:1}"/><text x="192" y="${Y(g)+5}" font-size="14" font-weight="700">${fmt(g)} kotu${h?" (hedef)":""}</text>`; });
+    for (let v = -500; v <= 0; v += 100) s += `<line x1="100" y1="${Y(v)}" x2="112" y2="${Y(v)}" stroke="var(--ink)"/><text x="96" y="${Y(v)+4}" text-anchor="end" font-size="13">${fmt(v)}</text>`;
+    s += `<line x1="112" y1="${Y(hi)}" x2="112" y2="${Y(lo)}" stroke="var(--ink)" stroke-width="1.5"/><text x="112" y="${H-4}" text-anchor="middle" font-size="13" fill="var(--muted)">kot (m)</text>`;
+    s += `<rect x="153" y="${Y(cur)-14}" width="30" height="28" rx="3" fill="var(--acc2)" stroke="var(--ink)"/><line x1="168" y1="${Y(TOP)}" x2="168" y2="${Y(cur)-14}" stroke="var(--ink)" stroke-width="1"/>`;
+    svg.innerHTML = s; p.querySelector("#v12").textContent = sgn(cur) + " m"; }
+  function yeni(){ hedef = pick([-160,-260,-360,-460]); cur = TOP; tahm = null; p.querySelector("#e12").value = "";
+    p.querySelector("#g12").innerHTML = `Görev: Kafesi kuyu ağzından <b>${fmt(hedef)} kotundaki</b> galeriye indiriniz.`;
+    ["#f12","#f12t"].forEach(i=>p.querySelector(i).hidden = true); A.ac(1); draw(); }
+  p.querySelector("#t12").onclick = () => { const t = parse(p.querySelector("#e12").value), f = p.querySelector("#f12t");
+    if (isNaN(t) || t < 0) return fb(f, false, "Yolu metre cinsinden, işaretsiz bir sayıyla yazınız.");
+    tahm = t; f.className = "fb bilgi"; f.hidden = false; f.innerHTML = `Tahmininiz: <b>${t} m</b>. Şimdi kafesi indiriniz.`; A.ac(2); };
+  p.querySelector("#as12").addEventListener("click", e => { const b = e.target.closest("button[data-m]"); if (!b) return; cur = Math.max(lo+20, Math.min(TOP, cur + +b.dataset.m)); draw(); });
+  p.querySelector("#k12").onclick = () => { const yol = TOP - hedef, f = p.querySelector("#f12");
+    if (cur !== hedef) return fb(f, false, `Kafes şu an ${sgn(cur)} kotunda, galeri ${fmt(hedef)} kotunda. Kafes ${Math.abs(cur-hedef)} m daha ${cur > hedef ? "inmeli" : "çıkmalı"}.`);
+    fb(f, true, `Kafes galeride. Yol: kuyu ağzından deniz seviyesine 40 m, deniz seviyesinden galeriye ${-hedef} m; toplam <b>${yol} m</b>.` + (tahm === null ? "" : tahm === yol ? " Tahmininiz tam isabet!" : ` Tahmininiz ${tahm} m idi; ${Math.abs(tahm - yol)} m ${tahm < yol ? "eksik" : "fazla"}.`));
+    if (A.n !== 2) return; A.ac(3);
+    acikla(p.querySelector("#a12"), `Yol neden galerinin kotundaki sayıdan (${-hedef}) 40 m fazla çıktı?`, ["Kot negatif olduğu için","Kafes 0'dan değil, deniz seviyesinin 40 m üstünden başladığı için","Galeriler 40 m aralıklı olduğu için"], 1, "Doğru. Başlangıç noktası (0) deniz seviyesidir; kafes ise 0'ın 40 m üstünden yola çıkar. Yol, iki noktanın 0'a uzaklıklarının toplamıdır.", () => A.bitir(),
+      ["Kotun işareti yalnız yönü söyler (deniz seviyesinin altı). Kafesin nereden yola çıktığına bakınız.", null, "Şekildeki galeriler 100 m aralıklıdır. Farkın nereden geldiğini kuyu ağzının kotunda arayınız."]); };
+  p.querySelector("#n12").onclick = yeni; yeni();
+}
+
+/* ============================================================ 13 · Sayılar şeması */
+function e13(p){
+  const havuz = [["12",0],["0",0],[FR(18,6),0],["−7",1],[M+FR(12,4),1],["−1",1],[FR(5,2),2],[M+FR(3,4),2],["−2"+FR(1,3),2],["0,6",2],[FR(0,9),0],[FR(7,0),3],[M+FR(20,5),1],[FR(9,4),2]];
+  const ad = ["Doğal sayılar (iç bölge)","Doğal olmayan tam sayılar (orta bölge)","Tam sayı olmayan rasyonel sayılar (dış bölge)","Şemada yeri yok (tanımsız)"];
+  let list, i, dogru, tah;
+  p.innerHTML = `<div id="t13"></div><div id="as13"></div>`;
+  const A = asamalar(p.querySelector("#as13"), [
+    ["Sekiz kartı yerleştir", `<p class="task">Karttaki sayının ait olduğu en içteki bölgeye dokununuz. İfade bir sayı belirtmiyorsa “Şemada yeri yok” düğmesine basınız.</p>
+   <div class="two" style="align-items:center"><svg id="v13" viewBox="0 0 480 260" width="100%" style="max-width:560px" role="group" aria-label="Sayılar şeması">
+     <rect data-r="2" x="3" y="3" width="474" height="254" rx="16" fill="color-mix(in srgb,var(--acc) 9%,var(--card))" stroke="var(--acc)" stroke-width="2" style="cursor:pointer"/><text x="240" y="24" text-anchor="middle" font-weight="700" fill="var(--acc)" pointer-events="none">Rasyonel sayılar</text>
+     <rect data-r="1" x="86" y="36" width="308" height="212" rx="14" fill="color-mix(in srgb,var(--acc2) 12%,var(--card))" stroke="var(--acc2)" stroke-width="2" style="cursor:pointer"/><text x="240" y="56" text-anchor="middle" font-weight="700" fill="var(--acc2)" pointer-events="none">Tam sayılar</text>
+     <rect data-r="0" x="166" y="68" width="148" height="170" rx="12" fill="color-mix(in srgb,var(--acc3) 16%,var(--card))" stroke="var(--acc3)" stroke-width="2" style="cursor:pointer"/><text x="240" y="90" text-anchor="middle" font-weight="700" fill="var(--acc3)" pointer-events="none">Doğal sayılar</text>
+     <g id="y13"></g></svg>
+    <div><div class="cardi" style="text-align:center"><p style="font-size:30px;margin:6px 0" id="k13"></p><span class="score" id="s13"></span></div>
+     <div class="row"><button class="ghost" id="x13">Şemada yeri yok (tanımsız)</button></div><div id="f13" hidden></div></div></div>`],
+    ["Kuralı bul", `<div id="a13"></div>`]]);
+  tahmin(p.querySelector("#t13"), "Her tam sayı aynı zamanda bir rasyonel sayı mıdır?", ["Evet, hepsi","Hayır, hiçbiri","Yalnız pozitif olanlar"], t=>{ tah = t; });
+  function basla(){ list = havuz.slice().sort(()=>Math.random()-.5).slice(0,8); i = 0; dogru = 0; n13 = [0,0,0]; p.querySelector("#y13").innerHTML = ""; A.ac(1); goster(); }
+  function goster(){ p.querySelector("#k13").innerHTML = list[i][0]; p.querySelector("#s13").innerHTML = `<span class="dz">Kart: <b>${i+1} / ${list.length}</b></span> <span class="dz">Doğru: <b>${dogru}</b></span>`; }
+  const YER = [[[200,125],[240,125],[280,125],[200,170],[240,170],[280,170],[200,215],[240,215],[280,215]],[[126,90],[354,90],[126,135],[354,135],[126,180],[354,180],[126,222],[354,222]],[[44,70],[436,70],[44,115],[436,115],[44,160],[436,160],[44,205],[436,205]]]; let n13 = [0,0,0];
+  function sec(r){ if (i >= list.length) return; const g = r === list[i][1];
+    if (g) { dogru++; if (r < 3) { const yer = YER[r][n13[r] % YER[r].length]; n13[r]++; p.querySelector("#y13").insertAdjacentHTML("beforeend", svgKesir(yer[0], yer[1], list[i][0], 14)); } }
+    fb(p.querySelector("#f13"), g, g ? `Doğru: ${ad[list[i][1]]}.` : `Bu sayının yeri: ${ad[list[i][1]]}. Önce sadeleştirmeyi deneyiniz.`);
+    i++; if (i < list.length) goster(); else { p.querySelector("#s13").innerHTML = `<span class="dz ok">Kartlar bitti</span> <span class="dz">Doğru: <b>${dogru} / ${list.length}</b></span>`; A.ac(2);
+      acikla(p.querySelector("#a13"), `${tahY(tah, ["evet, hepsi","hayır, hiçbiri","yalnız pozitif olanlar"])} Şemadan ne söyleyebilirsiniz?`, ["Tam sayılar rasyonel sayıların içindedir; her tam sayı paydası 1 olan bir rasyonel sayıdır.","Rasyonel sayılar tam sayıların içindedir.","Negatif sayılar rasyonel sayı değildir."], 0, `Doğru. Doğal sayılar tam sayıların, tam sayılar da rasyonel sayıların içindedir: −7 = ${M}${FR(7,1)}.`, () => A.bitir(),
+        [null, "Şemaya bakınız: hangi dikdörtgen hangisinin içinde? Rasyonel sayılar en dıştaki bölgedir.", `${M}${FR(3,4)} negatiftir ve rasyonel sayılar bölgesindedir.`]); } }
+  p.querySelector("#v13").addEventListener("click", e => { const r = e.target.dataset && e.target.dataset.r; if (r !== undefined) sec(+r); });
+  p.querySelector("#x13").onclick = () => sec(3);
+  basla();
+}
+
+/* ============================================================ 14 · Payda sıfır olursa */
+function e14(p){
+  let a = pick([3,4,5,-3,-4,-5]), b = null, tah, denenen = new Map();
+  p.innerHTML = `<div id="t14"></div><div id="as14"></div>`;
+  const A = asamalar(p.querySelector("#as14"), [
+    ["Paydayı küçült", `<p class="task" id="g14"></p>
+   <div class="asama"><div class="row" style="margin-top:0"><b>Payda seçiniz:</b></div><div class="seg" id="r14" style="margin-top:6px"></div>
+     <p class="score" style="margin:6px 0 0">Paydayı 6'dan başlayarak 1'e doğru küçültünüz, en sonda 0'ı deneyiniz.</p></div>
+   <div class="cardi" style="margin:8px 0"><p style="font-size:24px" id="o14"></p><p class="score" id="c14"></p></div>
+   <div class="scroll" id="l14"></div>
+   <div class="scroll"><table class="t" id="tb14" style="margin-top:8px"></table></div><div id="f14" hidden></div>`],
+    ["Kuralı bul", `<div id="a14"></div>`]]);
+  const seg = p.querySelector("#r14");
+  seg.innerHTML = [6,5,4,3,2,1,0,-1,-2,-3,-4,-5,-6].map(v=>`<button data-v="${v}" aria-pressed="false" style="min-width:44px;font-size:17px;font-weight:700">${fmt(v)}</button>`).join("");
+  tahmin(p.querySelector("#t14"), "Pay sabitken payda 0'a yaklaştıkça bölümün büyüklüğüne ne olur?", ["0'a yaklaşır","Büyür","Değişmez"], t=>{ tah = t; });
+  function tablo(){ const L = [...denenen.entries()].sort((x,y)=>Math.abs(y[0])-Math.abs(x[0]));
+    p.querySelector("#tb14").innerHTML = L.length ? `<tr><th>Payda</th>${L.map(([d])=>`<td>${fmt(d)}</td>`).join("")}</tr><tr><th>Bölüm</th>${L.map(([d,v])=>`<td>${v}</td>`).join("")}</tr>` : ""; }
+  function draw(){ p.querySelector("#g14").innerHTML = `Pay <b>${fmt(a)}</b> olarak sabit. Aşağıdaki düğmelerle paydayı seçiniz; bölümün nasıl değiştiğini tabloda izleyiniz.`;
+    seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", b !== null && +x.dataset.v === b));
+    if (b === null) { p.querySelector("#o14").innerHTML = `${fmt(a)} : ▢ = ?`; p.querySelector("#c14").textContent = "Henüz payda seçilmedi."; p.querySelector("#l14").innerHTML = hline({min:-6,max:6,H:90,y:46}); tablo(); return; }
+    if (b === 0) { const oncesi = [...denenen.keys()].filter(x=>x!==0).length, f = p.querySelector("#f14");
+      p.querySelector("#o14").innerHTML = `${fmt(a)} : 0 = ?`; p.querySelector("#l14").innerHTML = hline({min:-6,max:6,H:90,y:46});
+      if (oncesi < 3) { p.querySelector("#c14").textContent = "Önce en az üç farklı payda deneyiniz."; return fb(f, false, `0'ı denemeden önce paydayı 6'dan başlayarak küçültünüz (ör. 6, 3, 2, 1). Şimdiye kadar ${oncesi} payda denediniz; en az 3 gerekir.`); }
+      denenen.set(0, "tanımsız"); tablo(); f.hidden = true;
+      p.querySelector("#c14").innerHTML = `0 · ▢ = ${fmt(a)} eşitliğini sağlayan bir sayı yok. <b>Tanımsız.</b>`;
+      if (A.n !== 1) return; A.ac(2);
+      acikla(p.querySelector("#a14"), `${tahY(tah, ["0'a yaklaşır","büyür","değişmez"])} Tabloda payda 0'a yaklaşırken bölümün 0'a uzaklığı büyüdü. ${fmt(a)}/0 neden bir sayı belirtmez?`, ["Çünkü sonuç 0'dır.","Çünkü 0 ile hangi sayı çarpılırsa çarpılsın sonuç 0 olur; pay elde edilemez.","Çünkü pay negatiftir."], 1, "Doğru. Bölmeyi çarpmayla kontrol ederiz: 0 · ▢ her zaman 0'dır, " + fmt(a) + " olamaz. Bu yüzden paydası 0 olan ifade tanımsızdır.", () => A.bitir(),
+        ["0 · ▢ = 0 olurdu; oysa pay " + fmt(a) + ". Sonuç 0 olsaydı çarpma kontrolü tutmalıydı.", null, "Pay pozitif olsaydı da 0 · ▢ yine 0 olurdu; sorun payın işareti değildir."]); return; }
+    const v = a / b; denenen.set(b, kesir(a,b)); tablo();
+    p.querySelector("#o14").innerHTML = `<span class="frac"><span>${fmt(a)}</span><span>${fmt(b)}</span></span> = ${kesir(a,b)}`;
+    p.querySelector("#c14").innerHTML = `Kontrol: ${b<0?"("+fmt(b)+")":fmt(b)} · ${a/b<0?"("+kesir(a,b)+")":kesir(a,b)} = ${fmt(a)}`;
+    p.querySelector("#l14").innerHTML = hline({min:-6,max:6,H:90,y:46,marks:[{v, t:"", c:"var(--acc2)"}]}); p.querySelector("#f14").hidden = true; }
+  seg.onclick = e => { const x = e.target.closest("button"); if (!x) return; b = +x.dataset.v; draw(); };
+  draw();
+}
+
+/* ============================================================ 15 · Tam sayılar yetmediğinde */
+function e15(p){
+  let n, m, tah = null, den = new Map(), son = null;
+  p.innerHTML = `<div id="t15"></div><p class="task" id="g15"></p><div id="as15"></div>
+   <div class="row"><button class="ghost" id="n15">Yeni eşitlik</button></div>`;
+  tahmin(p.querySelector("#t15"), "3 · ▢ = 2 eşitliğini sağlayan bir tam sayı var mıdır?", ["Var","Yok"], t=>{ tah = t; });
+  const A = asamalar(p.querySelector("#as15"), [
+    ["Tam sayıları dene", `<p>Kutuya koymak istediğiniz tam sayının düğmesine basınız. Her deneme tabloya yazılır.</p>
+      <div class="seg" id="r15"></div><div class="scroll" id="l15"></div><div class="scroll"><table class="t" id="tb15"></table></div>
+      <div class="row"><button class="ghost" id="y15">Bu eşitliği sağlayan tam sayı yok</button></div><div id="f15" hidden></div>`],
+    ["Rasyonel sayıyı yaz", `<p id="q15"></p><div class="row"><span style="font-size:20px">▢ =</span> ${kgi("e15")} <button class="primary" id="k15">Kontrol et</button></div>
+      <p class="score">Sayıyı <b>kesir olarak</b> yazınız: önce <b>+</b> ya da <b>−</b> düğmesiyle işareti seçiniz, sonra payı ve paydayı yazınız.</p><div id="f15b" hidden></div>`],
+    ["Kuralı bul", `<div id="a15"></div>`]]);
+  const seg = p.querySelector("#r15");
+  seg.innerHTML = [-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6].map(v=>`<button data-v="${v}" aria-pressed="false" style="min-width:44px;font-size:17px;font-weight:700">${fmt(v)}</button>`).join("");
+  function yeni(){ n = R(2,5); do { m = R(-9,9); } while (m === 0 || m % n === 0); den = new Map(); son = null;
+    ["#f15","#f15b"].forEach(i=>p.querySelector(i).hidden = true); kgTemizle(p, "e15"); A.ac(1); draw(); }
+  function draw(){ p.querySelector("#g15").innerHTML = `<b style="font-size:21px">${n} · ▢ = ${fmt(m)}</b> eşitliğini sağlayan sayıyı arıyoruz.`;
+    seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", son !== null && +x.dataset.v === son));
+    const L = [...den.keys()].sort((x,y)=>x-y);
+    p.querySelector("#tb15").innerHTML = `<tr><th>Denenen tam sayı</th>${L.map(k=>`<td>${fmt(k)}</td>`).join("") || "<td>—</td>"}</tr><tr><th>${n} · (denenen)</th>${L.map(k=>`<td>${fmt(n*k)}</td>`).join("") || "<td>—</td>"}</tr><tr><th>Hedef ${fmt(m)} ile</th>${L.map(k=>`<td>${n*k < m ? "küçük" : "büyük"}</td>`).join("") || "<td>—</td>"}</tr>`;
+    const marks = [{v:m, t:"hedef", c:"var(--acc3)"}]; if (son !== null && Math.abs(n*son) <= 10) marks.push({v:n*son, c:"var(--acc2)", t: fmt(n*son), tc:"var(--acc2)"});
+    p.querySelector("#l15").innerHTML = hline({min:-10,max:10,H:96,y:50,marks}); }
+  seg.onclick = e => { const b = e.target.closest("button"); if (!b) return; son = +b.dataset.v; den.set(son, n*son); draw(); };
+  p.querySelector("#y15").onclick = () => { const k0 = Math.floor(m/n), f = p.querySelector("#f15");
+    if (!den.has(k0) || !den.has(k0+1)) return fb(f, false, `Henüz emin olamayız. Çarpımı hedefin hemen altında kalan ve hedefi hemen geçen iki tam sayıyı da deneyiniz.`);
+    fb(f, true, `Evet. ${n} · (${fmt(k0)}) = ${fmt(n*k0)} hedeften küçük, ${n} · (${fmt(k0+1)}) = ${fmt(n*(k0+1))} hedeften büyük. ${fmt(k0)} ile ${fmt(k0+1)} ardışık tam sayılardır; aralarında başka tam sayı yoktur.`);
+    p.querySelector("#q15").innerHTML = `Aranan sayı ${fmt(k0)} ile ${fmt(k0+1)} arasındadır. ${n} · ▢ = ${fmt(m)} ise ▢ = ${fmt(m)} : ${n} olur. Bu sayıyı kesir olarak yazınız.`;
+    A.ac(2); };
+  p.querySelector("#k15").onclick = () => { const v = kgDeger(p, "e15"), g = Math.abs(v - m/n) < 1e-9, f = p.querySelector("#f15b");
+    if (isNaN(v)) return fb(f, false, "Payı ve paydayı yazınız.");
+    if (!g) return fb(f, false, Math.abs(v + m/n) < 1e-9 ? "Büyüklük doğru, işaret yanlış. Hedef sayının işaretine bakınız." : `▢ = ${fmt(m)} : ${n} olmalıdır. Bölünen payda, bölen paydada yer alır.`);
+    fb(f, true, `Doğru: ▢ = ${kesir(m,n)}. Kontrol: ${n} · ${kesir(m,n)} = ${fmt(m)}. Tam sayılar yetmeyince rasyonel sayıları kullanırız.`); if (A.n !== 2) return; A.ac(3);
+    acikla(p.querySelector("#a15"), `${tahY(tah, ["var","yok"])} Neden tam sayı bulunamadı?`, ["Çünkü eşitlik yanlış yazılmıştır.","Çünkü aranan sayı iki ardışık tam sayının arasındadır ve ardışık tam sayılar arasında başka tam sayı yoktur.","Çünkü negatif sayılar denenmedi."], 1, "Doğru. Bu yüzden tam sayılar, paylaştırma ve bölme durumlarını karşılamak için rasyonel sayılara genişletilir.", () => A.bitir(),
+      ["Eşitlik doğru yazılmıştır; kesir olarak bir çözümü var. Tabloya bakınız: çarpım hedefi hangi iki tam sayı arasında aştı?", null, "Tabloda negatif sayıları da denediniz; sorun işaret değildir."]); };
+  p.querySelector("#n15").onclick = yeni; yeni();
+}
+
+/* ============================================================ 16 · Yakınlaştır */
+function e16(p){
+  /* [a, b, c, d]: a/b < c/d, paydalar farklı */
+  const ciftler = [[1,3,1,2],[1,4,1,3],[2,5,1,2],[-1,2,-1,3],[-3,4,-1,2],[1,2,2,3],[-2,3,-1,2],[-1,2,1,4],[1,6,3,4]];
+  let c, L, bul, tah = null, onceki, denenen, zoomL, ekBol;
+  p.innerHTML = `<div id="t16"></div><p class="task" id="g16"></p><div id="as16"></div>
+   <div class="row"><button class="ghost" id="n16">Yeni sayı çifti</button></div>`;
+  tahmin(p.querySelector("#t16"), "İki rasyonel sayı arasında kaç rasyonel sayı bulunabilir?", ["Hiç yok","Yalnız bir tane","İstediğimiz kadar"], t=>{ tah = t; });
+  const A = asamalar(p.querySelector("#as16"), [
+    ["Aralığı eş parçalara böl", `<p>Sayı doğrusunda her birimi eş parçalara bölünüz. Parça sayısını − ve + düğmeleriyle ya da “Her parçayı ikiye böl” düğmesiyle seçiniz; çentikler hemen değişir. Şu iki şart sağlanınca “Yakınlaştır” düğmesine basınız:</p>
+      <ol class="kurallar" style="margin-top:0"><li>İki sayı da bir çentiğin üstüne gelmeli.</li><li>İki sayının arasında en az <b>3 çentik</b> olmalı.</li></ol>
+      <div class="scroll" id="l16a"></div>
+      <div class="row"><span>Her birimdeki eş parça sayısı:</span>${adim("L16", 1)}<button class="ghost" id="x16">Her parçayı ikiye böl</button></div>
+      <div class="dzs" id="d16"></div>
+      <div class="row"><button class="primary" id="k16a">Yakınlaştır</button></div><div id="f16a" hidden></div>
+      <div class="scroll"><table class="t ctab" id="tb16" style="margin-top:8px"></table></div>`],
+    ["Aradaki sayıları bul", `<p>Yakınlaştırılmış sayı doğrusunda iki sayının <b>arasındaki</b> çentiklere dokununuz. Her çentik bir rasyonel sayı gösterir; sayı çentiğin altına ve aşağıdaki listeye yazılır. <b>Üç farklı</b> sayı bulunca aşama biter.</p>
+      <div class="scroll" id="l16b"></div><div id="f16b" hidden></div>
+      <div class="liste" id="liste16"><b>Bulunan sayılar:</b> <span class="dz" style="border-style:dashed">henüz yok</span></div>`],
+    ["Kuralı bul", `<p>Parçaları bir kez daha ikiye bölüp arada yeni çentik çıkıp çıkmadığına bakınız.</p>
+      <div class="row"><button class="ghost" id="z16">Her parçayı ikiye böl</button></div><div class="scroll" id="l16c"></div><div id="a16"></div>`]]);
+  const Av = () => c[0]/c[1], Bv = () => c[2]/c[3];
+  const ustunde = (v, n) => Math.abs(v*n - Math.round(v*n)) < 1e-9;
+  /* Kesir etiketi: çentiğin tam altında */
+  const etk = (x, y, pay, payda, renk) => { const t = svgKesir(x, y, payda === 1 ? fmt(pay) : (pay<0?M:"") + FR(Math.abs(pay), payda), 17); return renk ? t.replace(/<text /g, `<text style="fill:${renk}" `) : t; };
+  function genel(){ /* Aşama 1: [taban(A), tavan(B)] aralığı */
+    const lo = Math.floor(Av()), hi = Math.ceil(Bv()), aw = actW(), pad = 34, W = aw, y = 44, H = 110;
+    const X = v => pad + (v - lo)/(hi - lo)*(W - 2*pad);
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Sayı doğrusu"><line x1="${pad-18}" y1="${y}" x2="${W-pad+18}" y2="${y}" stroke="var(--ink)" stroke-width="2"/><path d="M${W-pad+24},${y} l-10,-5 v10z M${pad-24},${y} l10,-5 v10z" fill="var(--ink)"/>`;
+    s += `<rect x="${X(Av())}" y="${y-5}" width="${X(Bv())-X(Av())}" height="10" fill="color-mix(in srgb,var(--acc) 18%,transparent)"/>`;
+    for (let k = 0; k <= (hi-lo)*L; k++) { const v = lo + k/L, maj = k % L === 0;
+      s += `<line x1="${X(v)}" y1="${y-(maj?10:6)}" x2="${X(v)}" y2="${y+(maj?10:6)}" stroke="var(--ink)" stroke-width="${maj?2:1.2}"/>`;
+      if (maj) s += `<text x="${X(v)}" y="${y+30}" text-anchor="middle" font-size="17" font-weight="600">${fmt(Math.round(v))}</text>`; }
+    [[Av(),c[0],c[1]],[Bv(),c[2],c[3]]].forEach(([v,a,b]) => { const on = ustunde(v, L);
+      s += `<circle cx="${X(v)}" cy="${y}" r="6.5" fill="${on ? "var(--acc3)" : "var(--acc2)"}" stroke="var(--card)" stroke-width="2"/>` + etk(X(v), y+34, a, b, "var(--acc)"); });
+    p.querySelector("#l16a").innerHTML = s + "</svg>";
+    p.querySelector("#L16 b").textContent = L;
+    const onA = ustunde(Av(), L), onB = ustunde(Bv(), L), ara = onA && onB ? Math.round(Bv()*L) - Math.round(Av()*L) - 1 : null;
+    const du = (v, a, b) => { const ad = `${a<0?M:""}${FR(Math.abs(a),b)}`, n = Math.round(v*L);
+      return ustunde(v, L) ? `${ad} çentikte${L !== b ? ` (${ad} = ${n<0?M:""}${FR(Math.abs(n),L)})` : ""}` : `${ad} çentikte değil`; };
+    p.querySelector("#d16").innerHTML = `<span class="dz">Bir parça: <b>${L === 1 ? "1 birim" : FR(1,L) + " birim"}</b></span><span class="dz${onA?" ok":""}">${du(Av(),c[0],c[1])}</span><span class="dz${onB?" ok":""}">${du(Bv(),c[2],c[3])}</span><span class="dz${ara>=3?" ok":""}">Aradaki çentik: <b>${ara === null ? "sayılamaz" : ara}</b></span>`; }
+  function yakin(hedefEl, Lz, ekle){ /* Aşama 2 ve 3: A'dan bir parça önce, B'den bir parça sonra */
+    const nA = Math.round(Av()*Lz), nB = Math.round(Bv()*Lz), P0 = nA - 1, parts = nB - nA + 2, aw = actW(), pad = 30;
+    const W = Math.max(aw, parts*50 + 2*pad), y = 40, H = 104, X = k => pad + (k - P0)/parts*(W - 2*pad);
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${W > aw ? W : 0}px" role="img" aria-label="Yakınlaştırılmış sayı doğrusu"><line x1="${pad-18}" y1="${y}" x2="${W-pad+18}" y2="${y}" stroke="var(--ink)" stroke-width="2"/><path d="M${W-pad+24},${y} l-10,-5 v10z M${pad-24},${y} l10,-5 v10z" fill="var(--ink)"/>`;
+    s += `<rect x="${X(nA)}" y="${y-5}" width="${X(nB)-X(nA)}" height="10" fill="color-mix(in srgb,var(--acc) 16%,transparent)"/>`;
+    for (let k = P0; k <= nB + 1; k++) { const uc = k === nA || k === nB, dis = k === P0 || k === nB + 1, b = bul.find(u => u.k*Lz/u.L === k);
+      s += `<line x1="${X(k)}" y1="${y-(uc?12:8)}" x2="${X(k)}" y2="${y+(uc?12:8)}" stroke="${dis?"var(--muted)":"var(--ink)"}" stroke-width="${uc?2.6:1.5}"/>`;
+      if (uc) s += `<circle cx="${X(k)}" cy="${y}" r="6.5" fill="var(--acc)" stroke="var(--card)" stroke-width="2"/>` + etk(X(k), y+34, k === nA ? c[0] : c[2], k === nA ? c[1] : c[3], "var(--acc)");
+      else if (b) s += `<circle cx="${X(k)}" cy="${y}" r="6.5" fill="var(--acc3)" stroke="var(--card)" stroke-width="2"/>` + etk(X(k), y+34, k, Lz, "var(--acc3)");
+      else if (!dis && ekle) s += `<circle cx="${X(k)}" cy="${y}" r="4" fill="var(--card)" stroke="var(--acc2)" stroke-width="2"/>`;
+      if (ekle && !uc && !dis) s += `<rect data-k="${k}" x="${X(k)-12}" y="${y-24}" width="24" height="56" fill="transparent" style="cursor:pointer" tabindex="0" role="button" aria-label="${k}. çentik"/>`; }
+    hedefEl.innerHTML = s + "</svg>"; }
+  function yeni(){ do { c = pick(ciftler); } while (c === onceki); onceki = c; L = 1; bul = []; denenen = new Map(); ekBol = false;
+    p.querySelector("#g16").innerHTML = `<b style="font-size:20px">${c[0]<0?M:""}${FR(Math.abs(c[0]),c[1])}</b> ile <b style="font-size:20px">${c[2]<0?M:""}${FR(Math.abs(c[2]),c[3])}</b> arasında üç farklı rasyonel sayı bulunuz.`;
+    ["#f16a","#f16b"].forEach(i=>p.querySelector(i).hidden = true); p.querySelector("#tb16").innerHTML = ""; p.querySelector("#l16b").innerHTML = ""; p.querySelector("#l16c").innerHTML = ""; p.querySelector("#a16").innerHTML = "";
+    p.querySelector("#z16").disabled = false; p.querySelectorAll("#L16 button, #x16").forEach(b=>b.disabled = false); liste(); A.ac(1); genel(); }
+  function liste(){ p.querySelector("#liste16").innerHTML = `<b>Bulunan sayılar:</b> ` + (bul.length ? bul.map(u => `<span>${u.k<0?M:""}${FR(Math.abs(u.k),u.L)}${gcd(u.k,u.L) > 1 ? " = " + kesir(u.k,u.L) : ""}</span>`).join("") : `<span class="dz" style="border-style:dashed">henüz yok</span>`) + ` <span class="dz">${bul.length} / 3</span>`; }
+  function tablo(){ const r = [...denenen.entries()];
+    p.querySelector("#tb16").innerHTML = r.length ? `<tr><th>Parça sayısı</th><th>${c[0]<0?M:""}${FR(Math.abs(c[0]),c[1])} çentikte mi?</th><th>${c[2]<0?M:""}${FR(Math.abs(c[2]),c[3])} çentikte mi?</th><th>Aradaki çentik</th></tr>` + r.map(([l,[a,b,n]])=>`<tr><td>${l}</td><td>${a?"evet":"hayır"}</td><td>${b?"evet":"hayır"}</td><td>${n === null ? "—" : n}</td></tr>`).join("") : ""; }
+  p.querySelector("#L16").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || b.disabled) return; L = Math.max(1, Math.min(60, L + +b.dataset.d)); p.querySelector("#f16a").hidden = true; genel(); });
+  p.querySelector("#x16").onclick = () => { if (A.n !== 1) return; L = Math.min(60, L * 2); p.querySelector("#f16a").hidden = true; genel(); };
+  p.querySelector("#k16a").onclick = () => { const f = p.querySelector("#f16a"), onA = ustunde(Av(), L), onB = ustunde(Bv(), L), ara = onA && onB ? Math.round(Bv()*L) - Math.round(Av()*L) - 1 : null;
+    denenen.set(L, [onA, onB, ara]); tablo();
+    if (!onA || !onB) { const kim = !onA && !onB ? "İki sayı da" : (!onA ? FR(Math.abs(c[0]),c[1]) : FR(Math.abs(c[2]),c[3])) + " sayısı";
+      return fb(f, false, `${kim} bir çentiğe denk gelmiyor. Bir sayının çentiğe gelmesi için parça sayısı onun paydasının katı olmalı. Hem ${c[1]}'${({2:"nin",3:"ün",4:"ün",5:"in",6:"nın"})[c[1]]} hem ${c[3]}'${({2:"nin",3:"ün",4:"ün",5:"in",6:"nın"})[c[3]]} katı olan bir sayı deneyiniz.`); }
+    if (ara < 3) return fb(f, false, `İki sayı da çentikte ama arada ${ara === 0 ? "hiç çentik yok" : "yalnız " + ara + " çentik var"}. Üç sayı bulmak için daha küçük parçalar gerekir: “Her parçayı ikiye böl” düğmesiyle parça sayısını iki katına çıkarınız (${L} yerine ${2*L}).`);
+    zoomL = L; fb(f, true, `Harika! Birimi ${L} eş parçaya böldünüz: ${c[0]<0?M:""}${FR(Math.abs(c[0]),c[1])} = ${c[0]<0?M:""}${FR(Math.abs(Math.round(Av()*L)),L)} ve ${c[2]<0?M:""}${FR(Math.abs(c[2]),c[3])} = ${c[2]<0?M:""}${FR(Math.abs(Math.round(Bv()*L)),L)}. Arada ${ara} çentik var. Şimdi iki sayının arası yakınlaştırıldı.`);
+    p.querySelectorAll("#L16 button, #x16").forEach(b=>b.disabled = true); A.ac(2); yakin(p.querySelector("#l16b"), zoomL, true); };
+  const dokun = t => { if (!t.dataset || t.dataset.k === undefined || A.n !== 2) return; const k = +t.dataset.k, f = p.querySelector("#f16b");
+    if (bul.some(u => u.k === k)) return fb(f, false, "Bu çentiği zaten buldunuz. Başka bir çentiğe dokununuz.");
+    bul.push({k, L: zoomL}); liste(); yakin(p.querySelector("#l16b"), zoomL, bul.length < 3);
+    const v = `${k<0?M:""}${FR(Math.abs(k),zoomL)}`;
+    if (bul.length < 3) return fb(f, true, `Doğru: ${v}, iki sayının arasındadır (payı ${fmt(Math.round(Av()*zoomL))} ile ${fmt(Math.round(Bv()*zoomL))} arasında, paydası ${zoomL}). ${3 - bul.length} sayı daha bulunuz.`);
+    fb(f, true, `Tebrikler! Arada üç farklı rasyonel sayı buldunuz. Hepsi aynı paydalı (${zoomL}) ve payları iki sayının payları arasında.`); A.ac(3); };
+  p.querySelector("#l16b").addEventListener("click", e => dokun(e.target));
+  p.querySelector("#l16b").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); dokun(e.target); } });
+  p.querySelector("#z16").onclick = () => { if (ekBol) return; ekBol = true; p.querySelector("#z16").disabled = true;
+    yakin(p.querySelector("#l16c"), zoomL*2, false);
+    const yeniC = Math.round(Bv()*zoomL*2) - Math.round(Av()*zoomL*2) - 1;
+    p.querySelector("#l16c").insertAdjacentHTML("beforeend", `<p style="margin:4px 0">Parçalar ikiye bölününce aradaki çentik sayısı ${Math.round(Bv()*zoomL) - Math.round(Av()*zoomL) - 1} iken <b>${yeniC}</b> oldu. Yeşil noktalar bulduğunuz sayılardır; aralarına yeni çentikler geldi.</p>`);
+    acikla(p.querySelector("#a16"), `${tahY(tah, ["hiç yok","yalnız bir tane","istediğimiz kadar"])} İki rasyonel sayı arasında kaç rasyonel sayı vardır?`, ["Hiç yoktur.","Yalnız bir tane vardır.","Parçaları bölmeye devam ederek istediğimiz kadar (sonsuz sayıda) bulabiliriz."], 2,
+      "Doğru. Parçaları her ikiye bölüşümüzde arada yeni çentikler, yani yeni rasyonel sayılar çıkar. İki rasyonel sayı arasında sonsuz sayıda rasyonel sayı vardır.", () => A.bitir(),
+      ["Az önce arada üç sayı buldunuz; demek ki arada sayı vardır.", "Siz üç farklı sayı buldunuz, üstelik bölünce daha fazlası çıktı.", null]); };
+  p.querySelector("#n16").onclick = yeni; yeni();
+}
+
+/* ============================================================ 17 · Sayı doğrusu dedektifi */
+function e17(p){
+  const n = 12; let d, bas, i1, i2, ip, ref, tah = null, parca = false, yol = false, hata = [0,0,0];
+  p.innerHTML = `<div id="t17"></div><p class="task">Sayı doğrusundaki çentikler arası eşittir. Yalnız iki çentiğin sayısı yazılıdır. <b>P</b> noktasının gösterdiği sayıyı <b>kesir olarak</b> bulacaksınız. Önce parça sayısını, sonra bir parçanın değerini, en son P'nin değerini yazınız.</p>
+   <div class="asama" style="border-color:var(--acc)"><div class="scroll" id="l17"></div></div><div id="as17"></div>
+   <div class="row"><button class="ghost" id="n17">Yeni soru</button></div>`;
+  tahmin(p.querySelector("#t17"), "Sayı doğrusunda yalnız iki noktanın sayısı bilinirse diğer noktaların sayısı bulunabilir mi?", ["Evet, çentikler eşit aralıklıysa","Hayır, 0 da yazılı olmalı"], t=>{ tah = t; });
+  const A = asamalar(p.querySelector("#as17"), [
+    ["Parçaları say", `<p>Sayısı yazılı iki çentiğin arasında kaç eş parça (boşluk) var? Çentikleri değil, aradaki boşlukları sayınız. Kutuya <b>yalnız parça sayısını</b> (bir doğal sayı) yazınız.</p>
+      <div class="row"><label>Parça sayısı: <input class="ans" id="c17" inputmode="numeric" style="width:70px"></label><button class="primary" id="k17a">Kontrol et</button></div><div id="f17a" hidden></div>`],
+    ["Bir parça kaç birim?", `<p id="q17b"></p>
+      <div class="row"><span>Uzaklık =</span>${kg("u17")}<span style="margin-left:8px">Bir parça =</span>${kg("b17")}<button class="primary" id="k17b">Kontrol et</button></div><div id="f17b" hidden></div>`],
+    ["P'nin değeri", `<p id="q17c"></p><div class="row"><span style="font-size:20px">P =</span>${kgi("e17")}<button class="primary" id="k17c">Kontrol et</button></div>
+      <p class="score">P'nin değerini <b>kesir olarak</b> yazınız: önce <b>+</b> ya da <b>−</b> düğmesiyle işareti seçiniz, sonra payı ve paydayı yazınız.</p><div id="f17c" hidden></div>`],
+    ["Kuralı bul", `<div id="a17"></div>`]]);
+  const deger = k => kesir(bas + k, d);
+  function yeni(){ d = pick([2,3,4,5,6]); bas = R(-2*d, 0); i1 = R(0,4); i2 = R(i1+2, Math.min(n, i1+7)); do { ip = R(0, n); } while (ip === i1 || ip === i2);
+    ref = Math.abs(ip - i1) <= Math.abs(ip - i2) ? i1 : i2; parca = false; yol = false; hata = [0,0,0];
+    ["u17","b17","e17"].forEach(i=>kgTemizle(p,i)); p.querySelector("#c17").value = "";
+    ["#f17a","#f17b","#f17c"].forEach(i=>p.querySelector(i).hidden = true); A.ac(1); draw(); }
+  function draw(){ const W = actW(), pad = 34, y = 70, H = 128, X = k => pad + k/n*(W-2*pad);
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Sayı doğrusu"><line x1="${pad-22}" y1="${y}" x2="${W-pad+22}" y2="${y}" stroke="var(--ink)" stroke-width="2"/><path d="M${W-pad+28},${y} l-10,-5 v10z M${pad-28},${y} l10,-5 v10z" fill="var(--ink)"/>`;
+    if (parca) { s += `<rect x="${X(i1)}" y="${y-5}" width="${X(i2)-X(i1)}" height="10" fill="color-mix(in srgb,var(--acc) 22%,transparent)"/>`;
+      if (!yol) for (let k = i1; k < i2; k++) s += `<text x="${(X(k)+X(k+1))/2}" y="${y-12}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--acc)">${k-i1+1}</text>`; }
+    for (let k = 0; k <= n; k++) { const et = k === i1 || k === i2; s += `<line x1="${X(k)}" y1="${y-(et?11:8)}" x2="${X(k)}" y2="${y+(et?11:8)}" stroke="var(--ink)" stroke-width="${et?2.4:1.6}"/>`; }
+    if (yol) { const yon = Math.sign(ip - ref); for (let k = ref; k !== ip; k += yon) { const x1 = X(k), x2 = X(k+yon);
+      s += `<path d="M${x1},${y-8} Q${(x1+x2)/2},${y-44} ${x2},${y-8}" fill="none" stroke="var(--acc3)" stroke-width="2"/>`; } }
+    [i1,i2].forEach(k => s += svgKesir(X(k), y+34, deger(k), 18));
+    s += `<circle cx="${X(ip)}" cy="${y}" r="7" fill="var(--acc2)" stroke="var(--card)" stroke-width="2"/><text x="${X(ip)}" y="${y-(yol||parca?48:16)}" text-anchor="middle" font-weight="800" font-size="21" fill="var(--acc2)">P</text></svg>`;
+    p.querySelector("#l17").innerHTML = s; }
+  p.querySelector("#k17a").onclick = () => { const f = p.querySelector("#f17a"), c = parse(p.querySelector("#c17").value), N = i2 - i1;
+    if (isNaN(c)) return fb(f, false, "Parça sayısını yazınız.");
+    if (c !== N) { hata[0]++; return fb(f, false, c === N + 1 ? "Çentikleri saydınız. Yazılı iki çentiğin arasındaki parçaları (boşlukları) sayınız; parça sayısı çentik sayısından 1 eksiktir." : hata[0] < 2 ? "Yazılı iki çentiğin arasındaki boşlukları soldan sağa yeniden sayınız." : `Soldaki yazılı çentikten başlayınız: her boşluk bir parçadır. ${deger(i1)} ile ${deger(i2)} arasındaki boşlukları tek tek sayınız.`); }
+    parca = true; draw(); fb(f, true, `Doğru: arada ${N} eş parça var. Parçalar sayı doğrusunda numaralandı.`);
+    p.querySelector("#q17b").innerHTML = `Yazılı iki sayı arasındaki uzaklığı bulunuz: büyük sayıdan küçük sayıyı çıkarınız. Sonra bu uzaklığı ${N} eş parçaya bölerek bir parçanın kaç birim olduğunu bulunuz. İki sonucu da <b>kesir olarak</b> yazınız: üst kutuya pay, alt kutuya payda.`; A.ac(2); };
+  p.querySelector("#k17b").onclick = () => { const f = p.querySelector("#f17b"), u = kgDeger(p, "u17"), v = kgDeger(p, "b17"), N = i2 - i1;
+    if (isNaN(u)) return fb(f, false, "Önce uzaklığı kesir olarak yazınız (pay ve payda).");
+    if (Math.abs(u - N/d) > 1e-9) { hata[1]++; return fb(f, false, hata[1] < 2 ? `Uzaklık, büyük sayı ile küçük sayının farkıdır: ${deger(i2)} − (${deger(i1)}). İki sayıyı paydası ${d} olan kesirler olarak yazıp payları çıkarınız.` : `${deger(i2)} = ${bas+i2<0?M:""}${FR(Math.abs(bas+i2),d)} ve ${deger(i1)} = ${bas+i1<0?M:""}${FR(Math.abs(bas+i1),d)}; farkı: ${kesir(N,d)}.`); }
+    if (isNaN(v)) return fb(f, false, "Uzaklık doğru. Şimdi bir parçanın değerini yazınız.");
+    if (Math.abs(v - 1/d) > 1e-9) return fb(f, false, `Uzaklık ${kesir(N,d)} ve arada ${N} eş parça var. ${kesir(N,d)} birimi ${N} eş parçaya bölünüz.`);
+    fb(f, true, `Doğru. Uzaklık ${kesir(N,d)} birim, ${N} parçaya bölününce bir parça ${FR(1,d)} birim olur.`);
+    p.querySelector("#q17c").innerHTML = `P'ye en yakın yazılı çentik <b>${deger(ref)}</b>. Bu çentikten P'ye kadar parçaları sayınız (her parça ${FR(1,d)} birim). P ${ip > ref ? "sağda olduğu için sayı büyür" : "solda olduğu için sayı küçülür"}.`; A.ac(3); };
+  p.querySelector("#k17c").onclick = () => { const f = p.querySelector("#f17c"), v = kgDeger(p, "e17"), w = (bas + ip)/d, yon = Math.sign(ip - ref), adimS = Math.abs(ip - ref);
+    if (isNaN(v)) return fb(f, false, "İşareti seçip payı ve paydayı yazınız.");
+    if (Math.abs(v - w) > 1e-9) { hata[2]++; if (hata[2] >= 2 && !yol) { yol = true; draw(); }
+      return fb(f, false, Math.abs(v + w) < 1e-9 ? "Pay ve payda doğru ama işaret yanlış. P, 0'ın hangi yanında? İşaret düğmesini değiştiriniz." : hata[2] < 2 ? `${deger(ref)} sayısından ${yon > 0 ? "sağa" : "sola"} doğru P'ye kadar parçaları sayınız. Her parça ${FR(1,d)} birimdir.` : `Yeşil yaylar ${deger(ref)} çentiğinden P'ye ${adimS} parça gösteriyor. ${deger(ref)} = ${bas+ref<0?M:""}${FR(Math.abs(bas+ref), d)}; her parça payı 1 ${yon > 0 ? "artırır" : "azaltır"}.`); }
+    yol = true; draw();
+    fb(f, true, `Doğru: P = ${kesir(bas+ip, d)}. ${deger(ref)} sayısından ${adimS} parça (${kesir(adimS, d)} birim) ${yon > 0 ? "sağa" : "sola"} gidince P bulunur.`); if (A.n !== 3) return; A.ac(4);
+    acikla(p.querySelector("#a17"), `${tahY(tah, ["evet, çentikler eşit aralıklıysa","hayır, 0 da yazılı olmalı"])} Bu yöntem neden işe yaradı?`, ["Çünkü her çentik bir tam sayıyı gösterir.","Çünkü eşit aralıklı sayı doğrusunda her parça aynı miktarı gösterir; bir parçanın değerini bilince her noktayı buluruz.","Çünkü P her zaman iki yazılı çentiğin ortasındadır."], 1,
+      "Doğru. Sayı doğrusunda her rasyonel sayının bir noktası vardır; aralıklar eşitse bir parçanın değeriyle her noktanın sayısı bulunur.", () => A.bitir(),
+      [`Bu sayı doğrusunda bir parça ${FR(1,d)} birimdi; çentikler tam sayıları göstermiyordu.`, null, "P'nin yerine bakınız: yazılı iki çentiğin ortasında olmak zorunda değil."]); };
+  p.querySelector("#n17").onclick = yeni; yeni();
+}
+
+/* ============================================================ 18 · Uzaklık ölçer */
+function e18(p){
+  let m, n, sa = 1, sb = 1, tah, denenen;
+  p.innerHTML = `<div id="t18"></div><p class="task" id="g18"></p>
+   <div class="asama" style="border-color:var(--acc)"><div class="row" style="margin-top:0"><button class="ghost" id="a18">a'nın işaretini değiştir</button><button class="ghost" id="b18">b'nin işaretini değiştir</button></div>
+   <div class="scroll" id="l18"></div><div class="scroll"><table class="t ctab" id="tb18"></table></div></div>
+   <div id="as18"></div><div class="row"><button class="ghost" id="n18">Yeni sayılar</button></div>`;
+  tahmin(p.querySelector("#t18"), "|a| = 5 ve |b| = 2 ise a ile b arasındaki uzaklık ne zaman en fazla olur?", ["a ile b aynı yöndeyken","a ile b 0'ın farklı yanlarındayken","Uzaklık hep aynıdır"], t=>{ tah = t; });
+  const A = asamalar(p.querySelector("#as18"), [
+    ["En fazla uzaklık", `<p>İşaret düğmeleriyle a ve b'yi 0'ın sağına ya da soluna koyunuz. Denediğiniz durumlar tabloya yazılır. Uzaklık <b>en fazla</b> kaç birim olabilir?</p>
+      <div class="row"><input class="ans" id="e18a" inputmode="numeric" aria-label="En fazla uzaklık"> birim <button class="primary" id="k18a">Kontrol et</button></div><div id="f18a" hidden></div>`],
+    ["En az uzaklık", `<p>Şimdi uzaklığın <b>en az</b> kaç birim olabileceğini bulunuz.</p>
+      <div class="row"><input class="ans" id="e18b" inputmode="numeric" aria-label="En az uzaklık"> birim <button class="primary" id="k18b">Kontrol et</button></div><div id="f18b" hidden></div>`],
+    ["Kuralı bul", `<div id="x18"></div>`]]);
+  function yeni(){ m = R(2,8); do { n = R(1,7); } while (n === m); sa = 1; sb = 1; denenen = new Map(); ["#e18a","#e18b"].forEach(x=>p.querySelector(x).value = ""); ["#f18a","#f18b"].forEach(x=>p.querySelector(x).hidden = true); A.ac(1); draw(); }
+  function draw(){ const a = sa*m, b = sb*n; denenen.set(`${a}|${b}`, [a,b]);
+    p.querySelector("#g18").innerHTML = `|a| = <b>${m}</b> ve |b| = <b>${n}</b>. a ile b arasındaki uzaklık en fazla ve en az kaç birim olabilir?`;
+    p.querySelector("#l18").innerHTML = hline({min:-10,max:10,H:130,y:72,marks:[{v:a,t:"a",c:"var(--acc2)",tc:"var(--acc2)"},{v:b,t:"b",c:"var(--acc)",tc:"var(--acc)"}],extra:[(X,y)=>`<line x1="${X(a)}" y1="${y-36}" x2="${X(b)}" y2="${y-36}" stroke="var(--acc3)" stroke-width="4"/><text x="${(X(a)+X(b))/2}" y="${y-44}" text-anchor="middle" font-weight="700" fill="var(--acc3)">${Math.abs(a-b)} birim</text>`]});
+    const r = [...denenen.values()];
+    p.querySelector("#tb18").innerHTML = `<tr><th>a</th>${r.map(x=>`<td>${fmt(x[0])}</td>`).join("")}</tr><tr><th>b</th>${r.map(x=>`<td>${fmt(x[1])}</td>`).join("")}</tr><tr><th>Uzaklık</th>${r.map(x=>`<td>${Math.abs(x[0]-x[1])}</td>`).join("")}</tr>`; }
+  p.querySelector("#a18").onclick = () => { sa *= -1; draw(); }; p.querySelector("#b18").onclick = () => { sb *= -1; draw(); };
+  p.querySelector("#k18a").onclick = () => { const f = p.querySelector("#f18a"), v = parse(p.querySelector("#e18a").value);
+    if (isNaN(v)) return fb(f, false, "Bir sayı yazınız.");
+    if (v !== m + n) return fb(f, false, v === Math.abs(m-n) ? "Bu, uzaklığın en az olduğu durum. a ile b'yi 0'ın farklı yanlarına koyunuz." : "İşaret düğmeleriyle dört durumu da deneyiniz; tablodaki en büyük uzaklığı bulunuz.");
+    fb(f, true, `Doğru: ${m+n} birim. a ile b 0'ın farklı yanlarındayken uzaklık ${m} + ${n} = ${m+n} birim olur.`); A.ac(2); };
+  p.querySelector("#k18b").onclick = () => { const f = p.querySelector("#f18b"), v = parse(p.querySelector("#e18b").value);
+    if (isNaN(v)) return fb(f, false, "Bir sayı yazınız.");
+    if (v !== Math.abs(m - n)) return fb(f, false, v === m + n ? "Bu, en fazla uzaklıktı. a ile b'yi 0'ın aynı yanına koyunuz." : "a ile b'yi 0'ın aynı yanına koyunuz ve doğrunun üstündeki uzaklığı okuyunuz.");
+    fb(f, true, `Doğru: ${Math.abs(m-n)} birim. a ile b 0'ın aynı yanındayken uzaklık ${Math.max(m,n)} − ${Math.min(m,n)} = ${Math.abs(m-n)} birim olur.`); if (A.n !== 2) return; A.ac(3);
+    acikla(p.querySelector("#x18"), `${tahY(tah, ["aynı yöndeyken","farklı yanlardayken","hep aynı"])} En fazla uzaklık nasıl bulunur?`, ["Mutlak değerler çıkarılır.","Sayılar 0'ın farklı yanlarına konur; iki uzaklık toplanır.","Mutlak değerler çarpılır."], 1,
+      `Doğru. Farklı yanlarda uzaklık ${m} + ${n} = ${m+n}, aynı yanda ${Math.max(m,n)} − ${Math.min(m,n)} = ${Math.abs(m-n)} birimdir.`, () => A.bitir(),
+      ["Mutlak değerler çıkarılınca en az uzaklık bulunur (aynı yanda).", null, "Tablodaki uzaklıklara bakınız: çarpım hiçbirinde görünmüyor."]); };
+  p.querySelector("#n18").onclick = yeni; yeni();
+}
+
+/* ============================================================ 19 · Soğuk zincir dolapları */
+function e19(p){
+  const urun = [["Dondurulmuş gıda",-25,-18],["Süt ürünleri",2,8],["Klasik aşılar",2,8]];
+  let dol, tah;
+  p.innerHTML = `<p class="intro">Soğuk zincirde ürünler belirli sıcaklık aralıklarında saklanır. Dondurulmuş gıda −25 °C ile −18 °C, süt ürünleri ve klasik aşılar 2 °C ile 8 °C arasında (sınırlar dâhil).</p>
+   <div id="t19"></div><div id="as19"></div>`;
+  const A = asamalar(p.querySelector("#as19"), [
+    ["Dolaplara ürün seç", `<p class="task">Her dolabın göstergesini okuyup dolaba konabilecek ürünü seçiniz. Dört dolabı da işaretleyince “Kontrol et” düğmesine basınız.</p>
+   <div class="two" style="align-items:start"><svg id="s19" viewBox="0 0 200 330" width="100%" style="max-width:220px" role="img" aria-label="Dikey sayı doğrusu"></svg><div class="cards" id="c19"></div></div>
+   <div class="row"><button class="primary" id="k19">Kontrol et</button><button class="ghost" id="n19">Yeni göstergeler</button></div><div id="f19" hidden></div>`],
+    ["Kuralı bul", `<div id="a19"></div>`]]);
+  tahmin(p.querySelector("#t19"), "Dondurucunun göstergesi −16 °C ise dondurulmuş gıda için uygun mudur?", ["Uygundur","Uygun değildir"], t=>{ tah = t; });
+  const lo = -30, hi = 12, Y = v => 10 + (hi - v)/(hi - lo)*310;
+  function yeni(){ dol = [R(-25,-18), pick([-16,-15,-14,-12]), R(2,8), pick([-3,-1,10,11])].sort(()=>Math.random()-.5);
+    let s = `<rect x="70" y="${Y(-18)}" width="26" height="${Y(-25)-Y(-18)}" fill="color-mix(in srgb,var(--acc) 30%,transparent)"/><rect x="70" y="${Y(8)}" width="26" height="${Y(2)-Y(8)}" fill="color-mix(in srgb,var(--acc3) 35%,transparent)"/>`;
+    s += `<line x1="70" y1="${Y(hi)}" x2="70" y2="${Y(lo)}" stroke="var(--ink)" stroke-width="2"/>`;
+    for (let v = lo; v <= hi; v += 2) s += `<line x1="${v%10===0?60:64}" y1="${Y(v)}" x2="70" y2="${Y(v)}" stroke="var(--ink)"/>` + (v%10===0 ? `<text x="56" y="${Y(v)+4}" text-anchor="end" font-size="14">${fmt(v)}</text>` : "");
+    s += `<text x="100" y="${Y(-21)}" font-size="14" fill="var(--acc)">dondurulmuş</text><text x="100" y="${Y(5)}" font-size="14" fill="var(--acc3)">süt, aşı</text><text x="30" y="${Y(hi)+4}" font-size="13" fill="var(--muted)">°C</text>`;
+    p.querySelector("#s19").innerHTML = s;
+    p.querySelector("#c19").innerHTML = dol.map((t,i)=>`<div class="cardi" data-i="${i}"><p>Dolap ${i+1}: <b style="font-size:22px">${fmt(t)} °C</b></p><div class="seg"><button data-u="0" aria-pressed="false">Dondurulmuş gıda</button><button data-u="1" aria-pressed="false">Süt ürünü / aşı</button><button data-u="2" aria-pressed="false">Hiçbiri</button></div></div>`).join("");
+    p.querySelector("#f19").hidden = true; A.ac(1); }
+  const dogruU = t => t >= -25 && t <= -18 ? "0" : t >= 2 && t <= 8 ? "1" : "2";
+  p.querySelector("#c19").onclick = e => { const b = e.target.closest("button"); if (!b) return; const c = b.closest(".cardi"); c.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); c.dataset.s = b.dataset.u; c.classList.remove("ok","no"); };
+  p.querySelector("#k19").onclick = () => { let ok = 0; p.querySelectorAll("#c19 .cardi").forEach(c => { const g = c.dataset.s === dogruU(dol[+c.dataset.i]); c.classList.toggle("ok",g); c.classList.toggle("no",!g); if (g) ok++; });
+    const s = p.querySelector("#s19"); dol.forEach((t,i)=> s.insertAdjacentHTML("beforeend", `<circle cx="70" cy="${Y(t)}" r="5" fill="var(--acc2)"/><text x="${i % 2 ? 196 : 158}" y="${Y(t)+5}" font-size="13" text-anchor="end" font-weight="700">D${i+1}</text>`));
+    fb(p.querySelector("#f19"), ok === 4, ok === 4 ? "Hepsi doğru. Göstergeyi dikey sayı doğrusunda bulup renkli bandın içinde mi diye bakmak yeterlidir." : `${ok} / 4 doğru. Turuncu noktalar göstergelerin sayı doğrusundaki yerini gösteriyor.`);
+    if (ok === 4 && A.n === 1) { A.ac(2); acikla(p.querySelector("#a19"), `${tahY(tah, ["uygundur","uygun değildir"])} −16 °C dondurulmuş gıda için uygun mudur?`, ["Uygundur; çünkü 16, 18'den küçüktür.","Uygun değildir; −16 dikey sayı doğrusunda −18'in üstünde, bandın dışında kalır.","Uygundur; çünkü negatif bir sıcaklıktır."], 1, "Doğru. Negatif sayılarda sayının kendisine değil, sayı doğrusundaki yerine bakılır: −16, −18'den yukarıdadır.", () => A.bitir(),
+      ["−16 ile −18'in dikey sayı doğrusundaki yerine bakınız: −16 daha yukarıda, yani daha sıcaktır.", null, "Her negatif sıcaklık dondurucu için uygun değildir; bandın içinde olmalıdır."]); } };
+  p.querySelector("#n19").onclick = yeni; yeni();
+}
+
+/* ============================================================ 20 · Hata avcısı */
+function e20(p){
+  const havuz = [["0 bir doğal sayıdır.",1,"0 doğal sayıdır ama pozitif ya da negatif değildir."],["0 pozitif bir tam sayıdır.",0,"0'ın işareti yoktur; ne pozitif ne negatiftir."],["Her tam sayı bir rasyonel sayıdır.",1,"Her tam sayı paydası 1 olan bir kesir olarak yazılabilir."],
+    ["Her rasyonel sayı bir tam sayıdır.",0,"1/2 rasyoneldir ama tam sayı değildir."],["5/0 = 0'dır.",0,"Paydası 0 olan ifade tanımsızdır."],["0/5 = 0'dır.",1,"5 · 0 = 0 olduğundan 0/5 = 0'dır."],["|−9| = −9'dur.",0,"Mutlak değer uzaklıktır: |−9| = 9."],
+    ["Mutlak değeri 4 olan iki tam sayı vardır.",1,"Bu sayılar −4 ve 4'tür."],["−7/3, −3 ile −2 arasındadır.",1,"−7/3 = −2 1/3 olduğundan −3 ile −2 arasındadır."],["−12/4 bir tam sayıdır.",1,"−12/4 = −3'tür."],["Ardışık iki tam sayı arasında başka tam sayı vardır.",0,"Ardışık tam sayılar arasında tam sayı yoktur; rasyonel sayılar vardır."],
+    ["1/3 ile 1/2 arasında rasyonel sayı yoktur.",0,"Örneğin 5/12 aradadır; iki rasyonel sayı arasında daima rasyonel sayı bulunur."],["Sayı doğrusunda her rasyonel sayıya bir nokta karşılık gelir.",1,"Birim, payda kadar eş parçaya bölünerek nokta bulunur."],
+    ["−4 ile 3 arasında 8 tam sayı vardır.",0,"Uçlar sayılmaz: −3, −2, −1, 0, 1, 2; yani 6 tam sayı vardır."],["2/4 ile 1/2 sayı doğrusunda aynı noktayı gösterir.",1,"Denk kesirler aynı sayıdır."],["Bir sayının mutlak değeri 0 olabilir.",1,"|0| = 0'dır."]];
+  let set, st, tah = null, deneme = 0;
+  p.innerHTML = `<div id="t20"></div><div id="as20"></div>`;
+  tahmin(p.querySelector("#t20"), "Aşağıdaki altı ifadeden kaçı doğrudur?", ["Hepsi","Yaklaşık yarısı","Hiçbiri"], t=>{ tah = t; });
+  const A = asamalar(p.querySelector("#as20"), [
+    ["Doğru mu, yanlış mı?", `<p>Her ifadeyi okuyup “Doğru” ya da “Yanlış” düğmesine basınız. Altısını da işaretleyince “Kontrol et” düğmesine basınız. Her kartın altında ifadenin <b>gerekçesi</b> görünür; kırmızı kartlarda seçiminizi değiştirip yeniden kontrol ediniz.</p>
+      <div class="cards" id="c20"></div><div class="row"><button class="primary" id="k20">Kontrol et</button><button class="ghost" id="n20">Yeni ifadeler</button></div><div id="f20" hidden></div>`],
+    ["Kuralı bul", `<div id="a20"></div>`]]);
+  function draw(){ set = havuz.slice().sort(()=>Math.random()-.5).slice(0,6); st = set.map(()=>null); deneme = 0; A.ac(1);
+    p.querySelector("#c20").innerHTML = set.map((s,i)=>`<div class="cardi" data-i="${i}"><p>${kesHTML(s[0])}</p><div class="seg"><button data-v="1" aria-pressed="false">Doğru</button><button data-v="0" aria-pressed="false">Yanlış</button></div><p class="score" data-g hidden style="margin:6px 0 0;font-weight:400;font-size:15px"></p></div>`).join(""); p.querySelector("#f20").hidden = true; }
+  p.querySelector("#c20").onclick = e => { const b = e.target.closest("button"); if (!b) return; const c = b.closest(".cardi"); st[+c.dataset.i] = +b.dataset.v; c.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); c.classList.remove("ok","no"); };
+  p.querySelector("#k20").onclick = () => { const f = p.querySelector("#f20"), eksik = st.filter(x=>x===null).length;
+    if (eksik) return fb(f, false, `Önce altı ifadenin hepsini işaretleyiniz. (${6 - eksik} / 6 işaretlendi)`);
+    deneme++; let ok = 0; set.forEach((s,i)=>{ const c = p.querySelector(`.cardi[data-i="${i}"]`), g = st[i] === s[1]; c.classList.toggle("ok",g); c.classList.toggle("no",!g); if (g) ok++;
+      const q = c.querySelector("[data-g]"); q.hidden = false;
+      q.innerHTML = g ? `<b style="color:var(--acc3)">✓ Seçiminiz doğru.</b> Bu ifade ${s[1] ? "doğrudur" : "yanlıştır"}. <b>Gerekçe:</b> ${kesHTML(s[2])}`
+        : `<b style="color:var(--bad)">✗ Seçiminiz yanlış.</b> Bu ifade ${s[1] ? "doğrudur" : "yanlıştır"}. <b>Gerekçe:</b> ${kesHTML(s[2])} Seçiminizi düzeltip yeniden kontrol ediniz.`; });
+    const dc = set.filter(s=>s[1]).length, hepsi = ok === set.length;
+    fb(f, hepsi, hepsi ? `Hepsi doğru! Bu kartlarda ${dc} ifade doğru, ${6 - dc} ifade yanlıştı. ${tahY(tah, ["hepsi","yaklaşık yarısı","hiçbiri"])}` : `${ok} / ${set.length} doğru. Kırmızı kartlardaki gerekçeleri okuyup seçiminizi düzeltiniz, sonra yeniden kontrol ediniz.`);
+    if (hepsi && A.n === 1) { A.ac(2);
+      acikla(p.querySelector("#a20"), "“0 pozitif bir tam sayıdır.” gibi genel bir ifadenin yanlış olduğunu göstermek için ne yeterlidir?", ["İfadeye uymayan tek bir örnek (karşı örnek) göstermek","İfadeye uyan birkaç örnek göstermek","İfadeyi yüksek sesle okumak"], 0,
+        "Doğru. Bir ifadenin yanlış olduğunu göstermek için ona uymayan tek bir örnek yeter. Örneğin “Her rasyonel sayı bir tam sayıdır.” ifadesi, tam sayı olmayan 1/2 ile çürütülür.".replace("1/2", FR(1,2)), () => A.bitir(),
+        [null, "Uyan örnekler bir ifadeyi kanıtlamaya yetmez; yanlışlığı ise tek bir aykırı örnek gösterir.", "Gerekçeler matematiksel bir örnekle verilir."]); } };
+  p.querySelector("#n20").onclick = draw; draw();
+}
+
+/* ============================================================ 21 · Rasyonel sayıyı inşa et (bütün bloklar → parçalama → boyama) */
+function e21(p){
+  let hp, hq, bl, pd, boya, tah = null, neg;
+  const MAXB = 4;
+  p.innerHTML = `<div id="t21"></div><p class="task" id="g21"></p>
+   <div class="asama" style="border-color:var(--acc)"><div class="scroll" id="s21"></div><p style="margin:4px 0 0;font-size:18px">Boyanan kısım: <span id="sk21"></span></p></div>
+   <div id="as21"></div><div class="row"><button class="ghost" id="n21">Yeni sayı</button></div>`;
+  tahmin(p.querySelector("#t21"), "Payı paydasından büyük bir kesri göstermek için bir bütün yeter mi?", ["Yeter","Birden fazla bütün gerekir"], t=>{ tah = t; });
+  const A = asamalar(p.querySelector("#as21"), [
+    ["Kaç bütün gerekir?", `<p>Bir bütün, sayı doğrusunda ardışık iki tam sayının arasını kaplar. Sayıyı göstermeye yetecek kadar bütün ekleyiniz.</p>
+      <div class="row"><span>Bütün sayısı:</span>${adim("b21", 0)}<button class="primary" id="k21a">Kontrol et</button></div><div id="f21a" hidden></div>`],
+    ["Bütünleri eş parçalara ayır", `<p>Her bütünü paydadaki sayı kadar eş parçaya ayırınız. Sayı doğrusundaki küçük çentikler de parçalarla birlikte değişir.</p>
+      <div class="row"><span>Her bütündeki parça sayısı:</span>${adim("d21", 1)}<button class="primary" id="k21b">Kontrol et</button></div><div id="f21b" hidden></div>`],
+    ["Sayı kadar parçayı boya", `<p id="q21"></p><div class="row"><button class="primary" id="k21c">Kontrol et</button></div><div id="f21c" hidden></div>`],
+    ["Sayı doğrusundaki yeri", `<div id="x21"></div>`]]);
+  function yeni(){ hq = R(2,5); do { hp = R(hq+1, 3*hq-1); } while (hp % hq === 0 || gcd(hp,hq) !== 1); neg = Math.random() < .5; if (neg) hp = -hp;
+    bl = 0; pd = 1; boya = 0; ["#f21a","#f21b","#f21c"].forEach(i=>p.querySelector(i).hidden = true); p.querySelector("#x21").innerHTML = "";
+    p.querySelectorAll("#as21 .adim button").forEach(b=>b.disabled = false);
+    p.querySelector("#g21").innerHTML = `<b style="font-size:24px">${FR(hp,hq)}</b> rasyonel sayısını bütünlerle oluşturunuz. ${neg ? "Sayı negatif olduğu için bütünler 0'dan <b>sola</b> doğru dizilir." : "Sayı pozitif olduğu için bütünler 0'dan <b>sağa</b> doğru dizilir."}`;
+    p.querySelector("#q21").innerHTML = `Parçalara dokunarak 0'dan başlayıp <b>${neg ? "sola" : "sağa"}</b> doğru ${FR(Math.abs(hp),hq)} kadar boyayınız. Bir parçaya dokunmak, 0'dan o parçaya kadar bütün parçaları boyar; son boyalı parçaya yeniden dokunmak onu siler.`;
+    A.ac(1); ciz(); }
+  function ciz(){
+    const W = Math.max(actW(), 380), pad = 30, min = neg ? -MAXB : 0, max = neg ? 0 : MAXB, X = v => pad + (v - min)/(max - min)*(W - 2*pad);
+    const yb = 16, hb = 48, y = 106, H = 144, boyaAktif = A.n === 3;
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Bütünler ve sayı doğrusu">`;
+    if (!bl) s += `<text x="${W/2}" y="${yb+hb/2+5}" text-anchor="middle" font-size="17" fill="var(--muted)">Bütün ekleyince burada, sayı doğrusunun hemen üstünde görünecek.</text>`;
+    for (let i = 0; i < bl; i++) { const a = neg ? -(i+1) : i, b = a + 1;
+      for (let j = 0; j < pd; j++) { const k = i*pd + j, u0 = neg ? -(k+1)/pd : k/pd, x0 = X(u0), x1 = X(u0 + 1/pd);
+        s += `<rect data-k="${k}" x="${x0}" y="${yb}" width="${x1-x0}" height="${hb}" fill="${k < boya ? "var(--acc3)" : "var(--card)"}" stroke="var(--muted)" stroke-width="1" ${boyaAktif ? `style="cursor:pointer" tabindex="0" role="button" aria-label="${i+1}. bütün, ${j+1}. parça"` : ""}/>`; }
+      s += `<rect x="${X(a)}" y="${yb}" width="${X(b)-X(a)}" height="${hb}" fill="none" stroke="var(--acc)" stroke-width="3" pointer-events="none"/>`;
+      [a,b].forEach(v => s += `<line x1="${X(v)}" y1="${yb+hb}" x2="${X(v)}" y2="${y}" stroke="var(--acc)" stroke-width="1.2" stroke-dasharray="4 3" pointer-events="none"/>`); }
+    s += `<line x1="${pad-18}" y1="${y}" x2="${W-pad+18}" y2="${y}" stroke="var(--ink)" stroke-width="2"/><path d="M${W-pad+24},${y} l-10,-5 v10z M${pad-24},${y} l10,-5 v10z" fill="var(--ink)"/>`;
+    for (let k = 0; k <= MAXB*pd; k++) { const v = min + k/pd, maj = k % pd === 0;
+      s += `<line x1="${X(v)}" y1="${y-(maj?9:5)}" x2="${X(v)}" y2="${y+(maj?9:5)}" stroke="var(--ink)" stroke-width="${maj?2:1.2}"/>`;
+      if (maj) s += `<text x="${X(v)}" y="${y+30}" text-anchor="middle" font-size="18" font-weight="600">${fmt(Math.round(v))}</text>`; }
+    if (boya) { const v = (neg ? -1 : 1) * boya / pd; s += `<line x1="${X(0)}" y1="${y}" x2="${X(v)}" y2="${y}" stroke="var(--acc2)" stroke-width="6" stroke-linecap="round" opacity=".6"/><circle cx="${X(v)}" cy="${y}" r="6" fill="var(--acc2)" stroke="var(--card)" stroke-width="2"/>`; }
+    p.querySelector("#s21").innerHTML = s + "</svg>";
+    p.querySelector("#b21 b").textContent = bl; p.querySelector("#d21 b").textContent = pd;
+    const sg = neg ? M : "";
+    p.querySelector("#sk21").innerHTML = boya ? `<b>${sg}${boya % pd === 0 ? boya/pd : FR(boya, pd)}</b>${boya > pd && boya % pd ? ` = <b>${sg}${Math.floor(boya/pd)}${FR(boya % pd, pd)}</b>` : ""}` : "henüz boyama yok"; }
+  p.querySelector("#as21").addEventListener("click", e => { const b = e.target.closest(".adim button"); if (!b || b.disabled) return; const d = +b.dataset.d;
+    if (b.parentElement.id === "b21") bl = Math.max(0, Math.min(MAXB, bl + d)); else pd = Math.max(1, Math.min(10, pd + d));
+    ciz(); });
+  const boyaTik = k => { boya = k + 1 === boya ? k : k + 1; ciz(); };
+  p.querySelector("#s21").addEventListener("click", e => { const k = e.target.dataset && e.target.dataset.k; if (k !== undefined && A.n === 3) boyaTik(+k); });
+  p.querySelector("#s21").addEventListener("keydown", e => { const k = e.target.dataset && e.target.dataset.k; if (k !== undefined && A.n === 3 && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); boyaTik(+k); } });
+  const kilitle = id => p.querySelectorAll(`#${id} button`).forEach(b=>b.disabled = true);
+  p.querySelector("#k21a").onclick = () => { const f = p.querySelector("#f21a"), P = Math.abs(hp), tam = Math.floor(P/hq), gerek = tam + 1;
+    if (!bl) return fb(f, false, "Önce + düğmesiyle bütün ekleyiniz.");
+    if (bl < gerek) return fb(f, false, `Bütünler yetmiyor. ${bl} bütün ${FR(bl*hq,hq)} eder; ${FR(P,hq)} bundan büyüktür.`);
+    if (bl > gerek) return fb(f, false, `Fazla bütün var. ${bl - 1} bütün ${FR((bl-1)*hq,hq)} eder ve ${FR(P,hq)} sayısını zaten karşılar; son bütüne hiç boya gelmez.`);
+    fb(f, true, `Doğru. ${FR(P,hq)} = ${tam}${FR(P%hq,hq)}: ${tam} tam bütün ve bir bütünün bir kısmı gerekir; toplam ${gerek} bütün. Her bütünün sayı doğrusunda ardışık iki tam sayının arasını kapladığına dikkat ediniz.`);
+    kilitle("b21"); A.ac(2); ciz(); };
+  p.querySelector("#k21b").onclick = () => { const f = p.querySelector("#f21b");
+    if (pd !== hq) return fb(f, false, pd > 1 && pd % hq === 0 ? `${pd} parça da denk bir kesir verir; bu etkinlikte paydadaki sayı kadar parça seçiniz.` : `Paydaya bakınız: ${FR(Math.abs(hp),hq)} kesrinin paydası ${hq}. Her bütün kaç eş parçaya ayrılmalı?`);
+    fb(f, true, `Doğru. Her bütün ${hq} eş parçaya ayrıldı; her parça ${FR(1,hq)} birimdir ve sayı doğrusundaki küçük çentiklerle aynı hizadadır.`);
+    kilitle("d21"); A.ac(3); ciz(); };
+  p.querySelector("#k21c").onclick = () => { const f = p.querySelector("#f21c"), P = Math.abs(hp);
+    if (!boya) return fb(f, false, "Önce parçalara dokunarak boyayınız.");
+    if (boya !== P) return fb(f, false, `Boyanan kısım ${FR(boya,pd)}; ${FR(P,hq)} olmalı. ${boya < P ? "Biraz daha boyayınız." : "Fazla boyadınız; son parçalardan silinmeli."}`);
+    const tam = Math.floor(P/hq), a = neg ? -tam - 1 : tam, b = a + 1;
+    fb(f, true, `Doğru. ${FR(hp,hq)} = ${neg ? M : ""}${tam}${FR(P%hq,hq)}. Turuncu nokta sayının sayı doğrusundaki yeridir.`); if (A.n !== 3) return; A.ac(4); ciz();
+    const bas = a - R(0,2), sec = [0,1,2].map(i => `${fmt(bas+i)} ile ${fmt(bas+i+1)}`);
+    acikla(p.querySelector("#x21"), `${tahY(tah, ["yeter","birden fazla bütün gerekir"])} ${FR(hp,hq)} sayı doğrusunda hangi ardışık iki tam sayı arasındadır?`, sec, a - bas,
+      `Doğru. ${tam} tam bütün tam kısmı, son bütündeki boyalı parçalar kesir kısmını verir. Bu yüzden ${FR(hp,hq)}, ${fmt(a)} ile ${fmt(b)} arasındadır. Her bütün, ardışık iki tam sayı arasındaki bir birimdir.`, () => { A.bitir(); ciz(); },
+      sec.map((x,i) => i === a - bas ? null : `Turuncu noktanın hangi iki tam sayı çentiği arasında kaldığına bakınız. Son boyalı parça hangi bütünün içinde?`)); };
+  p.querySelector("#n21").onclick = yeni; yeni();
+}
+
+/* ============================================================ 22 · Sayı doğrusu yarışı (oyun: zorluk, süre, seri bonusu) */
+function e22(p){
+  const AYAR = { kolay:{ad:"Kolay", sure:0, qs:[2,3,4], neg:false, etiket:"hepsi"}, orta:{ad:"Orta", sure:90, qs:[2,3,4,5], neg:true, etiket:"hepsi"}, zor:{ad:"Zor", sure:60, qs:[2,3,4,5,6], neg:true, etiket:"iki"} };
+  let zor, puan, seri, no, dogru, cevap, bekle, kalan, zmn, enIyi = 0; try { enIyi = +localStorage.getItem("e22-rekor") || 0; } catch(e) {}
+  p.innerHTML = `<div id="bas22"><div id="as22"></div></div>
+   <div id="oy22" hidden>
+     <div class="skor"><div><small>SORU</small><b id="s22"></b></div><div><small>PUAN</small><b id="p22"></b></div><div><small>ÜST ÜSTE DOĞRU</small><b class="durum" style="justify-content:center"><span class="seri" id="r22"></span></b></div><div><small>KALAN SÜRE</small><b id="k22"></b></div></div>
+     <div class="zbar"><i id="zb22"></i></div>
+     <p class="task">P noktasının gösterdiği sayı hangisidir? Seçeneklerden birine dokununuz.</p><div class="scroll" id="l22"></div>
+     <div class="secenek4" id="c22"></div><div id="f22" hidden></div>
+     <div class="row"><button class="ghost" id="q22">Oyunu bitir</button></div></div>`;
+  const SEV = { kolay:["Yalnız pozitif sayılar (0 ile 2 arası)","Bütün tam sayılar yazılıdır","Paydalar 2, 3 ya da 4","Süre sınırı yoktur"],
+    orta:["Negatif sayılar da vardır","Bütün tam sayılar yazılıdır","Paydalar 2'den 5'e kadar","10 sorunun tamamı için 90 saniye"],
+    zor:["Negatif sayılar da vardır","Yalnız iki uçtaki tam sayı yazılıdır; aradakileri siz bulursunuz","Paydalar 2'den 6'ya kadar","10 sorunun tamamı için 60 saniye"] };
+  const A = asamalar(p.querySelector("#as22"), [
+    ["Oyunun kurallarını oku", `<p style="margin-top:0"><b>Oyun nasıl oynanır?</b></p>
+     <ol class="kurallar">
+      <li>Her soruda sayı doğrusunda bir <b>P</b> noktası işaretlidir. P'nin gösterdiği sayıyı dört seçenekten birine dokunarak seçersiniz.</li>
+      <li>Oyun <b>10 sorudan</b> oluşur. Cevap verince bir sonraki soru kendiliğinden gelir.</li>
+      <li>Her doğru cevap <b>10 puan</b> kazandırır. Her yanlış cevap <b>5 puan</b> kaybettirir; puan 0'ın altına düşmez. Yanlış cevapta doğru seçenek yeşil yanıp söner.</li>
+      <li>Üst üste <b>3 doğru</b> cevap verirseniz ayrıca <b>5 puan bonus</b> kazanırsınız. Sonra sayaç sıfırlanır; yeniden 3 doğru bonus getirir.</li>
+      <li>Oyun 10 soru bitince ya da süre dolunca biter. En yüksek puanınız bu cihazda saklanır.</li>
+     </ol>
+     <div class="ornek"><b>Puan örneği</b>
+      <p style="margin:4px 0">Doğru, doğru, doğru: 10 + 10 + 10 + 5 (bonus) = <b>35 puan</b>.</p>
+      <p style="margin:4px 0">Sonra bir yanlış: 35 − 5 = <b>30 puan</b>. Üst üste doğru sayacı sıfırlanır.</p></div>
+     <div class="ornek"><b>Örnek soru</b><div class="scroll" id="o22"></div>
+      <p style="margin:4px 0 0">0 ile 1 arası 4 eş parçaya ayrılmıştır; her parça ${FR(1,4)} birimdir. P, 0'dan 3 parça sağdadır. Bu yüzden seçeneklerden ${FR(3,4)} seçilir ve 10 puan kazanılır.</p></div>
+     <div class="row"><button class="primary" id="ok22">Kuralları okudum</button></div>`],
+    ["Seviye seç ve oyna", `<p style="margin-top:0">Seviyeler sayıların türü, yazılı tam sayılar, paydalar ve süre bakımından farklıdır. Bir seviyeye dokunarak seçiniz:</p>
+     <div class="seviyeler" id="z22">${["kolay","orta","zor"].map((z,i)=>`<button data-z="${z}" aria-pressed="${i===0}"><b>${["Kolay","Orta","Zor"][i]}</b><ul>${SEV[z].map(x=>`<li>${x}</li>`).join("")}</ul></button>`).join("")}</div>
+     <div class="row"><button class="primary" id="b22">Oyuna başla</button><span class="dz">En yüksek puanınız: <b id="rek22">${enIyi}</b></span></div>
+     <div id="son22" hidden></div>`]]);
+  p.querySelector("#o22").innerHTML = hline({min:0, max:1, sub:4, H:84, y:40, marks:[{v:.75, t:"P", c:"var(--acc2)", tc:"var(--acc2)"}]});
+  p.querySelector("#ok22").onclick = () => A.ac(2);
+  let secZ = "kolay";
+  p.querySelector("#z22").onclick = e => { const b = e.target.closest("button"); if (!b) return; secZ = b.dataset.z; p.querySelectorAll("#z22 button").forEach(x=>x.setAttribute("aria-pressed", x===b)); };
+  function durum(){ p.querySelector("#s22").textContent = `${no} / 10`; p.querySelector("#p22").textContent = puan;
+    p.querySelector("#r22").innerHTML = [0,1,2].map(i=>`<i class="${i < seri ? "d" : ""}"></i>`).join("");
+    p.querySelector("#k22").textContent = zor.sure ? `${kalan} sn` : "sınırsız"; }
+  p.querySelector("#b22").onclick = () => { zor = AYAR[secZ]; puan = 0; seri = 0; no = 0; dogru = 0; p.querySelector("#bas22").hidden = true; p.querySelector("#oy22").hidden = false;
+    clearInterval(zmn); const zb = p.querySelector("#zb22"); zb.parentElement.hidden = !zor.sure; kalan = zor.sure;
+    if (zor.sure) { zb.style.width = "100%"; zb.style.background = "var(--acc3)"; zmn = setInterval(()=>{ if (!p.isConnected) return clearInterval(zmn); kalan--; zb.style.width = (100*kalan/zor.sure) + "%";
+      zb.style.background = kalan < zor.sure*.25 ? "var(--bad)" : kalan < zor.sure*.5 ? "var(--acc2)" : "var(--acc3)"; durum(); if (kalan <= 0) bitir(true); }, 1000); }
+    soru(); };
+  function soru(){ if (no >= 10) return bitir(false); bekle = false; no++;
+    const q = pick(zor.qs), a = zor.neg ? R(-3, 1) : 0, b = a + (zor.neg ? 3 : 2);
+    let k; do { k = R(a*q + 1, b*q - 1); } while (k % q === 0);
+    cevap = k; const t0 = Math.floor(k/q);
+    const yan = new Set([k]); const aday = [-k, k + q, k - q, (k>0? k-1 : k+1), t0*q + (q - (k - t0*q))].filter(x => x % q !== 0 && x !== k);
+    for (const x of aday.sort(()=>Math.random()-.5)) { if (yan.size >= 4) break; yan.add(x); }
+    while (yan.size < 4) { const x = R((a-1)*q+1, (b+1)*q-1); if (x % q) yan.add(x); } /* aralık dışı çeldiriciler de olabilir; sonsuz döngü olmaz */
+    const sec = [...yan].sort((x,y)=>x-y);
+    durum();
+    const lab = zor.etiket === "hepsi" ? null : [a, b];
+    p.querySelector("#l22").innerHTML = hline({min:a, max:b, sub:q, H:92, y:46, hideNums: lab ? [...Array(b-a+1).keys()].map(i=>a+i).filter(v=>!lab.includes(v)) : [], marks:[{v:k/q, t:"P", c:"var(--acc2)", tc:"var(--acc2)"}]});
+    p.querySelector("#c22").innerHTML = sec.map(x => `<button class="ghost" data-v="${x}" style="font-size:20px">${kesir(x,q)}</button>`).join("");
+    p.querySelector("#c22").dataset.q = q; p.querySelector("#f22").hidden = true; }
+  p.querySelector("#c22").onclick = e => { const b = e.target.closest("button"); if (!b || bekle) return; bekle = true; const g = +b.dataset.v === cevap, q = +p.querySelector("#c22").dataset.q;
+    const dogruB = p.querySelector(`#c22 button[data-v="${cevap}"]`);
+    if (g) { puan += 10; seri++; dogru++; b.classList.add("ok");
+      if (seri === 3) { puan += 5; seri = 0; fb(p.querySelector("#f22"), true, "Doğru! +10 puan. Üst üste 3 doğru: +5 puan daha!"); } else fb(p.querySelector("#f22"), true, "Doğru! +10 puan."); }
+    else { puan = Math.max(0, puan - 5); seri = 0; b.classList.add("no"); dogruB.classList.add("ok", "parla");
+      fb(p.querySelector("#f22"), false, `Doğrusu ${kesir(cevap, q)}. Ardışık iki tam sayı arası ${q} eş parçaya ayrılmış; her parça ${FR(1,q)} birimdir. −5 puan.`); }
+    durum(); setTimeout(soru, g ? 1000 : 2400); };
+  p.querySelector("#q22").onclick = () => bitir(false, true);
+  function bitir(sure, yarida){ clearInterval(zmn); bekle = true;
+    const yeniRekor = puan > enIyi; if (yeniRekor) { enIyi = puan; try { localStorage.setItem("e22-rekor", puan); } catch(e) {} }
+    p.querySelector("#oy22").hidden = true; p.querySelector("#bas22").hidden = false; p.querySelector("#rek22").textContent = enIyi;
+    const s = p.querySelector("#son22"); s.hidden = false; s.className = "fb bilgi";
+    s.innerHTML = `<b>${sure ? "Süre doldu!" : yarida ? "Oyunu bitirdiniz." : "Oyun bitti!"}</b><div class="dzs"><span class="dz">Cevaplanan soru: <b>${no}</b></span><span class="dz">Doğru: <b>${dogru}</b></span><span class="dz">Puan: <b>${puan}</b></span>${yeniRekor ? `<span class="dz ok">Yeni rekor!</span>` : ""}</div>${dogru < no ? "İpucu: Önce ardışık iki tam sayı arasının kaç eş parçaya bölündüğünü sayınız; bir parça, 1 bölü parça sayısı kadardır." : "Bütün cevaplarınız doğru. Daha zor bir seviye deneyebilirsiniz."}`;
+    p.querySelector("#b22").textContent = "Yeniden oyna"; if (!yarida || no >= 3) A.bitir(); }
+}
+
+/* Her etkinlik: [ad, süreç bileşeni, fonksiyon, Ne yapacaksınız?, [Nasıl yapacaksınız? adımları], Ne zaman biter?] */
+const ACT = [
+ ["Sıfırın anlamı","a",e1,"Günlük hayatta 0'ın iki farklı anlamını ayırt edeceksiniz.",
+   ["Aşama 1: Her kartta 0'ın neyi anlattığını düşününüz. 0 bir niceliğin hiç olmadığını anlatıyorsa “Hiç yok”, altı ve üstü olan seçilmiş bir yer ise “Başlangıç noktası” düğmesine basınız.","Sekiz kartı da işaretleyince “Kontrol et” düğmesine basınız. Kırmızı kartlarda seçiminizi değiştirip yeniden kontrol ediniz.","Aşama 2: Kartlardan çıkardığınız kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Asansör katları","a",e2,"Giriş katının 0 kabul edildiği bir binada katları tam sayılarla göstereceksiniz.",
+   ["Aşama 1: Görevi okuyup asansör panelinde istenen katın düğmesine basınız. İki kat istenirse iki düğmeye basınız. Sonra “Kontrol et” düğmesine basınız.","Doğru cevaptan sonra “Yeni görev” ile devam ediniz; üç görevi doğru yapınca Aşama 1 biter.","Aşama 2: Görevlerden çıkardığınız kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Termometre okuma","c",e3,"Termometreyi dikey bir sayı doğrusu gibi okuyacaksınız.",
+   ["Aşama 1 · 1. adım: İki büyük çizgi arasının kaç eş parçaya bölündüğünü sayınız; bir parçanın kaç °C olduğunu yazınız.","Aşama 1 · 2. adım: Sıvının ucundaki sıcaklığı ondalık gösterimle yazınız: işaret (+ ya da −), tam kısım ve ondalık kısım ayrı kutulara yazılır. Üç termometreyi doğru okuyunca Aşama 1 biter.","Aşama 2: Hangi sıcaklığın daha soğuk olduğunu açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Çekirgenin sıçrayışları","a",e4,"Eşit sıçrayışlarla ilerleyen çekirgenin uğradığı bir noktanın sayısını bulacaksınız.",
+   ["Aşama 1: Başlangıç ile bitiş arasındaki uzaklığı sıçrayış sayısına bölerek bir sıçrayışın uzunluğunu bulunuz.","Aşama 2: İstenen harfin başlangıçtan kaç sıçrayış sonra geldiğini sayıp o noktadaki sayıyı yazınız."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Eşit bölmeli sayı doğrusu","a",e5,"Yalnız iki noktası yazılı, eşit aralıklı bir sayı doğrusunda K noktasının sayısını bulacaksınız.",
+   ["Aşama 1: Yazılı iki sayının arasındaki parça (boşluk) sayısını ve bir parçanın kaç birim olduğunu bulunuz.","Aşama 2: Yazılı bir sayıdan K'ye kadar parçaları sayarak K'nin sayısını yazınız."],"İki aşama da tamamlanınca etkinlik biter. “Yeni soru” ile tekrar edebilirsiniz."],
+ ["Denk kesirler aynı nokta","b",e6,"Üstteki sayı doğrusunda verilen kesirle aynı noktayı gösteren iki farklı kesir bulacaksınız.",
+   ["Aşama 1: Her renkli çerçevede önce paydayı, sonra payı − ve + düğmeleriyle seçiniz.","Çerçevedeki noktanın üstteki noktayla aynı yerde olmasını sağlayınız. İki çerçevede birbirinden farklı iki denk kesir oluşturunca Aşama 1 biter.","Aşama 2: Denk kesirleri nasıl elde ettiğinizi açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter. Bulduğunuz denk kesirler listede birikir."],
+ ["Rasyonel sayıyı yerleştir","c",e7,"Verilen rasyonel sayıyı sayı doğrusunda göstereceksiniz.",
+   ["Aşama 1: Sayının hangi ardışık iki tam sayı arasında olduğunu bulup sayı doğrusunda o aralığa dokununuz.","Aşama 2: Aralık, paydadaki sayı kadar eş parçaya bölünür. Parçaları sayıp doğru çentiğe dokununuz."],"Doğru çentiğe dokununca etkinlik tamamlanır. “Yeni sayı” ile tekrar edebilirsiniz."],
+ ["Sayıları sınıflandır","b",e8,"Her sayının doğal sayı, tam sayı ya da rasyonel sayı olup olmadığına karar vereceksiniz.",
+   ["Aşama 1: Kesirleri önce sadeleştiriniz. Her kartta sayının ait olduğu bütün türleri işaretleyiniz; bir sayı birden fazla türe ait olabilir.","Paydası 0 olan ifadelerde yalnız “Tanımsız” düğmesini seçiniz. Altı kartı da işaretleyince “Kontrol et” düğmesine basınız.","Aşama 2: Bir kesrin ne zaman tam sayı olduğunu açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Hata miktarı","b",e9,"Paketlerin hedef kütleden farkını ve hata miktarını bulacaksınız.",
+   ["Aşama 1: “Fark” sütununa tartım ile hedef kütle arasındaki farkı yazınız: fazlaysa pozitif, eksikse negatif.","“Hata miktarı” sütununa farkın mutlak değerini yazınız. Hata miktarı en az olan makineyi seçip “Kontrol et” düğmesine basınız.","Aşama 2: Hata miktarının neden negatif olmadığını açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Mutlak değer avı","b",e10,"Mutlak değerin 0'a uzaklık olduğunu kullanarak istenen tam sayıları işaretleyeceksiniz.",
+   ["Aşama 1: Görevi okuyup sayı doğrusunda istenen sayıların çentiklerine dokununuz. Bir seçimi kaldırmak için aynı çentiğe yeniden dokununuz.","“Kontrol et” düğmesine basınız; seçtiğiniz noktaların 0'a uzaklığı doğrunun üstünde gösterilir. Üç görevi doğru yapınca Aşama 1 biter.","Aşama 2: Mutlak değerle ilgili kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Gelir mi, gider mi?","a",e11,"Günlük hayattaki para durumlarını tam sayılarla göstereceksiniz.",
+   ["Aşama 1: Her kartta durumun kazanç mı, kayıp mı, yoksa ikisi de değil mi olduğuna karar verip işaret düğmesini seçiniz.","Kutuya durumu gösteren tam sayıyı yazınız. Altı kartı da doldurunca “Kontrol et” düğmesine basınız.","Aşama 2: 0'ın bu kartlarda ne anlattığını seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Maden ocağı asansörü","a",e12,"Kuyu ağzından galeriye inen kafesin aldığı yolu bulacaksınız.",
+   ["Aşama 1: Kafesin alacağı yolu tahmin edip yazınız.","Aşama 2: Düğmelerle kafesi hedef galeriye indiriniz ve “Kontrol et” düğmesine basınız.","Aşama 3: Yolun neden kot sayısından farklı çıktığını açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
+ ["Sayılar şeması","b",e13,"Sayıları iç içe dikdörtgenlerden oluşan şemada doğru bölgeye yerleştireceksiniz.",
+   ["Aşama 1: Karttaki sayıyı gerekiyorsa sadeleştiriniz ve sayının ait olduğu en içteki bölgeye dokununuz.","Sayı tanımsızsa şemanın yanındaki “Şemada yeri yok” düğmesine basınız. Sekiz kart bitince Aşama 1 biter.","Aşama 2: Şemadan çıkardığınız sonucu seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Payda sıfır olursa","b",e14,"Pay sabitken payda küçüldükçe bölümün nasıl değiştiğini ve paydanın neden 0 olamayacağını keşfedeceksiniz.",
+   ["Aşama 1: Payda düğmelerini 6'dan başlayarak 1'e doğru sırayla seçiniz; bölüm ve sayı doğrusundaki yeri tabloda birikir.","En az üç payda denedikten sonra 0'ı seçiniz.","Aşama 2: Paydası 0 olan ifadenin neden sayı belirtmediğini açıklayınız."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Tam sayılar yetmediğinde","b",e15,"Hiçbir tam sayının sağlamadığı bir çarpma eşitliği için aranan rasyonel sayıyı bulacaksınız.",
+   ["Aşama 1: Sayı düğmeleriyle tam sayıları deneyiniz; her deneme tabloya yazılır. Çarpımın hedefi geçtiği yeri bulunca “Bu eşitliği sağlayan tam sayı yok” düğmesine basınız.","Aşama 2: Eşitliği sağlayan sayıyı kesir olarak yazınız.","Aşama 3: Tam sayının neden bulunamadığını açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
+ ["Yakınlaştır","c",e16,"İki rasyonel sayı arasında üç farklı rasyonel sayı bulacaksınız.",
+   ["Aşama 1: − ve + düğmeleriyle ya da “Her parçayı ikiye böl” düğmesiyle her birimi eş parçalara bölünüz. İki sayı da bir çentiğe gelince ve aralarında en az 3 çentik olunca “Yakınlaştır” düğmesine basınız.","Aşama 2: Yakınlaştırılmış sayı doğrusunda iki sayının arasındaki çentiklere dokununuz. Dokunduğunuz her çentiğin sayısı altına ve listeye yazılır.","Aşama 3: Parçaları yeniden ikiye bölüp iki sayı arasında kaç sayı olduğunu açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
+ ["Sayı doğrusu dedektifi","c",e17,"Yalnız iki çentiğinin sayısı yazılı bir sayı doğrusunda P noktasının gösterdiği sayıyı bulacaksınız.",
+   ["Aşama 1: Sayısı yazılı iki çentik arasında kaç eş parça olduğunu sayıp yalnız bu sayıyı yazınız.","Aşama 2: İki sayı arasındaki uzaklığı ve bir parçanın kaç birim olduğunu kesir olarak (pay ve payda) yazınız.","Aşama 3: En yakın yazılı çentikten P'ye kadar parçaları sayınız. P'nin değerini kesir olarak yazınız: önce işareti (+ ya da −) seçiniz, sonra payı ve paydayı yazınız.","Aşama 4: Yöntemin neden işe yaradığını açıklayınız."],"Dört aşama da tamamlanınca etkinlik biter."],
+ ["Uzaklık ölçer","b",e18,"Mutlak değerleri verilen iki sayı arasındaki uzaklığın en az ve en fazla kaç olabileceğini bulacaksınız.",
+   ["İşaret düğmeleriyle a ve b'yi 0'ın sağına ya da soluna koyunuz; her durumun uzaklığı tabloya yazılır.","Aşama 1: En fazla uzaklığı yazınız. Aşama 2: En az uzaklığı yazınız.","Aşama 3: En fazla uzaklığın nasıl bulunduğunu açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
+ ["Soğuk zincir dolapları","a",e19,"Dolap göstergelerini dikey sayı doğrusunda okuyup her dolaba uygun ürünü seçeceksiniz.",
+   ["Aşama 1: Her dolabın sıcaklığını soldaki dikey sayı doğrusunda bulunuz. Sıcaklık renkli bantlardan birinin içindeyse o ürünü, dışındaysa “Hiçbiri” düğmesini seçiniz.","Dört dolabı da işaretleyince “Kontrol et” düğmesine basınız.","Aşama 2: Negatif sıcaklıkları karşılaştırmayla ilgili soruyu cevaplayınız."],"İki aşama da tamamlanınca etkinlik biter."],
+ ["Hata avcısı","c",e20,"Sayılarla ilgili altı ifadenin doğru mu, yanlış mı olduğuna karar vereceksiniz.",
+   ["Aşama 1: Her ifadeyi okuyup “Doğru” ya da “Yanlış” düğmesine basınız. Altısını da işaretleyince “Kontrol et” düğmesine basınız.","Her kartın altında ifadenin gerekçesi çıkar. Kırmızı kartlarda seçiminizi düzeltip yeniden kontrol ediniz.","Aşama 2: Bir ifadenin yanlış olduğunu neyin gösterdiğini seçiniz."],"İki aşama da tamamlanınca etkinlik biter. “Yeni ifadeler” ile devam edebilirsiniz."],
+ ["Rasyonel sayıyı inşa et","c",e21,"Bir rasyonel sayıyı bütünlerle oluşturup sayı doğrusundaki yerini göreceksiniz.",
+   ["Aşama 1: Sayıyı göstermek için kaç bütün gerektiğini bulunuz. Her bütün, sayı doğrusunda ardışık iki tam sayının arasını tam olarak kaplar.","Aşama 2: Bütünleri paydadaki sayı kadar eş parçaya ayırınız. Aşama 3: 0'dan başlayarak sayı kadar parçayı boyayınız.","Aşama 4: Sayının hangi ardışık iki tam sayı arasında olduğunu seçiniz."],"Dört aşama da tamamlanınca etkinlik biter."],
+ ["Sayı doğrusu yarışı","c",e22,"Sayı doğrusundaki P noktasının gösterdiği sayıyı dört seçenek arasından bularak puan toplayacaksınız.",
+   ["Aşama 1: Oyunun kurallarını, puan örneğini ve örnek soruyu okuyup “Kuralları okudum” düğmesine basınız.","Aşama 2: Seviyelerin açıklamasını okuyup bir seviye seçiniz ve “Oyuna başla” düğmesine basınız.","Her soruda P'nin gösterdiği sayıya dokununuz. Soru, puan, üst üste doğru ve kalan süre ayrı kutularda görünür."],"Oyun 10 soru bitince ya da süre dolunca biter ve sonucunuz gösterilir."],
+];
+const idx = document.getElementById("index"), panel = document.getElementById("panel");
+idx.innerHTML = ACT.map((a,i)=>`<li><a role="button" tabindex="0" style="cursor:pointer" data-i="${i}"><span class="n">${i+1}</span><span class="t">${a[0]}<span class="s">Süreç bileşeni ${a[1]}</span></span></a></li>`).join("");
+function show(i){ const a = ACT[i];
+  panel.innerHTML = `<div class="ph"><h2>${i+1}. ${a[0]}</h2><span class="code">MAT.7.1.1.${a[1]}</span></div>
+   <div class="yon"><p class="intro"><b>Ne yapacaksınız?</b> ${a[3]}</p><ol>${a[4].map(x=>`<li>${x}</li>`).join("")}</ol><p class="bitis"><b>Ne zaman biter?</b> ${a[5]}</p></div><div id="act"></div>`;
+  a[2](panel.querySelector("#act"));
+  idx.querySelectorAll("a").forEach(x=>x.setAttribute("aria-current", +x.dataset.i === i));
+  try { localStorage.setItem("sa7-last", i); } catch(e) {} }
+function route(){ const m = location.hash.match(/^#e(\d+)$/); let i = m ? +m[1]-1 : null;
+  if (i === null || !(i >= 0 && i < ACT.length)) { i = 0; try { const s = localStorage.getItem("sa7-last"); if (s !== null && +s >= 0 && +s < ACT.length) i = +s; } catch(e) {} }
+  show(i); }
+idx.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.closest("a")) { e.preventDefault(); e.target.closest("a").click(); } });
+idx.addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); try { history.replaceState(null, "", "#e" + (+a.dataset.i + 1)); } catch (_) {} show(+a.dataset.i); panel.scrollIntoView({behavior:"smooth", block:"start"}); });
+window.addEventListener("hashchange", route);
+route();
+})();
+</script>
+<!--KABUK-->
+<button class="kb-dugme" id="kbDugme" aria-label="Ayarlar ve yardım" aria-expanded="false" aria-controls="kbMenu">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>
+ <span class="kb-sessiz" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></span>
+</button>
+<div class="kb-menu" id="kbMenu" role="dialog" aria-label="Ayarlar ve yardım" hidden>
+ <h4>Ayarlar ve Yardım</h4>
+ <div class="kb-yuvarlak">
+  <button id="kbSes" aria-pressed="true"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="off" d="M16 9l5 6M21 9l-5 6" style="display:none"/></svg></b><span id="kbSesY">Ses açık</span></button>
+  <button id="kbYon" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></b><span>Yönerge</span></button>
+  <button id="kbOku" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 11v2"/></svg></b><span>Sesli oku</span></button>
+ </div>
+ <h5>Erişilebilirlik</h5>
+ <div class="kb-satir"><span>Yazı boyutu</span><div class="kb-seg" id="kbBoy"><button data-v="0" aria-label="Normal">A</button><button data-v="1" aria-label="Büyük">A+</button><button data-v="2" aria-label="Çok büyük">A++</button></div></div>
+ <div class="kb-satir"><span>Yüksek karşıtlık</span><button class="kb-anahtar" role="switch" data-k="karsit" aria-label="Yüksek karşıtlık"></button></div>
+ <div class="kb-satir"><span>Rahat okuma (geniş aralık)</span><button class="kb-anahtar" role="switch" data-k="rahat" aria-label="Rahat okuma"></button></div>
+ <div class="kb-satir"><span>Hareketi azalt</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azalt"></button></div>
+ <div class="kb-satir"><span>Tema</span><div class="kb-seg" id="kbTema"><button data-v="">Oto</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
+ <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dön</button></div>
+</div>
+<dialog class="kb-yonerge" id="kbYonerge" aria-labelledby="kbYB"><header id="kbYB">Yönerge</header><div class="ic" id="kbYIc"></div>
+ <footer><button class="ghost" id="kbYOku">Sesli oku</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
+<div class="kb-gizli" aria-live="polite" id="kbDuyuru"></div>
+<script>
+(function(){
+const D=document, H=D.documentElement, $=s=>D.querySelector(s);
+const ANAHTAR="kb-ayar", ILR="kb-ilerleme:"+(D.title||location.pathname);
+const oku=(k,v)=>{try{const s=localStorage.getItem(k);return s===null?v:JSON.parse(s)}catch(e){return v}};
+const yaz=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const VARS={ses:true,boy:0,karsit:false,rahat:false,azhareket:matchMedia("(prefers-reduced-motion: reduce)").matches,tema:""};
+let A=Object.assign({},VARS,oku(ANAHTAR,{}));
+
+/* --- Düzen: başlık bandı, yan liste, gezinti --- */
+const wrap=$(".wrap");
+if(wrap){
+  const h1=wrap.querySelector("h1"); let ust=h1; while(ust&&ust.parentElement!==wrap)ust=ust.parentElement;
+  let hero;
+  if(ust&&ust!==h1&&!ust.matches(".eyebrow,.lead")){ hero=ust; hero.classList.add("kb-hero"); wrap.prepend(hero); }
+  else { hero=D.createElement("header"); hero.className="kb-hero";
+    [...wrap.children].filter(e=>e.matches(".eyebrow,h1,.lead")).forEach(e=>hero.appendChild(e)); wrap.prepend(hero); }
+  const idx=$("#index"), pan=$("#panel");
+  if(idx&&pan){
+    const d=D.createElement("div"); d.className="kb-duzen";
+    const yan=D.createElement("aside"); yan.className="kb-yan"; yan.setAttribute("aria-label","Etkinlik listesi");
+    const ana=D.createElement("main");
+    pan.before(d); yan.appendChild(idx); ana.appendChild(pan); d.append(yan,ana);
+    const g=D.createElement("nav"); g.className="kb-gezinti"; g.setAttribute("aria-label","Etkinlikler arası geçiş");
+    g.innerHTML='<button class="ghost" id="kbOnce">‹ Önceki</button><span id="kbSira"></span><button class="primary" id="kbSonra">Sonraki ›</button>';
+    ana.appendChild(g);
+    const pr=D.createElement("div"); pr.className="kb-ilerleme"; pr.innerHTML='<div class="kb-bar"><i id="kbBar"></i></div><span id="kbSay"></span>'; hero.appendChild(pr);
+  }
+}
+const linkler=()=>[...D.querySelectorAll("#index a[data-i]")];
+const simdiki=()=>{const a=$('#index a[aria-current="true"]');return a?+a.dataset.i:-1};
+let tamam=new Set(oku(ILR,[]));
+function ilerleme(){const L=linkler(); if(!L.length)return;
+  L.forEach(a=>a.classList.toggle("kb-tamam",tamam.has(+a.dataset.i)));
+  const n=L.filter(a=>tamam.has(+a.dataset.i)).length;
+  const b=$("#kbBar"); if(b)b.style.width=(100*n/L.length)+"%";
+  const s=$("#kbSay"); if(s)s.textContent=n+" / "+L.length+" etkinlik tamamlandı";
+  const i=simdiki(), r=$("#kbSira"); if(r)r.textContent=(i+1)+" / "+L.length;
+  const o=$("#kbOnce"), z=$("#kbSonra"); if(o)o.disabled=i<=0; if(z)z.disabled=i>=L.length-1;}
+let gecis=0;
+function git(d){const L=linkler(), i=simdiki()+d; if(L[i]){gecis=Date.now(); L[i].click();}}
+$("#kbOnce")&&($("#kbOnce").onclick=()=>git(-1)); $("#kbSonra")&&($("#kbSonra").onclick=()=>git(1));
+const idx=$("#index"); if(idx){ idx.addEventListener("click",()=>{gecis=Date.now()},true);
+  new MutationObserver(()=>setTimeout(ilerleme,0)).observe(idx,{subtree:true,attributes:true,attributeFilter:["aria-current"]}); }
+window.addEventListener("hashchange",()=>{gecis=Date.now()});
+setTimeout(ilerleme,50);
+
+/* --- Ses --- */
+let ac=null;
+function ton(f,t0,sure,tip,hacim){const c=ac;const o=c.createOscillator(),g=c.createGain();o.type=tip;o.frequency.setValueAtTime(f[0],c.currentTime+t0);
+  if(f[1])o.frequency.exponentialRampToValueAtTime(f[1],c.currentTime+t0+sure);
+  g.gain.setValueAtTime(0.0001,c.currentTime+t0);g.gain.exponentialRampToValueAtTime(hacim,c.currentTime+t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+t0+sure);
+  o.connect(g).connect(c.destination);o.start(c.currentTime+t0);o.stop(c.currentTime+t0+sure+0.02);}
+function sesCal(tur){ if(!A.ses)return; try{ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended")ac.resume();
+  if(tur==="ok"){ton([659],0,.13,"sine",.22);ton([880],.11,.16,"sine",.22);ton([1319],.22,.22,"sine",.12);}
+  else if(tur==="no"){ton([260,180],0,.28,"triangle",.2);}
+  else ton([1200],0,.04,"sine",.06); }catch(e){} }
+function kutla(el){ if(A.azhareket||!el)return; const r=el.getBoundingClientRect(); const k=D.createElement("div"); k.className="kb-kutlama";
+  k.style.left=(r.left+Math.min(60,r.width/2))+"px"; k.style.top=(r.top+r.height/2)+"px";
+  const renk=["var(--p1)","var(--p2)","var(--p3)","var(--p4)","var(--p5)","var(--p6)"];
+  for(let i=0;i<18;i++){const p=D.createElement("i");const a=Math.random()*Math.PI*2,m=50+Math.random()*70;
+    p.style.background=renk[i%6];p.style.setProperty("--x",Math.cos(a)*m+"px");p.style.setProperty("--y",(Math.sin(a)*m-30)+"px");k.appendChild(p);}
+  D.body.appendChild(k); setTimeout(()=>k.remove(),900); }
+
+/* Doğru / yanlış geri bildirimini yakala: etkinlik kodu fb(...) ya da .ok/.no sınıfı kullanır */
+let sonEylem=0; ["click","keydown"].forEach(t=>D.addEventListener(t,e=>{ if(t==="click"||e.key==="Enter"||e.key===" ")sonEylem=Date.now(); },true));
+let kuyruk=[], zam=null;
+const has=(s,t)=>(" "+(s||"")+" ").includes(" "+t+" ");
+new MutationObserver(ms=>{ const now=Date.now(); if(now-sonEylem>900||now-gecis<450)return;
+  ms.forEach(m=>{ const el=m.target; if(!(el instanceof Element)||el.closest(".kb-menu,.kb-yonerge,#index"))return;
+    const fb=el.classList.contains("fb"), ok=el.classList.contains("ok"), no=el.classList.contains("no");
+    if(!ok&&!no)return; if(!fb&&((ok&&has(m.oldValue,"ok"))||(no&&has(m.oldValue,"no"))))return;
+    kuyruk.push({el,fb,ok}); });
+  if(kuyruk.length&&!zam)zam=setTimeout(()=>{ const f=kuyruk.filter(x=>x.fb).pop(); let ok, el;
+      if(f){ok=f.ok;el=f.el}else{ok=!kuyruk.some(x=>!x.ok);el=kuyruk[kuyruk.length-1].el}
+      kuyruk=[];zam=null; sesCal(ok?"ok":"no");
+      if(ok){ kutla(el); const i=simdiki(); if(i>=0&&(f||!$("#panel .fb"))){tamam.add(i);yaz(ILR,[...tamam]);ilerleme();} }
+      const d=$("#kbDuyuru"); if(d)d.textContent=ok?"Doğru.":"Yeniden deneyiniz."; },110);
+}).observe(D.body,{subtree:true,attributes:true,attributeFilter:["class"],attributeOldValue:true});
+
+/* --- Ayarları uygula --- */
+function uygula(){ H.classList.toggle("kb-sesyok",!A.ses);
+  ["karsit","rahat","azhareket"].forEach(k=>H.classList.toggle("kb-"+k,!!A[k]));
+  H.classList.toggle("kb-y1",A.boy===1); H.classList.toggle("kb-y2",A.boy===2);
+  if(A.tema)H.setAttribute("data-theme",A.tema); else H.removeAttribute("data-theme");
+  const s=$("#kbSes"); s.setAttribute("aria-pressed",A.ses); $("#kbSesY").textContent=A.ses?"Ses açık":"Ses kapalı";
+  s.querySelector(".on").style.display=A.ses?"":"none"; s.querySelector(".off").style.display=A.ses?"none":"";
+  D.querySelectorAll(".kb-anahtar").forEach(b=>b.setAttribute("aria-checked",!!A[b.dataset.k]));
+  D.querySelectorAll("#kbBoy button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===A.boy));
+  D.querySelectorAll("#kbTema button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===A.tema));
+  yaz(ANAHTAR,A); }
+uygula();
+const dug=$("#kbDugme"), men=$("#kbMenu");
+function menu(ac_){ men.hidden=!ac_; dug.setAttribute("aria-expanded",ac_); if(ac_)men.querySelector("button").focus(); }
+dug.onclick=()=>menu(men.hidden);
+D.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!men.hidden){menu(false);dug.focus();} });
+D.addEventListener("click",e=>{ if(!men.hidden&&!men.contains(e.target)&&!dug.contains(e.target))menu(false); });
+$("#kbSes").onclick=()=>{A.ses=!A.ses;uygula();sesCal("ok");};
+D.querySelectorAll(".kb-anahtar").forEach(b=>b.onclick=()=>{A[b.dataset.k]=!A[b.dataset.k];uygula();});
+D.querySelectorAll("#kbBoy button").forEach(b=>b.onclick=()=>{A.boy=+b.dataset.v;uygula();});
+D.querySelectorAll("#kbTema button").forEach(b=>b.onclick=()=>{A.tema=b.dataset.v;uygula();});
+$("#kbSifir").onclick=()=>{A=Object.assign({},VARS);uygula();};
+const tam=$("#kbTam"); if(!D.fullscreenEnabled)tam.hidden=true;
+tam.onclick=()=>{ try{ D.fullscreenElement?D.exitFullscreen():H.requestFullscreen(); }catch(e){} };
+
+/* --- Yönerge ve sesli okuma --- */
+const metin=el=>{ if(!el)return ""; const c=el.cloneNode(true); c.querySelectorAll(".frac").forEach(f=>{const s=f.querySelectorAll("span"); if(s.length>1)f.replaceWith(s[0].textContent+"/"+s[1].textContent);}); return c.textContent.replace(/\s+/g," ").trim(); };
+const PAYDA={2:"ikide",3:"üçte",4:"dörtte",5:"beşte",6:"altıda",7:"yedide",8:"sekizde",9:"dokuzda",10:"onda",12:"on ikide",20:"yirmide",100:"yüzde"};
+const okunus=t=>String(t).replace(/(−|-)?(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?"eksi ":"")+(PAYDA[b]||b+"'te")+" "+a).replace(/\|([^|]+)\|/g,"$1'in mutlak değeri").replace(/(^|[\s(])−\s?(\d)/g,"$1eksi $2").replace(/°C/g," derece");
+const kesH=t=>String(t).replace(/(−|-)?(\d+)\/(\d+)/g,(m,sg,a,b)=>(sg?"−":"")+'<span class="frac"><span>'+a+'</span><span>'+b+'</span></span>');
+const sesPuan=v=>(/natural|online|neural/i.test(v.name)?4:/google/i.test(v.name)?3:/enhanced|premium|geliş|siri/i.test(v.name)?3:1);
+function yonergeMetni(){ const p=$("#panel")||D.body, h=p.querySelector("h2"), g=[];
+  p.querySelectorAll(".intro,.task").forEach(e=>{const t=metin(e); if(t&&!g.includes(t)&&g.length<2)g.push(t);});
+  if(!g.length&&$(".lead"))g.push(metin($(".lead")));
+  return {baslik:metin(h)||D.title, gorev:g}; }
+function yonergeAc(){ const y=yonergeMetni(); $("#kbYB").textContent=y.baslik;
+  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol et</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
+  $("#kbYIc .gorev").innerHTML=kesH(y.gorev.join(" ").replace(/[<>&]/g,""));
+  const d=$("#kbYonerge"); menu(false); if(d.showModal)d.showModal(); else d.setAttribute("open",""); }
+$("#kbYon").onclick=yonergeAc;
+$("#kbYKapat").onclick=()=>{ const d=$("#kbYonerge"); speechSynthesis&&speechSynthesis.cancel(); d.close?d.close():d.removeAttribute("open"); };
+const konusabilir="speechSynthesis" in window;
+function sesliOku(t){ if(!konusabilir)return; speechSynthesis.cancel();
+  const v=speechSynthesis.getVoices().filter(v=>/^tr/i.test(v.lang)).sort((a,b)=>sesPuan(b)-sesPuan(a))[0];
+  (okunus(t).match(/[^.!?]+[.!?]?/g)||[t]).forEach(c=>{ const u=new SpeechSynthesisUtterance(c.trim()); u.lang="tr-TR"; u.rate=.95; if(v)u.voice=v; speechSynthesis.speak(u); }); }
+function okuPanel(){ const y=yonergeMetni(); sesliOku(y.baslik+". "+y.gorev.join(" ")); }
+if(!konusabilir){ $("#kbOku").hidden=true; $("#kbYOku").hidden=true; }
+$("#kbOku").onclick=()=>{ const b=$("#kbOku"); if(b.getAttribute("aria-pressed")==="true"){speechSynthesis.cancel();b.setAttribute("aria-pressed","false");return;}
+  b.setAttribute("aria-pressed","true"); okuPanel(); const t=setInterval(()=>{ if(!speechSynthesis.speaking){b.setAttribute("aria-pressed","false");clearInterval(t);} },400); };
+$("#kbYOku").onclick=()=>sesliOku(metin($("#kbYB"))+". "+metin($("#kbYIc")));
+})();
+</script>
+<!--/KABUK-->
+<script id="kesir-cizgi">
+/* ANA_KURALLAR §4.y-3: Etkinliklerde bütün kesirler kesir çizgisiyle (alt alta pay/payda) gösterilir. Düz yazılmış a/b biçimleri otomatik dönüştürülür. */
+(function(){
+  if (window.__kesirCizgi) return; window.__kesirCizgi = 1;
+  const RX = /(^|[^\w\/.,:%])([−-])?(?:(\d+) )?(\d{1,4})\/(\d{1,4})(?![\w\/.,]\d|\w)/g;
+  const ATLA = "script,style,svg,textarea,input,select,code,.ilr,.frac,[data-duz]";
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function donustur(kok){
+    if (!kok || !kok.nodeType) return;
+    if (kok.nodeType === 3) kok = kok.parentElement;
+    if (!kok || (kok.closest && kok.closest(ATLA))) return;
+    const w = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, { acceptNode: t => {
+      if (!/\d\/\d/.test(t.nodeValue)) return NodeFilter.FILTER_REJECT;
+      const p = t.parentElement; if (!p || p.closest(ATLA)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT; } });
+    const L = []; let t; while ((t = w.nextNode())) L.push(t);
+    L.forEach(t => {
+      let deg = false;
+      const h = esc(t.nodeValue).replace(RX, (m, a, s, tam, p, q) => { deg = true;
+        return a + (s ? "−" : "") + (tam ? tam + " " : "") + '<span class="frac"><span>' + p + "</span><span>" + q + "</span></span>"; });
+      if (!deg) return;
+      const k = document.createElement("span"); k.innerHTML = h; t.replaceWith(...k.childNodes);
+    });
+  }
+  let bekleyen = new Set(), plan = 0;
+  const calis = () => { plan = 0; const b = bekleyen; bekleyen = new Set(); b.forEach(donustur); };
+  const gozcu = new MutationObserver(ms => { ms.forEach(m => {
+      if (m.type === "characterData") bekleyen.add(m.target); else m.addedNodes.forEach(n => bekleyen.add(n)); });
+    if (!plan) plan = requestAnimationFrame(calis); });
+  const bas = () => { donustur(document.body); gozcu.observe(document.body, { childList: true, subtree: true, characterData: true }); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bas); else bas();
+  const st = document.createElement("style");
+  st.textContent = ".frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 2px}.frac>span{display:block;text-align:center;padding:0 3px}.frac>span:first-child{border-bottom:1.5px solid currentColor}";
+  document.head.appendChild(st);
+})();
+</script>
+
+</body></html>
