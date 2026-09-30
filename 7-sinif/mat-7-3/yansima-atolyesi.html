@@ -286,7 +286,7 @@ const SHAPES = {
 function reflectShape(key, text){ return p => {
   const sh = SHAPES[key]; const S = shell(p, `${text} Görüntünün köşelerini <b>${Lp.slice(0, sh.P.length).split("").join(", ")}</b> sırasıyla, her köşenin görüntüsüne dokunarak işaretleyiniz.`);
   const g = Grid(S.g, 12, 10); let U = [];
-  const ub = btn("Geri al"), rb = btn("Baştan başla"); S.row.append(ub, rb);
+  const ub = btn("Geri alın"), rb = btn("Baştan başlayın"); S.row.append(ub, rb);
   const I = sh.P.map(q => refl(q, sh.L));
   function draw(res){ let h = g.line(sh.L) + g.poly(sh.P, "shp") + sh.P.map((q,i)=>g.lab(q, Lp[i], -16, -8)).join("");
     if (U.length > 1) h += `<polyline points="${U.map(q=>g.X(q[0])+","+g.Y(q[1])).join(" ")}" fill="none" stroke="var(--acc2)" stroke-width="2"/>`;
@@ -342,12 +342,12 @@ function isSym(set){ return p => {
 function mirrorDraw(p){
   const S = shell(p, "Sol taraftaki karelere dokunarak bir desen oluşturunuz. Aynadaki görüntü kendiliğinden çizilir. İkinci doğruyu açarak dört parçalı desen yapabilirsiniz.");
   const g = Grid(S.g, 12, 10); let F = new Set(), both = false;
-  const tb = btn("Yatay doğruyu aç"), cb = btn("Temizle"); S.row.append(tb, cb);
+  const tb = btn("Yatay doğruyu açın"), cb = btn("Temizle"); S.row.append(tb, cb);
   const draw = () => { let h = ""; F.forEach(k => { const [i,j] = k.split(",").map(Number); const cells = [[i,j],[11-i,j]]; if (both) cells.push([i,9-j],[11-i,9-j]);
       cells.forEach(([a,b],n)=> h += g.cell(a,b, n === 0 ? "var(--acc)" : "var(--acc3)")); });
     h += g.line({t:"v",c:6}); if (both) h += g.line({t:"h",c:5}); g.draw(h); };
   g.onClick = (q, c) => { const [i,j] = c; if (i < 0 || i > 5 || j < 0 || j > 9 || (both && j < 5)) return; const k = i+","+j; F.has(k) ? F.delete(k) : F.add(k); draw(); };
-  tb.onclick = () => { both = !both; tb.textContent = both ? "Yatay doğruyu kapat" : "Yatay doğruyu aç"; draw(); };
+  tb.onclick = () => { both = !both; tb.textContent = both ? "Yatay doğruyu kapatın" : "Yatay doğruyu açın"; draw(); };
   cb.onclick = () => { F.clear(); draw(); }; ["2,2","3,3","4,4","5,5","4,6","3,7","5,3"].forEach(k=>F.add(k)); draw();
   fb(S.f, true, "Görüntüdeki her kare, simetri doğrusuna aslıyla aynı uzaklıktadır. Doğruya yapışık kareler görüntüsüyle birleşir."); }
 
@@ -372,7 +372,7 @@ function foldUnfold(p){
 function perpExplorer(p){
   const S = shell(p, "A noktasını zemin üzerinde bir yere dokunarak taşıyınız. Görüntü ve uzaklıklar değişir; neyin değişmediğini gözleyiniz.");
   const g = Grid(S.g, 12, 10); let A = [3,2]; const L = {t:"d", c:0};
-  const lb = btn("Doğruyu değiştir"); S.row.append(lb); let Ls = [{t:"d",c:0},{t:"v",c:6},{t:"a",c:10},{t:"h",c:5}], li = 0;
+  const lb = btn("Doğruyu değiştirin"); S.row.append(lb); let Ls = [{t:"d",c:0},{t:"v",c:6},{t:"a",c:10},{t:"h",c:5}], li = 0;
   function draw(){ const Lc = Ls[li % Ls.length]; const I = refl(A, Lc); const M = [(A[0]+I[0])/2, (A[1]+I[1])/2];
     const d = Math.hypot(A[0]-M[0], A[1]-M[1]);
     let h = g.line(Lc) + g.seg(A, I, 'stroke="var(--acc3)" stroke-width="2"') + g.dot(A, "shp") + g.lab(A, "A") + g.dot(I, "img") + g.lab(I, "A′", 9, -9, "var(--acc3)") + g.dot(M, "usr", 4) + g.lab(M, "O", 8, 18, "var(--acc2)");
@@ -385,7 +385,7 @@ function perpExplorer(p){
 /* ---------- 8. Harfler ---------- */
 function letters(p){
   const D = {A:"v",B:"h",C:"h",D:"h",E:"h",H:"vh",K:"h",M:"v",O:"vh",T:"v",U:"v",V:"v",Y:"v",Z:"",N:"",S:"",L:"",F:"",P:"",R:""};
-  p.innerHTML = `<p class="task">Her harf için dikey ya da yatay simetri doğrusu varsa işaretleyiniz. Hiçbiri yoksa boş bırakınız. (Harfler bu sayfadaki yazı tipiyle düşünülmüştür.)</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost nb">Yeni harfler</button></div><div class="f" hidden></div>`;
+  p.innerHTML = `<p class="task">Her harf için dikey ya da yatay simetri doğrusu varsa işaretleyiniz. Hiçbiri yoksa boş bırakınız. (Harfler bu sayfadaki yazı tipiyle düşünülmüştür.)</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol edin</button><button class="ghost nb">Yeni harfler</button></div><div class="f" hidden></div>`;
   const box = p.querySelector(".cards"), f = p.querySelector(".f"); let set;
   function nq(){ set = shuf(Object.keys(D)).slice(0, 8); f.hidden = true;
     box.innerHTML = set.map(l=>`<div class="cardi" data-l="${l}"><div class="letter">${l}</div><div class="seg"><button data-k="v" aria-pressed="false">Dikey</button><button data-k="h" aria-pressed="false">Yatay</button></div></div>`).join(""); }
@@ -414,7 +414,7 @@ function statements(p){
   const ST = [["Bir şekil ile yansıma dönüşümü altındaki görüntüsü eştir.",1],["Simetri doğrusu, bir noktayı görüntüsüne birleştiren doğru parçasını dik ortalar.",1],["Simetri doğrusu üzerindeki bir noktanın görüntüsü kendisidir.",1],
     ["Birbirine eş olan iki şekil her zaman bir doğruya göre simetriktir.",0],["Bir nokta ile görüntüsü arasındaki uzaklık, noktanın simetri doğrusuna uzaklığına eşittir.",0],["Yansımada kenar uzunlukları ve açı ölçüleri değişmez.",1],
     ["Simetri doğrusu bir şeklin içinden geçemez.",0],["Yansımada köşelerin dolanma yönü tersine döner.",1],["Bir şeklin görüntüsü, şekil simetri doğrusundan uzaklaştıkça küçülür.",0],["Simetri doğrusuna dik olan bir doğru parçasının görüntüsü de simetri doğrusuna diktir.",1]];
-  p.innerHTML = `<p class="task">Önermelerin doğru mu yanlış mı olduğuna karar veriniz.</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost nb">Yeni önermeler</button></div><div class="f" hidden></div>`;
+  p.innerHTML = `<p class="task">Önermelerin doğru mu yanlış mı olduğuna karar veriniz.</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol edin</button><button class="ghost nb">Yeni önermeler</button></div><div class="f" hidden></div>`;
   const box = p.querySelector(".cards"), f = p.querySelector(".f"); let set;
   function nq(){ set = shuf(ST).slice(0,5); f.hidden = true; box.innerHTML = set.map((s,i)=>`<div class="cardi" data-i="${i}"><p>${s[0]}</p><div class="seg"><button data-a="1" aria-pressed="false">Doğru</button><button data-a="0" aria-pressed="false">Yanlış</button></div></div>`).join(""); }
   box.onclick = e => { const b = e.target.closest("button"); if (!b) return; b.parentNode.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x === b)); b.closest(".cardi").classList.remove("ok","no"); };
@@ -484,7 +484,7 @@ function constructPB(p){
 function pbProperty(p){
   const S = shell(p, "P noktasını zemin üzerinde taşıyınız. P, A ve B'ye ne zaman eşit uzaklıkta oluyor?");
   const g = Grid(S.g, 12, 10); const A = [3,3], B = [9,7]; let P = [2,8], show = false;
-  const sb = btn("Orta dikmeyi göster"); S.row.append(sb);
+  const sb = btn("Orta dikmeyi gösterin"); S.row.append(sb);
   const L = {t:"a", c:NaN};
   function draw(){ const da = Math.hypot(P[0]-A[0],P[1]-A[1]), db = Math.hypot(P[0]-B[0],P[1]-B[1]), same = Math.abs(da-db) < 1e-9;
     let h = g.seg(A, B, 'stroke="var(--ink)" stroke-width="2.4"') + g.dot(A,"shp") + g.lab(A,"A",-18,16) + g.dot(B,"shp") + g.lab(B,"B",8,16);
@@ -492,7 +492,7 @@ function pbProperty(p){
     h += g.seg(P, A, `stroke="${same?"var(--acc3)":"var(--muted)"}" stroke-width="2"`) + g.seg(P, B, `stroke="${same?"var(--acc3)":"var(--muted)"}" stroke-width="2"`) + g.dot(P, same ? "img" : "usr") + g.lab(P, "P");
     g.draw(h); const fm = v => (Math.round(v*100)/100).toString().replace(".",",");
     fb(S.f, same, `|PA| ≈ ${fm(da)} birim, |PB| ≈ ${fm(db)} birim. ` + (same ? "Eşit! P, [AB]'nin orta dikmesi üzerindedir." : "Eşit değil. P'yi başka bir noktaya taşıyınız.")); }
-  g.onClick = q => { P = q; draw(); }; sb.onclick = () => { show = !show; sb.textContent = show ? "Orta dikmeyi gizle" : "Orta dikmeyi göster"; draw(); }; draw(); }
+  g.onClick = q => { P = q; draw(); }; sb.onclick = () => { show = !show; sb.textContent = show ? "Orta dikmeyi gizleyin" : "Orta dikmeyi gösterin"; draw(); }; draw(); }
 
 /* ---------- 15. Açıortay inşası ---------- */
 function constructAB(p){
@@ -520,7 +520,7 @@ function constructAB(p){
 /* ---------- 16. Açıortay üzerindeki noktalar ---------- */
 function abProperty(p){
   p.innerHTML = `<p class="task">Açının içinde bir noktaya dokununuz. Noktanın iki kola olan uzaklıkları ne zaman eşit olur?</p>`;
-  const svg = geo(p, 560, 340); p.insertAdjacentHTML("beforeend", `<div class="row"><button class="ghost sb">Açıortayı göster</button></div><div class="f" hidden></div>`);
+  const svg = geo(p, 560, 340); p.insertAdjacentHTML("beforeend", `<div class="row"><button class="ghost sb">Açıortayı gösterin</button></div><div class="f" hidden></div>`);
   const O = [60,170], th = 28*Math.PI/180, f = p.querySelector(".f"); let P = [330,120], show = false;
   const u1 = [Math.cos(-th), Math.sin(-th)], u2 = [Math.cos(th), Math.sin(th)];
   function foot(q, u){ const t = (q[0]-O[0])*u[0] + (q[1]-O[1])*u[1]; return [O[0]+t*u[0], O[1]+t*u[1]]; }
@@ -611,7 +611,7 @@ function circleGap(p){
 /* ---------- 22. İnşa mı ölçme mi ---------- */
 function toolsQuiz(p){
   const Q = [["Açıölçerle açıyı ölçüp yarısını işaretlemek", 0],["Pergel ile kollarda eşit uzaklıkta iki nokta almak", 1],["Cetvelin santimetre çizgileriyle orta noktayı bulmak", 0],["Aynı pergel açıklığıyla iki yay çizmek", 1],["Ölçüsüz cetvelle iki noktayı birleştirmek", 1],["Gönyeyle dik açı çizmek", 0]];
-  p.innerHTML = `<p class="task">Pergel ve ölçüsüz cetvelle yapılan <b>inşa</b> adımlarını seçiniz. Ölçme gerektiren adımları seçmeyiniz.</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol et</button></div><div class="f" hidden></div>`;
+  p.innerHTML = `<p class="task">Pergel ve ölçüsüz cetvelle yapılan <b>inşa</b> adımlarını seçiniz. Ölçme gerektiren adımları seçmeyiniz.</p><div class="cards"></div><div class="row"><button class="primary k">Kontrol edin</button></div><div class="f" hidden></div>`;
   const box = p.querySelector(".cards"), f = p.querySelector(".f");
   box.innerHTML = shuf(Q).map(q=>`<div class="cardi" data-a="${q[1]}"><p>${q[0]}</p><div class="seg"><button aria-pressed="false">İnşa adımıdır</button></div></div>`).join("");
   box.onclick = e => { const b = e.target.closest("button"); if (!b) return; b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); b.closest(".cardi").classList.remove("ok","no"); };
@@ -621,7 +621,7 @@ function toolsQuiz(p){
 /* ---------- Liste ---------- */
 /* ---------- ortak: tahmin → keşfet → açıkla ---------- */
 function yTahmin(box, soru, secs, cb){
-  box.innerHTML = `<div class="tah"><div class="adimlbl">1 · Tahmin et</div><p>${soru}</p><div class="seg">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div></div>`;
+  box.innerHTML = `<div class="tah"><div class="adimlbl">1 · Tahmin edin</div><p>${soru}</p><div class="seg">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div></div>`;
   box.querySelectorAll("button").forEach(b=>b.onclick=()=>{ box.querySelectorAll("button").forEach(x=>{x.setAttribute("aria-pressed",x===b);x.disabled=true;}); cb(+b.dataset.i); }); }
 function yAcikla(box, soru, secs, dogru, aciklama){ box.hidden = false;
   box.innerHTML = `<div class="acik"><div class="adimlbl">3 · Açıkla</div><p>${soru}</p><div class="seg">${secs.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div><div class="fbx" hidden></div></div>`;
@@ -640,9 +640,9 @@ function freeCompass(p){
   const A = [170,210], B = [430,210], BR = 20; let cem = [], cizgi = [], mod = "pergel", surt = null, fare = null, secili = [], tah;
   p.innerHTML = `<div class="t35"></div><div class="w35" hidden><div class="adimlbl" style="margin-top:10px">2 · Keşfet</div>
     <p class="task">Pergeli <b>A</b> ya da <b>B</b> noktasına yerleştirip sürükleyerek yay çiziniz. Yayların kesişim noktaları belirir. Sonra cetvelle iki noktayı birleştirerek [AB]'nin orta dikmesini inşa ediniz.</p>
-    <div class="seg" role="group" aria-label="Araç"><button data-m="pergel" aria-pressed="true">Pergel</button><button data-m="cetvel" aria-pressed="false">Ölçüsüz cetvel</button><button class="geri">Son adımı geri al</button><button class="sil">Temizle</button></div>
+    <div class="seg" role="group" aria-label="Araç"><button data-m="pergel" aria-pressed="true">Pergel</button><button data-m="cetvel" aria-pressed="false">Ölçüsüz cetvel</button><button class="geri">Son adımı geri alın</button><button class="sil">Temizle</button></div>
     <svg class="gsvg s35" viewBox="0 0 600 400" style="max-width:640px;cursor:crosshair;touch-action:none"></svg>
-    <p class="score o35"></p><div class="row"><button class="primary k">Kontrol et</button></div><div class="f" hidden></div></div><div class="x35" hidden></div>`;
+    <p class="score o35"></p><div class="row"><button class="primary k">Kontrol edin</button></div><div class="f" hidden></div></div><div class="x35" hidden></div>`;
   const svg = p.querySelector(".s35"), f = p.querySelector(".f"), olc = p.querySelector(".o35");
   yTahmin(p.querySelector(".t35"), "Orta dikmeyi inşa ederken A ve B merkezli yayların pergel açıklıkları nasıl olmalıdır?", ["Eşit olmalıdır","Farklı olmalıdır","Fark etmez"], t=>{ tah = t; p.querySelector(".w35").hidden = false; ciz(); });
   const noktalar = () => { const k = []; for (let i = 0; i < cem.length; i++) for (let j = i+1; j < cem.length; j++) cemberKesisim(cem[i], cem[j]).forEach(q => k.push(q)); return k; };
@@ -691,7 +691,7 @@ function protractorBisector(p){
     <p class="task">Turuncu ışının ucundaki C noktasını sürükleyerek AOB açısını iki eş açıya ayırınız. Açı ölçer iki açıyı anlık ölçer.</p>
     <div class="row"><button class="ghost ys" aria-pressed="false">Açı ölçeri 1°'ye yasla</button><button class="ghost yeni">Yeni açı</button></div>
     <svg class="gsvg s36" viewBox="0 0 600 360" style="max-width:640px;touch-action:none"></svg>
-    <div class="row o36" style="font-size:18px"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost dg" hidden>Pergelle doğrula</button></div><div class="f" hidden></div></div><div class="x36" hidden></div>`;
+    <div class="row o36" style="font-size:18px"></div><div class="row"><button class="primary k">Kontrol edin</button><button class="ghost dg" hidden>Pergelle doğrula</button></div><div class="f" hidden></div></div><div class="x36" hidden></div>`;
   const svg = p.querySelector(".s36"), f = p.querySelector(".f");
   yTahmin(p.querySelector(".t36"), "Açıortay üzerinde alınan bir noktanın açının iki koluna olan uzaklıkları için ne söylenebilir?", ["Eşittir","Yakın kola daha azdır","Nokta nerede olursa olsun farklıdır"], t=>{ tah = t; p.querySelector(".w36").hidden = false; yeni(); });
   const der = r => r*180/Math.PI, rad = d => d*Math.PI/180, uc = (a, r) => [O[0] + r*Math.cos(rad(a)), O[1] - r*Math.sin(rad(a))];
@@ -780,9 +780,9 @@ window.__N__ = FLAT.length;
  <div class="kb-satir"><span>Yazı boyutu</span><div class="kb-seg" id="kbBoy"><button data-v="0" aria-label="Normal">A</button><button data-v="1" aria-label="Büyük">A+</button><button data-v="2" aria-label="Çok büyük">A++</button></div></div>
  <div class="kb-satir"><span>Yüksek karşıtlık</span><button class="kb-anahtar" role="switch" data-k="karsit" aria-label="Yüksek karşıtlık"></button></div>
  <div class="kb-satir"><span>Rahat okuma (geniş aralık)</span><button class="kb-anahtar" role="switch" data-k="rahat" aria-label="Rahat okuma"></button></div>
- <div class="kb-satir"><span>Hareketi azalt</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azalt"></button></div>
+ <div class="kb-satir"><span>Hareketi azaltın</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azaltın"></button></div>
  <div class="kb-satir"><span>Tema</span><div class="kb-seg" id="kbTema"><button data-v="">Oto</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
- <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dön</button></div>
+ <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dönün</button></div>
 </div>
 <dialog class="kb-yonerge" id="kbYonerge" aria-labelledby="kbYB"><header id="kbYB">Yönerge</header><div class="ic" id="kbYIc"></div>
  <footer><button class="ghost" id="kbYOku">Sesli oku</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
@@ -903,7 +903,7 @@ function yonergeMetni(){ const p=$("#panel")||D.body, h=p.querySelector("h2"), g
   if(!g.length&&$(".lead"))g.push(metin($(".lead")));
   return {baslik:metin(h)||D.title, gorev:g}; }
 function yonergeAc(){ const y=yonergeMetni(); $("#kbYB").textContent=y.baslik;
-  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol et</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
+  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol edin</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
   $("#kbYIc .gorev").innerHTML=kesH(y.gorev.join(" ").replace(/[<>&]/g,""));
   const d=$("#kbYonerge"); menu(false); if(d.showModal)d.showModal(); else d.setAttribute("open",""); }
 $("#kbYon").onclick=yonergeAc;
