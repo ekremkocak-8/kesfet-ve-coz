@@ -208,7 +208,7 @@ const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).
 function h(html){ const d=document.createElement("div"); d.innerHTML=html; return d; }
 /* üç adım: tahmin → keşfet → açıkla */
 function adim3(p, tahminSoru, tahminSec, kesfetHTML, init){
-  p.innerHTML = `<div class="tah"><span class="adimlbl">1 · Tahmin et</span><p>${tahminSoru}</p><div class="seg t3">${tahminSec.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div></div>
+  p.innerHTML = `<div class="tah"><span class="adimlbl">1 · Tahmin edin</span><p>${tahminSoru}</p><div class="seg t3">${tahminSec.map((s,i)=>`<button data-i="${i}" aria-pressed="false">${s}</button>`).join("")}</div></div>
     <div class="kes" hidden><span class="adimlbl" style="margin-top:12px">2 · Keşfet</span>${kesfetHTML}</div><div class="acik" hidden></div>`;
   let tah = null;
   p.querySelectorAll(".t3 button").forEach(b=>b.onclick=()=>{ p.querySelectorAll(".t3 button").forEach(x=>{x.setAttribute("aria-pressed",x===b); x.disabled=true;}); tah=+b.dataset.i; p.querySelector(".kes").hidden=false; init(p.querySelector(".kes"), ()=>tah); });
@@ -252,7 +252,7 @@ const dikdortgen = n => p => {
 /* E2 · Bölen avı */
 const bolenAvi = n => p => {
   const d = divs(n);
-  p.innerHTML = `<p class="task"><b>${n}</b> sayısının bütün pozitif çarpanlarını seçiniz.</p><div class="chips"></div><div class="row"><button class="primary k">Kontrol et</button><button class="ghost ipucu">İpucu: çiftleri göster</button></div><div class="fb" hidden></div><div class="list"></div>`;
+  p.innerHTML = `<p class="task"><b>${n}</b> sayısının bütün pozitif çarpanlarını seçiniz.</p><div class="chips"></div><div class="row"><button class="primary k">Kontrol edin</button><button class="ghost ipucu">İpucu: çiftleri gösterin</button></div><div class="fb" hidden></div><div class="list"></div>`;
   const ch = p.querySelector(".chips"), f = p.querySelector(".fb");
   for (let i=1;i<=n;i++){ const b=document.createElement("button"); b.className="chip"; b.textContent=i; b.setAttribute("aria-pressed","false"); b.onclick=()=>b.setAttribute("aria-pressed", b.getAttribute("aria-pressed")!=="true"); ch.appendChild(b); }
   p.querySelector(".ipucu").onclick = () => { p.querySelector(".list").innerHTML = d.filter(x=>x*x<=n).map(x=>`<span>${x} · ${n/x}</span>`).join(""); };
@@ -265,7 +265,7 @@ const bolenAvi = n => p => {
 
 /* E3 · Çarpan ağacı kur */
 const agacKur = n => p => {
-  p.innerHTML = `<p class="task"><b>${n}</b> sayısının çarpan ağacını kurunuz: Asal olmayan bir sayıya dokununca çarpan çiftleri çıkar, birini seçiniz. Bütün yapraklar asal olunca üslü yazımı tamamlayınız.</p><div class="stage"></div><div class="row sec"></div><div class="son" hidden><p>Asal çarpanlar: <b class="yap"></b></p><p>Üslü yazım: <span class="usl"></span> <button class="primary k">Kontrol et</button></p></div><div class="fb" hidden></div>`;
+  p.innerHTML = `<p class="task"><b>${n}</b> sayısının çarpan ağacını kurunuz: Asal olmayan bir sayıya dokununca çarpan çiftleri çıkar, birini seçiniz. Bütün yapraklar asal olunca üslü yazımı tamamlayınız.</p><div class="stage"></div><div class="row sec"></div><div class="son" hidden><p>Asal çarpanlar: <b class="yap"></b></p><p>Üslü yazım: <span class="usl"></span> <button class="primary k">Kontrol edin</button></p></div><div class="fb" hidden></div>`;
   const st=p.querySelector(".stage"), sec=p.querySelector(".row.sec"), f=p.querySelector(".fb");
   const kok={v:n,c:null};
   function yapraklar(d,out=[]){ if(d.c){ yapraklar(d.c[0],out); yapraklar(d.c[1],out); } else out.push(d.v); return out; }
@@ -288,7 +288,7 @@ const agacKur = n => p => {
 
 /* E4 · Asal eleği */
 const elek = (N, soru) => p => {
-  p.innerHTML = `<p class="task">1'den ${N}'e kadar sayılar. Asal olduğunu bildiğiniz bir sayıya dokunun: katları (kendisi hariç) üstü çizilir. 1 asal değildir.</p><div class="chips" style="max-width:640px"></div><div class="row"><span>Kaç asal sayı kaldı?</span><input class="ans" inputmode="numeric"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  p.innerHTML = `<p class="task">1'den ${N}'e kadar sayılar. Asal olduğunu bildiğiniz bir sayıya dokunun: katları (kendisi hariç) üstü çizilir. 1 asal değildir.</p><div class="chips" style="max-width:640px"></div><div class="row"><span>Kaç asal sayı kaldı?</span><input class="ans" inputmode="numeric"><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   const ch=p.querySelector(".chips"), f=p.querySelector(".fb");
   for(let i=1;i<=N;i++){ const b=document.createElement("button"); b.className="chip"+(i===1?" off":""); b.textContent=i; b.onclick=()=>{ if(b.classList.contains("off")) return; if(!isP(i)) return fb(f,false,`${i} asal değil: ${Object.keys(fac(i)).join(", ")} ile bölünür. Önce asal bir sayı seçiniz.`);
       b.setAttribute("aria-pressed","true"); [...ch.children].forEach(x=>{ const v=+x.textContent; if(v>i&&v%i===0) x.classList.add("off"); }); f.hidden=true; }; ch.appendChild(b); }
@@ -388,7 +388,7 @@ const lambalar = (p1,p2) => p => {
 const dis = (a,b) => p => {
   const L=lcm(a,b);
   adim3(p, `${a} dişli ve ${b} dişli iki çarkın işaretli dişleri karşı karşıya. Büyük çark kaç tur dönünce işaretli dişler yeniden buluşur?`, shuf([String(L/Math.max(a,b)), String(L/Math.min(a,b)), String(Math.min(a,b)), "1"].filter((v,i,x)=>x.indexOf(v)===i)),
-   `<p class="task">"Bir diş ilerlet" ya da "Bir tur" ile çarkları döndürünüz. İşaretli dişler buluşunca kontrol ediniz.</p><div class="stage"></div><div class="row"><button class="ghost d1">Bir diş ilerlet</button><button class="ghost d10">10 diş</button><button class="primary k">Buluştular mı?</button><span class="sayac"></span></div><div class="fb" hidden></div>`,
+   `<p class="task">"Bir diş ilerletin" ya da "Bir tur" ile çarkları döndürünüz. İşaretli dişler buluşunca kontrol ediniz.</p><div class="stage"></div><div class="row"><button class="ghost d1">Bir diş ilerletin</button><button class="ghost d10">10 diş</button><button class="primary k">Buluştular mı?</button><span class="sayac"></span></div><div class="fb" hidden></div>`,
    (k) => { const st=k.querySelector(".stage"), f=k.querySelector(".fb"), sy=k.querySelector(".sayac"); let s=0; const A=Math.max(a,b), B=Math.min(a,b);
      function cark(n,r,cx,cy,off,col,yon){ let o=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${css('--soft')}" stroke="${col}" stroke-width="2"/>`;
        for(let i=0;i<n;i++){ const ang=(i-off)*2*Math.PI/n*yon + Math.PI*(yon>0?0:1); const x=cx+(r+6)*Math.cos(ang), y=cy+(r+6)*Math.sin(ang); o+=`<circle cx="${x}" cy="${y}" r="${i===0?6:3.2}" fill="${i===0?css('--acc2'):col}"/>`; } return o; }
@@ -403,7 +403,7 @@ const dis = (a,b) => p => {
 /* E12 · Kurdele kesme (EBOB problemleri) */
 const kurdele = (arr) => p => {
   const g=arr.reduce(gcd);
-  p.innerHTML=`<p class="task">Uzunlukları ${arr.join(" cm, ")} cm olan kurdeleler hiç artmadan eşit parçalara kesilecek. Parça uzunluğunu seçiniz; <b>en az parça</b> sayısını bulunuz.</p><div class="row"><label>Parça: <b class="v"></b> cm</label><input type="range" min="1" max="${Math.min(...arr)}" value="1"></div><div class="stage"></div><p class="durum"></p><div class="row"><span>En az parça sayısı:</span><input class="ans" inputmode="numeric"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  p.innerHTML=`<p class="task">Uzunlukları ${arr.join(" cm, ")} cm olan kurdeleler hiç artmadan eşit parçalara kesilecek. Parça uzunluğunu seçiniz; <b>en az parça</b> sayısını bulunuz.</p><div class="row"><label>Parça: <b class="v"></b> cm</label><input type="range" min="1" max="${Math.min(...arr)}" value="1"></div><div class="stage"></div><p class="durum"></p><div class="row"><span>En az parça sayısı:</span><input class="ans" inputmode="numeric"><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   const inp=p.querySelector("input[type=range]"), st=p.querySelector(".stage"), du=p.querySelector(".durum"), f=p.querySelector(".fb");
   function ciz(){ const t=+inp.value; p.querySelector(".v").textContent=t; const M=Math.max(...arr), s=480/M; const sv=svgEl(500, arr.length*34+10); let o="";
     arr.forEach((L,i)=>{ const y=10+i*34; for(let x=0;x<L;x+=t){ const w=Math.min(t,L-x); o+=`<rect x="${10+x*s}" y="${y}" width="${w*s}" height="22" fill="${w<t?css('--bad'):(x/t)%2?css('--soft'):css('--card')}" stroke="${css('--acc')}"/>`; } });
@@ -425,7 +425,7 @@ const carpimIliski = () => p => {
 
 /* E14 · Bölme yöntemiyle EBOB ve EKOK */
 const ortakBolme = (a,b) => p => {
-  p.innerHTML=`<p class="task"><b>${a}</b> ve <b>${b}</b> sayılarını birlikte bölünüz. Bir asal sayı iki sayıyı da bölüyorsa "ortak" olarak işaretlenir. Sonunda EBOB ve EKOK'u yazınız.</p><table class="t"><tbody></tbody></table><div class="row sec"></div><div class="row son" hidden><span>EBOB =</span><input class="ans g"><span>EKOK =</span><input class="ans l"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  p.innerHTML=`<p class="task"><b>${a}</b> ve <b>${b}</b> sayılarını birlikte bölünüz. Bir asal sayı iki sayıyı da bölüyorsa "ortak" olarak işaretlenir. Sonunda EBOB ve EKOK'u yazınız.</p><table class="t"><tbody></tbody></table><div class="row sec"></div><div class="row son" hidden><span>EBOB =</span><input class="ans g"><span>EKOK =</span><input class="ans l"><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   const tb=p.querySelector("tbody"), sec=p.querySelector(".sec"), f=p.querySelector(".fb"); let x=a, y=b; const satirlar=[];
   function yaz(){ tb.innerHTML=satirlar.map(s=>`<tr><td>${s[0]}</td><td>${s[1]}</td><td style="border-left:2px solid var(--ink);font-weight:700;color:${s[3]?css('--acc3'):css('--muted')}">${s[2]}${s[3]?" ✓":""}</td></tr>`).join("")+`<tr><td>${x}</td><td>${y}</td><td style="border-left:2px solid var(--ink)"></td></tr>`;
     if(x===1&&y===1){ sec.innerHTML=""; p.querySelector(".son").hidden=false; return; }
@@ -456,7 +456,7 @@ const yildiz = n => p => {
 
 /* E16 · Tablo boyama */
 const tabloBoya = (sat, sut) => p => {
-  p.innerHTML=`<p class="task">Satır başındaki sayı ile sütun başındaki sayı <b>aralarında asalsa</b> kutuyu boyayınız (dokununuz).</p><table class="t"><tr><th></th>${sut.map(s=>`<th>${s}</th>`).join("")}</tr>${sat.map((a,i)=>`<tr><th>${a}</th>${sut.map((b,j)=>`<td class="pick" data-a="${a}" data-b="${b}"></td>`).join("")}</tr>`).join("")}</table><div class="row"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  p.innerHTML=`<p class="task">Satır başındaki sayı ile sütun başındaki sayı <b>aralarında asalsa</b> kutuyu boyayınız (dokununuz).</p><table class="t"><tr><th></th>${sut.map(s=>`<th>${s}</th>`).join("")}</tr>${sat.map((a,i)=>`<tr><th>${a}</th>${sut.map((b,j)=>`<td class="pick" data-a="${a}" data-b="${b}"></td>`).join("")}</tr>`).join("")}</table><div class="row"><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   p.querySelectorAll("td.pick").forEach(td=>td.onclick=()=>td.classList.toggle("on"));
   p.querySelector(".k").onclick=()=>{ let hata=0; p.querySelectorAll("td.pick").forEach(td=>{ const ok=gcd(+td.dataset.a,+td.dataset.b)===1; td.textContent=""; if(ok!==td.classList.contains("on")){ hata++; td.textContent=gcd(+td.dataset.a,+td.dataset.b); } });
     fb(p.querySelector(".fb"), !hata, hata?`${hata} kutuda hata var; yanlış kutulara iki sayının EBOB'u yazıldı. EBOB 1 ise aralarında asaldır.`:"Hepsi doğru. Ortak asal çarpanı olmayan çiftler aralarında asaldır."); };
@@ -466,7 +466,7 @@ const tabloBoya = (sat, sut) => p => {
 const sadeKesir = d => p => {
   const dog=[...Array(d-1)].map((_,i)=>i+1).filter(a=>gcd(a,d)===1);
   adim3(p, `Paydası ${d} olan, 0 ile 1 arasındaki kesirlerden kaç tanesi sadeleşmez?`, shuf([String(dog.length), String(dog.length+2), String(d-1), String(Math.floor(d/2))].filter((v,i,x)=>x.indexOf(v)===i)),
-   `<p class="task">Sadeleşmeyen kesirleri seçiniz.</p><div class="chips"></div><div class="row"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`,
+   `<p class="task">Sadeleşmeyen kesirleri seçiniz.</p><div class="chips"></div><div class="row"><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`,
    (k) => { const ch=k.querySelector(".chips"), f=k.querySelector(".fb");
      for(let a=1;a<d;a++){ const b=document.createElement("button"); b.className="chip"; b.innerHTML=frac(a,d); b.dataset.a=a; b.setAttribute("aria-pressed","false"); b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"); ch.appendChild(b); }
      k.querySelector(".k").onclick=()=>{ const sec=[...ch.children].filter(b=>b.getAttribute("aria-pressed")==="true").map(b=>+b.dataset.a);
@@ -585,9 +585,9 @@ window.__ACT__ = FLAT.map(a=>[a[0],a[1]]);
  <div class="kb-satir"><span>Yazı boyutu</span><div class="kb-seg" id="kbBoy"><button data-v="0" aria-label="Normal">A</button><button data-v="1" aria-label="Büyük">A+</button><button data-v="2" aria-label="Çok büyük">A++</button></div></div>
  <div class="kb-satir"><span>Yüksek karşıtlık</span><button class="kb-anahtar" role="switch" data-k="karsit" aria-label="Yüksek karşıtlık"></button></div>
  <div class="kb-satir"><span>Rahat okuma (geniş aralık)</span><button class="kb-anahtar" role="switch" data-k="rahat" aria-label="Rahat okuma"></button></div>
- <div class="kb-satir"><span>Hareketi azalt</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azalt"></button></div>
+ <div class="kb-satir"><span>Hareketi azaltın</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azaltın"></button></div>
  <div class="kb-satir"><span>Tema</span><div class="kb-seg" id="kbTema"><button data-v="">Oto</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
- <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dön</button></div>
+ <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dönün</button></div>
 </div>
 <dialog class="kb-yonerge" id="kbYonerge" aria-labelledby="kbYB"><header id="kbYB">Yönerge</header><div class="ic" id="kbYIc"></div>
  <footer><button class="ghost" id="kbYOku">Sesli oku</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
@@ -708,7 +708,7 @@ function yonergeMetni(){ const p=$("#panel")||D.body, h=p.querySelector("h2"), g
   if(!g.length&&$(".lead"))g.push(metin($(".lead")));
   return {baslik:metin(h)||D.title, gorev:g}; }
 function yonergeAc(){ const y=yonergeMetni(); $("#kbYB").textContent=y.baslik;
-  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol et</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
+  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol edin</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
   $("#kbYIc .gorev").innerHTML=kesH(y.gorev.join(" ").replace(/[<>&]/g,""));
   const d=$("#kbYonerge"); menu(false); if(d.showModal)d.showModal(); else d.setAttribute("open",""); }
 $("#kbYon").onclick=yonergeAc;
