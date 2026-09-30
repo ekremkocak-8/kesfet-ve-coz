@@ -425,23 +425,23 @@ function yonlendir(t){const y=document.getElementById("yonlendir");if(y){y.inner
 
 /* Aşamalar */
 function iskelet(p){
-  p.innerHTML=`<ol class="asamalar"><li data-a="1">Tahmin et</li><li data-a="2">Dene</li><li data-a="3">Kuralı bul</li><li data-a="4">Kendini dene</li></ol><div class="bolumler"></div>`;
+  p.innerHTML=`<ol class="asamalar"><li data-a="1">Tahmin edin</li><li data-a="2">Deneyin</li><li data-a="3">Kuralı bulun</li><li data-a="4">Kendinizi deneyin</li></ol><div class="bolumler"></div>`;
   const b=p.querySelector(".bolumler");const B={};
   const isaret=n=>p.querySelectorAll(".asamalar li").forEach(li=>{const a=+li.dataset.a;li.classList.toggle("on",a===n);li.classList.toggle("bitti",a<n);});
   isaret(1);
   const katla=n=>{const d=B[n];if(d&&!d.dataset.sabit)d.classList.add("kapali");};
-  const ADLAR={1:"Tahmin et",2:"Dene",3:"Kuralı bul",4:"Kendini dene"};
+  const ADLAR={1:"Tahmin edin",2:"Deneyin",3:"Kuralı bulun",4:"Kendinizi deneyin"};
   return {bolum(n,baslik,sabit){isaret(n);if(n===2)katla(1);if(n===4){katla(2);katla(3);}
     const d=document.createElement("section");d.className="bolum";if(sabit)d.dataset.sabit="1";
     d.innerHTML=`<h3 class="bb"><span>${n}</span>${baslik||ADLAR[n]}<em class="oz"></em><small class="ac">göster</small></h3>`;
     d.querySelector(".bb").onclick=()=>{if(d.classList.contains("kapali")||d.classList.contains("acildi")){d.classList.toggle("kapali");d.classList.add("acildi");}};
     b.appendChild(d);B[n]=d;d.ozet=t=>{d.querySelector(".oz").innerHTML=t;};
-    if(n===1)yonlendir("Tahminini yap.");if(n===3)yonlendir("Deney defterine bak ve soruları cevapla.");if(n===4)yonlendir("Son soruyu çöz.");
+    if(n===1)yonlendir("Tahmininizi yapınız.");if(n===3)yonlendir("Deney defterine bakınız ve soruları cevaplayınız.");if(n===4)yonlendir("Son soruyu çözünüz.");
     if(n>1)setTimeout(()=>d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"}),80);return d;},
     bitir(kural){isaret(5);const d=document.createElement("section");d.className="ogrendim";
-      d.innerHTML=`<div class="og-bas">Ne öğrendim?</div><p>${kural}</p><div class="row"><button class="primary tekrar">Baştan oyna</button></div>`;
+      d.innerHTML=`<div class="og-bas">Ne öğrendim?</div><p>${kural}</p><div class="row"><button class="primary tekrar">Baştan oynayın</button></div>`;
       b.appendChild(d);d.querySelector(".tekrar").onclick=()=>window.dispatchEvent(new Event("kesif-tekrar"));
-      yonlendir("Etkinliği bitirdin. İstersen baştan oynayabilirsin.");setTimeout(()=>d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"center"}),150);}};
+      yonlendir("Etkinliği bitirdiniz. İsterseniz baştan oynayabilirsiniz.");setTimeout(()=>d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"center"}),150);}};
 }
 const yaz=satirlar=>`<div class="yonerge">${satirlar.map(s=>`<p>${s}</p>`).join("")}</div>`;
 const soruKut=s=>`<div class="soruk"><b>Soru</b><span>${s}</span></div>`;
@@ -459,16 +459,16 @@ function sor(kap,soru,secs,dogru,okMsg,sonra){
   kap.appendChild(d);const f=d.querySelector(".fb");let bitti=false;
   d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;const i=+b.dataset.i;
     if(i===dogru){bitti=true;b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,okMsg);sonra&&setTimeout(sonra,400);}
-    else{b.classList.add("yanlis");b.disabled=true;fb(f,false,"Olmadı. Deney defterine bir daha bak ve başka bir seçenek dene.");}});
+    else{b.classList.add("yanlis");b.disabled=true;fb(f,false,"Olmadı. Deney defterine bir daha bakınız ve başka bir seçenek deneyiniz.");}});
   return d;
 }
 function tahminSec(kap,secs,fn){const d=document.createElement("div");d.className="secler";d.innerHTML=secs.map(s=>`<button class="sec" data-v="${s[0]}">${s[1]}</button>`).join("");kap.appendChild(d);
   let bitti=false;d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;bitti=true;b.classList.add("secili");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fn(b.dataset.v,b.textContent);});}
 function sayiSor(kap,ust,dogru,okMsg,ipucu,sonra){
   const d=document.createElement("div");d.className="sor";
-  d.innerHTML=`${ust}<div class="row"><input class="ans" inputmode="numeric" aria-label="Cevabın"><button class="primary k">Kontrol et</button></div><div class="fb" hidden></div>`;
+  d.innerHTML=`${ust}<div class="row"><input class="ans" inputmode="numeric" aria-label="Cevabın"><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   kap.appendChild(d);const f=d.querySelector(".fb"),inp=d.querySelector(".ans");let den=0,ok=false;
-  const kontrol=()=>{if(!inp.value||ok)return;const v=+inp.value;den++;if(v===dogru){ok=true;fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,500);}else fb(f,false,den>=2?"İpucu: "+ipucu:"Olmadı. Bir daha dene.");};
+  const kontrol=()=>{if(!inp.value||ok)return;const v=+inp.value;den++;if(v===dogru){ok=true;fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,500);}else fb(f,false,den>=2?"İpucu: "+ipucu:"Olmadı. Bir daha deneyiniz.");};
   d.querySelector(".k").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};
   return d;
 }
@@ -503,9 +503,9 @@ function kesifBaslat(ACT,BILGI){
       <div class="yon-ust">${tek?"":`<button class="ghost geri">‹ Bütün etkinlikler</button>`}<span class="kod">${BILGI.kod} · Keşfetme Etkinliği ${i+1}</span></div>
       <div class="yon-no">${i+1}</div><h2>${a.ad}</h2>
       <p class="amac"><b>Amaç:</b> ${a.amac}</p>
-      <div class="lab">Ne yapacaksın?</div><ol class="adimlar">${a.adimlar.map(s=>`<li>${s}</li>`).join("")}</ol>
-      <p class="sure">Yaklaşık ${a.sure||6} dakika · Telefonda da yapabilirsin.</p>
-      <button class="primary basla">Etkinliğe Başla</button></div></div>`;
+      <div class="lab">Ne yapacaksınız?</div><ol class="adimlar">${a.adimlar.map(s=>`<li>${s}</li>`).join("")}</ol>
+      <p class="sure">Yaklaşık ${a.sure||6} dakika · Telefonda da yapabilirsiniz.</p>
+      <button class="primary basla">Etkinliğe Başlayın</button></div></div>`;
     if(!tek)kok.querySelector(".geri").onclick=()=>{try{history.replaceState(null,"","#liste");}catch(e){}liste();};
     kok.querySelector(".basla").onclick=()=>{bip(660,.1);etkinlik(i);};
     const y=document.getElementById("yonlendir");if(y)y.hidden=true;window.scrollTo(0,0);}
@@ -562,13 +562,13 @@ function oku(s){s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g," 
 /* Cevap kutusu: eksi ve kesir tuşlu (telefon klavyesinde − ve / olmayabilir) */
 function cevap(kap,ust,dogru,okMsg,ipucu,sonra,o={}){
   const d=document.createElement("div");d.className="sor";
-  d.innerHTML=`${ust}<div class="row"><input class="ans gen" type="text" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Cevabın" placeholder="${o.kesir?"ör. "+EKSI+"7/3":"ör. "+EKSI+"12"}"><button type="button" class="ghost tus" data-t="-" aria-label="Eksi işareti ekle ya da kaldır">${EKSI}</button>${o.kesir?`<button type="button" class="ghost tus" data-t="/" aria-label="Kesir çizgisi ekle">/</button>`:""}<button class="primary k">Kontrol et</button></div><div class="onz" aria-live="polite"></div><div class="fb" hidden></div>`;
+  d.innerHTML=`${ust}<div class="row"><input class="ans gen" type="text" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Cevabın" placeholder="${o.kesir?"ör. "+EKSI+"7/3":"ör. "+EKSI+"12"}"><button type="button" class="ghost tus" data-t="-" aria-label="Eksi işareti ekle ya da kaldır">${EKSI}</button>${o.kesir?`<button type="button" class="ghost tus" data-t="/" aria-label="Kesir çizgisi ekle">/</button>`:""}<button class="primary k">Kontrol edin</button></div><div class="onz" aria-live="polite"></div><div class="fb" hidden></div>`;
   kap.appendChild(d);const inp=d.querySelector("input"),f=d.querySelector(".fb"),onz=d.querySelector(".onz");let den=0,ok=false;
   if(typeof dogru!=="function"){const dv=Array.isArray(dogru)?dogru:[dogru,1];d.dataset.cvp=dv[1]===1?String(dv[0]):`${dv[0]}/${dv[1]}`;}
-  const on=()=>{const s=inp.value.trim().replace(/[−]/g,"-");const v=oku(inp.value);const karma=/\d \d/.test(s);onz.innerHTML=v&&(v[1]!==1)?`Cevabın: <b>${rH(v[0],v[1],karma,true)}</b>`:"";};
+  const on=()=>{const s=inp.value.trim().replace(/[−]/g,"-");const v=oku(inp.value);const karma=/\d \d/.test(s);onz.innerHTML=v&&(v[1]!==1)?`Cevabınız: <b>${rH(v[0],v[1],karma,true)}</b>`:"";};
   d.querySelectorAll(".tus").forEach(b=>b.onclick=()=>{if(ok)return;let s=inp.value.trim();if(b.dataset.t==="-")s=/^[-−]/.test(s)?s.replace(/^[-−]/,""):EKSI+s;else s+="/";inp.value=s;inp.focus();on();});
   inp.oninput=on;
-  const kontrol=()=>{if(ok)return;const v=oku(inp.value);if(!v){fb(f,false,inp.value.trim()?`Bu yazımı okuyamadım. Örnek: ${o.kesir?EKSI+"7/3 ya da "+EKSI+"2 1/3":EKSI+"12"}`:"Önce cevabını yaz.");return;}den++;
+  const kontrol=()=>{if(ok)return;const v=oku(inp.value);if(!v){fb(f,false,inp.value.trim()?`Bu yazımı okuyamadım. Örnek: ${o.kesir?EKSI+"7/3 ya da "+EKSI+"2 1/3":EKSI+"12"}`:"Önce cevabınızı yazınız.");return;}den++;
     const dog=typeof dogru==="function"?dogru(v):esit(v,Array.isArray(dogru)?dogru:[dogru,1]);
     if(dog){ok=true;d.dataset.ok="1";inp.disabled=true;d.querySelectorAll(".tus").forEach(x=>x.disabled=true);fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,500);}
     else{const oz=o.ozel&&o.ozel(v);bip(220,.12);fb(f,false,oz||("Olmadı. İpucu: "+ipucu));}};
@@ -620,7 +620,7 @@ const yay=(x1,x2,y,h,renk,kesikli)=>`<path d="M${x1} ${y}Q${(x1+x2)/2} ${y-h} ${
    ("Ne yapacaksın, nasıl, ne zaman biter") ve denetimiyle yer alır; aşama bitince sıradaki açılır. */
 const yeniEl=(tag,cls,html)=>{const d=document.createElement(tag);if(cls)d.className=cls;if(html!=null)d.innerHTML=html;return d;};
 const duzYazi=h=>String(h).replace(/<[^>]+>/g,"");
-/* Ekrana bağlanmamış deney defteri: "Kuralı bul" aşamasında gösterilir */
+/* Ekrana bağlanmamış deney defteri: "Kuralı bulun" aşamasında gösterilir */
 function defterY(b){const c=document.createElement("div");const D=defter(c,b);D.el=c.firstElementChild;return D;}
 /* Çoktan seçmeli soru. secs[0] doğrudur (karıştırılır). ip: yanlış seçeneklere yönlendirici ipucu (dizi ya da tek metin) */
 function soruY(kap,soru,secs,okMsg,ip,sonra){const s=karistir(secs.map((_,i)=>i));
@@ -629,14 +629,14 @@ function soruY(kap,soru,secs,okMsg,ip,sonra){const s=karistir(secs.map((_,i)=>i)
   kap.appendChild(d);const f=d.querySelector(".fb");let bitti=false;
   d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;const i=+b.dataset.i;
     if(i===0){bitti=true;d.dataset.ok="1";b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,okMsg);bip(760,.12);sonra&&setTimeout(sonra,450);}
-    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);const m=typeof ip==="string"?ip:(ip&&ip[i-1]);fb(f,false,"Bu seçenek doğru değil. "+(m||"Deney defterine bakıp başka bir seçenek dene."));}});
+    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);const m=typeof ip==="string"?ip:(ip&&ip[i-1]);fb(f,false,"Bu seçenek doğru değil. "+(m||"Deney defterine bakıp başka bir seçenek deneyiniz."));}});
   return d;}
 /* Soruları sırayla sorar: [soru, seçenekler(ilki doğru), doğru açıklaması, ipuçları] */
 function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
   const git=()=>{if(i>=n){bitince&&bitince();return;}const q=liste[i++];soruY(kap,(n>1?`<span class="sn">Soru ${i} / ${n}</span>`:"")+q[0],q[1],q[2],q[3],git);};git();}
-const kuralA=(D,liste,ozet)=>({ad:"Kuralı bul",yon:["Deney defterindeki sonuçlarına bak.","Soruları sırayla cevapla. Yanlış seçersen ipucunu oku ve başka bir seçenek dene."],bitis:"Soruların hepsini doğru cevaplayınca.",
-  kur:(k,A)=>{if(D&&D.el&&D.n){k.appendChild(D.el);}soruZincir(k,liste,()=>A.tamam(ozet||"Kuralı buldun."));}});
-const kendiA=(fn,yon)=>({ad:"Kendini dene",yon:yon||["Öğrendiğini yeni bir soruda kullan.","Cevabını ver. Yanlışsa ipucunu oku ve yeniden dene."],bitis:"Soruyu doğru cevaplayınca etkinlik biter.",kur:(k,A)=>fn(k,()=>A.tamam(""))});
+const kuralA=(D,liste,ozet)=>({ad:"Kuralı bulun",yon:["Deney defterindeki sonuçlarınıza bakınız.","Soruları sırayla cevaplayınız. Yanlış seçerseniz ipucunu okuyunuz ve başka bir seçenek deneyiniz."],bitis:"Soruların hepsini doğru cevaplayınca.",
+  kur:(k,A)=>{if(D&&D.el&&D.n){k.appendChild(D.el);}soruZincir(k,liste,()=>A.tamam(ozet||"Kuralı buldunuz."));}});
+const kendiA=(fn,yon)=>({ad:"Kendinizi deneyin",yon:yon||["Öğrendiğinizi yeni bir soruda kullanınız.","Cevabınızı veriniz. Yanlışsa ipucunu okuyunuz ve yeniden deneyiniz."],bitis:"Soruyu doğru cevaplayınca etkinlik biter.",kur:(k,A)=>fn(k,()=>A.tamam(""))});
 /* Test ve erişilebilirlik için: SVG üzerinde bir noktaya dokunmayı taklit eder */
 function simTik(sv,x,y){const m=sv.getScreenCTM();const o={clientX:m.a*x+m.c*y+m.e,clientY:m.b*x+m.d*y+m.f,bubbles:true,pointerId:1,isPrimary:true};
   sv.dispatchEvent(new PointerEvent("pointerdown",o));sv.dispatchEvent(new PointerEvent("pointerup",o));sv.dispatchEvent(new MouseEvent("click",o));}
@@ -645,11 +645,11 @@ function asamali(p,o){
   const serit=yeniEl("ol","as-serit",AS.map((a,i)=>`<li><span>${i+1}</span><em>${a.ad}</em></li>`).join(""));kok.appendChild(serit);const li=[...serit.children];
   let tah=null,tk=null,cur=null;
   if(o.tahmin){const t=o.tahmin;tk=yeniEl("section","tahmin-k");
-    tk.innerHTML=`<div class="tk-bas"><span class="tk-et">Önce tahmin et</span><small>Bir seçeneğe dokun. Tahminini etkinliğin sonunda kontrol edeceğiz.</small></div>${t.giris?yaz([].concat(t.giris)):""}<div class="tk-ciz"></div>${soruKut(t.soru)}<div class="secler tk-sec">${t.secs.map(s=>`<button type="button" class="sec" data-v="${s[0]}">${s[1]}</button>`).join("")}</div><p class="tk-not" hidden></p>`;
+    tk.innerHTML=`<div class="tk-bas"><span class="tk-et">Önce tahmin edin</span><small>Bir seçeneğe dokununuz. Tahmininizi etkinliğin sonunda kontrol edeceğiz.</small></div>${t.giris?yaz([].concat(t.giris)):""}<div class="tk-ciz"></div>${soruKut(t.soru)}<div class="secler tk-sec">${t.secs.map(s=>`<button type="button" class="sec" data-v="${s[0]}">${s[1]}</button>`).join("")}</div><p class="tk-not" hidden></p>`;
     kok.appendChild(tk);const cz=tk.querySelector(".tk-ciz");if(t.ciz)t.ciz(cz);else cz.remove();
     tk.querySelectorAll(".tk-sec .sec").forEach(b=>b.onclick=()=>{if(tk.dataset.kilit)return;tk.querySelectorAll(".tk-sec .sec").forEach(x=>x.classList.toggle("secili",x===b));tah={v:b.dataset.v,t:b.innerHTML};
-      const n=tk.querySelector(".tk-not");n.hidden=false;n.textContent="Tahminin kaydedildi. Şimdi aşağıdaki Aşama 1'i yap.";bip(660,.06);});}
-  const kilitle=()=>{if(!tk)return;tk.dataset.kilit="1";tk.querySelectorAll(".tk-sec .sec").forEach(x=>x.disabled=true);const n=tk.querySelector(".tk-not");n.hidden=false;n.textContent=tah?"Tahminin kaydedildi. Sonunda kontrol edeceğiz.":"Tahmin seçmedin. Doğru cevabı etkinliğin sonunda göreceksin.";};
+      const n=tk.querySelector(".tk-not");n.hidden=false;n.textContent="Tahmininiz kaydedildi. Şimdi aşağıdaki Aşama 1'i yapınız.";bip(660,.06);});}
+  const kilitle=()=>{if(!tk)return;tk.dataset.kilit="1";tk.querySelectorAll(".tk-sec .sec").forEach(x=>x.disabled=true);const n=tk.querySelector(".tk-not");n.hidden=false;n.textContent=tah?"Tahmininiz kaydedildi. Sonunda kontrol edeceğiz.":"Tahmin seçmediniz. Doğru cevabı etkinliğin sonunda göreceksiniz.";};
   const S=AS.map((a,i)=>{const s=yeniEl("section","asama kilitli");
     s.innerHTML=`<header class="as-bas"><span class="as-no">Aşama ${i+1}</span><h3>${a.ad}</h3><span class="as-dr">Kilitli</span></header><div class="as-govde">${a.yon?`<ol class="as-yon">${a.yon.map(x=>`<li>${x}</li>`).join("")}</ol>`:""}${a.bitis?`<p class="as-bitis"><b>Aşama ne zaman biter?</b> ${a.bitis}</p>`:""}<div class="as-ic"></div></div>${i?`<p class="as-kilit">Aşama ${i} bitince açılır.</p>`:""}<div class="as-son" hidden></div>`;
     kok.appendChild(s);return s;});
@@ -664,11 +664,11 @@ function asamali(p,o){
     if(i>0)setTimeout(()=>{if(s.isConnected)s.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"});},60);}
   function bitir(){const t=o.tahmin;let th="";cur=null;
     if(t){const dg=t.secs.find(s=>String(s[0])===String(t.dogru));const dogruMu=tah&&String(tah.v)===String(t.dogru);
-      th=`<p class="tk-sonuc"><b>Başta tahminin:</b> ${tah?tah.t:"seçmedin"}. ${dogruMu?"Tahminin doğruydu!":`Doğru cevap: <b>${dg?dg[1]:""}</b>.`} ${t.neden||""}</p>`;
-      const n=tk.querySelector(".tk-not");n.hidden=false;n.innerHTML=dogruMu?"Tahminin doğruydu!":`Doğru cevap: ${dg?dg[1]:""}`;}
-    const d=yeniEl("section","ogrendim",`<div class="og-bas">Ne öğrendim?</div><p>${o.kural}</p>${th}<div class="row"><button type="button" class="primary tekrar">Baştan oyna</button></div>`);kok.appendChild(d);
+      th=`<p class="tk-sonuc"><b>Başta tahmininiz:</b> ${tah?tah.t:"seçmediniz"}. ${dogruMu?"Tahmininiz doğruydu!":`Doğru cevap: <b>${dg?dg[1]:""}</b>.`} ${t.neden||""}</p>`;
+      const n=tk.querySelector(".tk-not");n.hidden=false;n.innerHTML=dogruMu?"Tahmininiz doğruydu!":`Doğru cevap: ${dg?dg[1]:""}`;}
+    const d=yeniEl("section","ogrendim",`<div class="og-bas">Ne öğrendim?</div><p>${o.kural}</p>${th}<div class="row"><button type="button" class="primary tekrar">Baştan oynayın</button></div>`);kok.appendChild(d);
     d.querySelector(".tekrar").onclick=()=>window.dispatchEvent(new Event("kesif-tekrar"));
-    yonlendir("Etkinliği bitirdin. İstersen baştan oynayabilirsin.");setTimeout(()=>{if(d.isConnected)d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"center"});},150);}
+    yonlendir("Etkinliği bitirdiniz. İsterseniz baştan oynayabilirsiniz.");setTimeout(()=>{if(d.isConnected)d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"center"});},150);}
   ac(0);}
 
 /* 1 · SIFIR NEREDE? */
@@ -693,18 +693,18 @@ const e_sifir=p=>{const D=defterY(["Durum","0 ne anlatıyor?"]);
     const goster=()=>{kart.innerHTML=i<kartlar.length?`<div class="dkart"><small>Kart ${i+1} / ${kartlar.length}</small><p>${kartlar[i].t}</p></div>`:`<div class="dkart"><p>Bütün kartlar yerleşti.</p></div>`;A.durum(`${i} / ${kartlar.length}`);};
     k.querySelectorAll(".kova").forEach(b=>b.onclick=()=>{if(i>=kartlar.length)return;const c=kartlar[i];
       if(b.dataset.d===c.d){fb(f,true,"Doğru! "+c.a);b.querySelector("span").insertAdjacentHTML("beforeend",`<i>${c.k}</i>`);D.ekle([c.t,c.d==="h"?"hiç yok":"seçilmiş başlangıç noktası"],c.k);i++;bip(760,.1);goster();if(i===kartlar.length)A.tamam("Kartların hepsi doğru kutuda.");}
-      else{bip(220,.12);fb(f,false,c.d==="h"?"Bir daha düşün: Bu nicelik 0'dan az olabilir mi? Örneğin “−2” olabilir mi? Olamıyorsa 0 “hiç yok” demektir.":"Bir daha düşün: 0'ın altında bir değer olabilir mi? Örneğin “−5” olabilir mi? Olabiliyorsa 0 bir başlangıç noktasıdır.");}});
+      else{bip(220,.12);fb(f,false,c.d==="h"?"Bir daha düşününüz: Bu nicelik 0'dan az olabilir mi? Örneğin “−2” olabilir mi? Olamıyorsa 0 “hiç yok” demektir.":"Bir daha düşününüz: 0'ın altında bir değer olabilir mi? Örneğin “−5” olabilir mi? Olabiliyorsa 0 bir başlangıç noktasıdır.");}});
     A.oto=()=>{const c=kartlar[i];if(c)k.querySelector(`.kova[data-d="${c.d}"]`).click();};
     goster();}
   asamali(p,{tahmin:{giris:"Bir termometre <b>0 °C</b> gösteriyor.",soru:"Bu, havada hiç sıcaklık olmadığı anlamına mı gelir?",secs:[["e","Evet, hiç sıcaklık yoktur."],["h","Hayır, 0 °C bir başlangıç noktasıdır; hava daha soğuk da olabilir."]],dogru:"h",neden:"Sıcaklık 0 °C'nin altına inebilir: −10 °C gibi."},
     asamalar:[
-      {ad:"İlk 6 kart",yon:["Kartı oku ve kendine sor: Bu nicelik 0'ın altına inebilir mi?","İnemiyorsa <b>“0 = hiç yok”</b> kutusuna, inebiliyorsa <b>“0 = seçilmiş başlangıç noktası”</b> kutusuna dokun."],bitis:"6 kartın hepsi doğru kutuya girince.",kur:(k,A)=>deste(k,karistir([...H.slice(0,3),...B.slice(0,3)]),A)},
-      {ad:"Yeni 6 kart",yon:["Aynı işi yeni kartlarla yap.","Her kartta “−2 olabilir mi?” diye düşün."],bitis:"6 kartın hepsi doğru kutuya girince.",kur:(k,A)=>deste(k,karistir([...H.slice(3),...B.slice(3)]),A)},
+      {ad:"İlk 6 kart",yon:["Kartı okuyunuz ve kendinize sorunuz: Bu nicelik 0'ın altına inebilir mi?","İnemiyorsa <b>“0 = hiç yok”</b> kutusuna, inebiliyorsa <b>“0 = seçilmiş başlangıç noktası”</b> kutusuna dokununuz."],bitis:"6 kartın hepsi doğru kutuya girince.",kur:(k,A)=>deste(k,karistir([...H.slice(0,3),...B.slice(0,3)]),A)},
+      {ad:"Yeni 6 kart",yon:["Aynı işi yeni kartlarla yapınız.","Her kartta “−2 olabilir mi?” diye düşününüz."],bitis:"6 kartın hepsi doğru kutuya girince.",kur:(k,A)=>deste(k,karistir([...H.slice(3),...B.slice(3)]),A)},
       kuralA(D,[
-        ["Kütle, uzunluk, hacim ve sayma gibi niceliklerde 0 ne anlatır?",["Hiç yok demektir; bu nicelikler 0'ın altına inemez.","Seçilmiş bir başlangıç noktasıdır; altında da değerler vardır.","Hiçbir şey anlatmaz."],"Doğru! Bu niceliklerin doğal başlangıç noktası 0'dır.",["“−3 cm uzunluğunda kalem” olabilir mi? Defterdeki cetvel ve tartı kartlarına bak.","0 da bir değerdir: Sepette 0 elma olması “hiç elma yok” demektir."]],
-        ["Sıcaklık, deniz seviyesi ve katlar gibi durumlarda 0'ın altındaki değerler nasıl gösterilir?",["Başına “−” konarak, yani negatif sayılarla: −5 °C, −20 m, −2. kat","Doğal sayılarla: 5 °C, 20 m, 2. kat","Gösterilemez."],"Doğru! Negatif sayılar “eksi” diye okunur: −5 “eksi beş”.",["Doğal sayılar 0'dan başlar; 0'ın altındaki değerleri gösteremez.","Asansördeki bodrum katları hatırla: −1, −2 …"]]]),
+        ["Kütle, uzunluk, hacim ve sayma gibi niceliklerde 0 ne anlatır?",["Hiç yok demektir; bu nicelikler 0'ın altına inemez.","Seçilmiş bir başlangıç noktasıdır; altında da değerler vardır.","Hiçbir şey anlatmaz."],"Doğru! Bu niceliklerin doğal başlangıç noktası 0'dır.",["“−3 cm uzunluğunda kalem” olabilir mi? Defterdeki cetvel ve tartı kartlarına bakınız.","0 da bir değerdir: Sepette 0 elma olması “hiç elma yok” demektir."]],
+        ["Sıcaklık, deniz seviyesi ve katlar gibi durumlarda 0'ın altındaki değerler nasıl gösterilir?",["Başına “−” konarak, yani negatif sayılarla: −5 °C, −20 m, −2. kat","Doğal sayılarla: 5 °C, 20 m, 2. kat","Gösterilemez."],"Doğru! Negatif sayılar “eksi” diye okunur: −5 “eksi beş”.",["Doğal sayılar 0'dan başlar; 0'ın altındaki değerleri gösteremez.","Asansördeki bodrum katları hatırlayınız: −1, −2 …"]]]),
       kendiA((m,son)=>{const b=rastgele(SIFIR.filter(x=>x.d==="b")),h=karistir(SIFIR.filter(x=>x.d==="h")).slice(0,3);
-        soruY(m,"Aşağıdakilerin hangisinde 0, <b>seçilmiş bir başlangıç noktasıdır</b> (0'ın altında da değerler vardır)?",[b.t,...h.map(x=>x.t)],"Doğru! "+b.a,"Bu nicelik 0'ın altına inemez; burada 0 “hiç yok” demektir. 0'ın altında değer olabilen durumu bul.",son);})],
+        soruY(m,"Aşağıdakilerin hangisinde 0, <b>seçilmiş bir başlangıç noktasıdır</b> (0'ın altında da değerler vardır)?",[b.t,...h.map(x=>x.t)],"Doğru! "+b.a,"Bu nicelik 0'ın altına inemez; burada 0 “hiç yok” demektir. 0'ın altında değer olabilen durumu bulunuz.",son);})],
     kural:"Kütle, uzunluk, hacim ve sayma gibi niceliklerde 0 <b>hiç yok</b> demektir; bu niceliklerin doğal başlangıç noktası 0'dır. Sıcaklık, deniz seviyesi, katlar ve zaman gibi durumlarda 0 <b>seçilmiş bir başlangıç noktasıdır</b>; 0'ın altındaki değerler <b>negatif sayılarla</b> gösterilir."});
 };
 
@@ -712,14 +712,14 @@ const e_sifir=p=>{const D=defterY(["Durum","0 ne anlatıyor?"]);
 const e_asansor=p=>{const D=defterY(["Kat","Göstergedeki sayı"]);
   asamali(p,{tahmin:{giris:["Bir alışveriş merkezinde giriş katı <b>zemin kat</b>tır. Asansör göstergesi zemin katı <b>0</b> ile gösterir.","Otopark katları zemin katın altındadır."],soru:"Zemin katın 2 kat altındaki otopark katını asansör göstergesi hangi sayıyla gösterir?",secs:[["-2",EKSI+"2"],["2","2"],["0","0"]],dogru:"-2",neden:"Zemin katın altı negatif sayılarla gösterilir."},
     asamalar:[
-      {ad:"Müşterileri taşı",yon:["Sağdaki görev listesindeki müşterinin isteğini oku.","Binada o kata dokun: Asansör gider, göstergede katın sayısı yazar."],bitis:"4 müşterinin hepsi istediği kata ulaşınca.",kur:(k,A)=>{
+      {ad:"Müşterileri taşı",yon:["Sağdaki görev listesindeki müşterinin isteğini okuyunuz.","Binada o kata dokununuz: Asansör gider, göstergede katın sayısı yazar."],bitis:"4 müşterinin hepsi istediği kata ulaşınca.",kur:(k,A)=>{
         k.insertAdjacentHTML("beforeend",`<div class="two"><div class="stage bina"></div><div class="yan"><div class="gosterge"><small>Asansör göstergesi</small><b class="gk"></b><span class="gi"></span></div></div></div>`);
         const st=k.querySelector(".bina"),yan=k.querySelector(".yan"),gk=k.querySelector(".gk"),gi=k.querySelector(".gi");
         let kat=4,hareket=0;const YER=["Mağaza","Kafe","Sinema","Oyun alanı","Kitapçı","Restoran","Spor salonu"],YERE=["mağazaya","kafeye","sinemaya","oyun alanına","kitapçıya","restorana","spor salonuna"];
         const n1=-ra(2,4),p1=ra(2,7);let n2;do{n2=-ra(1,4);}while(n2===n1);
         const ad=v=>v<0?`Zemin katın <b>${-v} kat altındaki</b> otoparka`:`Zemin katın <b>${v} kat üstündeki</b> ${YERE[v-1]}`;
-        const L=[{m:"Asansörü <b>zemin kata</b> getir.",ok:()=>kat===0&&hareket>0,s:()=>"Gösterge: 0",h:0},{m:`Müşteri: “${ad(n1)} gitmek istiyorum.”`,ok:()=>kat===n1,s:()=>"Gösterge: "+T(n1),h:n1},{m:`Müşteri: “${ad(p1)} gitmek istiyorum.”`,ok:()=>kat===p1,s:()=>"Gösterge: "+T(p1),h:p1},{m:`Müşteri: “${ad(n2)} gitmek istiyorum.”`,ok:()=>kat===n2,s:()=>"Gösterge: "+T(n2),h:n2}];
-        let gi_=0;const G=gorevler(yan,L,()=>A.tamam("Dört müşteriyi de istedikleri kata götürdün."));
+        const L=[{m:"Asansörü <b>zemin kata</b> getiriniz.",ok:()=>kat===0&&hareket>0,s:()=>"Gösterge: 0",h:0},{m:`Müşteri: “${ad(n1)} gitmek istiyorum.”`,ok:()=>kat===n1,s:()=>"Gösterge: "+T(n1),h:n1},{m:`Müşteri: “${ad(p1)} gitmek istiyorum.”`,ok:()=>kat===p1,s:()=>"Gösterge: "+T(p1),h:p1},{m:`Müşteri: “${ad(n2)} gitmek istiyorum.”`,ok:()=>kat===n2,s:()=>"Gösterge: "+T(n2),h:n2}];
+        let gi_=0;const G=gorevler(yan,L,()=>A.tamam("Dört müşteriyi de istedikleri kata götürdünüz."));
         function sd0(v){return [0,520-(30+(v+4)/11*(520-60))];}
         const sd=SD(st,{dikey:true,min:-4,max:7,w:330,h:520,eks:44,pad:30,etiket:v=>v===0?"0":null,maxw:360,tik:v=>{kat=v;hareket++;ciz();
           D.ekle([v<0?`zemin katın ${-v} kat altı`:v>0?`zemin katın ${v} kat üstü`:"zemin kat",`<b>${T(v)}</b>`],String(v));bip(560,.08);G.kontrol();},
@@ -730,14 +730,14 @@ const e_asansor=p=>{const D=defterY(["Kat","Göstergedeki sayı"]);
           gk.textContent=T(kat);gi.textContent=kat<0?"negatif tam sayı":kat>0?"pozitif tam sayı":"sıfır: ne pozitif ne negatif";}
         A.oto=()=>{const g=L[yan.querySelectorAll(".gorevler li.tamam").length];if(!g)return;const [x,y]=sd.yer(g.h);simTik(sd.sv,x,y);};
         ciz();}},
-      {ad:"Göstergeyi yorumla",yon:["Bu kez tersini yap: Göstergedeki sayıya bak.","Asansörün nerede olduğunu seç."],bitis:"3 soruyu da doğru cevaplayınca.",kur:(k,A)=>{const a=-ra(2,4),b=ra(2,6);
-        soruZincir(k,[[`Asansör göstergesinde <b>${T(a)}</b> yazıyor. Asansör nerededir?`,[`Zemin katın ${-a} kat altında (otoparkta)`,`Zemin katın ${-a} kat üstünde`,"Zemin katta"],"Doğru! Negatif sayı zemin katın altını gösterir.",["Sayının başındaki “−” işaretine bak: Zemin katın altı mı, üstü mü?","Zemin kat 0 ile gösterilir; bu sayı 0 değil."]],
+      {ad:"Göstergeyi yorumla",yon:["Bu kez tersini yapınız: Göstergedeki sayıya bakınız.","Asansörün nerede olduğunu seçiniz."],bitis:"3 soruyu da doğru cevaplayınca.",kur:(k,A)=>{const a=-ra(2,4),b=ra(2,6);
+        soruZincir(k,[[`Asansör göstergesinde <b>${T(a)}</b> yazıyor. Asansör nerededir?`,[`Zemin katın ${-a} kat altında (otoparkta)`,`Zemin katın ${-a} kat üstünde`,"Zemin katta"],"Doğru! Negatif sayı zemin katın altını gösterir.",["Sayının başındaki “−” işaretine bakınız: Zemin katın altı mı, üstü mü?","Zemin kat 0 ile gösterilir; bu sayı 0 değil."]],
           [`Göstergede <b>${b}</b> yazıyor. Asansör nerededir?`,[`Zemin katın ${b} kat üstünde`,`Zemin katın ${b} kat altında`,"Zemin katta"],"Doğru! Pozitif sayılar zemin katın üstünü gösterir; + işareti yazılmayabilir.",["Bu sayının başında “−” yok. Pozitif sayılar zemin katın hangi yanındadır?","Zemin kat 0 ile gösterilir; bu sayı 0 değil."]],
-          ["Göstergede <b>0</b> yazıyor. Asansör nerededir?",["Zemin katta (giriş katında)","Zemin katın 1 kat altında","Zemin katın 1 kat üstünde"],"Doğru! Zemin kat başlangıç noktasıdır: 0.",["0 ne pozitif ne negatiftir; zemin katın altını göstermez.","0 ne pozitif ne negatiftir; zemin katın üstünü göstermez."]]],()=>A.tamam("Göstergedeki sayıdan katı buldun."));}},
-      kuralA(D,[["Zemin katın altındaki katlar göstergede hangi sayılarla gösterildi?",["Başında “−” olan sayılarla, yani negatif tam sayılarla","Pozitif tam sayılarla","Doğal sayılarla"],"Doğru! Zemin katın 3 kat altı −3 ile gösterilir, “eksi üç” diye okunur.",["Pozitif sayılar zemin katın üstünü gösterdi. Deftere bak.","Doğal sayılar 0'dan başlar; zemin katın altını gösteremez."]],
+          ["Göstergede <b>0</b> yazıyor. Asansör nerededir?",["Zemin katta (giriş katında)","Zemin katın 1 kat altında","Zemin katın 1 kat üstünde"],"Doğru! Zemin kat başlangıç noktasıdır: 0.",["0 ne pozitif ne negatiftir; zemin katın altını göstermez.","0 ne pozitif ne negatiftir; zemin katın üstünü göstermez."]]],()=>A.tamam("Göstergedeki sayıdan katı buldunuz."));}},
+      kuralA(D,[["Zemin katın altındaki katlar göstergede hangi sayılarla gösterildi?",["Başında “−” olan sayılarla, yani negatif tam sayılarla","Pozitif tam sayılarla","Doğal sayılarla"],"Doğru! Zemin katın 3 kat altı −3 ile gösterilir, “eksi üç” diye okunur.",["Pozitif sayılar zemin katın üstünü gösterdi. Deftere bakınız.","Doğal sayılar 0'dan başlar; zemin katın altını gösteremez."]],
         ["Zemin kat (0) için hangisi doğrudur?",["0 ne pozitif ne negatiftir; 0'ın işareti yoktur.","0 pozitif bir tam sayıdır.","0 negatif bir tam sayıdır."],"Doğru! Sıfır, pozitif ya da negatif kabul edilmez.","Göstergede 0'ın önünde + ya da − işareti var mıydı?"]]),
       kendiA((m,son)=>{const d=ra(2,6);
-        cevap(m,yaz([`Bir hastanede zemin katın <b>${d} kat altında</b> otopark vardır. Zemin kat 0 ile gösterilir.`])+soruKut("Asansör göstergesi bu otopark katını hangi tam sayıyla gösterir?"),-d,`Doğru! Zemin katın ${d} kat altı <b>${T(-d)}</b> ile gösterilir.`,"Zemin katın altındaki katlar negatif sayılarla gösterilir. “−” düğmesini kullan.",son,{ozel:v=>v[0]===d&&v[1]===1?"Otopark zemin katın altında. İşarete dikkat: “−” düğmesiyle eksi işaretini ekle.":null});})],
+        cevap(m,yaz([`Bir hastanede zemin katın <b>${d} kat altında</b> otopark vardır. Zemin kat 0 ile gösterilir.`])+soruKut("Asansör göstergesi bu otopark katını hangi tam sayıyla gösterir?"),-d,`Doğru! Zemin katın ${d} kat altı <b>${T(-d)}</b> ile gösterilir.`,"Zemin katın altındaki katlar negatif sayılarla gösterilir. “−” düğmesini kullanınız.",son,{ozel:v=>v[0]===d&&v[1]===1?"Otopark zemin katın altında. İşarete dikkat: “−” düğmesiyle eksi işaretini ekleyiniz.":null});})],
     kural:"Dikey sayı doğrusunda başlangıç noktası (zemin kat) <b>0</b>'dır. 0'ın üstündekiler <b>pozitif</b>, altındakiler <b>negatif</b> tam sayılarla gösterilir. <b>0'ın işareti yoktur.</b>"});
 };
 
@@ -750,22 +750,22 @@ function termometre(kap,sur,tik){
 const e_termo=p=>{const D=defterY(["Sıcaklık","Okunuşu"]);
   asamali(p,{tahmin:{giris:"Bir kış sabahı termometredeki sıvı, 0 çizgisinin <b>7 çizgi altında</b> duruyor. Her çizgi 1 °C.",soru:"Bu sıcaklık nasıl yazılır?",secs:[["a",EKSI+"7 °C"],["b","7 °C"],["c","+7 °C"]],dogru:"a",neden:"0 °C'nin altındaki sıcaklıklar negatif sayılarla yazılır."},
     asamalar:[
-      {ad:"Sıcaklığı ayarla",yon:["Termometrenin üstünde parmağını ya da fareni yukarı–aşağı sürükle; kırmızı sıvı seninle hareket eder.","Her çizgi 1 °C'dir. Görev listesindeki sıcaklığa gelince parmağını kaldır."],bitis:"4 görevin hepsi tamamlanınca.",kur:(k,A)=>{
+      {ad:"Sıcaklığı ayarla",yon:["Termometrenin üstünde parmağınızı ya da farenizi yukarı–aşağı sürükleyiniz; kırmızı sıvı sizinle hareket eder.","Her çizgi 1 °C'dir. Görev listesindeki sıcaklığa gelince parmağınızı kaldırınız."],bitis:"4 görevin hepsi tamamlanınca.",kur:(k,A)=>{
         k.insertAdjacentHTML("beforeend",`<div class="two"><div class="stage tm"></div><div class="yan"><div class="gosterge"><small>Termometre</small><b class="gk"></b><span class="gi"></span></div></div></div>`);
         const st=k.querySelector(".tm"),yan=k.querySelector(".yan"),gk=k.querySelector(".gk"),gi=k.querySelector(".gi");let t=20;
         const SC=[["Dondurucu",-24,-16],["Kar yağarken dışarısı",-4,-1],["Erzurum'da bir kış sabahı",-22,-9],["Aşı dolabı (buzdolabı)",2,8],["Yaz öğleni Antalya",28,34],["Kayak merkezi",-15,-6]];
         const neg=karistir(SC.filter(s=>s[1]<0)),pos=rastgele(SC.filter(s=>s[1]>0));
         const h1=[neg[0][0],ra(neg[0][1],neg[0][2])],h2=[pos[0],ra(pos[1],pos[2])];let h3;do{h3=[neg[1][0],ra(neg[1][1],neg[1][2])];}while(h3[1]===h1[1]);
-        const L=[{m:"Sıvıyı <b>0 °C</b>'ye getir. (Su bu sıcaklıkta donar.)",ok:()=>t===0,v:0},{m:`${h1[0]}: sıvıyı <b>${T(h1[1])} °C</b>'ye getir.`,ok:()=>t===h1[1],s:()=>sesle(h1[1])+" derece",v:h1[1]},{m:`${h2[0]}: sıvıyı <b>${T(h2[1])} °C</b>'ye getir.`,ok:()=>t===h2[1],v:h2[1]},{m:`${h3[0]}: sıvıyı <b>${T(h3[1])} °C</b>'ye getir.`,ok:()=>t===h3[1],s:()=>sesle(h3[1])+" derece",v:h3[1]}];
-        const G=gorevler(yan,L,()=>A.tamam("Dört sıcaklığı da ayarladın."));
+        const L=[{m:"Sıvıyı <b>0 °C</b>'ye getiriniz. (Su bu sıcaklıkta donar.)",ok:()=>t===0,v:0},{m:`${h1[0]}: sıvıyı <b>${T(h1[1])} °C</b>'ye getiriniz.`,ok:()=>t===h1[1],s:()=>sesle(h1[1])+" derece",v:h1[1]},{m:`${h2[0]}: sıvıyı <b>${T(h2[1])} °C</b>'ye getiriniz.`,ok:()=>t===h2[1],v:h2[1]},{m:`${h3[0]}: sıvıyı <b>${T(h3[1])} °C</b>'ye getiriniz.`,ok:()=>t===h3[1],s:()=>sesle(h3[1])+" derece",v:h3[1]}];
+        const G=gorevler(yan,L,()=>A.tamam("Dört sıcaklığı da ayarladınız."));
         const sd=termometre(st,v=>{t=v;ciz();},v=>{t=v;ciz();if(D.ekle([`${T(v)} °C`,sesle(v)+" derece"],String(v)))bip(560,.06);G.kontrol();});
         function ciz(){sd.sivi(t);gk.textContent=T(t)+" °C";gi.textContent=t<0?"0 °C'nin altında":t>0?"0 °C'nin üstünde":"suyun donma sıcaklığı";}
         A.oto=()=>{const g=L[yan.querySelectorAll(".gorevler li.tamam").length];if(!g)return;const [x,y]=sd.yer(g.v);simTik(sd.sv,x,y);};
         ciz();}},
-      kuralA(D,[["0 °C'nin altındaki sıcaklıkları nasıl yazdın?",["Sayının başına “−” koyarak: −18 °C","Sayıyı olduğu gibi: 18 °C","Sayının sonuna “−” koyarak: 18− °C"],"Doğru! −18 °C, “eksi on sekiz derece” diye okunur.",["18 °C sıcak bir gündür; 0'ın üstündedir.","İşaret sayının önüne yazılır."]],
+      kuralA(D,[["0 °C'nin altındaki sıcaklıkları nasıl yazdınız?",["Sayının başına “−” koyarak: −18 °C","Sayıyı olduğu gibi: 18 °C","Sayının sonuna “−” koyarak: 18− °C"],"Doğru! −18 °C, “eksi on sekiz derece” diye okunur.",["18 °C sıcak bir gündür; 0'ın üstündedir.","İşaret sayının önüne yazılır."]],
         ["+25 °C ile 25 °C için hangisi doğrudur?",["İkisi aynı sıcaklıktır; pozitif sayıların önündeki + işareti yazılmayabilir.","İkisi farklı sıcaklıklardır.","25 °C negatif bir sıcaklıktır."],"Doğru! +25 = 25.",["Termometrede ikisi aynı çizgiyi gösterir.","Negatif sayıların önünde “−” olur; 25'in önünde yok."]]]),
       kendiA((m,son)=>{const v=-ra(3,22);const w=yeniEl("div","stage mini");w.style.maxWidth="260px";m.appendChild(w);termometre(w,null,null).sivi(v);
-        cevap(m,soruKut("Termometrenin gösterdiği sıcaklık kaç °C'dir?"),v,`Doğru! Termometre <b>${T(v)} °C</b> gösteriyor: “${sesle(v)} derece”.`,"0 çizgisinden başla ve aşağı doğru çizgileri tek tek say. 5'er 5'er yazılmış sayılar işine yarar.",son,{ozel:x=>x[0]===-v&&x[1]===1?"Sıvı 0'ın altında. İşareti unutma: “−” düğmesini kullan.":null});})],
+        cevap(m,soruKut("Termometrenin gösterdiği sıcaklık kaç °C'dir?"),v,`Doğru! Termometre <b>${T(v)} °C</b> gösteriyor: “${sesle(v)} derece”.`,"0 çizgisinden başlayınız ve aşağı doğru çizgileri tek tek sayınız. 5'er 5'er yazılmış sayılar işine yarar.",son,{ozel:x=>x[0]===-v&&x[1]===1?"Sıvı 0'ın altında. İşareti unutmayınız: “−” düğmesini kullanınız.":null});})],
     kural:"0 °C bir <b>başlangıç noktasıdır</b>. 0 °C'nin altındaki sıcaklıklar <b>negatif</b> sayılarla (−12 °C: “eksi on iki derece”), üstündekiler <b>pozitif</b> sayılarla gösterilir. Pozitif işareti yazılmayabilir: +8 °C = 8 °C."});
 };
 
@@ -773,7 +773,7 @@ const e_termo=p=>{const D=defterY(["Sıcaklık","Okunuşu"]);
 const e_deniz=p=>{const D=defterY(["Nesne","Konumu","Tam sayı"]);
   asamali(p,{tahmin:{giris:"Deniz seviyesi <b>0 m</b> kabul edilir. Bir dalgıç deniz seviyesinin <b>20 m altında</b> yüzüyor.",soru:"Dalgıcın konumu hangi tam sayıyla gösterilir?",secs:[["a",EKSI+"20"],["b","20"],["c","0"]],dogru:"a",neden:"Deniz seviyesinin altı negatif sayılarla gösterilir."},
     asamalar:[
-      {ad:"Nesneleri yerleştir",yon:["Turuncu çerçeveli nesnenin cümlesini oku.","Nesneyi sahnede yukarı ya da aşağı sürükle ve doğru yükseklikte bırak. Sayı doğrusunda her çentik 5 m'dir."],bitis:"5 nesnenin hepsi doğru yere yerleşince.",kur:(k,A)=>{
+      {ad:"Nesneleri yerleştir",yon:["Turuncu çerçeveli nesnenin cümlesini okuyunuz.","Nesneyi sahnede yukarı ya da aşağı sürükleyiniz ve doğru yükseklikte bırakınız. Sayı doğrusunda her çentik 5 m'dir."],bitis:"5 nesnenin hepsi doğru yere yerleşince.",kur:(k,A)=>{
         k.insertAdjacentHTML("beforeend",`<div class="dkart ncumle"></div><div class="stage dz"></div><div class="fb" hidden></div>`);
         const st=k.querySelector(".dz"),nc=k.querySelector(".ncumle"),f=k.querySelector(".fb");
         const NEG=[["Dalgıç",-40,-10],["Balık sürüsü",-35,-5],["Denizaltı",-50,-25],["Batık gemi",-55,-45],["Ahtapot",-45,-20]],POS=[["Martı",10,35],["Uçurtma",15,40],["Paraşütçü",20,40],["Fener ışığı",25,35]];
@@ -787,15 +787,15 @@ const e_deniz=p=>{const D=defterY(["Nesne","Konumu","Tam sayı"]);
           tik:v=>{if(i>=N.length)return;const n=N[i];n.y=v;
             if(v===n.h){n.ok=true;fb(f,true,`Doğru! ${n.ad}: <b>${T(n.h)}</b>. ${n.h<0?"Deniz seviyesinin altı negatif sayıyla gösterilir.":n.h>0?"Deniz seviyesinin üstü pozitif sayıyla gösterilir.":"Deniz seviyesi 0'dır; 0'ın işareti yoktur."}`);
               D.ekle([n.ad,n.h>0?`${n.h} m üstünde`:n.h<0?`${-n.h} m altında`:"deniz seviyesinde",`<b>${T(n.h)}</b>`],n.ad);i++;bip(760,.1);ciz();if(i===N.length)A.tamam("Bütün nesneler doğru yükseklikte.");return;}
-            bip(220,.12);fb(f,false,(v>0&&n.h<0)||(v<0&&n.h>0)||(n.h===0&&v!==0)?"Deniz seviyesinin altı mı, üstü mü? Yönüne bir daha bak.":`Yön doğru ama nesne şu an ${T(v)} m'de. Çentikleri 5'er 5'er sayarak yeniden dene.`);ciz();}});
-        function ciz(){nc.innerHTML=i<N.length?`<small>Sıradaki nesne (${i+1} / ${N.length})</small><p>${cumle(N[i])}</p>`:`<p>Bütün nesneleri yerleştirdin.</p>`;A.durum(`${i} / ${N.length}`);
+            bip(220,.12);fb(f,false,(v>0&&n.h<0)||(v<0&&n.h>0)||(n.h===0&&v!==0)?"Deniz seviyesinin altı mı, üstü mü? Yönüne bir daha bakınız.":`Yön doğru ama nesne şu an ${T(v)} m'de. Çentikleri 5'er 5'er sayarak yeniden deneyiniz.`);ciz();}});
+        function ciz(){nc.innerHTML=i<N.length?`<small>Sıradaki nesne (${i+1} / ${N.length})</small><p>${cumle(N[i])}</p>`:`<p>Bütün nesneleri yerleştirdiniz.</p>`;A.durum(`${i} / ${N.length}`);
           let h="";N.forEach((n,j)=>{const aktif=j===i;const yy=n.y===null?(aktif?sd.yer(20)[1]:null):sd.yer(n.y)[1];if(yy===null)return;
             h+=`<line x1="52" y1="${yy}" x2="${n.x-40}" y2="${yy}" stroke="${n.ok?"#2f9e44":"#e8590c"}" stroke-width="1.6" stroke-dasharray="5 4"/><rect x="${n.x-40}" y="${yy-15}" width="80" height="30" rx="8" fill="${css('--card')}" stroke="${n.ok?"#2f9e44":aktif?"#e8590c":"currentColor"}" stroke-width="${aktif?3:2}"/><text x="${n.x}" y="${yy+5}" text-anchor="middle" font-size="${n.ad.length>9?11:13}" font-weight="800">${n.ad}</text>`;
             if(n.ok)h+=`<text x="${n.x+46}" y="${yy+6}" font-size="16" font-weight="800" fill="#2f9e44">${T(n.h)}</text>`;});
           sd.ciz(h);}
         A.oto=()=>{const n=N[i];if(!n)return;const [x,y]=sd.yer(n.h);simTik(sd.sv,x,y);};
         ciz();}},
-      kuralA(D,[["Deniz seviyesinin altındaki konumları hangi sayılarla gösterdin?",["Negatif tam sayılarla","Pozitif tam sayılarla","Hepsini 0 ile"],"Doğru! Deniz seviyesi 0; üstü pozitif, altı negatif.",["Pozitif sayılar deniz seviyesinin üstündeki martı ve uçurtma içindi.","0 yalnız deniz seviyesinin kendisidir (tekne)."]],
+      kuralA(D,[["Deniz seviyesinin altındaki konumları hangi sayılarla gösterdiniz?",["Negatif tam sayılarla","Pozitif tam sayılarla","Hepsini 0 ile"],"Doğru! Deniz seviyesi 0; üstü pozitif, altı negatif.",["Pozitif sayılar deniz seviyesinin üstündeki martı ve uçurtma içindi.","0 yalnız deniz seviyesinin kendisidir (tekne)."]],
         ["−30 m ile +30 m konumları için hangisi doğrudur?",["İkisi de deniz seviyesine 30 m uzaklıktadır; biri altında, biri üstündedir.","İkisi aynı yerdir.","−30 m, deniz seviyesine daha uzaktır."],"Doğru! Bu iki sayı 0'a eşit uzaklıkta, ters yönlerdedir.",["İşaretleri farklı: Biri su altında, biri su üstünde.","İkisi de 0'dan 30 çentik uzakta; yalnız yönleri farklı."]]]),
       kendiA((m,son)=>{const Q=rastgele([{m:"Marmaray tüp tünelinin en derin noktası, deniz seviyesinin yaklaşık <b>60 m altındadır</b>.",v:-60,s:"Bu nokta hangi tam sayıyla gösterilir?"},{m:"15 Temmuz Şehitler Köprüsü'nün yol kısmı (tabliyesi) deniz seviyesinin yaklaşık <b>64 m üstündedir</b>.",v:64,s:"Tabliyenin konumu hangi tam sayıyla gösterilir?"}]);
         cevap(m,yaz([Q.m,"Deniz seviyesi 0 kabul ediliyor."])+soruKut(Q.s),Q.v,`Doğru! <b>${T(Q.v)}</b>.`,"Deniz seviyesinin altı negatif, üstü pozitif sayıyla gösterilir.",son,{ozel:x=>x[0]===-Q.v&&x[1]===1?"Yöne dikkat: Deniz seviyesinin altında mı, üstünde mi?":null});})],
@@ -808,7 +808,7 @@ const e_cuzdan=p=>{const D=defterY(["Durum","Tam sayı"]);
   const mik=()=>5*ra(1,30);
   asamali(p,{tahmin:{giris:"Ece'nin kantin kartı borçlanabiliyor. Ece kantine <b>15 TL borçlandı</b>.",soru:"Kartta görünen bu durum hangi tam sayıyla gösterilir?",secs:[["a",EKSI+"15"],["b","15"],["c","0"]],dogru:"a",neden:"Borç, paranın eksiye düşmesidir; negatif sayıyla gösterilir."},
     asamalar:[
-      {ad:"Kartları cebe koy",yon:["Kartı oku: Para azalıyor mu (borç, zarar, gider), artıyor mu (alacak, kâr, gelir)?","Durumu gösteren sayının işaretini seç: <b>− Negatif</b>, <b>0</b> ya da <b>+ Pozitif</b>. Doğruysa kart cüzdandaki cebine girer."],bitis:"6 kartın hepsi cebine girince.",kur:(k,A)=>{
+      {ad:"Kartları cebe koy",yon:["Kartı okuyunuz: Para azalıyor mu (borç, zarar, gider), artıyor mu (alacak, kâr, gelir)?","Durumu gösteren sayının işaretini seçiniz: <b>− Negatif</b>, <b>0</b> ya da <b>+ Pozitif</b>. Doğruysa kart cüzdandaki cebine girer."],bitis:"6 kartın hepsi cebine girince.",kur:(k,A)=>{
         k.insertAdjacentHTML("beforeend",`<div class="dkart bak"></div><div class="row isr"><button type="button" class="isb n" data-s="-1">${EKSI} Negatif</button><button type="button" class="isb z" data-s="0">0</button><button type="button" class="isb p" data-s="1">+ Pozitif</button></div>
           <div class="cuzdan"><div class="cep borc"><b>Borç, zarar, gider</b><span></span></div><div class="cep sifir"><b>Ne borç ne alacak</b><span></span></div><div class="cep alacak"><b>Alacak, kâr, gelir</b><span></span></div></div><div class="fb" hidden></div>`);
         const kb=k.querySelector(".bak"),f=k.querySelector(".fb");
@@ -823,11 +823,11 @@ const e_cuzdan=p=>{const D=defterY(["Durum","Tam sayı"]);
           else{bip(220,.12);fb(f,false,c.v===0?"Bu kartta ne borç ne alacak var. Hangi sayı “hiç yok” durumunu gösterir?":c.v<0?"Bu durumda para azalıyor ya da ödenecek bir borç var. Azalma hangi işaretle gösterilir?":"Bu durumda para artıyor ya da alınacak bir para var. Artış hangi işaretle gösterilir?");}});
         A.oto=()=>{const c=deste[i];if(c)k.querySelector(`.isb[data-s="${Math.sign(c.v)}"]`).click();};
         goster();}},
-      {ad:"Karşıt durumu bul",yon:["Karttaki durumu oku.","Bu durumun <b>karşıtını</b> (tam tersini) seç."],bitis:"Karşıt durumu doğru seçince.",kur:(k,A)=>{const a=rastgele(ADL),x=mik();
+      {ad:"Karşıt durumu bul",yon:["Karttaki durumu okuyunuz.","Bu durumun <b>karşıtını</b> (tam tersini) seçiniz."],bitis:"Karşıt durumu doğru seçince.",kur:(k,A)=>{const a=rastgele(ADL),x=mik();
         k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>Durum</small><p>${a[1]} arkadaşından <b>${x} TL</b> alacağı var. Bu durum <b>${TI(x)}</b> ile gösterilir.</p></div>`);
         soruY(k,"Bu durumun <b>karşıtı</b> olan durum hangisidir?",[`${a[1]} arkadaşına ${x} TL borcu var.`,`${a[1]} arkadaşından ${2*x} TL alacağı var.`,`${a[1]} arkadaşına ${x+5} TL borcu var.`],`Doğru! Karşıt durum <b>${T(-x)}</b> ile gösterilir. ${TI(x)} ile ${T(-x)} <b>ters işaretli</b> sayılardır.`,["Bu da bir alacak; karşıtı borç olmalı.","Borç doğru ama miktar farklı. Karşıt durumda miktar aynı kalır."],()=>{D.ekle([`${x} TL alacak ↔ ${x} TL borç`,`${TI(x)} ↔ ${T(-x)}`],"karsit");A.tamam(`Karşıt durumlar: ${TI(x)} ve ${T(-x)}.`);});}},
       kuralA(D,[["Borç, zarar ve gider hangi sayılarla gösterildi?",["Negatif tam sayılarla","Pozitif tam sayılarla","Doğal sayılarla"],"Doğru! Alacak, kâr ve gelir ise pozitif tam sayılarla gösterilir.",["Pozitif sayılar alacak, kâr ve gelir cebine girdi.","Doğal sayılar negatif olamaz; borcu gösteremez."]],
-        ["“Ne borç ne alacak” durumu hangi sayıyla gösterildi?",["0 ile; 0'ın işareti yoktur.","+1 ile","−1 ile"],"Doğru!","Ortadaki cebe bak: Hiç borç ya da alacak yoksa miktar kaçtır?"]]),
+        ["“Ne borç ne alacak” durumu hangi sayıyla gösterildi?",["0 ile; 0'ın işareti yoktur.","+1 ile","−1 ile"],"Doğru!","Ortadaki cebe bakınız: Hiç borç ya da alacak yoksa miktar kaçtır?"]]),
       kendiA((m,son)=>{const x=5*ra(3,24),z=rastgele([true,false]);const s=z?`Bir kafenin bu ayki hesabında <b>${x} TL zarar</b> görünüyor.`:`Bir spor kulübünün kermesten <b>${x} TL geliri</b> oldu.`,v=z?-x:x;
         cevap(m,yaz([s])+soruKut("Bu durum hangi tam sayıyla gösterilir?"),v,`Doğru! <b>${T(v)}</b>.`,z?"Zarar, borç ve gider negatif sayıyla gösterilir.":"Gelir, kâr ve alacak pozitif sayıyla gösterilir.",son,{ozel:y=>y[0]===-v&&y[1]===1?(z?"Zarar paranın azalmasıdır; işaret negatif olmalı.":"Gelir paranın artmasıdır; işaret pozitif olmalı."):null});})],
     kural:"Günlük hayatta <b>karşıt durumlar</b> ters işaretli sayılarla gösterilir: Borç, zarar ve gider <b>negatif</b>; alacak, kâr ve gelir <b>pozitif</b> tam sayılarla gösterilir. Ne borç ne alacak durumu <b>0</b> ile gösterilir."});
@@ -850,25 +850,25 @@ const e_kurucu=p=>{const D=defterY(["Uçlar","Parça sayısı","Bir parça","Har
   const cizim=(kap,C,o)=>{const w=yeniEl("div","stage");kap.appendChild(w);const W=genislik(w,680,340),sv=svgEl(W,98);sv.innerHTML=kurucuSvg(W,C,o);w.appendChild(sv);return w;};
   asamali(p,{tahmin:{giris:"Bir sayı doğrusunun uçlarında <b>−10</b> ve <b>10</b> yazıyor. Aradaki bölüm <b>4 eşit parçaya</b> bölünmüş.",ciz:k=>cizim(k,{n:4,a:-10,b:10},{}),soru:"Bir parça kaç birimdir?",secs:[[5,"5"],[4,"4"],[10,"10"],[2,"2"]],dogru:5,neden:"−10'dan 10'a 20 birim vardır; 20 birim 4 parçaya bölününce bir parça 5 birim olur."},
     asamalar:[
-      {ad:"Bir parçayı bul",yon:[`Doğru ${C.n} eşit parçaya bölünmüş; yalnız uçlardaki sayılar yazılı.`,"Aşağıdaki değer düğmelerinden birine dokun: Bir parça o kadar birim olsaydı çentiklere hangi sayılar gelirdi, turuncu olarak görürsün.","Son çentiğe gelen sayı sağ uçtaki sayıyla aynı olunca bir parçanın değerini bulmuşsun demektir."],bitis:"Sağ uç tutunca.",kur:(k,A)=>{
-        k.insertAdjacentHTML("beforeend",`<div class="stage kr"></div><p class="lab2">Bir parça kaç birim olabilir? Bir değere dokun:</p><div class="chips kr-deg">${DEG.map(v=>`<button type="button" class="chip" data-v="${v}">${v}</button>`).join("")}</div><p class="durum kr-dr">Henüz bir değer seçmedin.</p><div class="tsar"><table class="t kr-tab"><thead><tr><th>Denediğin değer</th><th>Sağ uç olurdu</th><th>Sonuç</th></tr></thead><tbody></tbody></table></div><div class="fb" hidden></div>`);
+      {ad:"Bir parçayı bul",yon:[`Doğru ${C.n} eşit parçaya bölünmüş; yalnız uçlardaki sayılar yazılı.`,"Aşağıdaki değer düğmelerinden birine dokununuz: Bir parça o kadar birim olsaydı çentiklere hangi sayılar gelirdi, turuncu olarak görürsünüz.","Son çentiğe gelen sayı sağ uçtaki sayıyla aynı olunca bir parçanın değerini bulmuşsunuz demektir."],bitis:"Sağ uç tutunca.",kur:(k,A)=>{
+        k.insertAdjacentHTML("beforeend",`<div class="stage kr"></div><p class="lab2">Bir parça kaç birim olabilir? Bir değere dokununuz:</p><div class="chips kr-deg">${DEG.map(v=>`<button type="button" class="chip" data-v="${v}">${v}</button>`).join("")}</div><p class="durum kr-dr">Henüz bir değer seçmediniz.</p><div class="tsar"><table class="t kr-tab"><thead><tr><th>Denediğiniz değer</th><th>Sağ uç olurdu</th><th>Sonuç</th></tr></thead><tbody></tbody></table></div><div class="fb" hidden></div>`);
         const st=k.querySelector(".kr"),dr=k.querySelector(".kr-dr"),tb=k.querySelector(".kr-tab tbody"),f=k.querySelector(".fb");let g=0,ok=false;const denendi=new Set();
         const ciz=()=>{const W=genislik(st,680,340),sv=svgEl(W,98);sv.innerHTML=kurucuSvg(W,C,{g,yay:g?g:null,yayR:g===C.s?"#2f9e44":"#e8590c"});st.replaceChildren(sv);};
         k.querySelectorAll(".kr-deg .chip").forEach(b=>b.onclick=()=>{if(ok)return;g=+b.dataset.v;k.querySelectorAll(".kr-deg .chip").forEach(x=>x.setAttribute("aria-pressed",x===b));const u=C.a+C.n*g;ciz();bip(560,.05);
           dr.innerHTML=`Bir parça <b>${g}</b> birim olursa sağ uç: ${T(C.a)} + ${C.n} · ${g} = <b>${T(u)}</b>. Sağ uçta <b>${T(C.b)}</b> yazıyor.`;
           if(!denendi.has(g)){denendi.add(g);tb.insertAdjacentHTML("beforeend",`<tr class="yeni"><td>${g}</td><td>${T(u)}</td><td>${u===C.b?"tuttu ✓":u>C.b?"çok büyük":"çok küçük"}</td></tr>`);}
           if(g===C.s){ok=true;fb(f,true,`Tuttu! Bir parça <b>${C.s} birim</b>. ${denT(C.a)} başlayıp ${C.n} parça ilerleyince ${ekT(C.b,"e")} ulaşılır.`);A.tamam(`Bir parça ${C.s} birim.`);}
-          else fb(f,false,u>C.b?"Sağ uç, yazan sayıdan büyük çıktı. Daha küçük bir değer dene.":"Sağ uç, yazan sayıdan küçük çıktı. Daha büyük bir değer dene.");});
+          else fb(f,false,u>C.b?"Sağ uç, yazan sayıdan büyük çıktı. Daha küçük bir değer deneyiniz.":"Sağ uç, yazan sayıdan küçük çıktı. Daha büyük bir değer deneyiniz.");});
         A.oto=()=>k.querySelector(`.kr-deg .chip[data-v="${C.s}"]`).click();
         ciz();}},
-      {ad:"Harfli noktayı bul",yon:[`Artık bir parçanın ${C.s} birim olduğunu biliyorsun; yayların üstünde yazıyor.`,`Sol uçtan başla, çentik çentik ilerleyerek <b>${C.h}</b> noktasının gösterdiği sayıyı bul ve yaz.`],bitis:`${C.h} noktasının sayısını doğru yazınca.`,kur:(k,A)=>{
+      {ad:"Harfli noktayı bul",yon:[`Artık bir parçanın ${C.s} birim olduğunu biliyorsunuz; yayların üstünde yazıyor.`,`Sol uçtan başlayınız, çentik çentik ilerleyerek <b>${C.h}</b> noktasının gösterdiği sayıyı bulunuz ve yazınız.`],bitis:`${C.h} noktasının sayısını doğru yazınca.`,kur:(k,A)=>{
         cizim(k,C,{yay:C.s,harf:C.i});const deg=C.a+C.i*C.s;
-        cevap(k,soruKut(`${C.h} noktası hangi sayıyı gösterir?`),deg,`Doğru! ${C.h} = <b>${T(deg)}</b>. ${T(C.a)} + ${C.i} · ${C.s} = ${T(deg)}`,`${denT(C.a)} başla; her çentikte ${C.s} birim sağa ilerle. ${C.h}, sol uçtan ${C.i}. çentikte.`,
+        cevap(k,soruKut(`${C.h} noktası hangi sayıyı gösterir?`),deg,`Doğru! ${C.h} = <b>${T(deg)}</b>. ${T(C.a)} + ${C.i} · ${C.s} = ${T(deg)}`,`${denT(C.a)} başlayınız; her çentikte ${C.s} birim sağa ilerleyiniz. ${C.h}, sol uçtan ${C.i}. çentikte.`,
           ()=>{D.ekle([`${T(C.a)} ve ${T(C.b)}`,C.n,C.s,`${C.h} = ${T(deg)}`],"d");A.tamam(`${C.h} = ${T(deg)}`);});}},
-      kuralA(D,[["Bir parçanın kaç birim olduğunu nasıl bulursun?",["İki uç arasındaki birimleri sayar, parça sayısına eşit olarak paylaştırırım.","Uçlardaki sayıları toplarım.","Parça sayısını bir parçanın değeri kabul ederim."],"Doğru! Uçlar −12 ve 6 ise −12'den 0'a 12, 0'dan 6'ya 6 birim vardır: toplam 18 birim. Doğru 6 parçaya bölünmüşse bir parça 3 birimdir.",["Uçları toplamak aradaki uzaklığı vermez: −12 ile 6'nın toplamı −6'dır ama aralarında 18 birim vardır.","Tabloya bak: Parça sayısı ile bir parçanın değeri çoğu zaman farklıydı."]],
-        ["Uçları −12 ve 6 olan doğru 6 eşit parçaya bölünmüştür. Sol uçtan 2 parça sağdaki çentik hangi sayıyı gösterir?",[T(-6),T(-10),T(-9),"6"],"Doğru! Bir parça 3 birim: −12'den 2 parça (6 birim) sağa gidince −6'ya ulaşılır.",["Bir parça 1 birim değil, 3 birim.","−12'den başlayıp 2 parça ilerle; bir parça 3 birim.","6, sağ ucun kendisidir."]]]),
+      kuralA(D,[["Bir parçanın kaç birim olduğunu nasıl bulursunuz?",["İki uç arasındaki birimleri sayar, parça sayısına eşit olarak paylaştırırım.","Uçlardaki sayıları toplarım.","Parça sayısını bir parçanın değeri kabul ederim."],"Doğru! Uçlar −12 ve 6 ise −12'den 0'a 12, 0'dan 6'ya 6 birim vardır: toplam 18 birim. Doğru 6 parçaya bölünmüşse bir parça 3 birimdir.",["Uçları toplamak aradaki uzaklığı vermez: −12 ile 6'nın toplamı −6'dır ama aralarında 18 birim vardır.","Tabloya bakınız: Parça sayısı ile bir parçanın değeri çoğu zaman farklıydı."]],
+        ["Uçları −12 ve 6 olan doğru 6 eşit parçaya bölünmüştür. Sol uçtan 2 parça sağdaki çentik hangi sayıyı gösterir?",[T(-6),T(-10),T(-9),"6"],"Doğru! Bir parça 3 birim: −12'den 2 parça (6 birim) sağa gidince −6'ya ulaşılır.",["Bir parça 1 birim değil, 3 birim.","−12'den başlayıp 2 parça ilerleyiniz; bir parça 3 birim.","6, sağ ucun kendisidir."]]]),
       kendiA((m,son)=>{const C2=doguUret();cizim(m,C2,{harf:C2.i});
-        cevap(m,soruKut(`Sayı doğrusu eşit parçalara bölünmüştür. ${C2.h} noktası hangi sayıyı gösterir?`),C2.a+C2.i*C2.s,`Doğru! Bir parça ${C2.s} birim; ${C2.h} = <b>${T(C2.a+C2.i*C2.s)}</b>.`,`Önce iki uç arasındaki birimleri bul ve ${C2.n} parçaya paylaştır. Sonra sol uçtan ${C2.i} parça ilerle.`,son);})],
+        cevap(m,soruKut(`Sayı doğrusu eşit parçalara bölünmüştür. ${C2.h} noktası hangi sayıyı gösterir?`),C2.a+C2.i*C2.s,`Doğru! Bir parça ${C2.s} birim; ${C2.h} = <b>${T(C2.a+C2.i*C2.s)}</b>.`,`Önce iki uç arasındaki birimleri bulunuz ve ${C2.n} parçaya paylaştırınız. Sonra sol uçtan ${C2.i} parça ilerleyiniz.`,son);})],
     kural:"Uçları verilen eşit bölmeli bir sayı doğrusunda önce iki uç arasındaki <b>birim sayısı</b> bulunur ve <b>parça sayısına</b> eşit paylaştırılır. Sonra bir uçtan başlayıp parça parça ilerleyerek her noktanın gösterdiği sayı bulunur."});
 };
 
@@ -884,19 +884,19 @@ function ikizTur(k,olc,adet,D,A){
     h+=nokta(xa,y,"#e03131",9)+`<text x="${xa}" y="${y-60}" text-anchor="middle" font-size="18" font-weight="900" fill="#e03131">A</text>`;sd.ciz(h);}
   function dokun(v){if(bul)return;
     if(v===-Aa){bul=true;dS++;D.ekle([T(Aa),T(-Aa),Math.abs(Aa)+" birim"],"i"+olc+dS);fb(f,true,`Doğru! ${T(Aa)} ile ${T(-Aa)} ters işaretlidir. İkisi de 0'a <b>${Math.abs(Aa)} birim</b> uzaklıkta, 0'ın farklı yanlarında.`);bip(760,.1);ciz();A.durum(`${dS} / ${adet}`);
-      if(dS>=adet)A.tamam(`${adet} ikiz buldun.`);else sb.hidden=false;return;}
+      if(dS>=adet)A.tamam(`${adet} ikiz buldunuz.`);else sb.hidden=false;return;}
     yx=v;const d=Math.abs(Aa),dv=Math.abs(v);bip(220,.12);
-    fb(f,false,v===Aa?"Bu A'nın kendisi. İkizi 0'ın öbür yanında.":Math.sign(v)===Math.sign(Aa)?"Dokunduğun nokta A ile 0'ın aynı yanında. İkiz 0'ın öbür yanında olmalı.":v===0?"0'ın işareti yoktur. İkiz 0'ın öbür yanında.":`Yön doğru. A, 0'a ${d} birim uzakta; dokunduğun nokta ise 0'a ${dv} birim uzakta.`);ciz();}
+    fb(f,false,v===Aa?"Bu A'nın kendisi. İkizi 0'ın öbür yanında.":Math.sign(v)===Math.sign(Aa)?"Dokunduğunuz nokta A ile 0'ın aynı yanında. İkiz 0'ın öbür yanında olmalı.":v===0?"0'ın işareti yoktur. İkiz 0'ın öbür yanında.":`Yön doğru. A, 0'a ${d} birim uzakta; dokunduğunuz nokta ise 0'a ${dv} birim uzakta.`);ciz();}
   sb.onclick=yeni;A.oto=()=>{if(!sb.hidden){sb.click();return;}const [x,y]=sd.yer(-Aa);simTik(sd.sv,x,y);};yeni();}
 const e_ikiz=p=>{const D=defterY(["A","İkizi","0'a uzaklık"]);
   asamali(p,{tahmin:{giris:"−4 ile 4 <b>ters işaretli</b> iki sayıdır.",soru:"Bu iki sayı sayı doğrusunda nasıl yerleşir?",secs:[["a","0'ın iki yanında, 0'a eşit uzaklıkta"],["b","İkisi de 0'ın sağında"],["c","4, 0'a daha uzakta"]],dogru:"a",neden:"İkisi de 0'a 4 birim uzaklıktadır."},
     asamalar:[
-      {ad:"İkizleri bul",yon:["Kırmızı <b>A</b> noktasının ikizi, A ile <b>ters işaretli</b> sayıdır.","Sayı doğrusunda ikizin olduğu yere dokun. Bulunca <b>Sıradaki A noktası</b> düğmesine bas."],bitis:"3 ikiz bulunca.",kur:(k,A)=>ikizTur(k,1,3,D,A)},
-      {ad:"Büyük sayılarda ikiz",yon:["Bu doğru 10'ar 10'ar bölünmüş: Her çentik 10 birim.","A'nın ikizine dokun."],bitis:"İkizi bulunca.",kur:(k,A)=>ikizTur(k,10,1,D,A)},
-      kuralA(D,[["Ters işaretli iki sayı için hangisi doğrudur?",["0'a eşit uzaklıktadır ve 0'ın farklı yanlarındadır.","0'ın aynı yanındadır.","Negatif olan 0'a daha uzaktır."],"Doğru!",["Kırmızı ve mavi noktalar 0'ın aynı yanında mıydı?","Deftere bak: İki yay da aynı uzunluktaydı."]],
-        ["−9'un ters işaretlisi olan sayı hangisidir?",["9",T(-9),"0"],"Doğru! −9 ile 9, 0'a 9 birim uzaklıktadır.",["Bu −9'un kendisi. İşaretini değiştir.","0'ın işareti yoktur; 0'ın ters işaretlisi yine 0'dır."]]]),
+      {ad:"İkizleri bul",yon:["Kırmızı <b>A</b> noktasının ikizi, A ile <b>ters işaretli</b> sayıdır.","Sayı doğrusunda ikizin olduğu yere dokununuz. Bulunca <b>Sıradaki A noktası</b> düğmesine basınız."],bitis:"3 ikiz bulunca.",kur:(k,A)=>ikizTur(k,1,3,D,A)},
+      {ad:"Büyük sayılarda ikiz",yon:["Bu doğru 10'ar 10'ar bölünmüş: Her çentik 10 birim.","A'nın ikizine dokununuz."],bitis:"İkizi bulunca.",kur:(k,A)=>ikizTur(k,10,1,D,A)},
+      kuralA(D,[["Ters işaretli iki sayı için hangisi doğrudur?",["0'a eşit uzaklıktadır ve 0'ın farklı yanlarındadır.","0'ın aynı yanındadır.","Negatif olan 0'a daha uzaktır."],"Doğru!",["Kırmızı ve mavi noktalar 0'ın aynı yanında mıydı?","Deftere bakınız: İki yay da aynı uzunluktaydı."]],
+        ["−9'un ters işaretlisi olan sayı hangisidir?",["9",T(-9),"0"],"Doğru! −9 ile 9, 0'a 9 birim uzaklıktadır.",["Bu −9'un kendisi. İşaretini değiştiriniz.","0'ın işareti yoktur; 0'ın ters işaretlisi yine 0'dır."]]]),
       kendiA((m,son)=>{const a=-ra(21,125);
-        cevap(m,yaz([`Sayı doğrusunda A noktası <b>${T(a)}</b> sayısını gösteriyor. B noktası, A ile ters işaretli sayıyı gösteriyor.`])+soruKut("B noktası hangi sayıyı gösterir?"),-a,`Doğru! B = <b>${-a}</b>. İkisi de 0'a ${-a} birim uzaklıktadır.`,"Ters işaretli sayı, 0'ın öbür yanında ve 0'a aynı uzaklıktadır.",son,{ozel:x=>esit(x,[a,1])?"Bu A'nın kendisi. İşaretini değiştir.":null});})],
+        cevap(m,yaz([`Sayı doğrusunda A noktası <b>${T(a)}</b> sayısını gösteriyor. B noktası, A ile ters işaretli sayıyı gösteriyor.`])+soruKut("B noktası hangi sayıyı gösterir?"),-a,`Doğru! B = <b>${-a}</b>. İkisi de 0'a ${-a} birim uzaklıktadır.`,"Ters işaretli sayı, 0'ın öbür yanında ve 0'a aynı uzaklıktadır.",son,{ozel:x=>esit(x,[a,1])?"Bu A'nın kendisi. İşaretini değiştiriniz.":null});})],
     kural:"<b>Ters işaretli</b> iki sayı (−7 ile 7 gibi) sayı doğrusunda <b>0'a eşit uzaklıktadır</b> ve 0'ın <b>farklı yanlarındadır</b>. Pozitif sayılar 0'ın sağında, negatif sayılar solundadır."});
 };
 
@@ -906,43 +906,43 @@ const bayrakSvg=(xt,y)=>`<line x1="${xt}" y1="${y-6}" x2="${xt}" y2="${y-74}" st
 const e_adim=p=>{const D=defterY(["Sayı","Zıplama","0'a uzaklık (mutlak değer)"]);
   asamali(p,{tahmin:{giris:"Bir kurbağa 0 noktasında duruyor. Her zıplayışta 1 birim gidiyor.",soru:"Kurbağa −6'ya mı yoksa 6'ya mı daha az zıplayarak ulaşır?",secs:[["a","İkisine de aynı sayıda zıplayarak ulaşır."],["b","−6'ya daha az zıplar."],["c","6'ya daha az zıplar."]],dogru:"a",neden:"İkisi de 0'a 6 birim uzaklıktadır: 6 zıplama."},
     asamalar:[
-      {ad:"Kurbağayı zıplat",yon:["Kurbağayı <b>Sola zıpla</b> ve <b>Sağa zıpla</b> düğmeleriyle bayraklı noktaya götür.","0'dan başla ve <b>en kısa yoldan</b> git; yanlış yöne gidersen <b>Kurbağayı 0'a al</b>."],bitis:"İki bayrağa da en kısa yoldan ulaşınca.",kur:(k,A)=>{
-        k.insertAdjacentHTML("beforeend",`<div class="stage kb"></div><div class="row"><button type="button" class="ghost sol">‹ Sola zıpla</button><button type="button" class="ghost sag">Sağa zıpla ›</button><button type="button" class="ghost bas">Kurbağayı 0'a al</button><span class="durum"></span></div><div class="fb" hidden></div>`);
+      {ad:"Kurbağayı zıplat",yon:["Kurbağayı <b>Sola zıplayın</b> ve <b>Sağa zıplayın</b> düğmeleriyle bayraklı noktaya götürünüz.","0'dan başlayınız ve <b>en kısa yoldan</b> gidiniz; yanlış yöne giderseniz <b>Kurbağayı 0'a alın</b>."],bitis:"İki bayrağa da en kısa yoldan ulaşınca.",kur:(k,A)=>{
+        k.insertAdjacentHTML("beforeend",`<div class="stage kb"></div><div class="row"><button type="button" class="ghost sol">‹ Sola zıplayın</button><button type="button" class="ghost sag">Sağa zıplayın ›</button><button type="button" class="ghost bas">Kurbağayı 0'a alın</button><span class="durum"></span></div><div class="fb" hidden></div>`);
         const st=k.querySelector(".kb"),du=k.querySelector(".durum"),f=k.querySelector(".fb");const t=-ra(3,8),H=[t,-t];let hi=0,fr=0,z=0,iz=[0],kilit=false;
         const sd=SD(st,{min:-10,max:10,h:150,eks:104,fs:16});
         function ciz(){const [,y]=sd.yer(0);let h="";for(let j=1;j<iz.length;j++){const [a]=sd.yer(iz[j-1]),[b]=sd.yer(iz[j]);h+=yay(a,b,y-6,26,"#2f9e44",true);}
           if(hi<H.length){const [xt]=sd.yer(H[hi]);h+=bayrakSvg(xt,y);}const [xf]=sd.yer(fr);h+=kurbagaSvg(xf,y);sd.ciz(h);
-          du.innerHTML=hi<H.length?`Hedef: <b>${T(H[hi])}</b>. Zıplama: <b>${z}</b>`:"İki hedefe de ulaştın.";A.durum(`${hi} / 2`);}
+          du.innerHTML=hi<H.length?`Hedef: <b>${T(H[hi])}</b>. Zıplama: <b>${z}</b>`:"İki hedefe de ulaştınız.";A.durum(`${hi} / 2`);}
         const sifirla=()=>{fr=0;z=0;iz=[0];kilit=false;ciz();};
         function zipla(d){if(kilit||hi>=H.length)return;const n=fr+d;if(n<-10||n>10)return;fr=n;z++;iz.push(fr);bip(500+fr*12,.06);ciz();const tt=H[hi];
           if(fr===tt){kilit=true;const u=Math.abs(tt);
-            if(z===u){D.ekle([T(tt),z,`|${T(tt)}| = ${u}`],"z"+hi);fb(f,true,`Ulaştın! ${T(tt)} noktası 0'a <b>${u} birim</b> uzakta. Bir sayının 0'a uzaklığına o sayının <b>mutlak değeri</b> denir: |${T(tt)}| = ${u}.`);hi++;
+            if(z===u){D.ekle([T(tt),z,`|${T(tt)}| = ${u}`],"z"+hi);fb(f,true,`Ulaştınız! ${T(tt)} noktası 0'a <b>${u} birim</b> uzakta. Bir sayının 0'a uzaklığına o sayının <b>mutlak değeri</b> denir: |${T(tt)}| = ${u}.`);hi++;
               if(hi>=H.length){ciz();A.tamam(`|${T(t)}| = |${T(-t)}| = ${Math.abs(t)}`);}else setTimeout(()=>{if(k.isConnected)sifirla();},900);}
-            else{fb(f,false,`Ulaştın ama ${z} kez zıpladın. 0'dan başlayıp hep aynı yöne, en kısa yoldan git.`);setTimeout(()=>{if(k.isConnected)sifirla();},1200);}}}
+            else{fb(f,false,`Ulaştınız ama ${z} kez zıpladınız. 0'dan başlayıp hep aynı yöne, en kısa yoldan gidiniz.`);setTimeout(()=>{if(k.isConnected)sifirla();},1200);}}}
         k.querySelector(".sol").onclick=()=>zipla(-1);k.querySelector(".sag").onclick=()=>zipla(1);k.querySelector(".bas").onclick=sifirla;
         A.oto=()=>{if(hi>=H.length||kilit)return;const d=Math.sign(H[hi]-fr);k.querySelector(d<0?".sol":".sag").click();};
         ciz();}},
-      {ad:"Önce say, sonra zıplat",yon:["Bayrağa bak ve kurbağanın en az kaç zıplamada gideceğini yaz.","Doğru yazınca kurbağa kendisi zıplar ve cevabını gösterir."],bitis:"İki hedefin zıplama sayısını doğru yazınca.",kur:(k,A)=>{
+      {ad:"Önce say, sonra zıplat",yon:["Bayrağa bakınız ve kurbağanın en az kaç zıplamada gideceğini yazınız.","Doğru yazınca kurbağa kendisi zıplar ve cevabınızı gösterir."],bitis:"İki hedefin zıplama sayısını doğru yazınca.",kur:(k,A)=>{
         const u1=ra(4,9),s1=rastgele([1,-1]);let u2;do{u2=ra(2,9);}while(u2===u1);const H=[s1*u1,-s1*u2];let hi=0,fr=0,iz=[0];
         k.insertAdjacentHTML("beforeend",`<div class="stage kb2"></div><div class="k2s"></div>`);const sd=SD(k.querySelector(".kb2"),{min:-10,max:10,h:150,eks:104,fs:16}),ks=k.querySelector(".k2s");
         function ciz(){const [,y]=sd.yer(0);let h="";for(let j=1;j<iz.length;j++){const [a]=sd.yer(iz[j-1]),[b]=sd.yer(iz[j]);h+=yay(a,b,y-6,26,"#2f9e44",true);}
           if(hi<H.length){const [xt]=sd.yer(H[hi]);h+=bayrakSvg(xt,y);}const [xf]=sd.yer(fr);h+=kurbagaSvg(xf,y);sd.ciz(h);A.durum(`${hi} / 2`);}
         function soru(){const t=H[hi];fr=0;iz=[0];ciz();
-          cevap(ks,soruKut(`Kurbağa 0'dan <b>${T(t)}</b> noktasına en kısa yoldan kaç zıplamada gider?`),Math.abs(t),`Doğru! ${T(t)}, 0'a ${Math.abs(t)} birim uzakta: |${T(t)}| = ${Math.abs(t)}.`,"Her zıplayış 1 birim. 0 ile bayrak arasındaki birimleri say.",
-            ()=>{const u=Math.abs(t);let j=0;const adim=()=>{if(!k.isConnected)return;if(j<u){j++;fr+=Math.sign(t);iz.push(fr);bip(500+fr*12,.05);ciz();yas(160,adim);}else{D.ekle([T(t),u,`|${T(t)}| = ${u}`],"y"+hi);hi++;if(hi<H.length)soru();else{ciz();A.tamam("Zıplamadan önce uzaklığı buldun.");}}};adim();},
+          cevap(ks,soruKut(`Kurbağa 0'dan <b>${T(t)}</b> noktasına en kısa yoldan kaç zıplamada gider?`),Math.abs(t),`Doğru! ${T(t)}, 0'a ${Math.abs(t)} birim uzakta: |${T(t)}| = ${Math.abs(t)}.`,"Her zıplayış 1 birim. 0 ile bayrak arasındaki birimleri sayınız.",
+            ()=>{const u=Math.abs(t);let j=0;const adim=()=>{if(!k.isConnected)return;if(j<u){j++;fr+=Math.sign(t);iz.push(fr);bip(500+fr*12,.05);ciz();yas(160,adim);}else{D.ekle([T(t),u,`|${T(t)}| = ${u}`],"y"+hi);hi++;if(hi<H.length)soru();else{ciz();A.tamam("Zıplamadan önce uzaklığı buldunuz.");}}};adim();},
             {ozel:x=>x[0]<0?"Zıplama sayısı (uzaklık) negatif olamaz.":null});}
         soru();}},
       kuralA(D,[[`Kurbağa −6'ya da 6'ya da 6 zıplamada ulaştı. Buna göre hangisi doğrudur?`,[`|${T(-6)}| = |6| = 6`,`|${T(-6)}| = ${T(-6)}`,"|6| = 12"],"Doğru! Ters işaretli sayıların mutlak değerleri eşittir.",["Mutlak değer bir uzaklıktır; uzaklık negatif olamaz.","6'ya 6 zıplamada ulaşıldı, 12 değil."]],
         ["Bir sayının mutlak değeri negatif olabilir mi?",["Hayır; mutlak değer bir uzaklıktır, uzaklık negatif olamaz.","Evet; negatif sayıların mutlak değeri negatiftir."],"Doğru!","−6'ya giderken zıplama sayısı negatif miydi?"],
         ["|0| kaçtır?",["0","1","Mutlak değeri yoktur."],"Doğru! 0 noktası 0'a 0 birim uzaklıktadır: |0| = 0.",["Kurbağa 0'dayken 0'a ulaşmak için hiç zıplamaz.","Her sayının mutlak değeri vardır; 0'ın 0'a uzaklığı 0'dır."]]]),
-      kendiA((m,son)=>{if(Math.random()<.5){const a=rastgele([125,48,93,76,64,110,57,39]);cevap(m,soruKut(`|${T(-a)}| kaçtır?`),a,`Doğru! ${T(-a)}, 0'a ${a} birim uzaklıktadır: |${T(-a)}| = <b>${a}</b>.`,"Mutlak değer 0'a olan uzaklıktır. Uzaklık negatif olamaz.",son,{ozel:x=>esit(x,[-a,1])?"Mutlak değer negatif olamaz; işareti kaldır.":null});}
-        else{const q=ra(3,9);let pp;do{pp=ra(q+1,3*q);}while(gcd(pp,q)!==1);cevap(m,soruKut(`|${EKSI}${kH(pp,q)}| kaçtır?`),[pp,q],`Doğru! ${rH(-pp,q)}, 0'a ${rH(pp,q)} birim uzaklıktadır: |${rH(-pp,q)}| = <b>${rH(pp,q)}</b>.`,"Mutlak değer 0'a olan uzaklıktır. Uzaklık negatif olamaz. Kesri “/” düğmesiyle yazabilirsin.",son,{kesir:true,ozel:x=>esit(x,[-pp,q])?"Mutlak değer negatif olamaz; işareti kaldır.":null});}})],
+      kendiA((m,son)=>{if(Math.random()<.5){const a=rastgele([125,48,93,76,64,110,57,39]);cevap(m,soruKut(`|${T(-a)}| kaçtır?`),a,`Doğru! ${T(-a)}, 0'a ${a} birim uzaklıktadır: |${T(-a)}| = <b>${a}</b>.`,"Mutlak değer 0'a olan uzaklıktır. Uzaklık negatif olamaz.",son,{ozel:x=>esit(x,[-a,1])?"Mutlak değer negatif olamaz; işareti kaldırınız.":null});}
+        else{const q=ra(3,9);let pp;do{pp=ra(q+1,3*q);}while(gcd(pp,q)!==1);cevap(m,soruKut(`|${EKSI}${kH(pp,q)}| kaçtır?`),[pp,q],`Doğru! ${rH(-pp,q)}, 0'a ${rH(pp,q)} birim uzaklıktadır: |${rH(-pp,q)}| = <b>${rH(pp,q)}</b>.`,"Mutlak değer 0'a olan uzaklıktır. Uzaklık negatif olamaz. Kesri “/” düğmesiyle yazabilirsiniz.",son,{kesir:true,ozel:x=>esit(x,[-pp,q])?"Mutlak değer negatif olamaz; işareti kaldırınız.":null});}})],
     kural:`Bir sayının sayı doğrusunda <b>0'a olan uzaklığına</b> o sayının <b>mutlak değeri</b> denir ve | | ile gösterilir: |−6| = |6| = 6, |0| = 0. Kesirlerde de böyledir: |${EKSI}${kH(15,8)}| = ${kH(15,8)}. Mutlak değer bir uzaklık olduğu için <b>negatif olamaz</b>.`});
 };
 
 /* 9 · MUTLAK DEĞER AVI */
 function avTur(k,tip,D,A){
-  k.insertAdjacentHTML("beforeend",`<div class="dkart avk"></div><div class="stage av"></div><div class="row"><button type="button" class="primary kt">Kontrol et</button><button type="button" class="ghost tm">Temizle</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="dkart avk"></div><div class="stage av"></div><div class="row"><button type="button" class="primary kt">Kontrol edin</button><button type="button" class="ghost tm">Temizle</button></div><div class="fb" hidden></div>`);
   const st=k.querySelector(".av"),kr=k.querySelector(".avk"),f=k.querySelector(".fb");let tur,sec=new Set(),bitti=false,sd;
   const fm=v=>Number.isInteger(v)?T(v):rH(Math.round(v*2),2);
   if(tip==="K"){const pp=2*ra(1,9)+1,v=pp/2;tur={m:`Mutlak değeri <b>${Math.random()<.5?kH(pp,2):(T(Math.floor(v))+",5")}</b> olan bütün sayılar`,c:[v,-v],k:v};}
@@ -956,20 +956,20 @@ function avTur(k,tip,D,A){
     [...sec].forEach(v=>{const [x]=sd.yer(v);h+=nokta(x,y,bitti?"#2f9e44":"#e8590c",10);});sd.ciz(h);A.durum(`${sec.size} işaret`);}
   k.querySelector(".tm").onclick=()=>{if(bitti)return;sec.clear();ciz();};
   k.querySelector(".kt").onclick=()=>{if(bitti)return;const c=new Set(tur.c);const eksik=tur.c.filter(x=>!sec.has(x)),fazla=[...sec].filter(x=>!c.has(x));
-    if(!sec.size){fb(f,false,"Önce sayı doğrusunda en az bir sayıya dokunarak işaretle.");return;}
+    if(!sec.size){fb(f,false,"Önce sayı doğrusunda en az bir sayıya dokunarak işaretleyiniz.");return;}
     if(!eksik.length&&!fazla.length){bitti=true;const l=[...tur.c].sort((a,b)=>a-b);D.ekle([duzYazi(tur.m).replace(/\s+/g," "),l.map(fm).join(", "),l.length],"a"+tip);
       fb(f,true,tip==="K"?`Doğru! ${fm(tur.k)} ve ${fm(-tur.k)}, 0'a ${fm(tur.k)} birim uzaklıktadır. Kesirli sayıların da mutlak değeri vardır.`:tip==="A"?`Doğru! ${tur.k} ve ${T(-tur.k)}, 0'a ${tur.k} birim uzaklıktadır. Mutlak değeri ${tur.k} olan <b>iki</b> tam sayı vardır.`:`Doğru! ${T(-(tur.k-1))} ile ${tur.k-1} arasındaki tam sayıların hepsi (0 da dâhil) 0'a ${tur.k} birimden daha yakındır. Toplam <b>${l.length}</b> tam sayı.`);
       ciz();A.tamam(`Bulunan sayılar: ${l.map(fm).join(", ")}`);return;}
     const ilk=fazla[0];let msg;bip(220,.12);
-    if(fazla.length)msg=tip==="C"&&Math.abs(ilk)===tur.k?`${T(ilk)} sayısının mutlak değeri tam ${tur.k}; ${denT(tur.k)} küçük değil.`:`${fm(ilk)} sayısı 0'a ${fm(Math.abs(ilk))} birim uzaklıkta. Şarta uymuyor; işaretini kaldır.`;
-    else if(eksik.includes(0)&&tip==="C")msg=`0'ı unuttun: |0| = 0, bu da ${denT(tur.k)} küçüktür.`;
-    else if(eksik.some(x=>x<0)&&!eksik.some(x=>x>0))msg="Eksik var: 0'ın sol yanındaki negatif sayılara da bak.";
-    else if(eksik.some(x=>x>0)&&!eksik.some(x=>x<0))msg="Eksik var: 0'ın sağ yanındaki pozitif sayılara da bak.";
+    if(fazla.length)msg=tip==="C"&&Math.abs(ilk)===tur.k?`${T(ilk)} sayısının mutlak değeri tam ${tur.k}; ${denT(tur.k)} küçük değil.`:`${fm(ilk)} sayısı 0'a ${fm(Math.abs(ilk))} birim uzaklıkta. Şarta uymuyor; işaretini kaldırınız.`;
+    else if(eksik.includes(0)&&tip==="C")msg=`0'ı unuttunuz: |0| = 0, bu da ${denT(tur.k)} küçüktür.`;
+    else if(eksik.some(x=>x<0)&&!eksik.some(x=>x>0))msg="Eksik var: 0'ın sol yanındaki negatif sayılara da bakınız.";
+    else if(eksik.some(x=>x>0)&&!eksik.some(x=>x<0))msg="Eksik var: 0'ın sağ yanındaki pozitif sayılara da bakınız.";
     else msg=`Eksik sayılar var. Şarta uyan ${tur.c.length} sayı olmalı.`;
     fb(f,false,msg);};
   A.oto=()=>{if(bitti)return;const ek=tur.c.find(x=>!sec.has(x));if(ek===undefined){k.querySelector(".kt").click();return;}const [x,y]=sd.yer(ek);simTik(sd.sv,x,y);};
   ciz();}
-const e_av=p=>{const D=defterY(["Aranan","Bulunan sayılar","Kaç tane?"]);const yon=["Av kartını oku.","Şarta uyan <b>bütün</b> sayılara sayı doğrusunda dokun. Yanlış işareti kaldırmak için aynı yere yeniden dokun.","Bitince <b>Kontrol et</b> düğmesine bas."];
+const e_av=p=>{const D=defterY(["Aranan","Bulunan sayılar","Kaç tane?"]);const yon=["Av kartını okuyunuz.","Şarta uyan <b>bütün</b> sayılara sayı doğrusunda dokununuz. Yanlış işareti kaldırmak için aynı yere yeniden dokununuz.","Bitince <b>Kontrol edin</b> düğmesine basınız."];
   asamali(p,{tahmin:{soru:"Mutlak değeri 5 olan kaç tam sayı vardır?",secs:[[1,"1"],[2,"2"],[5,"5"],[10,"10"]],dogru:2,neden:"5 ve −5: ikisi de 0'a 5 birim uzaklıktadır."},
     asamalar:[
       {ad:"Mutlak değeri verilen sayılar",yon,bitis:"Şarta uyan sayıların hepsini, fazlası olmadan işaretleyince.",kur:(k,A)=>avTur(k,"A",D,A)},
@@ -979,7 +979,7 @@ const e_av=p=>{const D=defterY(["Aranan","Bulunan sayılar","Kaç tane?"]);const
         ["Mutlak değeri 0 olan kaç sayı vardır?",["Yalnız bir tane: 0","İki tane","Hiç yok"],"Doğru! 0'a 0 birim uzaklıkta olan tek nokta 0'ın kendisidir.",["0'ın ters işaretlisi yine 0'dır; iki farklı sayı yoktur.","|0| = 0 olduğuna göre 0'ın kendisi bu şarta uyar."]],
         ["Mutlak değeri −3 olan bir sayı var mıdır?",["Yoktur; mutlak değer negatif olamaz.","Vardır: −3","Vardır: 3"],"Doğru! Uzaklık negatif bir sayı olamaz.",["|−3| = 3'tür, −3 değil.","|3| = 3'tür, −3 değil."]]]),
       kendiA((m,son)=>{const kk=ra(11,40);
-        soruY(m,`|▲| = ${kk} ise ▲ yerine yazılabilecek sayılar hangileridir?`,[`${kk} ve ${T(-kk)}`,`Yalnız ${kk}`,`Yalnız ${T(-kk)}`,`${kk} ve 0`],`Doğru! ${kk} de ${T(-kk)} de 0'a ${kk} birim uzaklıktadır.`,["0'ın öbür yanını unutma.","0'ın öbür yanını unutma.","0'ın mutlak değeri 0'dır."],son);})],
+        soruY(m,`|▲| = ${kk} ise ▲ yerine yazılabilecek sayılar hangileridir?`,[`${kk} ve ${T(-kk)}`,`Yalnız ${kk}`,`Yalnız ${T(-kk)}`,`${kk} ve 0`],`Doğru! ${kk} de ${T(-kk)} de 0'a ${kk} birim uzaklıktadır.`,["0'ın öbür yanını unutmayınız.","0'ın öbür yanını unutmayınız.","0'ın mutlak değeri 0'dır."],son);})],
     kural:"Mutlak değeri pozitif bir sayı olan <b>iki</b> sayı vardır: |▲| = 12 ise ▲ = 12 ya da ▲ = −12. Kesirlerde de böyledir. Mutlak değeri 0 olan tek sayı <b>0</b>'dır. Mutlak değer negatif olamaz."});
 };
 
@@ -995,7 +995,7 @@ const TURAD={d:"Doğal sayılar",t:"Tam sayılar",r:"Rasyonel sayılar",y:"Hiçb
 const e_kutu=p=>{const D=defterY(["Kart","En içteki kutu"]);
   asamali(p,{tahmin:{giris:"Doğal sayılar, tam sayılar ve rasyonel sayılar için üç kutu var. Kutular iç içe.",soru:"−5 sayısı hangi sayı türlerine girer?",secs:[["a","Yalnız tam sayılara"],["b","Tam sayılara ve rasyonel sayılara"],["c","Doğal sayılara"]],dogru:"b",neden:"−5 bir tam sayıdır; her tam sayı aynı zamanda rasyonel sayıdır."},
     asamalar:[
-      {ad:"Kartları kutulara koy",yon:["Üstteki kartlardan birine dokun (kart turuncu çerçeveyle seçilir).","Sonra kartı koyacağın kutunun <b>içine</b> dokun. Her sayıyı girebildiği <b>en içteki</b> kutuya koy.","Sayı belirtmeyen bir kart görürsen onu <b>Hiçbiri</b> rafına koy."],bitis:"8 kartın hepsi yerleşince.",kur:(k,A)=>{
+      {ad:"Kartları kutulara koy",yon:["Üstteki kartlardan birine dokununuz (kart turuncu çerçeveyle seçilir).","Sonra kartı koyacağınız kutunun <b>içine</b> dokununuz. Her sayıyı girebildiği <b>en içteki</b> kutuya koyunuz.","Sayı belirtmeyen bir kart görürseniz onu <b>Hiçbiri</b> rafına koyunuz."],bitis:"8 kartın hepsi yerleşince.",kur:(k,A)=>{
         k.insertAdjacentHTML("beforeend",`<div class="kartlar kd"></div><div class="stage kts"></div><div class="row"><button type="button" class="raf-b">Hiçbiri rafı (sayı belirtmez)</button><span class="rafic"></span></div><div class="fb" hidden></div>`);
         const kd=k.querySelector(".kd"),st=k.querySelector(".kts"),f=k.querySelector(".fb"),rb=k.querySelector(".raf-b"),ri=k.querySelector(".rafic");
         const deste=karistir([...karistir(KUTU_H.d).slice(0,2),...karistir(KUTU_H.t).slice(0,2),...karistir(KUTU_H.r).slice(0,3),rastgele(KUTU_H.y)]).map(c=>[...c]);
@@ -1012,17 +1012,17 @@ const e_kutu=p=>{const D=defterY(["Kart","En içteki kutu"]);
           const kut=(b,rx,renk,ac)=>`<rect x="${b[0]}" y="${b[1]}" width="${b[2]}" height="${b[3]}" rx="${rx}" fill="${renk}" fill-opacity="${ac}" stroke="${renk}" stroke-width="3"/>`;
           let h=kut(KUT.r,22,"#1c7ed6",".10")+`<text x="${ETK.r[0]}" y="${ETK.r[1]}" font-size="19" font-weight="800" fill="#1864ab">Rasyonel sayılar</text>`+kut(KUT.t,20,"#7048e8",".12")+`<text x="${ETK.t[0]}" y="${ETK.t[1]}" font-size="19" font-weight="800" fill="#5f3dc4">Tam sayılar</text>`+kut(KUT.d,18,"#2f9e44",".14")+`<text x="${ETK.d[0]}" y="${ETK.d[1]}" font-size="19" font-weight="800" fill="#2b8a3e">Doğal sayılar</text>`;
           for(const r in yer)yer[r].forEach((c,j)=>{const [x,y]=kon(r,j);h+=`<rect x="${x-cw/2}" y="${y-22}" width="${cw}" height="44" rx="10" fill="${css('--card')}" stroke="currentColor" stroke-width="1.5"/>`+(c[2]?`<text x="${x}" y="${y+7}" text-anchor="middle" font-size="19" font-weight="800">${c[2]}</text>`:sK(x,y,c[0],c[1],{ham:true,fs:16}));});
-          if(secili!==null)h+=`<text x="${VW-20}" y="${VH-24}" text-anchor="end" font-size="14" font-weight="700" fill="#e8590c">Seçtiğin kartı koymak için bir kutuya dokun</text>`;
+          if(secili!==null)h+=`<text x="${VW-20}" y="${VH-24}" text-anchor="end" font-size="14" font-weight="700" fill="#e8590c">Seçtiğiniz kartı koymak için bir kutuya dokununuz</text>`;
           sv.innerHTML=h;A.durum(`${dt} / 8`);}
-        function koy(r){if(secili===null){fb(f,false,"Önce üstteki kartlardan birine dokunarak seç.");return;}const c=deste[secili],tr=kTur(c),ad=kKart(c);
+        function koy(r){if(secili===null){fb(f,false,"Önce üstteki kartlardan birine dokunarak seçiniz.");return;}const c=deste[secili],tr=kTur(c),ad=kKart(c);
           if(r===tr){c.yerlesti=true;secili=null;dt++;if(tr==="y")ri.insertAdjacentHTML("beforeend",`<i>${ad}</i>`);else yer[r].push(c);
             D.ekle([ad,TURAD[tr]],"k"+dt);const v=c[1]?sade(c[0],c[1]):null;bip(760,.1);
             fb(f,true,tr==="y"?"Doğru! Paydası 0 olan bir kesir hiçbir sayıyı göstermez; tanımsızdır.":tr==="r"?`Doğru! ${ad} bir tam sayı değildir; iki tam sayının arasında kalır. Yalnız rasyonel sayılar kutusuna girer.`:c[1]!==1&&!c[2]?`Doğru! ${ad} = ${T(v[0])}. ${tr==="d"?"Bu bir doğal sayıdır; tam sayılar ve rasyonel sayılar kutusunun da içindedir.":"Negatif bir tam sayıdır; rasyonel sayılar kutusunun da içindedir."}`:`Doğru! ${tr==="d"?"Doğal sayılar kutusu, tam sayılar ve rasyonel sayılar kutusunun içinde.":"Tam sayılar kutusu, rasyonel sayılar kutusunun içinde."}`);
             ciz();if(dt>=8)A.tamam("Sekiz kartın hepsi yerinde.");return;}
           const sira={d:0,t:1,r:2};let msg;bip(220,.12);
-          if(tr==="y")msg="Paydası 0 olan bir kesir bir sayı belirtmez; kutulara girmez. Rafı dene.";
+          if(tr==="y")msg="Paydası 0 olan bir kesir bir sayı belirtmez; kutulara girmez. Rafı deneyiniz.";
           else if(r==="y")msg="Bu kart bir sayı gösteriyor. Kutulardan birine girer.";
-          else if(sira[r]>sira[tr])msg="Bu kutuya da girer ama daha içteki bir kutuya da sığar. <b>En içteki</b> kutuyu bul.";
+          else if(sira[r]>sira[tr])msg="Bu kutuya da girer ama daha içteki bir kutuya da sığar. <b>En içteki</b> kutuyu bulunuz.";
           else if(tr==="t")msg=`${ad}${c[1]!==1?" = "+T(c[0]/c[1])+";":""} negatif sayılar doğal sayı değildir.`;
           else msg=`${ad} bir tam sayı değildir; iki tam sayının arasında kalır.`;
           fb(f,false,msg);}
@@ -1031,10 +1031,10 @@ const e_kutu=p=>{const D=defterY(["Kart","En içteki kutu"]);
         A.oto=()=>{const j=deste.findIndex(c=>!c.yerlesti);if(j<0)return;kd.querySelector(`.skart[data-j="${j}"]`).click();const tr=kTur(deste[j]);if(tr==="y")rb.click();else simTik(sv,...orta[tr]);};
         ciz();}},
       kuralA(D,[["Doğal sayılar kutusu neden tam sayılar kutusunun içinde?",["Her doğal sayı aynı zamanda bir tam sayıdır.","Doğal sayılar tam sayılardan büyüktür.","Tam sayılar doğal sayıların içindedir."],"Doğru! Tam sayılar doğal sayıları kapsar.",["Kutunun içinde olmak büyük olmak demek değildir; “o türe de girer” demektir.","Tersine: −3 bir tam sayıdır ama doğal sayı değildir."]],
-        ["Tam sayılar kutusu neden rasyonel sayılar kutusunun içinde?",[`Her tam sayı paydası 1 olan bir kesir olarak yazılabilir: −3 = ${EKSI}${kH(3,1)}`,"Rasyonel sayılar hep negatiftir.","Tam sayılar kesir olarak yazılamaz."],"Doğru! Rasyonel sayılar tam sayıları kapsar.",[`${kH(7,8)} pozitif bir rasyonel sayıdır.`,`${EKSI}${kH(8,2)} = ${EKSI}4 kartını hatırla.`]]]),
+        ["Tam sayılar kutusu neden rasyonel sayılar kutusunun içinde?",[`Her tam sayı paydası 1 olan bir kesir olarak yazılabilir: −3 = ${EKSI}${kH(3,1)}`,"Rasyonel sayılar hep negatiftir.","Tam sayılar kesir olarak yazılamaz."],"Doğru! Rasyonel sayılar tam sayıları kapsar.",[`${kH(7,8)} pozitif bir rasyonel sayıdır.`,`${EKSI}${kH(8,2)} = ${EKSI}4 kartını hatırlayınız.`]]]),
       kendiA((m,son)=>{const c=rastgele([...KUTU_H.d.filter(x=>x[1]!==1),...KUTU_H.t.filter(x=>x[1]!==1),...KUTU_H.r.filter(x=>!x[2])]);const tr=kTur(c);
         const secs=["Doğal sayılar","Tam sayılar","Yalnız rasyonel sayılar","Hiçbiri"],dg={d:0,t:1,r:2}[tr];const sr=[secs[dg],...secs.filter((_,i)=>i!==dg)];
-        soruY(m,`${kKart(c)} sayısı, girebildiği en içteki hangi kutuya konur?`,sr,`Doğru! ${kKart(c)} → ${secs[dg]}.`,`Önce kesri sadeleştir: ${kKart(c)} bir tam sayıya eşit mi? Eşitse negatif mi?`,son);})],
+        soruY(m,`${kKart(c)} sayısı, girebildiği en içteki hangi kutuya konur?`,sr,`Doğru! ${kKart(c)} → ${secs[dg]}.`,`Önce kesri sadeleştiriniz: ${kKart(c)} bir tam sayıya eşit mi? Eşitse negatif mi?`,son);})],
     kural:"<b>Tam sayılar doğal sayıları, rasyonel sayılar tam sayıları kapsar.</b> Her doğal sayı bir tam sayıdır; her tam sayı paydası 1 olan bir rasyonel sayıdır. Paydası 0 olan kesirler bir sayı belirtmez (tanımsızdır)."});
 };
 
@@ -1052,21 +1052,21 @@ function p1Tezgah(k,kontrol){
   ciz();
   return {ayarla(a,b){while(payda!==b){const d=b>payda?1:-1;Q.el.querySelector(`[data-d="${d}"]`).click();}while(pay!==a){const d=a>pay?1:-1;P.el.querySelector(`[data-d="${d}"]`).click();}}};}
 const e_payda1=p=>{const D=defterY(["Kesir","Gösterdiği tam sayı"]);const t1=-ra(2,5);let t3;do{t3=ra(2,5);}while(t3===-t1);
-  const yon2="<b>Pay</b> ve <b>Payda</b> sayaçlarını − ve + düğmeleriyle değiştir. Sayı doğrusu, paydadaki sayı kadar eş parçaya bölünür; kesrin noktası turuncu yanar.";
+  const yon2="<b>Pay</b> ve <b>Payda</b> sayaçlarını − ve + düğmeleriyle değiştiriniz. Sayı doğrusu, paydadaki sayı kadar eş parçaya bölünür; kesrin noktası turuncu yanar.";
   asamali(p,{tahmin:{soru:"−5 sayısı bir kesir olarak yazılabilir mi?",secs:[["e","Evet, yazılabilir."],["h","Hayır, tam sayılar kesir olarak yazılamaz."]],dogru:"e",neden:`−5 = ${EKSI}${kH(5,1)} = ${EKSI}${kH(10,2)} …`},
     asamalar:[
-      {ad:"Paydası 1 olan kesir",yon:[yon2,`<b>${T(t1)}</b> sayısını paydası <b>1</b> olan bir kesirle göster. Nokta bir tam sayının üstüne gelince kutu yeşil olur.`],bitis:`Kesir ${T(t1)} noktasını paydası 1 ile gösterince.`,kur:(k,A)=>{
+      {ad:"Paydası 1 olan kesir",yon:[yon2,`<b>${T(t1)}</b> sayısını paydası <b>1</b> olan bir kesirle gösteriniz. Nokta bir tam sayının üstüne gelince kutu yeşil olur.`],bitis:`Kesir ${T(t1)} noktasını paydası 1 ile gösterince.`,kur:(k,A)=>{
         const Tz=p1Tezgah(k,(a,b,tam)=>{if(tam)D.ekle([rH(a,b,false,true),`<b>${T(a/b)}</b>`],a+"/"+b);if(a===t1&&b===1)A.tamam(`${T(t1)} = ${rH(t1,1,false,true)}`);});A.oto=()=>Tz.ayarla(t1,1);}},
-      {ad:"Paydası 2 olan kesir",yon:[`Aynı noktaya (${T(t1)}) bu kez paydası <b>2</b> olan bir kesirle git.`,"İpucu: Payda 2 olunca her birim iki eş parçaya bölünür."],bitis:`Kesir ${T(t1)} noktasını paydası 2 ile gösterince.`,kur:(k,A)=>{
+      {ad:"Paydası 2 olan kesir",yon:[`Aynı noktaya (${T(t1)}) bu kez paydası <b>2</b> olan bir kesirle gidiniz.`,"İpucu: Payda 2 olunca her birim iki eş parçaya bölünür."],bitis:`Kesir ${T(t1)} noktasını paydası 2 ile gösterince.`,kur:(k,A)=>{
         const Tz=p1Tezgah(k,(a,b,tam)=>{if(tam)D.ekle([rH(a,b,false,true),`<b>${T(a/b)}</b>`],a+"/"+b);if(a===2*t1&&b===2)A.tamam(`${T(t1)} = ${rH(2*t1,2,false,true)}`);});A.oto=()=>Tz.ayarla(2*t1,2);}},
-      {ad:"Üç farklı kesir",yon:[`<b>${t3}</b> noktasını <b>üç farklı</b> kesirle göster: payı ve paydayı değiştir, nokta ${t3}'ün üstüne her gelişinde kesir sayılır.`],bitis:"Üç farklı kesir bulunca.",kur:(k,A)=>{const hit=new Set();
-        const not=yeniEl("p","p1-ek","Bulduğun kesirler: —");
-        const Tz=p1Tezgah(k,(a,b,tam)=>{if(!tam)return;D.ekle([rH(a,b,false,true),`<b>${T(a/b)}</b>`],a+"/"+b);if(a/b===t3){hit.add(a+"/"+b);not.innerHTML="Bulduğun kesirler: "+[...hit].map(s=>{const [x,y]=s.split("/");return rH(+x,+y,false,true);}).join(", ");A.durum(`${hit.size} / 3`);if(hit.size>=3)A.tamam(`${t3} noktasını ${hit.size} farklı kesirle gösterdin.`);}});
+      {ad:"Üç farklı kesir",yon:[`<b>${t3}</b> noktasını <b>üç farklı</b> kesirle gösteriniz: payı ve paydayı değiştiriniz, nokta ${t3}'ün üstüne her gelişinde kesir sayılır.`],bitis:"Üç farklı kesir bulunca.",kur:(k,A)=>{const hit=new Set();
+        const not=yeniEl("p","p1-ek","Bulduğunuz kesirler: —");
+        const Tz=p1Tezgah(k,(a,b,tam)=>{if(!tam)return;D.ekle([rH(a,b,false,true),`<b>${T(a/b)}</b>`],a+"/"+b);if(a/b===t3){hit.add(a+"/"+b);not.innerHTML="Bulduğunuz kesirler: "+[...hit].map(s=>{const [x,y]=s.split("/");return rH(+x,+y,false,true);}).join(", ");A.durum(`${hit.size} / 3`);if(hit.size>=3)A.tamam(`${t3} noktasını ${hit.size} farklı kesirle gösterdiniz.`);}});
         k.appendChild(not);let j=1;A.oto=()=>{Tz.ayarla(t3*j,j);j++;};}},
-      kuralA(D,[[`${EKSI}${kH(4,1)}, ${EKSI}${kH(8,2)} ve ${EKSI}${kH(12,3)} için hangisi doğrudur?`,["Üçü de −4 noktasındadır; pay, paydanın katı olunca kesir bir tam sayıyı gösterir.","Üçü farklı noktalardadır.","Hiçbiri bir tam sayıyı göstermez."],"Doğru!",["Deftere bak: Aynı tam sayıyı gösteren farklı kesirler buldun.","8 ÷ 2 = 4 ve 12 ÷ 3 = 4: Kesirler bir tam sayıya eşit olabilir."]],
-        ["Her tam sayı için hangisi doğrudur?",[`Paydası 1 olan bir kesir olarak yazılabilir: −7 = ${EKSI}${kH(7,1)}`,"Kesir olarak yazılamaz.","Yalnız pozitif tam sayılar kesir olarak yazılabilir."],"Doğru! Bu yüzden her tam sayı bir rasyonel sayıdır.",["Aşama 1'de bir tam sayıyı paydası 1 olan kesirle yazdın.","Aşama 1'deki sayı negatifti."]]]),
+      kuralA(D,[[`${EKSI}${kH(4,1)}, ${EKSI}${kH(8,2)} ve ${EKSI}${kH(12,3)} için hangisi doğrudur?`,["Üçü de −4 noktasındadır; pay, paydanın katı olunca kesir bir tam sayıyı gösterir.","Üçü farklı noktalardadır.","Hiçbiri bir tam sayıyı göstermez."],"Doğru!",["Deftere bakınız: Aynı tam sayıyı gösteren farklı kesirler buldunuz.","8 ÷ 2 = 4 ve 12 ÷ 3 = 4: Kesirler bir tam sayıya eşit olabilir."]],
+        ["Her tam sayı için hangisi doğrudur?",[`Paydası 1 olan bir kesir olarak yazılabilir: −7 = ${EKSI}${kH(7,1)}`,"Kesir olarak yazılamaz.","Yalnız pozitif tam sayılar kesir olarak yazılabilir."],"Doğru! Bu yüzden her tam sayı bir rasyonel sayıdır.",["Aşama 1'de bir tam sayıyı paydası 1 olan kesirle yazdınız.","Aşama 1'deki sayı negatifti."]]]),
       kendiA((m,son)=>{const a=ra(2,9),q=ra(2,6);
-        cevap(m,soruKut(`${EKSI}${kH(a*q,q)} kesri hangi tam sayıya eşittir?`),-a,`Doğru! ${EKSI}${kH(a*q,q)} = <b>${T(-a)}</b> = ${EKSI}${kH(a,1)}.`,`${a*q} içinde kaç tane ${q} var? İşareti de unutma.`,son,{ozel:x=>esit(x,[a,1])?"Kesir negatif. İşareti unutma.":null});})],
+        cevap(m,soruKut(`${EKSI}${kH(a*q,q)} kesri hangi tam sayıya eşittir?`),-a,`Doğru! ${EKSI}${kH(a*q,q)} = <b>${T(-a)}</b> = ${EKSI}${kH(a,1)}.`,`${a*q} içinde kaç tane ${q} var? İşareti de unutmayınız.`,son,{ozel:x=>esit(x,[a,1])?"Kesir negatif. İşareti unutmayınız.":null});})],
     kural:`Her tam sayı <b>paydası 1 olan</b> bir kesir olarak yazılabilir: −5 = ${EKSI}${kH(5,1)}. Pay, paydanın katı olduğunda kesir bir tam sayıyı gösterir: ${EKSI}${kH(8,2)} = −4. Bu yüzden <b>her tam sayı bir rasyonel sayıdır</b>.`});
 };
 
@@ -1086,12 +1086,12 @@ function makine(k,D,hedef,A,oz){
       const [x,y]=sd.yer(pay/payda);sd.ciz(nokta(x,y,"#e8590c",9));D.ekle([ad,rH(pay,payda,true)],pay+"/"+payda);}
     const r=hedef.ok(pay,payda);if(r)A.tamam(oz);else fb(f,false,hedef.ip(pay,payda));};
   gir();A.oto=()=>{const [a,b]=hedef.orn;while(payda!==b)Q.el.querySelector(`[data-d="${b>payda?1:-1}"]`).click();while(pay!==a)P.el.querySelector(`[data-d="${a>pay?1:-1}"]`).click();k.querySelector(".cal").click();};}
-const e_makine=p=>{const D=defterY(["Kesir","Makinenin çıktısı"]);const yon0="<b>Pay</b> ve <b>Payda</b> sayaçlarını − ve + düğmeleriyle ayarla, sonra <b>Çalıştır</b> düğmesine bas.";
+const e_makine=p=>{const D=defterY(["Kesir","Makinenin çıktısı"]);const yon0="<b>Pay</b> ve <b>Payda</b> sayaçlarını − ve + düğmeleriyle ayarlayınız, sonra <b>Çalıştır</b> düğmesine basınız.";
   asamali(p,{tahmin:{soru:`${kH(8,0)} ifadesi hangi sayıyı gösterir?`,secs:[["a","0"],["b","8"],["c","Hiçbir sayıyı göstermez."]],dogru:"c",neden:"Payda 0 olamaz; 0 ile çarpılıp 8 eden bir sayı yoktur."},
     asamalar:[
-      {ad:"Paydayı 0 yap",yon:[yon0,"Payı 0'dan farklı bırak, paydayı <b>0</b> yap ve makinenin ne yazdığına bak."],bitis:"Payda 0 iken makineyi çalıştırınca.",kur:(k,A)=>makine(k,D,{ok:(a,b)=>b===0&&a!==0,ip:(a,b)=>b===0?"Pay da 0 oldu. Payı 0'dan farklı bir sayı yap.":"Paydayı 0 yapmadın. Payda sayacındaki − düğmesiyle 0'a in.",orn:[8,0]},A,"Payda 0 olunca makine TANIMSIZ yazdı.")},
-      {ad:"Makineden 0 çıkar",yon:[yon0,"Ekranda <b>0</b> yazmasını sağla."],bitis:"Ekranda 0 çıkınca.",kur:(k,A)=>makine(k,D,{ok:(a,b)=>a===0&&b!==0,ip:(a,b)=>b===0?"Payda 0 olunca sonuç tanımsız olur. Paydayı 0'dan farklı bırak.":"Sonuç 0 olmadı. Hangi sayı 0 olursa kesir 0'a eşit olur?",orn:[0,5]},A,"Payı 0 olan kesir 0'a eşittir.")},
-      {ad:"Negatif kesir üret",yon:[yon0,"Ekranda tam sayı <b>olmayan</b>, <b>negatif</b> bir rasyonel sayı çıkmasını sağla."],bitis:"Böyle bir sayı çıkınca.",kur:(k,A)=>makine(k,D,{ok:(a,b)=>b!==0&&a*b<0&&a%b!==0,ip:(a,b)=>b===0?"Payda 0 olamaz.":a*b>=0?"Sonuç negatif değil. Payı negatif yap.":"Sonuç bir tam sayı çıktı. Pay, paydanın katı olmasın.",orn:[-7,3]},A,"Negatif rasyonel sayılar da vardır.")},
+      {ad:"Paydayı 0 yap",yon:[yon0,"Payı 0'dan farklı bırakınız, paydayı <b>0</b> yapınız ve makinenin ne yazdığına bakınız."],bitis:"Payda 0 iken makineyi çalıştırınca.",kur:(k,A)=>makine(k,D,{ok:(a,b)=>b===0&&a!==0,ip:(a,b)=>b===0?"Pay da 0 oldu. Payı 0'dan farklı bir sayı yapınız.":"Paydayı 0 yapmadınız. Payda sayacındaki − düğmesiyle 0'a in.",orn:[8,0]},A,"Payda 0 olunca makine TANIMSIZ yazdı.")},
+      {ad:"Makineden 0 çıkar",yon:[yon0,"Ekranda <b>0</b> yazmasını sağlayınız."],bitis:"Ekranda 0 çıkınca.",kur:(k,A)=>makine(k,D,{ok:(a,b)=>a===0&&b!==0,ip:(a,b)=>b===0?"Payda 0 olunca sonuç tanımsız olur. Paydayı 0'dan farklı bırakınız.":"Sonuç 0 olmadı. Hangi sayı 0 olursa kesir 0'a eşit olur?",orn:[0,5]},A,"Payı 0 olan kesir 0'a eşittir.")},
+      {ad:"Negatif kesir üret",yon:[yon0,"Ekranda tam sayı <b>olmayan</b>, <b>negatif</b> bir rasyonel sayı çıkmasını sağlayınız."],bitis:"Böyle bir sayı çıkınca.",kur:(k,A)=>makine(k,D,{ok:(a,b)=>b!==0&&a*b<0&&a%b!==0,ip:(a,b)=>b===0?"Payda 0 olamaz.":a*b>=0?"Sonuç negatif değil. Payı negatif yapınız.":"Sonuç bir tam sayı çıktı. Pay, paydanın katı olmasın.",orn:[-7,3]},A,"Negatif rasyonel sayılar da vardır.")},
       kuralA(D,[["Makine hangi durumda bir sayı üretemedi?",["Payda 0 olduğunda","Pay 0 olduğunda","Pay negatif olduğunda"],"Doğru! Bir kesirde payda 0 olamaz.",["Pay 0 olunca makine 0 yazdı; bu bir sayıdır.","Pay negatif olunca makine negatif bir sayı yazdı."]],
         [`${kH(0,7)} için hangisi doğrudur?`,["0'a eşittir; bir rasyonel sayıdır.","Tanımsızdır.","7'ye eşittir."],"Doğru! Pay 0 olabilir, payda 0 olamaz.",["Tanımsız olan, paydası 0 olan kesirdir.","7 · 0 = 0 olduğuna göre bölüm 0'dır."]]]),
       kendiA((m,son)=>{const a=ra(2,12);
@@ -1113,15 +1113,15 @@ function aynaTur(k,tip,D,A){
   function dokun(kk){if(bul)return;
     if(kk===-g){bul=true;D.ekle([rH(g,q,karma),rH(-g,q,karma),rH(Math.abs(g),q,karma)+" birim"],"a"+tip);fb(f,true,`Doğru! ${rH(g,q,karma)} ile ${rH(-g,q,karma)} 0'a eşit uzaklıkta, 0'ın farklı yanlarındadır.`);bip(760,.1);ciz();A.tamam(`${rH(g,q,karma)} ↔ ${rH(-g,q,karma)}`);return;}
     yx=kk;const yon=v=>v>0?"sağında":"solunda";bip(220,.12);
-    fb(f,false,kk===0?"Bu 0 noktası (aynanın kendisi). Görüntü aynanın öbür yanında olmalı.":kk===g?"Bu noktanın kendisi. Aynanın öbür yanına bak.":Math.sign(kk)===Math.sign(g)?"Görüntü, aynanın (0'ın) öbür yanında olmalı.":`Kırmızı nokta 0'ın ${Math.abs(g)} parça ${yon(g)}; dokunduğun nokta 0'ın ${Math.abs(kk)} parça ${yon(kk)}. Parçaları say.`);ciz();}
+    fb(f,false,kk===0?"Bu 0 noktası (aynanın kendisi). Görüntü aynanın öbür yanında olmalı.":kk===g?"Bu noktanın kendisi. Aynanın öbür yanına bakınız.":Math.sign(kk)===Math.sign(g)?"Görüntü, aynanın (0'ın) öbür yanında olmalı.":`Kırmızı nokta 0'ın ${Math.abs(g)} parça ${yon(g)}; dokunduğunuz nokta 0'ın ${Math.abs(kk)} parça ${yon(kk)}. Parçaları sayınız.`);ciz();}
   A.oto=()=>{const [x2,y]=sd.yer(-g/q);simTik(sd.sv,x2,y);};ciz();}
-const e_ayna=p=>{const D=defterY(["Nokta","Aynadaki görüntüsü","0'a uzaklık"]);const yon=["Kırmızı noktanın aynadaki görüntüsü, aynanın (0'ın) öbür yanında ve 0'a aynı uzaklıktadır.","Sayı doğrusundaki her birim paydadaki sayı kadar eş parçaya bölünmüştür. Görüntünün olduğu çentiğe dokun."];
+const e_ayna=p=>{const D=defterY(["Nokta","Aynadaki görüntüsü","0'a uzaklık"]);const yon=["Kırmızı noktanın aynadaki görüntüsü, aynanın (0'ın) öbür yanında ve 0'a aynı uzaklıktadır.","Sayı doğrusundaki her birim paydadaki sayı kadar eş parçaya bölünmüştür. Görüntünün olduğu çentiğe dokununuz."];
   asamali(p,{tahmin:{giris:"Sayı doğrusunun 0 noktasına dik bir ayna koyduk. 2'nin aynadaki görüntüsü −2 oldu.",soru:`${kH(1,2)} sayısının aynadaki görüntüsü hangi sayıdır?`,secs:[["a",EKSI+kH(1,2)],["b","2"],["c",kH(2,1)]],dogru:"a",neden:`${kH(1,2)} ile ${EKSI}${kH(1,2)}, 0'a eşit uzaklıktadır.`},
     asamalar:[
       {ad:"Pozitif bir kesir",yon,bitis:"Görüntünün yerine doğru dokununca.",kur:(k,A)=>aynaTur(k,"p",D,A)},
       {ad:"Negatif bir kesir",yon,bitis:"Görüntünün yerine doğru dokununca.",kur:(k,A)=>aynaTur(k,"n",D,A)},
       {ad:"Tam sayılı kesir",yon,bitis:"Görüntünün yerine doğru dokununca.",kur:(k,A)=>aynaTur(k,"k",D,A)},
-      kuralA(D,[["Bir kesir ile aynadaki görüntüsü için hangisi doğrudur?",[`0'a eşit uzaklıktadır ve ters işaretlidir: ${kH("a","b")} ile ${EKSI}${kH("a","b")}`,"İkisi de 0'ın aynı yanındadır.","Görüntünün payı ile paydası yer değiştirir."],"Doğru!",["Ayna 0'daydı; görüntü hep öbür yandaydı.","Deftere bak: Görüntünün payı ve paydası aynı kaldı, yalnız işaret değişti."]],
+      kuralA(D,[["Bir kesir ile aynadaki görüntüsü için hangisi doğrudur?",[`0'a eşit uzaklıktadır ve ters işaretlidir: ${kH("a","b")} ile ${EKSI}${kH("a","b")}`,"İkisi de 0'ın aynı yanındadır.","Görüntünün payı ile paydası yer değiştirir."],"Doğru!",["Ayna 0'daydı; görüntü hep öbür yandaydı.","Deftere bakınız: Görüntünün payı ve paydası aynı kaldı, yalnız işaret değişti."]],
         [`${EKSI}1${kH(1,2)} hangi sayının aynadaki görüntüsüdür?`,[`1${kH(1,2)}`,`${EKSI}${kH(1,2)}`,"1"],`Doğru! “−” işareti sayının tamamına aittir: ${EKSI}1${kH(1,2)}, 1${kH(1,2)} sayısının negatifidir.`,["“−” işareti yalnız kesir kısmına değil, sayının tamamına aittir.","Görüntü, sayının tamamının ters işaretlisidir."]]]),
       kendiA((m,son)=>{const q=ra(3,7);let a;do{a=ra(q+1,2*q+3);}while(gcd(a,q)!==1);
         soruY(m,`Sayı doğrusunda 0'a dik tutulan aynada ${kH(a,q)} sayısının görüntüsü hangisidir?`,[EKSI+kH(a,q),kH(q,a),EKSI+kH(q,a),String(a)],`Doğru! ${kH(a,q)} ile ${EKSI}${kH(a,q)} 0'a eşit uzaklıkta, 0'ın farklı yanlarındadır.`,["Görüntü 0'ın öbür yanındadır; işaret değişmeli.","İşaret doğru ama pay ile payda yer değiştirmez.","Görüntü bir kesirdir; pay ve payda aynı kalır, yalnız işaret değişir."],son);})],
@@ -1145,42 +1145,42 @@ function ziplaTur(k,s,D,A){
     sd.ciz(h);}
   function panel(){const bas=F.s*F.w;A.durum(`Adım ${Math.min(adim,4)} / 4`);
     if(adim===1){ap.innerHTML=`<p class="adl"><b>1. adım: İşaret.</b> Sayı pozitif mi, negatif mi?</p><div class="secler"><button type="button" class="sec" data-v="1">Pozitif</button><button type="button" class="sec" data-v="-1">Negatif</button></div>`;
-      ap.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(+b.dataset.v===F.s){fb(f,true,F.s<0?"Doğru! Sayı negatif; 0'ın solunda olacak.":"Doğru! Sayı pozitif; 0'ın sağında olacak.");adim=2;panel();}else{bip(220,.12);fb(f,false,"Sayının başındaki işarete bak: “−” var mı?");}});}
-    else if(adim===2){ap.innerHTML=`<p class="adl"><b>2. adım: Hangi iki tam sayı arasında?</b> Sayı doğrusunda iki tam sayının <b>arasına</b> dokun.</p><button type="button" class="ghost ipb">İpucu göster</button><p class="ipucu" hidden></p>`;
+      ap.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(+b.dataset.v===F.s){fb(f,true,F.s<0?"Doğru! Sayı negatif; 0'ın solunda olacak.":"Doğru! Sayı pozitif; 0'ın sağında olacak.");adim=2;panel();}else{bip(220,.12);fb(f,false,"Sayının başındaki işarete bakınız: “−” var mı?");}});}
+    else if(adim===2){ap.innerHTML=`<p class="adl"><b>2. adım: Hangi iki tam sayı arasında?</b> Sayı doğrusunda iki tam sayının <b>arasına</b> dokununuz.</p><button type="button" class="ghost ipb">İpucu gösterin</button><p class="ipucu" hidden></p>`;
       ap.querySelector(".ipb").onclick=()=>{const i=ap.querySelector(".ipucu");i.hidden=false;i.innerHTML=`${F.w*F.q+F.r} içinde ${F.q} tam ${F.w} kez var, ${F.r} artar: ${rH(F.p,F.q)} = <b>${rH(F.p,F.q,true)}</b>`;};}
-    else if(adim===3){ap.innerHTML=`<p class="adl"><b>3. adım: Böl.</b> ${T(ar)} ile ${T(ar+1)} arasını kaç eş parçaya bölmelisin? Sayacı ayarla ve <b>Böl</b> düğmesine bas.</p><div class="row sy"></div><div class="row"><button type="button" class="primary bol">Böl</button></div>`;
+    else if(adim===3){ap.innerHTML=`<p class="adl"><b>3. adım: Bölünüz.</b> ${T(ar)} ile ${T(ar+1)} arasını kaç eş parçaya bölmelisiniz? Sayacı ayarlayınız ve <b>Böl</b> düğmesine basınız.</p><div class="row sy"></div><div class="row"><button type="button" class="primary bol">Böl</button></div>`;
       Y=sayac("Parça sayısı",2,10,2,v=>{n=v;ciz();});n=2;ap.querySelector(".sy").appendChild(Y.el);ciz();
-      ap.querySelector(".bol").onclick=()=>{if(n===F.q){fb(f,true,`Doğru! Payda ${F.q} olduğu için aralığı ${F.q} eş parçaya böldün. Her parça ${kH(1,F.q)} birim.`);adim=4;j=0;panel();ciz();}else{bip(220,.12);fb(f,false,"Parça sayısı kesrin hangi sayısıyla ilgili? Paydaya bak.");}};}
-    else if(adim===4){ap.innerHTML=`<p class="adl"><b>4. adım: Say.</b> Tam kısımdan (<b>${T(bas)}</b>) başla; tam sayılı kesrin payı kadar parça say ve <b>Burada dur</b> düğmesine bas.</p><div class="row"><button type="button" class="ghost zl">‹ Sola bir parça</button><button type="button" class="ghost zr">Sağa bir parça ›</button><button type="button" class="primary dur">Burada dur</button><span class="durum"></span></div>`;
+      ap.querySelector(".bol").onclick=()=>{if(n===F.q){fb(f,true,`Doğru! Payda ${F.q} olduğu için aralığı ${F.q} eş parçaya böldünüz. Her parça ${kH(1,F.q)} birim.`);adim=4;j=0;panel();ciz();}else{bip(220,.12);fb(f,false,"Parça sayısı kesrin hangi sayısıyla ilgili? Paydaya bakınız.");}};}
+    else if(adim===4){ap.innerHTML=`<p class="adl"><b>4. adım: Sayınız.</b> Tam kısımdan (<b>${T(bas)}</b>) başlayınız; tam sayılı kesrin payı kadar parça sayınız ve <b>Burada durun</b> düğmesine basınız.</p><div class="row"><button type="button" class="ghost zl">‹ Sola bir parça</button><button type="button" class="ghost zr">Sağa bir parça ›</button><button type="button" class="primary dur">Burada durun</button><span class="durum"></span></div>`;
       const du=ap.querySelector(".durum");const g=()=>{du.innerHTML=`Sayılan parça: <b>${Math.abs(j)}</b>`;};g();
       const hareket=d=>{const nj=j+d,v=bas+nj/F.q;if(v<ar-1e-9||v>ar+1+1e-9)return;j=nj;bip(520,.05);g();ciz();};
       ap.querySelector(".zl").onclick=()=>hareket(-1);ap.querySelector(".zr").onclick=()=>hareket(1);
       ap.querySelector(".dur").onclick=()=>{if(j===F.s*F.r){bitti=true;D.ekle([rH(F.p,F.q),rH(F.p,F.q,true),`${T(ar)} ile ${T(ar+1)}`],"z"+s);
-          fb(f,true,`Yerleştirdin! ${rH(F.p,F.q)} = ${rH(F.p,F.q,true)}. Tam kısım ${denT(bas)} ${F.s<0?"sola":"sağa"} ${F.r} parça sayıldı.`);ap.innerHTML="";ciz();A.tamam(`${rH(F.p,F.q)} = ${rH(F.p,F.q,true)}`);}
+          fb(f,true,`Yerleştirdiniz! ${rH(F.p,F.q)} = ${rH(F.p,F.q,true)}. Tam kısım ${denT(bas)} ${F.s<0?"sola":"sağa"} ${F.r} parça sayıldı.`);ap.innerHTML="";ciz();A.tamam(`${rH(F.p,F.q)} = ${rH(F.p,F.q,true)}`);}
         else if(j!==0&&Math.sign(j)!==F.s){bip(220,.12);fb(f,false,F.s<0?"Negatif bir sayıda tam kısımdan 0'dan uzaklaşan yöne, yani <b>sola</b> sayılır.":"Pozitif bir sayıda tam kısımdan <b>sağa</b> sayılır.");}
-        else{bip(220,.12);fb(f,false,`Tam sayılı kesrin payı kadar parça say: ${rH(F.p,F.q)} = ${rH(F.p,F.q,true)}`);}};}}
+        else{bip(220,.12);fb(f,false,`Tam sayılı kesrin payı kadar parça sayınız: ${rH(F.p,F.q)} = ${rH(F.p,F.q,true)}`);}};}}
   function araSec(a){if(a<-5||a>4)return;const dog=Math.floor(F.p/F.q);ar=a;ciz();
     if(a===dog){fb(f,true,`Doğru! ${rH(F.p,F.q)} = ${rH(F.p,F.q,true)}; ${T(a)} ile ${T(a+1)} arasındadır. Sayı doğrusu bu aralığa yakınlaştırıldı.`);adim=3;kur(a-1,a+2);panel();}
-    else{bip(220,.12);fb(f,false,Math.sign(a+.5)!==F.s?"Önce işarete bak: Sayı 0'ın hangi yanında?":`Bu aralık değil. ${rH(F.p,F.q)} kesrinde payın içinde paydanın kaç kez olduğunu düşün.`);setTimeout(()=>{if(adim===2){ar=null;ciz();}},900);}}
+    else{bip(220,.12);fb(f,false,Math.sign(a+.5)!==F.s?"Önce işarete bakınız: Sayı 0'ın hangi yanında?":`Bu aralık değil. ${rH(F.p,F.q)} kesrinde payın içinde paydanın kaç kez olduğunu düşününüz.`);setTimeout(()=>{if(adim===2){ar=null;ciz();}},900);}}
   A.oto=()=>{if(bitti)return;if(adim===1)ap.querySelector(`.sec[data-v="${F.s}"]`).click();else if(adim===2){const a=Math.floor(F.p/F.q);const [x,y]=sd.yer(a+.5);simTik(sd.sv,x,y);}
     else if(adim===3){while(n<F.q)Y.el.querySelector('[data-d="1"]').click();ap.querySelector(".bol").click();}else{while(j!==F.s*F.r)ap.querySelector(F.s<0?".zl":".zr").click();ap.querySelector(".dur").click();}};
   kur(-5,5);panel();ciz();}
-const e_zipla=p=>{const D=defterY(["Kesir","Tam sayılı kesir","Arasında olduğu tam sayılar"]);const yon=["Kesri sayı doğrusuna dört adımda yerleştir: işaret, aralık, bölme, sayma.","Her adımın yönergesi aşağıdaki kutuda yazar; adımı doğru yapınca sıradaki gelir."];
+const e_zipla=p=>{const D=defterY(["Kesir","Tam sayılı kesir","Arasında olduğu tam sayılar"]);const yon=["Kesri sayı doğrusuna dört adımda yerleştiriniz: işaret, aralık, bölme, sayma.","Her adımın yönergesi aşağıdaki kutuda yazar; adımı doğru yapınca sıradaki gelir."];
   asamali(p,{tahmin:{soru:`${EKSI}${kH(13,5)} sayısı hangi ardışık iki tam sayı arasındadır?`,secs:[["a",`${EKSI}3 ile ${EKSI}2`],["b",`${EKSI}2 ile ${EKSI}1`],["c","2 ile 3"]],dogru:"a",neden:`${EKSI}${kH(13,5)} = ${EKSI}2${kH(3,5)}; ${EKSI}2'nin 3 parça solundadır.`},
     asamalar:[
       {ad:"Negatif bir kesir",yon,bitis:"Dördüncü adımda doğru yerde durunca.",kur:(k,A)=>ziplaTur(k,-1,D,A)},
       {ad:"Pozitif bir kesir",yon,bitis:"Dördüncü adımda doğru yerde durunca.",kur:(k,A)=>ziplaTur(k,1,D,A)},
-      kuralA(D,[["Negatif bir kesri yerleştirirken tam kısımdan hangi yöne saydın?",["Sola, yani 0'dan uzaklaşan yöne","Sağa, yani 0'a doğru","Yön fark etmez."],`Doğru! ${EKSI}2${kH(3,5)} için ${EKSI}2'den sola 3 parça sayılır.`,["Sağa saymak sayıyı 0'a yaklaştırır; −2'den sağa gidersen −2'den büyük bir sayı bulursun.","Aşama 1'de yanlış yöne saydığında ne oldu?"]],
+      kuralA(D,[["Negatif bir kesri yerleştirirken tam kısımdan hangi yöne saydınız?",["Sola, yani 0'dan uzaklaşan yöne","Sağa, yani 0'a doğru","Yön fark etmez."],`Doğru! ${EKSI}2${kH(3,5)} için ${EKSI}2'den sola 3 parça sayılır.`,["Sağa saymak sayıyı 0'a yaklaştırır; −2'den sağa giderseniz −2'den büyük bir sayı bulursunuz.","Aşama 1'de yanlış yöne saydığında ne oldu?"]],
         [`${EKSI}1${kH(1,2)} için hangisi doğrudur?`,[`“−” işareti sayının tamamına aittir: ${EKSI}1${kH(1,2)} = ${EKSI}${kH(3,2)}`,`${EKSI}1${kH(1,2)}, ${EKSI}1 ile 0 arasındadır.`,`${EKSI}1${kH(1,2)} pozitif bir sayıdır.`],`Doğru! ${EKSI}1${kH(1,2)}, ${EKSI}2 ile ${EKSI}1 arasındadır.`,[`${EKSI}1${kH(1,2)} = ${EKSI}1 − ${kH(1,2)}; ${EKSI}1'den de küçüktür.`,"Başında “−” var."]]]),
       kendiA((m,son)=>{const q=ra(3,7),w=ra(2,5);let r;do{r=ra(1,q-1);}while(gcd(r,q)!==1);const pp=-(w*q+r);
-        soruY(m,`${rH(pp,q)} sayısı hangi ardışık iki tam sayı arasındadır?`,[`${T(-w-1)} ile ${T(-w)}`,`${T(-w)} ile ${T(-w+1)}`,`${w} ile ${w+1}`,`${T(-r-1)} ile ${T(-r)}`].filter((x,i,a)=>a.indexOf(x)===i),`Doğru! ${rH(pp,q)} = ${rH(pp,q,true)}; ${T(-w-1)} ile ${T(-w)} arasındadır.`,[`Önce tam sayılı kesre çevir: ${rH(pp,q)} = ${rH(pp,q,true)}. “−” işareti sayının tamamına aittir.`,"Sayı negatif; 0'ın solunda.","Tam kısmı bulmak için payın içinde paydanın kaç kez olduğuna bak."],son);})],
-    kural:`Bir kesri sayı doğrusuna yerleştirmek için: <b>1)</b> işaretine bak; <b>2)</b> tam sayılı kesre çevirip hangi iki tam sayı arasında olduğunu bul (${EKSI}${kH(13,5)} = ${EKSI}2${kH(3,5)}, ${EKSI}3 ile ${EKSI}2 arası); <b>3)</b> bu aralığı payda kadar eş parçaya böl; <b>4)</b> tam kısımdan başlayıp pozitifte sağa, negatifte sola pay kadar parça say.`});
+        soruY(m,`${rH(pp,q)} sayısı hangi ardışık iki tam sayı arasındadır?`,[`${T(-w-1)} ile ${T(-w)}`,`${T(-w)} ile ${T(-w+1)}`,`${w} ile ${w+1}`,`${T(-r-1)} ile ${T(-r)}`].filter((x,i,a)=>a.indexOf(x)===i),`Doğru! ${rH(pp,q)} = ${rH(pp,q,true)}; ${T(-w-1)} ile ${T(-w)} arasındadır.`,[`Önce tam sayılı kesre çeviriniz: ${rH(pp,q)} = ${rH(pp,q,true)}. “−” işareti sayının tamamına aittir.`,"Sayı negatif; 0'ın solunda.","Tam kısmı bulmak için payın içinde paydanın kaç kez olduğuna bakınız."],son);})],
+    kural:`Bir kesri sayı doğrusuna yerleştirmek için: <b>1)</b> işaretine bakınız; <b>2)</b> tam sayılı kesre çevirip hangi iki tam sayı arasında olduğunu bulunuz (${EKSI}${kH(13,5)} = ${EKSI}2${kH(3,5)}, ${EKSI}3 ile ${EKSI}2 arası); <b>3)</b> bu aralığı payda kadar eş parçaya bölünüz; <b>4)</b> tam kısımdan başlayıp pozitifte sağa, negatifte sola pay kadar parça sayınız.`});
 };
 
 /* 15 · ARADA KİM VAR? */
 function kesirUret(w,s){const q=ra(2,9);let r;do{r=ra(1,q-1);}while(gcd(r,q)!==1);return [s*(w*q+r),q];}
 function aradaTur(k,tip,D,A){
-  k.insertAdjacentHTML("beforeend",`<div class="dkart ark"></div><div class="stage ar"></div><div class="row"><button type="button" class="primary kt">Kontrol et</button><button type="button" class="ghost yok">Arada hiç tam sayı yok</button><button type="button" class="ghost tm">Temizle</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="dkart ark"></div><div class="stage ar"></div><div class="row"><button type="button" class="primary kt">Kontrol edin</button><button type="button" class="ghost yok">Arada hiç tam sayı yok</button><button type="button" class="ghost tm">Temizle</button></div><div class="fb" hidden></div>`);
   const st=k.querySelector(".ar"),kr=k.querySelector(".ark"),f=k.querySelector(".fb");let Av,Bv,sec=new Set(),bitti=false;
   if(tip==="y"){const nn=ra(-5,4);let q1,r1,q2,r2;do{q1=ra(2,9);r1=ra(1,q1-1);q2=ra(2,9);r2=ra(1,q2-1);}while(gcd(r1,q1)!==1||gcd(r2,q2)!==1||r1*q2===r2*q1);Av=[nn*q1+r1,q1];Bv=[nn*q2+r2,q2];if(Math.random()<.5)[Av,Bv]=[Bv,Av];}
   else{Av=kesirUret(ra(1,5),-1);Bv=kesirUret(ra(1,5),1);if(Math.random()<.4)[Av,Bv]=[Bv,Av];}
@@ -1194,24 +1194,24 @@ function aradaTur(k,tip,D,A){
     const aa=rH(Av[0],Av[1],true),bb=rH(Bv[0],Bv[1],true);bip(760,.1);
     fb(f,true,l.length?`Doğru! A = ${aa}, B = ${bb}. Aradaki tam sayılar: ${l.map(T).join(", ")} (<b>${l.length} tane</b>).`:`Doğru! A = ${aa} ve B = ${bb} aynı iki tam sayı arasında. <b>Ardışık iki tam sayı arasında başka tam sayı yoktur.</b>`);ciz();A.tamam(l.length?`Arada ${l.length} tam sayı var.`:"Arada tam sayı yok.");}
   k.querySelector(".tm").onclick=()=>{if(bitti)return;sec.clear();ciz();};
-  k.querySelector(".yok").onclick=()=>{if(bitti)return;if(!cevapL().length){sec.clear();sonuc();}else{bip(220,.12);fb(f,false,"A ile B arasında tam sayı var. A ve B'nin hangi iki tam sayı arasında olduğunu bul.");}};
-  k.querySelector(".kt").onclick=()=>{if(bitti)return;const l=cevapL(),c=new Set(l);if(!sec.size){fb(f,false,l.length?"Önce aradaki tam sayılara dokunarak işaretle.":"Hiç tam sayı işaretlemedin. Arada tam sayı yoksa <b>Arada hiç tam sayı yok</b> düğmesine bas.");return;}
+  k.querySelector(".yok").onclick=()=>{if(bitti)return;if(!cevapL().length){sec.clear();sonuc();}else{bip(220,.12);fb(f,false,"A ile B arasında tam sayı var. A ve B'nin hangi iki tam sayı arasında olduğunu bulunuz.");}};
+  k.querySelector(".kt").onclick=()=>{if(bitti)return;const l=cevapL(),c=new Set(l);if(!sec.size){fb(f,false,l.length?"Önce aradaki tam sayılara dokunarak işaretleyiniz.":"Hiç tam sayı işaretlemediniz. Arada tam sayı yoksa <b>Arada hiç tam sayı yok</b> düğmesine basınız.");return;}
     const fazla=[...sec].filter(x=>!c.has(x)),eksik=l.filter(x=>!sec.has(x));
     if(!fazla.length&&!eksik.length){sonuc();return;}bip(220,.12);const kes=v=>rH(v[0],v[1],true);
-    if(fazla.length){const x=fazla[0];const yak=[Av,Bv].find(v=>Math.abs(v[0]/v[1]-x)<1)||Av;fb(f,false,`${T(x)} arada değil. ${kes(yak)} sayısının hangi iki tam sayı arasında olduğuna bak.`);}
-    else fb(f,false,`Eksik var: Aradaki tam sayıların hepsini işaretlemedin. ${eksik.some(x=>x<0)?"Negatif tarafı":eksik.includes(0)?"0'ı":"Pozitif tarafı"} kontrol et.`);};
+    if(fazla.length){const x=fazla[0];const yak=[Av,Bv].find(v=>Math.abs(v[0]/v[1]-x)<1)||Av;fb(f,false,`${T(x)} arada değil. ${kes(yak)} sayısının hangi iki tam sayı arasında olduğuna bakınız.`);}
+    else fb(f,false,`Eksik var: Aradaki tam sayıların hepsini işaretlemediniz. ${eksik.some(x=>x<0)?"Negatif tarafı":eksik.includes(0)?"0'ı":"Pozitif tarafı"} kontrol ediniz.`);};
   A.oto=()=>{if(bitti)return;const l=cevapL();if(!l.length){k.querySelector(".yok").click();return;}const e=l.find(x=>!sec.has(x));if(e===undefined){k.querySelector(".kt").click();return;}const [x,y]=sd.yer(e);simTik(sd.sv,x,y);};
   ciz();}
-const e_arada=p=>{const D=defterY(["A","B","Aradaki tam sayılar","Kaç tane?"]);const yon=["A ile B arasında kalan <b>bütün tam sayılara</b> sayı doğrusunda dokun (işareti kaldırmak için yeniden dokun).","Bitince <b>Kontrol et</b> düğmesine bas. Arada hiç tam sayı yoksa <b>Arada hiç tam sayı yok</b> düğmesine bas."];
+const e_arada=p=>{const D=defterY(["A","B","Aradaki tam sayılar","Kaç tane?"]);const yon=["A ile B arasında kalan <b>bütün tam sayılara</b> sayı doğrusunda dokununuz (işareti kaldırmak için yeniden dokununuz).","Bitince <b>Kontrol edin</b> düğmesine basınız. Arada hiç tam sayı yoksa <b>Arada hiç tam sayı yok</b> düğmesine basınız."];
   asamali(p,{tahmin:{soru:`${EKSI}2${kH(1,5)} ile ${kH(17,3)} arasında kaç tam sayı vardır?`,secs:[[6,"6"],[7,"7"],[8,"8"],[9,"9"]],dogru:8,neden:`${kH(17,3)} = 5${kH(2,3)}; aradaki tam sayılar ${EKSI}2, ${EKSI}1, 0, 1, 2, 3, 4, 5'tir.`},
     asamalar:[
       {ad:"Görünür tur",yon,bitis:"Aradaki tam sayıların hepsini doğru işaretleyince.",kur:(k,A)=>aradaTur(k,"g",D,A)},
-      {ad:"Gizli tur",yon:["Bu turda A ve B doğruda <b>görünmez</b>. Önce her birinin hangi iki tam sayı arasında olduğunu kafandan bul (tam sayılı kesre çevir).",yon[0],yon[1]],bitis:"Aradaki tam sayıların hepsini doğru işaretleyince.",kur:(k,A)=>aradaTur(k,"s",D,A)},
-      {ad:"Yakın komşular",yon:["A ile B birbirine çok yakın. Önce ikisinin de hangi iki tam sayı arasında olduğuna bak.",yon[1]],bitis:"Doğru kararı verince.",kur:(k,A)=>aradaTur(k,"y",D,A)},
-      kuralA(D,[["Arada kalan tam sayıları hızlıca bulmak için ne yaptın?",["Kesirleri tam sayılı kesre çevirip hangi iki tam sayı arasında olduklarına baktım.","Payları sayı doğrusuna yerleştirdim.","Paydaları sayı doğrusuna yerleştirdim."],`Doğru! Örneğin ${EKSI}${kH(23,5)} = ${EKSI}4${kH(3,5)}, ${EKSI}5 ile ${EKSI}4 arasındadır.`,["Pay tek başına kesrin yerini göstermez: 23 ile 23 ÷ 5 farklıdır.","Payda yalnız bir birimin kaç parçaya bölündüğünü söyler."]],
-        ["Ardışık iki tam sayının (3 ile 4 gibi) arasında kaç tam sayı vardır?",["Hiç yoktur.","Bir tane vardır.","Sonsuz tane vardır."],"Doğru! Ardışık iki tam sayı arasında başka tam sayı yoktur.",["3 ile 4 arasında bir tam sayı söyleyebilir misin?","Aralarında sonsuz tane kesir vardır ama tam sayı yoktur."]]]),
+      {ad:"Gizli tur",yon:["Bu turda A ve B doğruda <b>görünmez</b>. Önce her birinin hangi iki tam sayı arasında olduğunu kafanızdan bulunuz (tam sayılı kesre çeviriniz).",yon[0],yon[1]],bitis:"Aradaki tam sayıların hepsini doğru işaretleyince.",kur:(k,A)=>aradaTur(k,"s",D,A)},
+      {ad:"Yakın komşular",yon:["A ile B birbirine çok yakın. Önce ikisinin de hangi iki tam sayı arasında olduğuna bakınız.",yon[1]],bitis:"Doğru kararı verince.",kur:(k,A)=>aradaTur(k,"y",D,A)},
+      kuralA(D,[["Arada kalan tam sayıları hızlıca bulmak için ne yaptınız?",["Kesirleri tam sayılı kesre çevirip hangi iki tam sayı arasında olduklarına baktım.","Payları sayı doğrusuna yerleştirdim.","Paydaları sayı doğrusuna yerleştirdim."],`Doğru! Örneğin ${EKSI}${kH(23,5)} = ${EKSI}4${kH(3,5)}, ${EKSI}5 ile ${EKSI}4 arasındadır.`,["Pay tek başına kesrin yerini göstermez: 23 ile 23 ÷ 5 farklıdır.","Payda yalnız bir birimin kaç parçaya bölündüğünü söyler."]],
+        ["Ardışık iki tam sayının (3 ile 4 gibi) arasında kaç tam sayı vardır?",["Hiç yoktur.","Bir tane vardır.","Sonsuz tane vardır."],"Doğru! Ardışık iki tam sayı arasında başka tam sayı yoktur.",["3 ile 4 arasında bir tam sayı söyleyebilir misiniz?","Aralarında sonsuz tane kesir vardır ama tam sayı yoktur."]]]),
       kendiA((m,son)=>{const w1=ra(2,5),w2=ra(3,6);const Av=kesirUret(w1,-1),Bv=kesirUret(w2,1);
-        cevap(m,yaz([`A = ${rH(Av[0],Av[1])} ve B = ${rH(Bv[0],Bv[1])}`])+soruKut("A ile B arasında kaç tam sayı vardır?"),w1+w2+1,`Doğru! A = ${rH(Av[0],Av[1],true)}, B = ${rH(Bv[0],Bv[1],true)}. Aradaki tam sayılar ${denT(-w1)} ${ekT(w2,"e")} kadar: <b>${w1+w2+1} tane</b> (0 da dâhil).`,"Önce A ve B'yi tam sayılı kesre çevir. 0'ı saymayı unutma.",son,{ozel:x=>esit(x,[w1+w2,1])?"Bir eksik saydın: 0'ı da saydın mı?":null});})],
+        cevap(m,yaz([`A = ${rH(Av[0],Av[1])} ve B = ${rH(Bv[0],Bv[1])}`])+soruKut("A ile B arasında kaç tam sayı vardır?"),w1+w2+1,`Doğru! A = ${rH(Av[0],Av[1],true)}, B = ${rH(Bv[0],Bv[1],true)}. Aradaki tam sayılar ${denT(-w1)} ${ekT(w2,"e")} kadar: <b>${w1+w2+1} tane</b> (0 da dâhil).`,"Önce A ve B'yi tam sayılı kesre çeviriniz. 0'ı saymayı unutmayınız.",son,{ozel:x=>esit(x,[w1+w2,1])?"Bir eksik saydınız: 0'ı da saydınız mı?":null});})],
     kural:"İki rasyonel sayı arasındaki tam sayıları bulmak için önce her birinin <b>hangi ardışık iki tam sayı arasında</b> olduğu bulunur. Sonra aradaki tam sayılar sayılır; <b>0 da bir tam sayıdır</b>. Ardışık iki tam sayı arasında başka tam sayı yoktur."});
 };
 
@@ -1227,37 +1227,37 @@ function buyukAralik(n0,N,oran,o={}){const W=o.W||680,L=W<520?40:60,R=W-L,y=o.y|
 
 /* 16 · YAKINLAŞTIR */
 function yakinTur(k,neg,D,A){
-  k.insertAdjacentHTML("beforeend",`<p class="lab2">1. P'nin bulunduğu aralığa (iki tam sayının arasına) dokun.</p><div class="stage yk1"></div><div class="buyutec" hidden><p class="lab2">2. Büyütülen aralığı eş parçalara böl.</p><div class="row sy"></div><div class="stage yk2"></div><p class="durum"></p><div class="pc"></div></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<p class="lab2">1. P'nin bulunduğu aralığa (iki tam sayının arasına) dokununuz.</p><div class="stage yk1"></div><div class="buyutec" hidden><p class="lab2">2. Büyütülen aralığı eş parçalara bölünüz.</p><div class="row sy"></div><div class="stage yk2"></div><p class="durum"></p><div class="pc"></div></div><div class="fb" hidden></div>`);
   const st1=k.querySelector(".yk1"),bu=k.querySelector(".buyutec"),st2=k.querySelector(".yk2"),du=k.querySelector(".durum"),pc=k.querySelector(".pc"),f=k.querySelector(".fb");
   const q=ra(2,10),n0=neg?ra(-4,-1):ra(0,3);let r;do{r=ra(1,q-1);}while(gcd(r,q)!==1);const P=[n0*q+r,q];let N=2,zoom=false,otur=false,sorul=false;
   const oran=()=>(P[0]-n0*P[1])/P[1];
   const sd=SD(st1,{min:-4,max:4,h:140,eks:92,tik:(kk,h)=>{const a=Math.floor(h);if(a<-4||a>3)return;
-    if(a===n0){if(!zoom){zoom=true;bu.hidden=false;f.hidden=true;ciz2();bip(700,.1);}ciz1();}else{bip(220,.12);fb(f,false,"P bu aralıkta değil. Yıldızın hemen solundaki ve sağındaki tam sayılara bak, o ikisinin arasına dokun.");}}});
+    if(a===n0){if(!zoom){zoom=true;bu.hidden=false;f.hidden=true;ciz2();bip(700,.1);}ciz1();}else{bip(220,.12);fb(f,false,"P bu aralıkta değil. Yıldızın hemen solundaki ve sağındaki tam sayılara bakınız, o ikisinin arasına dokununuz.");}}});
   const Y=sayac("Parça sayısı",2,12,N,v=>{N=v;ciz2();});k.querySelector(".sy").appendChild(Y.el);
   const W2=genislik(st1,680,340),L2=W2<520?40:60,sv2=svgEl(W2,130);st2.appendChild(sv2);sv2.style.cursor="pointer";
   function ciz1(){const [x,y]=sd.yer(P[0]/P[1]);let h="";if(zoom){const [a]=sd.yer(n0),[b]=sd.yer(n0+1);h+=`<rect x="${a}" y="${y-16}" width="${b-a}" height="32" fill="#7048e8" fill-opacity=".18"/>`;}
     h+=yildiz(x,y-24,12,"#e8590c")+`<line x1="${x}" y1="${y-12}" x2="${x}" y2="${y}" stroke="#e8590c" stroke-width="2"/><text x="${x}" y="${y-42}" text-anchor="middle" font-size="16" font-weight="900" fill="#e8590c">P</text>`;sd.ciz(h);}
   function ciz2(){const o=oran(),uy=(P[0]-n0*P[1])*N%P[1]===0;sv2.innerHTML=buyukAralik(n0,N,o,{y:80,W:W2});
     if(uy&&!otur){otur=true;f.hidden=true;bip(700,.1);}
-    du.innerHTML=uy?`P şimdi bir çentiğin tam üstünde! Her parça ${kH(1,N)} birim. <b>3. P'nin çentiğine dokun.</b>`:`Her parça ${kH(1,N)} birim. P henüz bir çentiğin tam üstünde değil; parça sayısını değiştir.`;}
+    du.innerHTML=uy?`P şimdi bir çentiğin tam üstünde! Her parça ${kH(1,N)} birim. <b>3. P'nin çentiğinize dokununuz.</b>`:`Her parça ${kH(1,N)} birim. P henüz bir çentiğin tam üstünde değil; parça sayısını değiştiriniz.`;}
   sv2.addEventListener("click",e=>{if(sorul)return;const pt=svgNokta(sv2,e);const j=Math.round((pt.x-L2)/(W2-2*L2)*N);if(j<0||j>N)return;
     const uy=(P[0]-n0*P[1])*N%P[1]===0,dj=Math.round(oran()*N);
-    if(!uy){bip(220,.12);fb(f,false,"P henüz bir çentiğin üstünde değil. Önce parça sayısını değiştir.");return;}
-    if(j!==dj){bip(220,.12);fb(f,false,"Bu çentik P'nin çentiği değil. Yıldızın tam altındaki çentiğe dokun.");return;}
+    if(!uy){bip(220,.12);fb(f,false,"P henüz bir çentiğin üstünde değil. Önce parça sayısını değiştiriniz.");return;}
+    if(j!==dj){bip(220,.12);fb(f,false,"Bu çentik P'nin çentiği değil. Yıldızın tam altındaki çentiğe dokununuz.");return;}
     sorul=true;f.hidden=true;A.durum("Son adım");
-    cevap(pc,soruKut("4. P noktası hangi sayıyı gösterir? (Kesir ya da tam sayılı kesir yazabilirsin; “/” düğmesini kullan.)"),P,`Doğru! P = <b>${rH(P[0],P[1],true)}</b> = ${rH(P[0],P[1])}.`,n0<0?`P negatif tarafta. 0'a yakın uç olan ${T(n0+1)} noktasından başla ve sola doğru parçaları say. Sonucun başına “−” koy.`:`${n0} noktasından başla ve sağa doğru parçaları say. Her parça ${kH(1,N)} birim.`,
+    cevap(pc,soruKut("4. P noktası hangi sayıyı gösterir? (Kesir ya da tam sayılı kesir yazabilirsiniz; “/” düğmesini kullanınız.)"),P,`Doğru! P = <b>${rH(P[0],P[1],true)}</b> = ${rH(P[0],P[1])}.`,n0<0?`P negatif tarafta. 0'a yakın uç olan ${T(n0+1)} noktasından başlayınız ve sola doğru parçaları sayınız. Sonucun başına “−” koyunuz.`:`${n0} noktasından başlayınız ve sağa doğru parçaları sayınız. Her parça ${kH(1,N)} birim.`,
       ()=>{D.ekle([`${T(n0)} ile ${T(n0+1)}`,N,rH(P[0],P[1],true)],"y"+neg);A.tamam(`P = ${rH(P[0],P[1],true)}`);},{kesir:true,ozel:x=>esit(x,[-P[0],P[1]])?"İşarete dikkat: P, 0'ın hangi yanında?":null});});
   A.oto=()=>{if(!zoom){const [x,y]=sd.yer(n0+.5);simTik(sd.sv,x,y);return;}if(!sorul){while(N<q)Y.el.querySelector('[data-d="1"]').click();while(N>q)Y.el.querySelector('[data-d="-1"]').click();const x=L2+oran()*(W2-2*L2);simTik(sv2,x,80);}};
   A.durum("1 / 4");ciz1();}
-const e_yakin=p=>{const D=defterY(["Aralık","Parça sayısı","P"]);const yon=["P'nin olduğu aralığa dokun; aralık büyütülür.","Büyütülen aralığı <b>Parça sayısı</b> sayacıyla eş parçalara böl. P bir çentiğin tam üstüne gelince o çentiğe dokun.","P'nin gösterdiği sayıyı yaz."];
+const e_yakin=p=>{const D=defterY(["Aralık","Parça sayısı","P"]);const yon=["P'nin olduğu aralığa dokununuz; aralık büyütülür.","Büyütülen aralığı <b>Parça sayısı</b> sayacıyla eş parçalara bölünüz. P bir çentiğin tam üstüne gelince o çentiğe dokununuz.","P'nin gösterdiği sayıyı yazınız."];
   asamali(p,{tahmin:{giris:"Sayı doğrusunda iki tam sayı arasında yıldızla gösterilen bir P noktası var.",soru:"P'nin hangi sayıyı gösterdiğini bulmak için ne yapmalıyız?",secs:[["a","İki tam sayı arasını eş parçalara bölmeliyiz."],["b","En yakın tam sayıyı yazmalıyız."],["c","P'nin değeri bulunamaz."]],dogru:"a",neden:"Aralık, kesrin paydası kadar eş parçaya bölününce P bir çentiğe oturur."},
     asamalar:[
       {ad:"Pozitif tarafta P",yon,bitis:"P'nin sayısını doğru yazınca.",kur:(k,A)=>yakinTur(k,false,D,A)},
       {ad:"Negatif tarafta P",yon,bitis:"P'nin sayısını doğru yazınca.",kur:(k,A)=>yakinTur(k,true,D,A)},
-      kuralA(D,[["P'yi kaç parçaya bölünce çentiğin üstüne oturttun?",["Kesrin paydası kadar ya da onun katları kadar parçaya bölünce","Her zaman 10 parçaya bölünce","Hiçbir zaman oturmadı."],`Doğru! Örneğin P = 2${kH(3,4)} ise 4, 8 ya da 12 parça işe yarar.`,["10 parça yalnız paydası 10'un böleni olan kesirlerde işe yarar.","Deftere bak: Her seferinde oturttun."]],
-        ["Rasyonel sayılar ve sayı doğrusu için hangisi doğrudur?",["Her rasyonel sayı sayı doğrusunda bir noktaya karşılık gelir.","Yalnız tam sayılar sayı doğrusunda gösterilebilir.","Negatif kesirler sayı doğrusunda gösterilemez."],"Doğru!",["P tam sayı değildi ama sayı doğrusunda bir noktaydı.","Aşama 2'de negatif bir kesri gösterdin."]]]),
+      kuralA(D,[["P'yi kaç parçaya bölünce çentiğin üstüne oturttunuz?",["Kesrin paydası kadar ya da onun katları kadar parçaya bölünce","Her zaman 10 parçaya bölünce","Hiçbir zaman oturmadı."],`Doğru! Örneğin P = 2${kH(3,4)} ise 4, 8 ya da 12 parça işe yarar.`,["10 parça yalnız paydası 10'un böleni olan kesirlerde işe yarar.","Deftere bakınız: Her seferinde oturttunuz."]],
+        ["Rasyonel sayılar ve sayı doğrusu için hangisi doğrudur?",["Her rasyonel sayı sayı doğrusunda bir noktaya karşılık gelir.","Yalnız tam sayılar sayı doğrusunda gösterilebilir.","Negatif kesirler sayı doğrusunda gösterilemez."],"Doğru!",["P tam sayı değildi ama sayı doğrusunda bir noktaydı.","Aşama 2'de negatif bir kesri gösterdiniz."]]]),
       kendiA((m,son)=>{const n0=-ra(1,4),q=ra(3,8);let j;do{j=ra(1,q-1);}while(gcd(j,q)!==1);const w=yeniEl("div","stage mini");m.appendChild(w);const W=genislik(w,680,340),sv=svgEl(W,130);sv.innerHTML=buyukAralik(n0,q,j/q,{y:80,W});w.appendChild(sv);const P=[n0*q+j,q];
-        cevap(m,yaz([`Sayı doğrusunun ${T(n0)} ile ${T(n0+1)} arasındaki bölümü büyütülmüş ve eş parçalara bölünmüştür.`])+soruKut("P noktası hangi sayıyı gösterir?"),P,`Doğru! P = <b>${rH(P[0],P[1],true)}</b> = ${rH(P[0],P[1])}.`,`Her parça ${kH(1,q)} birim. ${T(n0+1)} noktasından sola doğru parçaları say.`,son,{kesir:true,ozel:x=>esit(x,[-P[0],P[1]])?"İşarete dikkat: P, 0'ın solunda.":null});})],
+        cevap(m,yaz([`Sayı doğrusunun ${T(n0)} ile ${T(n0+1)} arasındaki bölümü büyütülmüş ve eş parçalara bölünmüştür.`])+soruKut("P noktası hangi sayıyı gösterir?"),P,`Doğru! P = <b>${rH(P[0],P[1],true)}</b> = ${rH(P[0],P[1])}.`,`Her parça ${kH(1,q)} birim. ${T(n0+1)} noktasından sola doğru parçaları sayınız.`,son,{kesir:true,ozel:x=>esit(x,[-P[0],P[1]])?"İşarete dikkat: P, 0'ın solunda.":null});})],
     kural:"İki tam sayı arasındaki bir noktanın değerini okumak için aralık, kesrin <b>paydası kadar eş parçaya</b> bölünür ve parçalar sayılır. Tam sayı olmayan sayılar da sayı doğrusunda bir noktadır: <b>her rasyonel sayı sayı doğrusunda bir noktaya karşılık gelir</b>."});
 };
 
@@ -1270,7 +1270,7 @@ const e_adlar=p=>{const D=defterY(["Mor nokta","Denenen ad","Aynı nokta mı?"])
   const K=karistir([...dog,...yan]);
   asamali(p,{tahmin:{soru:`${EKSI}${kH(7,5)} ile ${EKSI}${kH(14,10)} sayı doğrusunda nerededir?`,secs:[["a","Aynı noktadadır."],["b","Farklı noktalardadır."],["c",`${EKSI}${kH(14,10)} sayı doğrusunda gösterilemez.`]],dogru:"a",neden:"Denk kesirler aynı noktayı gösterir."},
     asamalar:[
-      {ad:"Adları bayrağa as",yon:["Mor bayraklı noktanın birçok adı (yazılışı) var. Alttaki ad kartlarından birine dokun.","Kart bu noktanın adıysa bayrağa asılır. Değilse kartın gösterdiği nokta gri olarak belirir ve kart kaldırılır."],bitis:`Noktanın bütün adları (${dog.length} kart) bayrağa asılınca.`,kur:(k,A)=>{
+      {ad:"Adları bayrağa as",yon:["Mor bayraklı noktanın birçok adı (yazılışı) var. Alttaki ad kartlarından birine dokununuz.","Kart bu noktanın adıysa bayrağa asılır. Değilse kartın gösterdiği nokta gri olarak belirir ve kart kaldırılır."],bitis:`Noktanın bütün adları (${dog.length} kart) bayrağa asılınca.`,kur:(k,A)=>{
         k.insertAdjacentHTML("beforeend",`<div class="stage adl"></div><div class="pano"><b>Bayraktaki adlar:</b><span class="asili"></span></div><p class="lab2">Ad kartları</p><div class="kartlar adk"></div><div class="fb" hidden></div>`);
         const st=k.querySelector(".adl"),as=k.querySelector(".asili"),ak=k.querySelector(".adk"),f=k.querySelector(".fb");const hay=[];
         const sd=SD(st,{min:-3,max:3,bol:1,h:170,eks:110});
@@ -1282,12 +1282,12 @@ const e_adlar=p=>{const D=defterY(["Mor nokta","Denenen ad","Aynı nokta mı?"])
         function sec(j){const c=K[j];
           if(esit(c.v,[-a,b])){c.tak=true;D.ekle([rH(-a,b),c.h,"evet"],"k"+j);bip(760,.1);
             fb(f,true,c.n==="g"?"Doğru! Pay ve payda aynı sayıyla genişletilmiş: <b>denk kesirler</b> aynı noktadadır.":c.n==="i"?"Doğru! “−” işaretinin yeri değişse de sayı değişmez.":c.n==="k"?"Doğru! Tam sayılı kesir olarak yazılmış hâli.":"Doğru! Bu, noktanın en bilinen adı.");
-            ciz();if(!K.some(x=>!x.tak&&!x.at&&esit(x.v,[-a,b])))A.tamam("Noktanın bütün adlarını buldun.");return;}
+            ciz();if(!K.some(x=>!x.tak&&!x.at&&esit(x.v,[-a,b])))A.tamam("Noktanın bütün adlarını buldunuz.");return;}
           c.at=true;hay.push(c.v);D.ekle([rH(-a,b),c.h,"hayır"],"y"+j);bip(220,.12);
           fb(f,false,c.n==="poz"?"Bu ad pozitif bir sayının adı; o nokta 0'ın sağında.":c.n==="cift"?"Pay da payda da negatif olunca sayı pozitif olur. Bu nokta 0'ın sağında.":c.n==="ters"?"Pay ile payda yer değiştirmiş. Bu başka bir sayı.":"Pay aynı ama payda farklı. Bu kesir denk değil; başka bir noktada.");ciz();}
         A.oto=()=>{const j=K.findIndex(c=>!c.tak&&!c.at&&esit(c.v,[-a,b]));if(j>=0)sec(j);};ciz();}},
-      {ad:"En sade adı seç",yon:["Bayraktaki adların hepsi aynı noktayı gösteriyor.","Bunlardan <b>en sade</b> olanına dokun: pay ile paydanın 1'den başka ortak böleni olmasın, “−” işareti kesrin önünde olsun."],bitis:"En sade adı seçince.",kur:(k,A)=>{
-        soruY(k,"Bayraktaki adlardan hangisi <b>en sade</b> yazılıştır?",dog.map(c=>c.h),`Doğru! ${EKSI}${kH(a,b)} en sade hâldir: ${a} ile ${b} sayılarının 1'den başka ortak böleni yoktur.`,dog.slice(1).map(c=>c.n==="g"?"Bu kesir sadeleşebilir: pay ile paydanın ortak böleni var.":c.n==="i"?"Değeri doğru ama en yaygın yazılışta “−” işareti kesrin önüne yazılır.":"Bu tam sayılı kesir yazılışı; en sade kesir yazılışını seç."),()=>A.tamam(`En sade ad: ${EKSI}${kH(a,b)}`));}},
+      {ad:"En sade adı seç",yon:["Bayraktaki adların hepsi aynı noktayı gösteriyor.","Bunlardan <b>en sade</b> olanına dokununuz: pay ile paydanın 1'den başka ortak böleni olmasın, “−” işareti kesrin önünde olsun."],bitis:"En sade adı seçince.",kur:(k,A)=>{
+        soruY(k,"Bayraktaki adlardan hangisi <b>en sade</b> yazılıştır?",dog.map(c=>c.h),`Doğru! ${EKSI}${kH(a,b)} en sade hâldir: ${a} ile ${b} sayılarının 1'den başka ortak böleni yoktur.`,dog.slice(1).map(c=>c.n==="g"?"Bu kesir sadeleşebilir: pay ile paydanın ortak böleni var.":c.n==="i"?"Değeri doğru ama en yaygın yazılışta “−” işareti kesrin önüne yazılır.":"Bu tam sayılı kesir yazılışı; en sade kesir yazılışını seçiniz."),()=>A.tamam(`En sade ad: ${EKSI}${kH(a,b)}`));}},
       kuralA(D,[["Aynı noktayı gösteren kesirler için hangisi doğrudur?",["Denk kesirlerdir; aynı rasyonel sayıyı gösterir.","Payları eşittir.","Paydaları eşittir."],"Doğru!",["Bayraktaki adların payları farklıydı.","Bayraktaki adların paydaları farklıydı."]],
         [`${EKSI}${kH(3,4)}, ${kH(EKSI+3,4)} ve ${kH(3,EKSI+4)} için hangisi doğrudur?`,["Üçü de aynı sayıdır.","Üçü de farklı sayılardır.",`Yalnız ${EKSI}${kH(3,4)} negatiftir.`],"Doğru! “−” işareti payda, paydada ya da kesrin önünde olabilir; sayı değişmez.",["“−” işaretinin yeri değişen kartlar bayrağa asılmıştı.","Paydası negatif olan kesir de negatiftir."]]]),
       kendiA((m,son)=>{const bb=ra(3,7);let aa;do{aa=ra(1,bb*2);}while(aa%bb===0||gcd(aa,bb)!==1);const k2=ra(2,4);
@@ -1302,7 +1302,7 @@ const e_dikey=p=>{const D=defterY(["Nesne","Konum","Rasyonel sayı"]);
   const tok=(sd,n,aktif,renk)=>{const yy=sd.yer(n.y/4)[1];return `<line x1="64" y1="${yy}" x2="${n.x-46}" y2="${yy}" stroke="${renk}" stroke-width="1.6" stroke-dasharray="5 4"/><rect x="${n.x-46}" y="${yy-15}" width="92" height="30" rx="8" fill="${css('--card')}" stroke="${renk}" stroke-width="${aktif?3:2}"/><text x="${n.x}" y="${yy+5}" text-anchor="middle" font-size="${n.ad.length>12?10:n.ad.length>9?11.5:13}" font-weight="800">${n.ad}</text>`;};
   asamali(p,{tahmin:{giris:"Yer yüzeyini 0 kabul eden dikey bir sayı doğrusu çiziyoruz.",soru:"Bir kuyunun dibi hangi tür sayıyla gösterilir?",secs:[["a","Negatif bir sayıyla"],["b","Pozitif bir sayıyla"],["c","0 ile"]],dogru:"a",neden:"Yer yüzeyinin altı negatif sayılarla gösterilir."},
     asamalar:[
-      {ad:"Nesneleri yerleştir",yon:["Turuncu çerçeveli nesnenin cümlesini oku.","Nesneyi yukarı ya da aşağı sürükle ve doğru yükseklikte bırak.",`Büyük çentikler 1 m'dir; aradaki küçük çentikler metreyi 4 eş parçaya böler (her biri ${kH(1,4)} m).`],bitis:"3 nesnenin hepsi doğru yere yerleşince.",kur:(k,A)=>{
+      {ad:"Nesneleri yerleştir",yon:["Turuncu çerçeveli nesnenin cümlesini okuyunuz.","Nesneyi yukarı ya da aşağı sürükleyiniz ve doğru yükseklikte bırakınız.",`Büyük çentikler 1 m'dir; aradaki küçük çentikler metreyi 4 eş parçaya böler (her biri ${kH(1,4)} m).`],bitis:"3 nesnenin hepsi doğru yere yerleşince.",kur:(k,A)=>{
         k.insertAdjacentHTML("beforeend",`<div class="dkart ncumle"></div><div class="stage dk"></div><div class="fb" hidden></div>`);
         const st=k.querySelector(".dk"),nc=k.querySelector(".ncumle"),f=k.querySelector(".fb");
         const NEG=["Kuyudaki kova","Köstebek","Havucun kökü","Toprak altı boru"],POS=["Uçurtma","Bayrağın ucu","Serçe","Çatının tepesi"];
@@ -1313,25 +1313,25 @@ const e_dikey=p=>{const D=defterY(["Nesne","Konum","Rasyonel sayı"]);
           sur:kk=>{if(i>=N.length)return;N[i].y=kk;ciz();},
           tik:kk=>{if(i>=N.length)return;const n=N[i];n.y=kk;
             if(kk===n.k){n.ok=true;D.ekle([n.ad,`${rH(Math.abs(n.p),n.q,true)} m ${n.p<0?"aşağıda":"yukarıda"}`,`<b>${rH(n.p,n.q,true)}</b>`],n.ad);fb(f,true,`Doğru! ${n.ad}: <b>${rH(n.p,n.q,true)}</b> ${n.p<0?"(yer yüzeyinin altı negatif)":"(yer yüzeyinin üstü pozitif)"}.`);i++;bip(760,.1);ciz();if(i===N.length)A.tamam("Üç nesne de doğru yükseklikte.");return;}
-            bip(220,.12);fb(f,false,Math.sign(kk)!==Math.sign(n.k)?"Yer yüzeyinin altı mı, üstü mü? Yönüne bir daha bak.":`Yön doğru. Önce tam metreleri say, sonra ${kH(1,4)} m'lik küçük çentikleri say.`);ciz();}});
+            bip(220,.12);fb(f,false,Math.sign(kk)!==Math.sign(n.k)?"Yer yüzeyinin altı mı, üstü mü? Yönüne bir daha bakınız.":`Yön doğru. Önce tam metreleri sayınız, sonra ${kH(1,4)} m'lik küçük çentikleri sayınız.`);ciz();}});
         function ciz(){nc.innerHTML=i<N.length?`<small>Sıradaki nesne (${i+1} / ${N.length})</small><p>${cumle(N[i])}</p>`:`<p>Nesnelerin hepsi yerinde.</p>`;A.durum(`${i} / ${N.length}`);let h="";
           N.forEach((n,j)=>{if(j===i&&n.y===null)n.y=8;if(n.y===null)return;h+=tok(sd,n,j===i,n.ok?"#2f9e44":j===i?"#e8590c":"currentColor");if(n.ok)h+=sK(darS?n.x:n.x+84,sd.yer(n.y/4)[1]-(darS?40:0),n.p,n.q,{fs:15,karma:true,renk:"#2f9e44"});});sd.ciz(h);}
         A.oto=()=>{const n=N[i];if(!n)return;const [x,y]=sd.yer(n.k/4);simTik(sd.sv,x,y);};ciz();}},
-      {ad:"Solucanın konumu",yon:["Mor çerçeveli solucan toprağın içinde duruyor.","Önce tam metreleri, sonra küçük çentikleri sayarak konumunu bul ve rasyonel sayıyla yaz."],bitis:"Solucanın konumunu doğru yazınca.",kur:(k,A)=>{
+      {ad:"Solucanın konumu",yon:["Mor çerçeveli solucan toprağın içinde duruyor.","Önce tam metreleri, sonra küçük çentikleri sayarak konumunu bulunuz ve rasyonel sayıyla yazınız."],bitis:"Solucanın konumunu doğru yazınca.",kur:(k,A)=>{
         const st=yeniEl("div","stage dk2");k.appendChild(st);const WS=genislik(st,600,360);const sol={...deger(-1),ad:"Solucan",x:WS<520?WS-62:260};sol.y=sol.k;
         const sd=SD(st,{dikey:true,min:-6,max:2,bol:4,w:WS,h:400,eks:64,pad:28,fs:15,arka:arka(WS,400)});sd.ciz(tok(sd,sol,true,"#7048e8"));
-        cevap(k,soruKut("Solucanın konumunu gösteren rasyonel sayı nedir? (Kesir ya da tam sayılı kesir yazabilirsin.)"),[sol.p,sol.q],`Doğru! Solucan <b>${rH(sol.p,sol.q,true)}</b> m'de (${rH(sol.p,sol.q)}).`,`Önce tam metreleri say, sonra ${kH(1,4)} m'lik küçük çentikleri say. Yer yüzeyinin altı negatiftir.`,
+        cevap(k,soruKut("Solucanın konumunu gösteren rasyonel sayı nedir? (Kesir ya da tam sayılı kesir yazabilirsiniz.)"),[sol.p,sol.q],`Doğru! Solucan <b>${rH(sol.p,sol.q,true)}</b> m'de (${rH(sol.p,sol.q)}).`,`Önce tam metreleri sayınız, sonra ${kH(1,4)} m'lik küçük çentikleri sayınız. Yer yüzeyinin altı negatiftir.`,
           ()=>{D.ekle(["Solucan",`${rH(-sol.p,sol.q,true)} m aşağıda`,`<b>${rH(sol.p,sol.q,true)}</b>`],"sol");A.tamam(`Solucan: ${rH(sol.p,sol.q,true)}`);},{kesir:true,ozel:x=>esit(x,[-sol.p,sol.q])?"Solucan yer yüzeyinin altında. İşarete dikkat.":null});}},
       kuralA(D,[["Dikey sayı doğrusunda yönler için hangisi doğrudur?",["0'ın yukarısı pozitif, aşağısı negatiftir.","0'ın yukarısı negatif, aşağısı pozitiftir.","İki yön de pozitiftir."],"Doğru!",["Uçurtma yukarıdaydı; sayısı pozitifti.","Kova ve solucan aşağıdaydı; sayıları negatifti."]],
-        [`Kova yer yüzeyinin 3${kH(1,2)} m altındadır. Kovanın konumu hangi sayıyla gösterilir?`,[`${EKSI}3${kH(1,2)}`,`3${kH(1,2)}`,`${EKSI}3`],`Doğru! ${EKSI}3${kH(1,2)} = ${EKSI}${kH(7,2)}.`,["Kova yer yüzeyinin altında; işaret negatif olmalı.",`Yalnız tam metreyi yazdın; ${kH(1,2)} m'yi unutma.`]]]),
+        [`Kova yer yüzeyinin 3${kH(1,2)} m altındadır. Kovanın konumu hangi sayıyla gösterilir?`,[`${EKSI}3${kH(1,2)}`,`3${kH(1,2)}`,`${EKSI}3`],`Doğru! ${EKSI}3${kH(1,2)} = ${EKSI}${kH(7,2)}.`,["Kova yer yüzeyinin altında; işaret negatif olmalı.",`Yalnız tam metreyi yazdınız; ${kH(1,2)} m'yi unutmayınız.`]]]),
       kendiA((m,son)=>{const w=ra(2,9);
-        cevap(m,yaz([`Bir dalgıç su yüzeyinin <b>${w}${kH(1,2)} m altında</b> yüzüyor. Su yüzeyi 0 kabul ediliyor.`])+soruKut("Dalgıcın konumu hangi rasyonel sayıyla gösterilir?"),[-(2*w+1),2],`Doğru! <b>${EKSI}${w}${kH(1,2)}</b> = ${EKSI}${kH(2*w+1,2)}.`,"Su yüzeyinin altı negatif sayıyla gösterilir. Tam sayılı kesir yazabilirsin: örneğin −2 1/2.",son,{kesir:true,ozel:x=>esit(x,[2*w+1,2])?"Su yüzeyinin altında: işareti unutma.":null});})],
+        cevap(m,yaz([`Bir dalgıç su yüzeyinin <b>${w}${kH(1,2)} m altında</b> yüzüyor. Su yüzeyi 0 kabul ediliyor.`])+soruKut("Dalgıcın konumu hangi rasyonel sayıyla gösterilir?"),[-(2*w+1),2],`Doğru! <b>${EKSI}${w}${kH(1,2)}</b> = ${EKSI}${kH(2*w+1,2)}.`,"Su yüzeyinin altı negatif sayıyla gösterilir. Tam sayılı kesir yazabilirsiniz: örneğin −2 1/2.",son,{kesir:true,ozel:x=>esit(x,[2*w+1,2])?"Su yüzeyinin altında: işareti unutmayınız.":null});})],
     kural:`Dikey sayı doğrusunda başlangıç noktası (yer yüzeyi, su yüzeyi) <b>0</b>'dır. <b>Yukarı yön pozitif, aşağı yön negatiftir.</b> Tam sayı olmayan konumlar da rasyonel sayılarla gösterilir: yer yüzeyinin 3${kH(1,2)} m altı ${EKSI}3${kH(1,2)}'dir.`});
 };
 
 /* 19 · GİZLİ SAYI DEDEKTİFİ */
 function dedTur(k,sinir,D,A){
-  k.insertAdjacentHTML("beforeend",`<p class="lab2">İpucu kartları</p><div class="row ipk"></div><ul class="iplist"></ul><p class="lab2">Adaylar: gizli sayı olduğunu düşündüğün adaya dokun</p><div class="adaylar2"></div><p class="durum"></p><div class="fb" hidden></div><div class="row"><button type="button" class="ghost yeni" hidden>Yeni gizli sayıyla yeniden dene</button></div>`);
+  k.insertAdjacentHTML("beforeend",`<p class="lab2">İpucu kartları</p><div class="row ipk"></div><ul class="iplist"></ul><p class="lab2">Adaylar: gizli sayı olduğunu düşündüğünüz adaya dokununuz</p><div class="adaylar2"></div><p class="durum"></p><div class="fb" hidden></div><div class="row"><button type="button" class="ghost yeni" hidden>Yeni gizli sayıyla yeniden deneyin</button></div>`);
   const ik=k.querySelector(".ipk"),il=k.querySelector(".iplist"),ad=k.querySelector(".adaylar2"),du=k.querySelector(".durum"),f=k.querySelector(".fb"),yb=k.querySelector(".yeni");let G0,C,acilan,bitti,yanlis;
   function yeni(){const q=ra(2,6),w=ra(1,4);let r;do{r=ra(1,q-1);}while(gcd(r,q)!==1);const s=rastgele([1,-1]);G0={p:s*(w*q+r),q,s};
     const M=new Map();const ekle=(pp,qq)=>{const v=sade(pp,qq);if(Math.abs(v[0]/v[1])>=6)return;const key=v.join("/");if(!M.has(key))M.set(key,{p:v[0],q:v[1]});};
@@ -1355,20 +1355,20 @@ function dedTur(k,sinir,D,A){
     ad.querySelectorAll(".adb").forEach(b=>b.onclick=()=>dokun(+b.dataset.j));
     du.innerHTML=`Açılan ipucu: <b>${acilan.length}</b>. Yanlış tahmin: <b>${yanlis}</b>.${sinir?` (Sınır: en fazla ${sinir} ipucu ve 1 yanlış tahmin)`:""}`;A.durum(`${acilan.length} ipucu`);}
   function dokun(j){const c=C[j];if(bitti||c.el)return;
-    if(!acilan.length){fb(f,false,"Önce bir ipucu kartı aç; sonra ipucuna uyan adayı seç.");return;}
+    if(!acilan.length){fb(f,false,"Önce bir ipucu kartı açınız; sonra ipucuna uyan adayı seçiniz.");return;}
     if(esit([c.p,c.q],[G0.p,G0.q])){bitti=true;D.ekle([rH(G0.p,G0.q)+" = "+rH(G0.p,G0.q,true),acilan.map(i=>G0.IP[i].ad).join(", "),yanlis],"g"+(sinir||0)+Math.random());bip(760,.1);
-      if(sinir&&(acilan.length>sinir||yanlis>1)){fb(f,false,`Gizli sayıyı buldun: ${rH(G0.p,G0.q)}. Ama bu aşamada en fazla ${sinir} ipucu açıp en fazla 1 kez yanılmalısın. İşaret ve mutlak değer ipuçları birlikte çok işe yarar. Yeniden dene.`);yb.hidden=false;ciz();return;}
-      fb(f,true,`Buldun! Gizli sayı <b>${rH(G0.p,G0.q)}</b> = ${rH(G0.p,G0.q,true)}. ${acilan.length} ipucu açtın.`);ciz();A.tamam(`Gizli sayı: ${rH(G0.p,G0.q)}`);return;}
+      if(sinir&&(acilan.length>sinir||yanlis>1)){fb(f,false,`Gizli sayıyı buldunuz: ${rH(G0.p,G0.q)}. Ama bu aşamada en fazla ${sinir} ipucu açıp en fazla 1 kez yanılmalısınız. İşaret ve mutlak değer ipuçları birlikte çok işe yarar. Yeniden deneyiniz.`);yb.hidden=false;ciz();return;}
+      fb(f,true,`Buldunuz! Gizli sayı <b>${rH(G0.p,G0.q)}</b> = ${rH(G0.p,G0.q,true)}. ${acilan.length} ipucu açtınız.`);ciz();A.tamam(`Gizli sayı: ${rH(G0.p,G0.q)}`);return;}
     yanlis++;c.el=true;bip(220,.12);const bozan=acilan.find(i=>!G0.IP[i].f(c));
     fb(f,false,bozan!==undefined?`Bu değil. ${rH(c.p,c.q)} şu ipucuna uymuyor: <b>${G0.IP[bozan].m}</b>`:"Bu sayı açılan ipuçlarına uyuyor ama gizli sayı değil. Bir ipucu daha açmak işine yarar.");ciz();}
   yb.onclick=yeni;
   A.oto=()=>{if(bitti){if(!yb.hidden)yb.click();return;}if(acilan.length<2){const i=acilan.includes(0)?1:0;ik.querySelector(`.ipb[data-i="${i}"]`).click();return;}const j=C.findIndex(c=>esit([c.p,c.q],[G0.p,G0.q]));dokun(j);};
   yeni();}
-const e_dedektif=p=>{const D=defterY(["Gizli sayı","Açılan ipuçları","Yanlış tahmin"]);const yon=["Adaylardan biri gizli sayı. Bir <b>ipucu kartı</b> aç ve oku.","İpuçlarına uyan bir adaya dokun. Uymayan bir adaya dokunursan hangi ipucunu bozduğu yazılır ve aday elenir.","Az ipucu açmaya çalış."];
+const e_dedektif=p=>{const D=defterY(["Gizli sayı","Açılan ipuçları","Yanlış tahmin"]);const yon=["Adaylardan biri gizli sayı. Bir <b>ipucu kartı</b> açınız ve okuyunuz.","İpuçlarına uyan bir adaya dokununuz. Uymayan bir adaya dokunursanız hangi ipucunu bozduğu yazılır ve aday elenir.","Az ipucu açmaya çalışınız."];
   asamali(p,{tahmin:{giris:`Gizli sayı için ipuçları: <b>Negatiftir.</b> <b>Mutlak değeri 3${kH(1,2)}'dir.</b>`,soru:"Gizli sayı hangisi olabilir?",secs:[["a",EKSI+kH(7,2)],["b",kH(7,2)],["c",EKSI+kH(3,2)]],dogru:"a",neden:`3${kH(1,2)} = ${kH(7,2)}; negatif olduğu için ${EKSI}${kH(7,2)}.`},
     asamalar:[
       {ad:"İlk gizli sayı",yon,bitis:"Gizli sayıyı bulunca.",kur:(k,A)=>dedTur(k,0,D,A)},
-      {ad:"Az ipucuyla bul",yon:["Yeni bir gizli sayı var.","Bu kez <b>en fazla 3 ipucu</b> aç ve <b>en fazla 1 kez</b> yanıl.","Hangi iki ipucu birlikte gizli sayıyı tek başına belirler? Düşünerek seç."],bitis:"Gizli sayıyı sınırlar içinde bulunca.",kur:(k,A)=>dedTur(k,3,D,A)},
+      {ad:"Az ipucuyla bul",yon:["Yeni bir gizli sayı var.","Bu kez <b>en fazla 3 ipucu</b> açınız ve <b>en fazla 1 kez</b> yanılınız.","Hangi iki ipucu birlikte gizli sayıyı tek başına belirler? Düşünerek seçiniz."],bitis:"Gizli sayıyı sınırlar içinde bulunca.",kur:(k,A)=>dedTur(k,3,D,A)},
       kuralA(D,[["“Mutlak değer” ipucu tek başına neden yetmeyebilir?",["Mutlak değeri aynı olan iki sayı vardır: biri pozitif, biri negatif.","Mutlak değer her zaman 0'dır.","Mutlak değeri aynı olan iki sayı olamaz."],"Doğru!",["Mutlak değer 0'a uzaklıktır; 0 olması gerekmez.",`${kH(7,2)} ile ${EKSI}${kH(7,2)} sayılarının mutlak değeri aynıdır.`]],
         [`|${EKSI}${kH(7,2)}| = |${kH(7,2)}| = ${kH(7,2)}. Bu iki adayı hangi ipucu ayırır?`,["İşaret ipucu","Payda ipucu","Tam sayı mı ipucu"],"Doğru! a ile −a'yı yalnız işaret ayırır.",["İkisinin paydası da 2'dir.","İkisi de tam sayı değildir."]]]),
       kendiA((m,son)=>{const q=rastgele([3,4,5]);let r;do{r=ra(1,q-1);}while(gcd(r,q)!==1);const w=ra(2,4),pp=w*q+r;
@@ -1391,13 +1391,13 @@ const IFADE=[
   ()=>{const b=ra(2,7);let a;do{a=ra(1,8);}while(gcd(a,b)!==1||a===b);const k=ra(2,4);return rastgele([{m:`${kH(a,b)} ile ${kH(k*a,k*b)} aynı noktadadır.`,d:true,a:"Denk kesirler aynı noktadadır."},{m:`${kH(a,b)} ile ${kH(a+1,b+1)} aynı noktadadır.`,d:false,a:"Paya ve paydaya aynı sayıyı eklemek denk kesir vermez."}]);}];
 /* Düello düzeneği (iki atölyede aynı kurallar): 8 tur, süre çubuğu, puan */
 function duelloKur(k,havuz,D,A,sureF){
-  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skorlar"><div><small>Tur</small><b class="s-tur">0 / 8</b></div><div><small>Sen</small><b class="s-sen">0</b></div><div><small>Bilgisayar</small><b class="s-bil">0</b></div><div><small>Puan</small><b class="s-puan">0</b></div></div><div class="dsoru">Hazır olunca <b>Düelloyu başlat</b> düğmesine bas.</div><div class="yaris" aria-label="Süre çubuğu"><i></i></div><div class="secler dsec"><button type="button" class="sec dy" data-v="1" disabled>Doğru</button><button type="button" class="sec dy" data-v="0" disabled>Yanlış</button></div></div><div class="row"><button type="button" class="primary basl">Düelloyu başlat</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skorlar"><div><small>Tur</small><b class="s-tur">0 / 8</b></div><div><small>Siz</small><b class="s-sen">0</b></div><div><small>Bilgisayar</small><b class="s-bil">0</b></div><div><small>Puan</small><b class="s-puan">0</b></div></div><div class="dsoru">Hazır olunca <b>Düelloyu başlatın</b> düğmesine basınız.</div><div class="yaris" aria-label="Süre çubuğu"><i></i></div><div class="secler dsec"><button type="button" class="sec dy" data-v="1" disabled>Doğru</button><button type="button" class="sec dy" data-v="0" disabled>Yanlış</button></div></div><div class="row"><button type="button" class="primary basl">Düelloyu başlatın</button></div><div class="fb" hidden></div>`);
   const ds=k.querySelector(".dsoru"),bar=k.querySelector(".yaris i"),bb=k.querySelector(".basl"),f=k.querySelector(".fb"),dy=[...k.querySelectorAll(".dy")];
   let tur=0,sen=0,bil=0,puan=0,zam=null,acik=false,Q=null,t0=0,sure=0,son=-1,oyn=0;
   function skor(){k.querySelector(".s-tur").textContent=`${Math.min(tur,8)} / 8`;k.querySelector(".s-sen").textContent=sen;k.querySelector(".s-bil").textContent=bil;k.querySelector(".s-puan").textContent=puan;A.durum(`Tur ${Math.min(tur,8)} / 8`);}
   const durdur=()=>{if(zam){clearInterval(zam);zam=null;}};
-  function turBitti(kaz){acik=false;durdur();dy.forEach(b=>b.disabled=true);if(kaz)sen++;else bil++;D.ekle([Q.m,Q.d?"Doğru":"Yanlış",kaz?"Sen":"Bilgisayar"],"t"+oyn+"-"+tur);skor();
-    if(tur>=8){setTimeout(()=>{if(!k.isConnected)return;fb(f,sen>=bil,sen>bil?`Düelloyu kazandın! Sen ${sen}, bilgisayar ${bil}. Puanın: ${puan}.`:sen===bil?`Berabere: ${sen} – ${bil}. Puanın: ${puan}.`:`Bilgisayar kazandı: ${bil} – ${sen}. Kuralı bul aşamasında yanlışlarını gözden geçir.`);A.tamam(`Düello bitti: Sen ${sen}, bilgisayar ${bil}.`);},900);}
+  function turBitti(kaz){acik=false;durdur();dy.forEach(b=>b.disabled=true);if(kaz)sen++;else bil++;D.ekle([Q.m,Q.d?"Doğru":"Yanlış",kaz?"Siz":"Bilgisayar"],"t"+oyn+"-"+tur);skor();
+    if(tur>=8){setTimeout(()=>{if(!k.isConnected)return;fb(f,sen>=bil,sen>bil?`Düelloyu kazandınız! Siz ${sen}, bilgisayar ${bil}. Puanınız: ${puan}.`:sen===bil?`Berabere: ${sen} – ${bil}. Puanınız: ${puan}.`:`Bilgisayar kazandı: ${bil} – ${sen}. Kuralı bulun aşamasında yanlışlarınızı gözden geçiriniz.`);A.tamam(`Düello bitti: Siz ${sen}, bilgisayar ${bil}.`);},900);}
     else setTimeout(()=>{if(k.isConnected)yeniTur();},1600);}
   function yeniTur(){tur++;skor();let g;do{g=Math.floor(Math.random()*havuz.length);}while(g===son);son=g;Q=havuz[g]();acik=true;ds.innerHTML=Q.m;dy.forEach(b=>{b.disabled=false;b.classList.remove("dogru","yanlis");});
     sure=sureF(tur);t0=Date.now();bar.style.width="0%";durdur();
@@ -1412,16 +1412,16 @@ function duelloKur(k,havuz,D,A,sureF){
 function duelloKurallar(k,A,ornek,bitince){
   k.insertAdjacentHTML("beforeend",`<div class="kurallar"><h4>Düello kuralları</h4><ul>
     <li><b>Tur:</b> Düello 8 turdur. Her turda ekrana bir ifade gelir.<span class="orn">Örnek: ${ornek.m}</span></li>
-    <li><b>Cevap:</b> İfade doğruysa <b>Doğru</b>, yanlışsa <b>Yanlış</b> düğmesine bas.</li>
+    <li><b>Cevap:</b> İfade doğruysa <b>Doğru</b>, yanlışsa <b>Yanlış</b> düğmesine basınız.</li>
     <li><b>Süre:</b> Her turda bir süre çubuğu dolar (yaklaşık 5–10 saniye). Çubuk dolmadan cevap vermezsen tur bilgisayarın olur.</li>
     <li><b>Puan:</b> Doğru cevap 10 puandır. Çubuğun yarısı dolmadan verilen doğru cevap 15 puandır.<span class="orn">Örnek: 3 hızlı ve 2 yavaş doğru cevap = 3 · 15 + 2 · 10 = 65 puan.</span></li>
-    <li><b>Kazanan:</b> Yanlış cevap verirsen ya da süre biterse tur bilgisayarın olur. 8 turun sonunda çok tur alan kazanır.</li></ul></div>`);
-  soruY(k,`Isınma sorusu (süre yok): “${ornek.m}” Bu ifade doğru mu, yanlış mı?`,ornek.d?["Doğru","Yanlış"]:["Yanlış","Doğru"],`Evet! ${ornek.a} Artık düelloya hazırsın.`,`Bir daha düşün. ${ornek.ip}`,bitince);}
+    <li><b>Kazanan:</b> Yanlış cevap verirseniz ya da süre biterse tur bilgisayarın olur. 8 turun sonunda çok tur alan kazanır.</li></ul></div>`);
+  soruY(k,`Isınma sorusu (süre yok): “${ornek.m}” Bu ifade doğru mu, yanlış mı?`,ornek.d?["Doğru","Yanlış"]:["Yanlış","Doğru"],`Evet! ${ornek.a} Artık düelloya hazırsınız.`,`Bir daha düşününüz. ${ornek.ip}`,bitince);}
 const e_duello=p=>{const D=defterY(["İfade","Doğru mu?","Turu alan"]);
-  asamali(p,{tahmin:{giris:"Bilgisayara karşı bir doğru–yanlış düellosu yapacaksın. Önce bir tahminle ısın.",soru:`“${EKSI}${kH(8,2)} bir tam sayıdır.” Bu ifade doğru mu?`,secs:[["d","Doğru"],["y","Yanlış"]],dogru:"d",neden:`${EKSI}${kH(8,2)} = −4, bir tam sayıdır.`},
+  asamali(p,{tahmin:{giris:"Bilgisayara karşı bir doğru–yanlış düellosu yapacaksınız. Önce bir tahminle ısınınız.",soru:`“${EKSI}${kH(8,2)} bir tam sayıdır.” Bu ifade doğru mu?`,secs:[["d","Doğru"],["y","Yanlış"]],dogru:"d",neden:`${EKSI}${kH(8,2)} = −4, bir tam sayıdır.`},
     asamalar:[
-      {ad:"Kuralları öğren",yon:["Düello kurallarını madde madde oku.","Süresiz ısınma sorusunu cevapla."],bitis:"Isınma sorusunu doğru cevaplayınca.",kur:(k,A)=>duelloKurallar(k,A,{m:"0 negatif bir tam sayıdır.",d:false,a:"0'ın işareti yoktur; ne pozitif ne negatiftir.",ip:"0'ın işareti var mı?"},()=>A.tamam("Kuralları öğrendin."))},
-      {ad:"Düello",yon:["<b>Düelloyu başlat</b> düğmesine bas.","Her turda süre çubuğu dolmadan <b>Doğru</b> ya da <b>Yanlış</b> düğmesine bas."],bitis:"8 tur bitince (kazanıp kaybetmen fark etmez; çok tur almaya çalış).",kur:(k,A)=>duelloKur(k,IFADE,D,A,t=>Math.max(5000,9000-t*450))},
+      {ad:"Kuralları öğren",yon:["Düello kurallarını madde madde okuyunuz.","Süresiz ısınma sorusunu cevaplayınız."],bitis:"Isınma sorusunu doğru cevaplayınca.",kur:(k,A)=>duelloKurallar(k,A,{m:"0 negatif bir tam sayıdır.",d:false,a:"0'ın işareti yoktur; ne pozitif ne negatiftir.",ip:"0'ın işareti var mı?"},()=>A.tamam("Kuralları öğrendiniz."))},
+      {ad:"Düello",yon:["<b>Düelloyu başlatın</b> düğmesine basınız.","Her turda süre çubuğu dolmadan <b>Doğru</b> ya da <b>Yanlış</b> düğmesine basınız."],bitis:"8 tur bitince (kazanıp kaybetmeniz fark etmez; çok tur almaya çalışınız).",kur:(k,A)=>duelloKur(k,IFADE,D,A,t=>Math.max(5000,9000-t*450))},
       kuralA(D,[["Aşağıdakilerden hangisi <b>her zaman</b> doğrudur?",["Her tam sayı, paydası 1 olan bir rasyonel sayıdır.","Her rasyonel sayı bir tam sayıdır.","Bir sayının mutlak değeri negatif olabilir."],"Doğru!",[`${kH(1,2)} bir rasyonel sayıdır ama tam sayı değildir.`,"Mutlak değer bir uzaklıktır; negatif olamaz."]],
         ["0 için hangisi doğrudur?",["0 bir doğal sayıdır; işareti yoktur.","0 pozitif bir tam sayıdır.","0 rasyonel sayı değildir."],"Doğru! 0 doğal sayı, tam sayı ve rasyonel sayıdır; ne pozitif ne negatiftir.",["0'ın işareti yoktur.",`0 = ${kH(0,1)} biçiminde yazılabilir.`]]]),
       kendiA((m,son)=>{const x=ra(3,12),q=ra(2,6);
@@ -1430,30 +1430,30 @@ const e_duello=p=>{const D=defterY(["İfade","Doğru mu?","Turu alan"]);
 };
 
 /* ================= liste ================= */
-const SON="Sonra <b>Kuralı bul</b> ve <b>Kendini dene</b> aşamalarını yap. Son soruyu doğru cevaplayınca etkinlik biter.";
+const SON="Sonra <b>Kuralı bulun</b> ve <b>Kendinizi deneyin</b> aşamalarını yapınız. Son soruyu doğru cevaplayınca etkinlik biter.";
 const ACT=[
- {ad:"Sıfır Nerede?",amac:"0'ın “hiç yok” mu yoksa “seçilmiş başlangıç noktası” mı olduğunu durumlara göre ayırt etmek.",adimlar:["<b>Aşama 1–2:</b> Her kartı oku ve 0'ın ne anlattığına göre doğru kutuya dokun (6 + 6 kart).",SON],sure:6,ciz:e_sifir},
- {ad:"Asansör Katları",amac:"Zemin katı 0 kabul eden dikey sayı doğrusunda bodrum katların negatif tam sayılarla gösterildiğini keşfetmek.",adimlar:["<b>Aşama 1:</b> Müşterilerin istediği katlara dokunarak asansörü götür (4 müşteri).","<b>Aşama 2:</b> Göstergedeki sayıya bakıp asansörün nerede olduğunu seç.",SON],sure:6,ciz:e_asansor},
- {ad:"Termometre Okuma",amac:"Termometrede 0 °C'nin altındaki ve üstündeki sıcaklıkları okuyup ayarlamak.",adimlar:["<b>Aşama 1:</b> Termometrenin sıvısını parmağınla sürükleyerek istenen 4 sıcaklığı ayarla.",SON],sure:5,ciz:e_termo},
- {ad:"Deniz Seviyesi",amac:"Deniz seviyesine göre yükseklik ve derinlikleri tam sayılarla göstermek.",adimlar:["<b>Aşama 1:</b> Her nesnenin cümlesini oku; nesneyi sürükleyip doğru yükseklikte bırak (5 nesne).",SON],sure:6,ciz:e_deniz},
- {ad:"Borç–Alacak Cüzdanı",amac:"Borç–alacak, kâr–zarar, gelir–gider gibi karşıt durumları tam sayılarla ifade etmek.",adimlar:["<b>Aşama 1:</b> Her kartın işaretini seç; kart doğru cebe girer (6 kart).","<b>Aşama 2:</b> Verilen durumun karşıtını bul.",SON],sure:6,ciz:e_cuzdan},
- {ad:"Sayı Doğrusu Kurucu",amac:"Uçları verilen eşit bölmeli sayı doğrusunda bir parçanın değerini ve harfli noktanın sayısını bulmak.",adimlar:["<b>Aşama 1:</b> Değer düğmeleriyle bir parçanın kaç birim olduğunu dene; sağ uç tutunca aşama biter.","<b>Aşama 2:</b> Harfli noktanın gösterdiği sayıyı yaz.",SON],sure:7,ciz:e_kurucu},
- {ad:"Ters Yönlü İkizler",amac:"Ters işaretli sayıların 0'a eşit uzaklıkta ve 0'ın farklı yanlarında olduğunu keşfetmek.",adimlar:["<b>Aşama 1:</b> Kırmızı A noktasının ikizine (ters işaretlisine) dokun; 3 ikiz bul.","<b>Aşama 2:</b> 10'ar 10'ar bölünmüş doğruda bir ikiz bul.",SON],sure:5,ciz:e_ikiz},
- {ad:"Mutlak Değer Adımları",amac:"Bir sayının 0'a uzaklığını zıplama sayarak bulmak ve mutlak değer kavramını keşfetmek.",adimlar:["<b>Aşama 1:</b> Kurbağayı düğmelerle en kısa yoldan iki bayrağa götür.","<b>Aşama 2:</b> Zıplamadan önce kaç zıplama gerektiğini yaz.",SON],sure:6,ciz:e_adim},
- {ad:"Mutlak Değer Avı",amac:"Mutlak değeri verilen sayıları sayı doğrusunda bulmak.",adimlar:["<b>Aşama 1–3:</b> Her aşamada av kartındaki şarta uyan bütün sayılara dokun ve <b>Kontrol et</b> düğmesine bas.",SON],sure:7,ciz:e_av},
- {ad:"Sayı Türleri Kutuları",amac:"Doğal sayıların, tam sayıların ve rasyonel sayıların iç içe olduğunu kartları kutulara yerleştirerek keşfetmek.",adimlar:["<b>Aşama 1:</b> Bir karta, sonra onun girebildiği en içteki kutuya dokun (8 kart). Sayı belirtmeyen kartı rafa koy.",SON],sure:7,ciz:e_kutu},
- {ad:"Paydası 1 Olanlar",amac:"Her tam sayının paydası 1 olan bir kesir olarak yazılabildiğini ve bazı kesirlerin tam sayıya eşit olduğunu keşfetmek.",adimlar:["<b>Aşama 1–3:</b> Pay ve payda sayaçlarıyla istenen noktayı istenen kesirle göster; nokta tam sayıya gelince kutu yeşil olur.",SON],sure:7,ciz:e_payda1},
- {ad:"Kesir Makinesi",amac:"Paydanın 0 olamayacağını, payın 0 olabileceğini makine deneyleriyle keşfetmek.",adimlar:["<b>Aşama 1–3:</b> Pay ve paydayı ayarla, <b>Çalıştır</b> düğmesine bas; her aşamada istenen sonucu elde et.",SON],sure:6,ciz:e_makine},
- {ad:"Negatif Kesirler Aynada",amac:"0'a dik tutulan aynada bir kesrin görüntüsünün ters işaretli kesir olduğunu keşfetmek.",adimlar:["<b>Aşama 1–3:</b> Kırmızı noktanın aynadaki görüntüsünün olduğu çentiğe dokun (pozitif, negatif ve tam sayılı kesir).",SON],sure:6,ciz:e_ayna},
- {ad:"Tam Sayılı Kesir Zıplaması",amac:"Negatif ve pozitif kesirleri dört adımlı yöntemle sayı doğrusuna yerleştirmek.",adimlar:["<b>Aşama 1–2:</b> Kesri dört adımda yerleştir: işaret, aralık, bölme, sayma.",SON],sure:8,ciz:e_zipla},
- {ad:"Arada Kim Var?",amac:"İki rasyonel sayı arasında kalan tam sayıları bulmak.",adimlar:["<b>Aşama 1–3:</b> A ile B arasındaki bütün tam sayılara dokun ve <b>Kontrol et</b> düğmesine bas (görünür, gizli ve yakın komşu turları).",SON],sure:7,ciz:e_arada},
- {ad:"Yakınlaştır",amac:"İki tam sayı arasını büyütüp eş parçalara bölerek bir noktanın gösterdiği kesri bulmak.",adimlar:["<b>Aşama 1–2:</b> P'nin aralığına dokun, aralığı eş parçalara böl, P'nin çentiğine dokun ve sayısını yaz.",SON],sure:7,ciz:e_yakin},
- {ad:"Aynı Nokta Farklı Adlar",amac:"Denk kesirlerin ve “−” işareti farklı yerde yazılan kesirlerin aynı noktayı gösterdiğini keşfetmek.",adimlar:["<b>Aşama 1:</b> Ad kartlarına dokun; noktanın bütün adlarını bayrağa as.","<b>Aşama 2:</b> Bayraktaki adlardan en sade olanını seç.",SON],sure:6,ciz:e_adlar},
- {ad:"Dikey Sayı Doğrusu",amac:"Yer yüzeyini 0 kabul eden dikey sayı doğrusunda rasyonel sayılarla konum göstermek.",adimlar:["<b>Aşama 1:</b> Nesneleri sürükleyip doğru yükseklikte bırak (3 nesne).","<b>Aşama 2:</b> Solucanın konumunu rasyonel sayıyla yaz.",SON],sure:7,ciz:e_dikey},
- {ad:"Gizli Sayı Dedektifi",amac:"İşaret, mutlak değer, payda ve aralık ipuçlarıyla gizli bir rasyonel sayıyı bulmak.",adimlar:["<b>Aşama 1:</b> İpucu kartları aç ve gizli sayı olan adaya dokun.","<b>Aşama 2:</b> Yeni bir gizli sayıyı en fazla 3 ipucuyla bul.",SON],sure:7,ciz:e_dedektif},
- {ad:"Rasyonel Sayı Düellosu",amac:"Doğal sayı, tam sayı, rasyonel sayı ve mutlak değer bilgilerini bir doğru–yanlış düellosunda kullanmak.",adimlar:["<b>Aşama 1:</b> Düello kurallarını oku ve ısınma sorusunu cevapla.","<b>Aşama 2:</b> 8 turluk düelloyu oyna: Süre dolmadan Doğru ya da Yanlış düğmesine bas.",SON],sure:7,ciz:e_duello}];
+ {ad:"Sıfır Nerede?",amac:"0'ın “hiç yok” mu yoksa “seçilmiş başlangıç noktası” mı olduğunu durumlara göre ayırt etmek.",adimlar:["<b>Aşama 1–2:</b> Her kartı okuyunuz ve 0'ın ne anlattığına göre doğru kutuya dokununuz (6 + 6 kart).",SON],sure:6,ciz:e_sifir},
+ {ad:"Asansör Katları",amac:"Zemin katı 0 kabul eden dikey sayı doğrusunda bodrum katların negatif tam sayılarla gösterildiğini keşfetmek.",adimlar:["<b>Aşama 1:</b> Müşterilerin istediği katlara dokunarak asansörü götürünüz (4 müşteri).","<b>Aşama 2:</b> Göstergedeki sayıya bakıp asansörün nerede olduğunu seçiniz.",SON],sure:6,ciz:e_asansor},
+ {ad:"Termometre Okuma",amac:"Termometrede 0 °C'nin altındaki ve üstündeki sıcaklıkları okuyup ayarlamak.",adimlar:["<b>Aşama 1:</b> Termometrenin sıvısını parmağınızla sürükleyerek istenen 4 sıcaklığı ayarlayınız.",SON],sure:5,ciz:e_termo},
+ {ad:"Deniz Seviyesi",amac:"Deniz seviyesine göre yükseklik ve derinlikleri tam sayılarla göstermek.",adimlar:["<b>Aşama 1:</b> Her nesnenin cümlesini okuyunuz; nesneyi sürükleyip doğru yükseklikte bırakınız (5 nesne).",SON],sure:6,ciz:e_deniz},
+ {ad:"Borç–Alacak Cüzdanı",amac:"Borç–alacak, kâr–zarar, gelir–gider gibi karşıt durumları tam sayılarla ifade etmek.",adimlar:["<b>Aşama 1:</b> Her kartın işaretini seçiniz; kart doğru cebe girer (6 kart).","<b>Aşama 2:</b> Verilen durumun karşıtını bulunuz.",SON],sure:6,ciz:e_cuzdan},
+ {ad:"Sayı Doğrusu Kurucu",amac:"Uçları verilen eşit bölmeli sayı doğrusunda bir parçanın değerini ve harfli noktanın sayısını bulmak.",adimlar:["<b>Aşama 1:</b> Değer düğmeleriyle bir parçanın kaç birim olduğunu deneyiniz; sağ uç tutunca aşama biter.","<b>Aşama 2:</b> Harfli noktanın gösterdiği sayıyı yazınız.",SON],sure:7,ciz:e_kurucu},
+ {ad:"Ters Yönlü İkizler",amac:"Ters işaretli sayıların 0'a eşit uzaklıkta ve 0'ın farklı yanlarında olduğunu keşfetmek.",adimlar:["<b>Aşama 1:</b> Kırmızı A noktasının ikizine (ters işaretlisine) dokununuz; 3 ikiz bulunuz.","<b>Aşama 2:</b> 10'ar 10'ar bölünmüş doğruda bir ikiz bulunuz.",SON],sure:5,ciz:e_ikiz},
+ {ad:"Mutlak Değer Adımları",amac:"Bir sayının 0'a uzaklığını zıplama sayarak bulmak ve mutlak değer kavramını keşfetmek.",adimlar:["<b>Aşama 1:</b> Kurbağayı düğmelerle en kısa yoldan iki bayrağa götürünüz.","<b>Aşama 2:</b> Zıplamadan önce kaç zıplama gerektiğini yazınız.",SON],sure:6,ciz:e_adim},
+ {ad:"Mutlak Değer Avı",amac:"Mutlak değeri verilen sayıları sayı doğrusunda bulmak.",adimlar:["<b>Aşama 1–3:</b> Her aşamada av kartındaki şarta uyan bütün sayılara dokununuz ve <b>Kontrol edin</b> düğmesine basınız.",SON],sure:7,ciz:e_av},
+ {ad:"Sayı Türleri Kutuları",amac:"Doğal sayıların, tam sayıların ve rasyonel sayıların iç içe olduğunu kartları kutulara yerleştirerek keşfetmek.",adimlar:["<b>Aşama 1:</b> Bir karta, sonra onun girebildiği en içteki kutuya dokununuz (8 kart). Sayı belirtmeyen kartı rafa koyunuz.",SON],sure:7,ciz:e_kutu},
+ {ad:"Paydası 1 Olanlar",amac:"Her tam sayının paydası 1 olan bir kesir olarak yazılabildiğini ve bazı kesirlerin tam sayıya eşit olduğunu keşfetmek.",adimlar:["<b>Aşama 1–3:</b> Pay ve payda sayaçlarıyla istenen noktayı istenen kesirle gösteriniz; nokta tam sayıya gelince kutu yeşil olur.",SON],sure:7,ciz:e_payda1},
+ {ad:"Kesir Makinesi",amac:"Paydanın 0 olamayacağını, payın 0 olabileceğini makine deneyleriyle keşfetmek.",adimlar:["<b>Aşama 1–3:</b> Pay ve paydayı ayarlayınız, <b>Çalıştır</b> düğmesine basınız; her aşamada istenen sonucu elde ediniz.",SON],sure:6,ciz:e_makine},
+ {ad:"Negatif Kesirler Aynada",amac:"0'a dik tutulan aynada bir kesrin görüntüsünün ters işaretli kesir olduğunu keşfetmek.",adimlar:["<b>Aşama 1–3:</b> Kırmızı noktanın aynadaki görüntüsünün olduğu çentiğe dokununuz (pozitif, negatif ve tam sayılı kesir).",SON],sure:6,ciz:e_ayna},
+ {ad:"Tam Sayılı Kesir Zıplaması",amac:"Negatif ve pozitif kesirleri dört adımlı yöntemle sayı doğrusuna yerleştirmek.",adimlar:["<b>Aşama 1–2:</b> Kesri dört adımda yerleştiriniz: işaret, aralık, bölme, sayma.",SON],sure:8,ciz:e_zipla},
+ {ad:"Arada Kim Var?",amac:"İki rasyonel sayı arasında kalan tam sayıları bulmak.",adimlar:["<b>Aşama 1–3:</b> A ile B arasındaki bütün tam sayılara dokununuz ve <b>Kontrol edin</b> düğmesine basınız (görünür, gizli ve yakın komşu turları).",SON],sure:7,ciz:e_arada},
+ {ad:"Yakınlaştır",amac:"İki tam sayı arasını büyütüp eş parçalara bölerek bir noktanın gösterdiği kesri bulmak.",adimlar:["<b>Aşama 1–2:</b> P'nin aralığına dokununuz, aralığı eş parçalara bölünüz, P'nin çentiğinize dokununuz ve sayısını yazınız.",SON],sure:7,ciz:e_yakin},
+ {ad:"Aynı Nokta Farklı Adlar",amac:"Denk kesirlerin ve “−” işareti farklı yerde yazılan kesirlerin aynı noktayı gösterdiğini keşfetmek.",adimlar:["<b>Aşama 1:</b> Ad kartlarına dokununuz; noktanın bütün adlarını bayrağa as.","<b>Aşama 2:</b> Bayraktaki adlardan en sade olanını seçiniz.",SON],sure:6,ciz:e_adlar},
+ {ad:"Dikey Sayı Doğrusu",amac:"Yer yüzeyini 0 kabul eden dikey sayı doğrusunda rasyonel sayılarla konum göstermek.",adimlar:["<b>Aşama 1:</b> Nesneleri sürükleyip doğru yükseklikte bırakınız (3 nesne).","<b>Aşama 2:</b> Solucanın konumunu rasyonel sayıyla yazınız.",SON],sure:7,ciz:e_dikey},
+ {ad:"Gizli Sayı Dedektifi",amac:"İşaret, mutlak değer, payda ve aralık ipuçlarıyla gizli bir rasyonel sayıyı bulmak.",adimlar:["<b>Aşama 1:</b> İpucu kartları açınız ve gizli sayı olan adaya dokununuz.","<b>Aşama 2:</b> Yeni bir gizli sayıyı en fazla 3 ipucuyla bulunuz.",SON],sure:7,ciz:e_dedektif},
+ {ad:"Rasyonel Sayı Düellosu",amac:"Doğal sayı, tam sayı, rasyonel sayı ve mutlak değer bilgilerini bir doğru–yanlış düellosunda kullanmak.",adimlar:["<b>Aşama 1:</b> Düello kurallarını okuyunuz ve ısınma sorusunu cevaplayınız.","<b>Aşama 2:</b> 8 turluk düelloyu oynayınız: Süre dolmadan Doğru ya da Yanlış düğmesine basınız.",SON],sure:7,ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"Sayılar Keşif Atölyesi",kisa:"Sayılar Keşif Atölyesi",kod:"MAT.7.1.1",ust:"7. Sınıf · Sayılar · MAT.7.1.1",
-  aciklama:"Doğal sayılar, tam sayılar, rasyonel sayılar ve mutlak değer için yirmi keşfetme etkinliği. Her etkinlik aşama aşama ilerler: dene, deney defterine bak, kuralı kendin bul."});
+  aciklama:"Doğal sayılar, tam sayılar, rasyonel sayılar ve mutlak değer için yirmi keşfetme etkinliği. Her etkinlik aşama aşama ilerler: deneyiniz, deney defterine bakınız, kuralı kendiniz bulunuz."});
 
 </script>
 <!--KABUK-->
@@ -1466,7 +1466,7 @@ kesifBaslat(ACT,{baslik:"Sayılar Keşif Atölyesi",kisa:"Sayılar Keşif Atöly
  <div class="kb-yuvarlak">
   <button id="kbSes" aria-pressed="true"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="off" d="M16 9l5 6M21 9l-5 6" style="display:none"/></svg></b><span id="kbSesY">Ses açık</span></button>
   <button id="kbYon" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></b><span>Yönerge</span></button>
-  <button id="kbOku" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 11v2"/></svg></b><span>Sesli oku</span></button>
+  <button id="kbOku" aria-pressed="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 11v2"/></svg></b><span>Sesli okuyun</span></button>
  </div>
  <h5>Erişilebilirlik</h5>
  <div class="kb-satir"><span>Yazı boyutu</span><div class="kb-seg" id="kbBoy"><button data-v="0" aria-label="Normal">A</button><button data-v="1" aria-label="Büyük">A+</button><button data-v="2" aria-label="Çok büyük">A++</button></div></div>
@@ -1474,10 +1474,10 @@ kesifBaslat(ACT,{baslik:"Sayılar Keşif Atölyesi",kisa:"Sayılar Keşif Atöly
  <div class="kb-satir"><span>Rahat okuma (geniş aralık)</span><button class="kb-anahtar" role="switch" data-k="rahat" aria-label="Rahat okuma"></button></div>
  <div class="kb-satir"><span>Hareketi azalt</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azalt"></button></div>
  <div class="kb-satir"><span>Tema</span><div class="kb-seg" id="kbTema"><button data-v="">Oto</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
- <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dön</button></div>
+ <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dönün</button></div>
 </div>
 <dialog class="kb-yonerge" id="kbYonerge" aria-labelledby="kbYB"><header id="kbYB">Yönerge</header><div class="ic" id="kbYIc"></div>
- <footer><button class="ghost" id="kbYOku">Sesli oku</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
+ <footer><button class="ghost" id="kbYOku">Sesli okuyun</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
 <div class="kb-gizli" aria-live="polite" id="kbDuyuru"></div>
 <script>
 (function(){
@@ -1595,7 +1595,7 @@ function yonergeMetni(){ const p=$("#panel")||D.body, h=p.querySelector("h2"), g
   if(!g.length&&$(".lead"))g.push(metin($(".lead")));
   return {baslik:metin(h)||D.title, gorev:g}; }
 function yonergeAc(){ const y=yonergeMetni(); $("#kbYB").textContent=y.baslik;
-  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol et</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
+  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol edin</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
   $("#kbYIc .gorev").innerHTML=kesH(y.gorev.join(" ").replace(/[<>&]/g,""));
   const d=$("#kbYonerge"); menu(false); if(d.showModal)d.showModal(); else d.setAttribute("open",""); }
 $("#kbYon").onclick=yonergeAc;
@@ -1612,5 +1612,41 @@ $("#kbYOku").onclick=()=>sesliOku(metin($("#kbYB"))+". "+metin($("#kbYIc")));
 })();
 </script>
 <!--/KABUK-->
+<script id="kesir-cizgi">
+/* ANA_KURALLAR §4.y-3: Etkinliklerde bütün kesirler kesir çizgisiyle (alt alta pay/payda) gösterilir. Düz yazılmış a/b biçimleri otomatik dönüştürülür. */
+(function(){
+  if (window.__kesirCizgi) return; window.__kesirCizgi = 1;
+  const RX = /(^|[^\w\/.,:%])([−-])?(?:(\d+) )?(\d{1,4})\/(\d{1,4})(?![\w\/.,]\d|\w)/g;
+  const ATLA = "script,style,svg,textarea,input,select,code,.ilr,.frac,[data-duz]";
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function donustur(kok){
+    if (!kok || !kok.nodeType) return;
+    if (kok.nodeType === 3) kok = kok.parentElement;
+    if (!kok || (kok.closest && kok.closest(ATLA))) return;
+    const w = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, { acceptNode: t => {
+      if (!/\d\/\d/.test(t.nodeValue)) return NodeFilter.FILTER_REJECT;
+      const p = t.parentElement; if (!p || p.closest(ATLA)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT; } });
+    const L = []; let t; while ((t = w.nextNode())) L.push(t);
+    L.forEach(t => {
+      let deg = false;
+      const h = esc(t.nodeValue).replace(RX, (m, a, s, tam, p, q) => { deg = true;
+        return a + (s ? "−" : "") + (tam ? tam + " " : "") + '<span class="frac"><span>' + p + "</span><span>" + q + "</span></span>"; });
+      if (!deg) return;
+      const k = document.createElement("span"); k.innerHTML = h; t.replaceWith(...k.childNodes);
+    });
+  }
+  let bekleyen = new Set(), plan = 0;
+  const calis = () => { plan = 0; const b = bekleyen; bekleyen = new Set(); b.forEach(donustur); };
+  const gozcu = new MutationObserver(ms => { ms.forEach(m => {
+      if (m.type === "characterData") bekleyen.add(m.target); else m.addedNodes.forEach(n => bekleyen.add(n)); });
+    if (!plan) plan = requestAnimationFrame(calis); });
+  const bas = () => { donustur(document.body); gozcu.observe(document.body, { childList: true, subtree: true, characterData: true }); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bas); else bas();
+  const st = document.createElement("style");
+  st.textContent = ".frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 2px}.frac>span{display:block;text-align:center;padding:0 3px}.frac>span:first-child{border-bottom:1.5px solid currentColor}";
+  document.head.appendChild(st);
+})();
+</script>
 
 </body></html>
