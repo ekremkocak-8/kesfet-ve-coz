@@ -317,9 +317,9 @@ function e1(p){
      <div class="cardi" style="background:var(--soft);border-style:dashed"><p style="margin:0">Başlangıç noktası</p><span>0 bir anlaşmayla seçilmiş bir yerdir; altı ve üstü vardır, bu yüzden negatif sayılar gerekir.</span></div></div>
    <div id="as1"></div>`;
   const A = asamalar(p.querySelector("#as1"), [
-    ["Kartları ayır", `<p>Her kartta 0 ne anlatıyor? Kartlardaki iki düğmeden birini seçiniz. Sekiz kartı da işaretleyince “Kontrol et” düğmesine basınız.</p>
-      <div class="cards" id="c1"></div><div class="row"><button class="primary" id="k1">Kontrol et</button><button class="ghost" id="r1">Kartları karıştır</button></div><div id="f1" hidden></div>`],
-    ["Kuralı bul", `<div id="a1"></div>`]]);
+    ["Kartları ayırın", `<p>Her kartta 0 ne anlatıyor? Kartlardaki iki düğmeden birini seçiniz. Sekiz kartı da işaretleyince “Kontrol edin” düğmesine basınız.</p>
+      <div class="cards" id="c1"></div><div class="row"><button class="primary" id="k1">Kontrol edin</button><button class="ghost" id="r1">Kartları karıştır</button></div><div id="f1" hidden></div>`],
+    ["Kuralı bulun", `<div id="a1"></div>`]]);
   let st = {};
   function draw(){ const box = p.querySelector("#c1"); const list = items.slice().sort(()=>Math.random()-.5); st = {};
     box.innerHTML = list.map((it,i)=>`<div class="cardi" data-k="${it[1]}" data-i="${i}"><p>${it[0]}</p><div class="seg"><button data-a="n" aria-pressed="false">Hiç yok</button><button data-a="r" aria-pressed="false">Başlangıç noktası</button></div></div>`).join("");
@@ -342,10 +342,10 @@ function e2(p){
   let cur = 0, task, sel = [], puan = 0, sayildi = false;
   p.innerHTML = `<div id="as2"></div>`;
   const A = asamalar(p.querySelector("#as2"), [
-    ["Üç görevi tamamla", `<div class="two"><div><svg id="b2" viewBox="0 0 330 380" width="100%" style="max-width:320px"></svg></div>
-    <div><p class="task" id="t2"></p><p class="intro">Asansör panelindeki düğmeye basınız. Bazı görevlerde iki kat seçmeniz gerekir. Sonra “Kontrol et” düğmesine basınız.</p>
-    <div class="seg" id="pad" style="max-width:260px"></div><div class="row"><button class="primary" id="k2">Kontrol et</button><button class="ghost" id="n2">Yeni görev</button></div><div id="f2" hidden></div><div class="dzs" id="s2"></div></div></div>`],
-    ["Kuralı bul", `<div id="a2"></div>`]]);
+    ["Üç görevi tamamlayın", `<div class="two"><div><svg id="b2" viewBox="0 0 330 380" width="100%" style="max-width:320px"></svg></div>
+    <div><p class="task" id="t2"></p><p class="intro">Asansör panelindeki düğmeye basınız. Bazı görevlerde iki kat seçmeniz gerekir. Sonra “Kontrol edin” düğmesine basınız.</p>
+    <div class="seg" id="pad" style="max-width:260px"></div><div class="row"><button class="primary" id="k2">Kontrol edin</button><button class="ghost" id="n2">Yeni görev</button></div><div id="f2" hidden></div><div class="dzs" id="s2"></div></div></div>`],
+    ["Kuralı bulun", `<div id="a2"></div>`]]);
   const pad = p.querySelector("#pad");
   pad.innerHTML = [4,3,2,1,0,-1,-2,-3].map(v=>`<button data-v="${v}" aria-pressed="false" style="width:56px">${v>0?"+"+v:fmt(v)}</button>`).join("");
   function draw(){ const y = v => 30 + (4 - v) * 42; let s = "";
@@ -384,16 +384,16 @@ function e3(p){
   let val, step, lo, hi, ok = 0, n = 0, sayildi = false;
   p.innerHTML = `<div id="as3"></div>`;
   const A = asamalar(p.querySelector("#as3"), [
-    ["Üç termometre oku", `<div class="two"><div><svg id="th" viewBox="0 0 170 400" width="100%" style="max-width:190px;margin:auto"></svg></div>
+    ["Üç termometre okuyun", `<div class="two"><div><svg id="th" viewBox="0 0 170 400" width="100%" style="max-width:190px;margin:auto"></svg></div>
     <div><p class="task">Termometreyi iki adımda okuyunuz.</p>
     <p class="adim3"><b>1. adım · Bir parça kaç derece?</b><br>İki büyük çizgi arasının kaç eş parçaya bölündüğünü sayınız. Bir parçanın (iki küçük çizgi arasının) kaç °C olduğunu yazınız. Cevap bir doğal sayı ya da ondalık gösterim olabilir (ör. 1 ya da 0,5).</p>
-    <div class="row"><label>Bir parça = <input class="ans" id="b3" inputmode="decimal" aria-label="Bir parçanın değeri" style="width:80px"> °C</label><button class="primary" id="kb3">Kontrol et</button></div>
+    <div class="row"><label>Bir parça = <input class="ans" id="b3" inputmode="decimal" aria-label="Bir parçanın değeri" style="width:80px"> °C</label><button class="primary" id="kb3">Kontrol edin</button></div>
     <div id="fb3" hidden></div>
     <div id="ik3" hidden><p class="adim3"><b>2. adım · Sıcaklığı yazınız.</b><br>Sıcaklığı ondalık gösterimle yazınız: önce <b>+</b> ya da <b>−</b> düğmesiyle işareti seçiniz, sonra <b>tam kısmı</b> ve <b>ondalık kısmı</b> ayrı kutulara yazınız. Sıcaklık tam sayıysa ondalık kısım kutusunu boş bırakınız.</p>
-    <div class="row"><span style="font-size:20px">Sıcaklık =</span><span class="kgo"><span class="isr" id="a3s" role="group" aria-label="işaret"><button type="button" data-s="1" aria-pressed="true">+</button><button type="button" data-s="-1" aria-pressed="false">−</button></span><input class="ans" id="a3t" inputmode="numeric" aria-label="tam kısım" placeholder="tam" style="width:64px"><b class="virg">,</b><input class="ans" id="a3o" inputmode="numeric" aria-label="ondalık kısım" placeholder="ondalık" style="width:96px"></span><span>°C</span><button class="primary" id="k3">Kontrol et</button></div></div>
+    <div class="row"><span style="font-size:20px">Sıcaklık =</span><span class="kgo"><span class="isr" id="a3s" role="group" aria-label="işaret"><button type="button" data-s="1" aria-pressed="true">+</button><button type="button" data-s="-1" aria-pressed="false">−</button></span><input class="ans" id="a3t" inputmode="numeric" aria-label="tam kısım" placeholder="tam" style="width:64px"><b class="virg">,</b><input class="ans" id="a3o" inputmode="numeric" aria-label="ondalık kısım" placeholder="ondalık" style="width:96px"></span><span>°C</span><button class="primary" id="k3">Kontrol edin</button></div></div>
     <div class="row"><button class="ghost" id="n3">Yeni termometre</button></div>
     <div id="f3" hidden></div><div class="dzs" id="s3"></div></div></div>`],
-    ["Kuralı bul", `<div id="x3"></div>`]]);
+    ["Kuralı bulun", `<div id="x3"></div>`]]);
   function draw(){ const Y = v => 360 - (v - lo) / (hi - lo) * 320; let s = `<rect x="55" y="${Y(hi)-14}" width="22" height="${Y(lo)-Y(hi)+30}" rx="11" fill="var(--card)" stroke="var(--muted)" stroke-width="2"/>`;
     s += `<circle cx="66" cy="${Y(lo)+30}" r="17" fill="var(--bad)"/><rect x="61" y="${Y(val)}" width="10" height="${Y(lo)+20-Y(val)}" fill="var(--bad)"/>`;
     const sub = Math.round(1/step);
@@ -431,8 +431,8 @@ function e4(p){
    <div class="row"><button class="ghost" id="n4">Yeni soru</button></div>`;
   const A = asamalar(p.querySelector("#as4"), [
     ["Bir sıçrayış kaç birim?", `<p>Başlangıç ile bitiş arasındaki uzaklığı bulup sıçrayış sayısına bölünüz.</p>
-      <div class="row"><label>Bir sıçrayış <input class="ans" id="a4a" inputmode="numeric" aria-label="Bir sıçrayışın uzunluğu"> birim</label><button class="primary" id="k4a">Kontrol et</button></div><div id="f4a" hidden></div>`],
-    ["Noktadaki sayı", `<p id="q4"></p><div class="row"><label><span id="lb4"></span> <input class="ans" id="a4b" inputmode="numeric"></label><button class="primary" id="k4b">Kontrol et</button></div><div id="f4b" hidden></div>`]]);
+      <div class="row"><label>Bir sıçrayış <input class="ans" id="a4a" inputmode="numeric" aria-label="Bir sıçrayışın uzunluğu"> birim</label><button class="primary" id="k4a">Kontrol edin</button></div><div id="f4a" hidden></div>`],
+    ["Noktadaki sayı", `<p id="q4"></p><div class="row"><label><span id="lb4"></span> <input class="ans" id="a4b" inputmode="numeric"></label><button class="primary" id="k4b">Kontrol edin</button></div><div id="f4b" hidden></div>`]]);
   function draw(show){ const end = a + n*s; const min = Math.min(a, 0) - 1, max = Math.max(end, 0) + 1;
     const marks = [{v:a,b:fmt(a),c:"var(--acc)"},{v:end,b:sgn(end),c:"var(--acc)"}];
     for (let k = 1; k < n; k++) marks.push({v:a+k*s,b:L[k-1],c:k===qi?"var(--acc2)":"var(--muted)"});
@@ -465,8 +465,8 @@ function e5(p){
    <div id="as5"></div><div class="row"><button class="ghost" id="n5">Yeni soru</button></div>`;
   const A = asamalar(p.querySelector("#as5"), [
     ["Bir parça kaç birim?", `<p>Yazılı iki sayının arasında kaç eş parça (boşluk) var? İki sayının farkını parça sayısına bölünüz.</p>
-      <div class="row"><label>Parça sayısı <input class="ans" id="c5" inputmode="numeric" style="width:70px"></label><label>Bir parça <input class="ans" id="b5" inputmode="numeric" style="width:70px"> birim</label><button class="primary" id="k5a">Kontrol et</button></div><div id="f5a" hidden></div>`],
-    ["K'nin sayısı", `<p id="q5"></p><div class="row"><label>K = <input class="ans" id="a5" inputmode="numeric"></label><button class="primary" id="k5">Kontrol et</button></div><div id="f5" hidden></div>`]]);
+      <div class="row"><label>Parça sayısı <input class="ans" id="c5" inputmode="numeric" style="width:70px"></label><label>Bir parça <input class="ans" id="b5" inputmode="numeric" style="width:70px"> birim</label><button class="primary" id="k5a">Kontrol edin</button></div><div id="f5a" hidden></div>`],
+    ["K'nin sayısı", `<p id="q5"></p><div class="row"><label>K = <input class="ans" id="a5" inputmode="numeric"></label><button class="primary" id="k5">Kontrol edin</button></div><div id="f5" hidden></div>`]]);
   function ciz(){ const W = 760, pad = 40, X = k => pad + k/n*(W-2*pad), y = 62;
     let s = `<svg viewBox="0 0 ${W} 112" width="100%" style="min-width:560px" role="img" aria-label="Eşit aralıklı sayı doğrusu"><line x1="18" y1="${y}" x2="${W-18}" y2="${y}" stroke="var(--ink)" stroke-width="2"/><path d="M${W-12},${y} l-10,-5 v10z M12,${y} l10,-5 v10z" fill="var(--ink)"/>`;
     if (goster) for (let k = i; k < j; k++) { const x1 = X(k), x2 = X(k+1); s += `<path d="M${x1},${y-7} Q${(x1+x2)/2},${y-34} ${x2},${y-7}" fill="none" stroke="var(--acc3)" stroke-width="1.8"/><text x="${(x1+x2)/2}" y="${y-24}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--acc3)">${st}</text>`; }
@@ -499,9 +499,9 @@ function e6(p){
   let T, rows, bulundu, puan = 0, liste = [], dokundu = false;
   p.innerHTML = `<div id="as6"></div>`;
   const A = asamalar(p.querySelector("#as6"), [
-    ["Aynı noktayı bul", `<p class="task" id="t6"></p><div id="h6"></div><div id="r6"></div>
+    ["Aynı noktayı bulun", `<p class="task" id="t6"></p><div id="h6"></div><div id="r6"></div>
      <div id="f6" class="fb no"></div><div class="liste" id="liste6"></div><div class="row"><button class="ghost" id="n6">Yeni kesir</button><span class="dz" id="s6">Tamamlanan kesir: 0</span></div>`],
-    ["Kuralı bul", `<div id="a6"></div>`]]);
+    ["Kuralı bulun", `<div id="a6"></div>`]]);
   const box = p.querySelector("#r6");
   function yeni(){
     let y; do { y = HED[Math.floor(Math.random()*HED.length)]; } while (T && y[0]===T[0] && y[1]===T[1]);
@@ -553,8 +553,8 @@ function e7(p){
   p.innerHTML = `<p class="task" id="t7"></p><div id="as7"></div>
    <div class="row"><button class="ghost" id="n7">Yeni sayı</button><span class="dz" id="s7">Yerleştirilen sayı: 0</span></div>`;
   const A = asamalar(p.querySelector("#as7"), [
-    ["Aralığı bul", `<p>Sayıyı tam sayılı kesre çeviriniz. Tam kısım, sayının hangi iki tam sayı arasında olduğunu söyler. Sayı doğrusunda o aralığa (iki tam sayının arasına) dokununuz.</p><div id="yer7a"></div><div id="f7a" hidden></div>`],
-    ["Doğru çentiği bul", `<p id="q7"></p><div id="yer7b"></div><div id="f7" hidden></div>`]]);
+    ["Aralığı bulun", `<p>Sayıyı tam sayılı kesre çeviriniz. Tam kısım, sayının hangi iki tam sayı arasında olduğunu söyler. Sayı doğrusunda o aralığa (iki tam sayının arasına) dokununuz.</p><div id="yer7a"></div><div id="f7a" hidden></div>`],
+    ["Doğru çentiği bulun", `<p id="q7"></p><div id="yer7b"></div><div id="f7" hidden></div>`]]);
   const kutu = document.createElement("div"); kutu.className = "scroll"; kutu.id = "l7";
   const min = -4, max = 4;
   function draw(mark){ const extra = [];
@@ -591,9 +591,9 @@ function e8(p){
   let set, st;
   p.innerHTML = `<div id="as8"></div>`;
   const A = asamalar(p.querySelector("#as8"), [
-    ["Kartları işaretle", `<p class="task">Her sayı için doğru olanların hepsini işaretleyiniz. Altı kartı da işaretleyince “Kontrol et” düğmesine basınız.</p><div class="cards" id="c8"></div>
-   <div class="row"><button class="primary" id="k8">Kontrol et</button><button class="ghost" id="n8">Yeni kartlar</button></div><div id="f8" hidden></div>`],
-    ["Kuralı bul", `<div id="a8"></div>`]]);
+    ["Kartları işaretleyin", `<p class="task">Her sayı için doğru olanların hepsini işaretleyiniz. Altı kartı da işaretleyince “Kontrol edin” düğmesine basınız.</p><div class="cards" id="c8"></div>
+   <div class="row"><button class="primary" id="k8">Kontrol edin</button><button class="ghost" id="n8">Yeni kartlar</button></div><div id="f8" hidden></div>`],
+    ["Kuralı bulun", `<div id="a8"></div>`]]);
   p.insertAdjacentHTML("beforeend", `<div class="two" style="margin-top:12px"><svg viewBox="0 0 360 200" width="100%" style="max-width:380px">
      <rect x="3" y="3" width="354" height="194" rx="14" fill="color-mix(in srgb,var(--acc) 8%,var(--card))" stroke="var(--acc)" stroke-width="2"/><text x="180" y="24" text-anchor="middle" font-weight="700" fill="var(--acc)">Rasyonel sayılar</text>
      <rect x="50" y="36" width="260" height="152" rx="12" fill="color-mix(in srgb,var(--acc2) 10%,var(--card))" stroke="var(--acc2)" stroke-width="2"/><text x="180" y="58" text-anchor="middle" font-weight="700" fill="var(--acc2)">Tam sayılar</text>
@@ -621,9 +621,9 @@ function e9(p){
   let data, T;
   p.innerHTML = `<div id="as9"></div>`;
   const A = asamalar(p.querySelector("#as9"), [
-    ["Tabloyu doldur", `<p class="task" id="t9"></p><div class="scroll"><table class="t" id="tb9"></table></div>
-   <div class="row"><button class="primary" id="k9">Kontrol et</button><button class="ghost" id="n9">Yeni ölçümler</button></div><div id="f9" hidden></div><div class="scroll" id="l9" style="margin-top:8px"></div>`],
-    ["Kuralı bul", `<div id="a9"></div>`]]);
+    ["Tabloyu doldurun", `<p class="task" id="t9"></p><div class="scroll"><table class="t" id="tb9"></table></div>
+   <div class="row"><button class="primary" id="k9">Kontrol edin</button><button class="ghost" id="n9">Yeni ölçümler</button></div><div id="f9" hidden></div><div class="scroll" id="l9" style="margin-top:8px"></div>`],
+    ["Kuralı bulun", `<div id="a9"></div>`]]);
   function nq(){ T = pick([250, 500, 1000]); const used = new Set(); data = [];
     while (data.length < 4) { const d = R(-9, 9); if (d === 0 || used.has(Math.abs(d))) continue; used.add(Math.abs(d)); data.push(T + d); }
     p.querySelector("#t9").innerHTML = `Bir fabrikada ${T} g'lık paketler dolduran dört makineden birer paket tartılıyor. Paketin hedef kütleden farkını (+ fazla, − eksik) ve hata miktarını yazınız, sonra hatası <b>en az</b> olan makineyi seçiniz.`;
@@ -648,9 +648,9 @@ function e10(p){
   let mode, k, sel, puan = 0, sayildi = false, turler = new Set();
   p.innerHTML = `<div id="as10"></div>`;
   const A = asamalar(p.querySelector("#as10"), [
-    ["Üç görevi tamamla", `<p class="task" id="t10"></p><div class="scroll" id="l10"></div>
-   <div class="row"><button class="primary" id="k10">Kontrol et</button><button class="ghost" id="c10">Seçimi temizle</button><button class="ghost" id="n10">Yeni görev</button></div><div id="f10" hidden></div><div class="dzs" id="s10"></div>`],
-    ["Kuralı bul", `<div id="a10"></div>`]]);
+    ["Üç görevi tamamlayın", `<p class="task" id="t10"></p><div class="scroll" id="l10"></div>
+   <div class="row"><button class="primary" id="k10">Kontrol edin</button><button class="ghost" id="c10">Seçimi temizle</button><button class="ghost" id="n10">Yeni görev</button></div><div id="f10" hidden></div><div class="dzs" id="s10"></div>`],
+    ["Kuralı bulun", `<div id="a10"></div>`]]);
   function draw(show){ const marks = [...sel].map(v=>({v, c:"var(--acc2)", r:7}));
     const extra = show ? [ (X,y)=>{ let r=""; [...sel].forEach(v=>{ r += `<line x1="${X(0)}" y1="${y-20}" x2="${X(v)}" y2="${y-20}" stroke="var(--acc3)" stroke-width="3"/><text x="${(X(0)+X(v))/2}" y="${y-30}" text-anchor="middle" font-size="14" fill="var(--acc3)" font-weight="700">${Math.abs(v)} birim</text>`; }); return r; } ] : [];
     p.querySelector("#l10").innerHTML = hline({min:-10,max:10,H:130,y:66,marks,extra,hits:1}); }
@@ -736,9 +736,9 @@ function e11(p){
   let set, st;
   p.innerHTML = `<div id="t11"></div><div id="as11"></div>`;
   const A = asamalar(p.querySelector("#as11"), [
-    ["Durumları sayıyla göster", `<p class="task">Her durumu bir tam sayıyla gösteriniz: önce işaretini seçiniz, sonra sayıyı yazınız. Altı kartı da doldurunca “Kontrol et” düğmesine basınız.</p><div class="cards" id="c11"></div>
-    <div class="row"><button class="primary" id="k11">Kontrol et</button><button class="ghost" id="n11">Yeni kartlar</button></div><div id="f11" hidden></div>`],
-    ["Kuralı bul", `<div id="a11"></div>`]]);
+    ["Durumları sayıyla gösterin", `<p class="task">Her durumu bir tam sayıyla gösteriniz: önce işaretini seçiniz, sonra sayıyı yazınız. Altı kartı da doldurunca “Kontrol edin” düğmesine basınız.</p><div class="cards" id="c11"></div>
+    <div class="row"><button class="primary" id="k11">Kontrol edin</button><button class="ghost" id="n11">Yeni kartlar</button></div><div id="f11" hidden></div>`],
+    ["Kuralı bulun", `<div id="a11"></div>`]]);
   let tah = null;
   tahmin(p.querySelector("#t11"), "Bir hesapta <b>ne kâr ne zarar</b> edilen durum hangi sayıyla gösterilir?", ["Pozitif bir sayıyla","0 ile","Negatif bir sayıyla"], i=>{ tah = i; });
   function draw(){ set = havuz.slice().sort(()=>Math.random()-.5).slice(0,6); st = set.map(()=>null);
@@ -767,13 +767,13 @@ function e12(p){
    <div class="two" style="align-items:start"><div class="scroll"><svg id="s12" viewBox="0 0 330 ${H}" width="100%" style="max-width:330px;margin:auto" role="img" aria-label="Maden kuyusu"></svg></div><div id="as12"></div></div>
    <div class="row"><button class="ghost" id="n12">Yeni görev</button></div>`;
   const A = asamalar(p.querySelector("#as12"), [
-    ["Yolu tahmin et", `<p>Kafes kuyu ağzından galeriye inerken kaç metre yol alır? Tahmininizi yazınız.</p>
+    ["Yolu tahmin edin", `<p>Kafes kuyu ağzından galeriye inerken kaç metre yol alır? Tahmininizi yazınız.</p>
       <div class="row"><input class="ans" id="e12" inputmode="numeric" aria-label="Tahmin edilen yol"> m <button class="primary" id="t12">Tahminimi kaydet</button></div><div id="f12t" hidden></div>`],
-    ["Kafesi indir", `<p>Düğmelerle kafesi hedef galeriye getiriniz, sonra kontrol ediniz.</p>
+    ["Kafesi indirin", `<p>Düğmelerle kafesi hedef galeriye getiriniz, sonra kontrol ediniz.</p>
       <div class="durum">Kafesin kotu: <span id="v12"></span></div>
-      <div class="row"><button class="ghost" data-m="-100">100 m in</button><button class="ghost" data-m="-10">10 m in</button><button class="ghost" data-m="10">10 m çık</button><button class="ghost" data-m="100">100 m çık</button></div>
-      <div class="row"><button class="primary" id="k12">Kafes galeride, kontrol et</button></div><div id="f12" hidden></div>`],
-    ["Kuralı bul", `<div id="a12"></div>`]]);
+      <div class="row"><button class="ghost" data-m="-100">100 m inin</button><button class="ghost" data-m="-10">10 m inin</button><button class="ghost" data-m="10">10 m çıkın</button><button class="ghost" data-m="100">100 m çıkın</button></div>
+      <div class="row"><button class="primary" id="k12">Kafes galeride, kontrol edin</button></div><div id="f12" hidden></div>`],
+    ["Kuralı bulun", `<div id="a12"></div>`]]);
   const svg = p.querySelector("#s12");
   function draw(){ let s = `<rect x="0" y="${Y(0)}" width="330" height="${H-Y(0)}" fill="color-mix(in srgb,#8a6a44 18%,transparent)"/><rect x="0" y="0" width="330" height="${Y(TOP)}" fill="color-mix(in srgb,var(--acc) 8%,transparent)"/>`;
     s += `<line x1="0" y1="${Y(0)}" x2="330" y2="${Y(0)}" stroke="var(--acc)" stroke-dasharray="6 5" stroke-width="2"/><text x="326" y="${Y(0)+17}" text-anchor="end" font-size="14" fill="var(--acc)">deniz seviyesi (0)</text>`;
@@ -806,7 +806,7 @@ function e13(p){
   let list, i, dogru, tah;
   p.innerHTML = `<div id="t13"></div><div id="as13"></div>`;
   const A = asamalar(p.querySelector("#as13"), [
-    ["Sekiz kartı yerleştir", `<p class="task">Karttaki sayının ait olduğu en içteki bölgeye dokununuz. İfade bir sayı belirtmiyorsa “Şemada yeri yok” düğmesine basınız.</p>
+    ["Sekiz kartı yerleştirin", `<p class="task">Karttaki sayının ait olduğu en içteki bölgeye dokununuz. İfade bir sayı belirtmiyorsa “Şemada yeri yok” düğmesine basınız.</p>
    <div class="two" style="align-items:center"><svg id="v13" viewBox="0 0 480 260" width="100%" style="max-width:560px" role="group" aria-label="Sayılar şeması">
      <rect data-r="2" x="3" y="3" width="474" height="254" rx="16" fill="color-mix(in srgb,var(--acc) 9%,var(--card))" stroke="var(--acc)" stroke-width="2" style="cursor:pointer"/><text x="240" y="24" text-anchor="middle" font-weight="700" fill="var(--acc)" pointer-events="none">Rasyonel sayılar</text>
      <rect data-r="1" x="86" y="36" width="308" height="212" rx="14" fill="color-mix(in srgb,var(--acc2) 12%,var(--card))" stroke="var(--acc2)" stroke-width="2" style="cursor:pointer"/><text x="240" y="56" text-anchor="middle" font-weight="700" fill="var(--acc2)" pointer-events="none">Tam sayılar</text>
@@ -814,7 +814,7 @@ function e13(p){
      <g id="y13"></g></svg>
     <div><div class="cardi" style="text-align:center"><p style="font-size:30px;margin:6px 0" id="k13"></p><span class="score" id="s13"></span></div>
      <div class="row"><button class="ghost" id="x13">Şemada yeri yok (tanımsız)</button></div><div id="f13" hidden></div></div></div>`],
-    ["Kuralı bul", `<div id="a13"></div>`]]);
+    ["Kuralı bulun", `<div id="a13"></div>`]]);
   tahmin(p.querySelector("#t13"), "Her tam sayı aynı zamanda bir rasyonel sayı mıdır?", ["Evet, hepsi","Hayır, hiçbiri","Yalnız pozitif olanlar"], t=>{ tah = t; });
   function basla(){ list = havuz.slice().sort(()=>Math.random()-.5).slice(0,8); i = 0; dogru = 0; n13 = [0,0,0]; p.querySelector("#y13").innerHTML = ""; A.ac(1); goster(); }
   function goster(){ p.querySelector("#k13").innerHTML = list[i][0]; p.querySelector("#s13").innerHTML = `<span class="dz">Kart: <b>${i+1} / ${list.length}</b></span> <span class="dz">Doğru: <b>${dogru}</b></span>`; }
@@ -835,13 +835,13 @@ function e14(p){
   let a = pick([3,4,5,-3,-4,-5]), b = null, tah, denenen = new Map();
   p.innerHTML = `<div id="t14"></div><div id="as14"></div>`;
   const A = asamalar(p.querySelector("#as14"), [
-    ["Paydayı küçült", `<p class="task" id="g14"></p>
+    ["Paydayı küçültün", `<p class="task" id="g14"></p>
    <div class="asama"><div class="row" style="margin-top:0"><b>Payda seçiniz:</b></div><div class="seg" id="r14" style="margin-top:6px"></div>
      <p class="score" style="margin:6px 0 0">Paydayı 6'dan başlayarak 1'e doğru küçültünüz, en sonda 0'ı deneyiniz.</p></div>
    <div class="cardi" style="margin:8px 0"><p style="font-size:24px" id="o14"></p><p class="score" id="c14"></p></div>
    <div class="scroll" id="l14"></div>
    <div class="scroll"><table class="t" id="tb14" style="margin-top:8px"></table></div><div id="f14" hidden></div>`],
-    ["Kuralı bul", `<div id="a14"></div>`]]);
+    ["Kuralı bulun", `<div id="a14"></div>`]]);
   const seg = p.querySelector("#r14");
   seg.innerHTML = [6,5,4,3,2,1,0,-1,-2,-3,-4,-5,-6].map(v=>`<button data-v="${v}" aria-pressed="false" style="min-width:44px;font-size:17px;font-weight:700">${fmt(v)}</button>`).join("");
   tahmin(p.querySelector("#t14"), "Pay sabitken payda 0'a yaklaştıkça bölümün büyüklüğüne ne olur?", ["0'a yaklaşır","Büyür","Değişmez"], t=>{ tah = t; });
@@ -873,12 +873,12 @@ function e15(p){
    <div class="row"><button class="ghost" id="n15">Yeni eşitlik</button></div>`;
   tahmin(p.querySelector("#t15"), "3 · ▢ = 2 eşitliğini sağlayan bir tam sayı var mıdır?", ["Var","Yok"], t=>{ tah = t; });
   const A = asamalar(p.querySelector("#as15"), [
-    ["Tam sayıları dene", `<p>Kutuya koymak istediğiniz tam sayının düğmesine basınız. Her deneme tabloya yazılır.</p>
+    ["Tam sayıları deneyin", `<p>Kutuya koymak istediğiniz tam sayının düğmesine basınız. Her deneme tabloya yazılır.</p>
       <div class="seg" id="r15"></div><div class="scroll" id="l15"></div><div class="scroll"><table class="t" id="tb15"></table></div>
       <div class="row"><button class="ghost" id="y15">Bu eşitliği sağlayan tam sayı yok</button></div><div id="f15" hidden></div>`],
-    ["Rasyonel sayıyı yaz", `<p id="q15"></p><div class="row"><span style="font-size:20px">▢ =</span> ${kgi("e15")} <button class="primary" id="k15">Kontrol et</button></div>
+    ["Rasyonel sayıyı yazın", `<p id="q15"></p><div class="row"><span style="font-size:20px">▢ =</span> ${kgi("e15")} <button class="primary" id="k15">Kontrol edin</button></div>
       <p class="score">Sayıyı <b>kesir olarak</b> yazınız: önce <b>+</b> ya da <b>−</b> düğmesiyle işareti seçiniz, sonra payı ve paydayı yazınız.</p><div id="f15b" hidden></div>`],
-    ["Kuralı bul", `<div id="a15"></div>`]]);
+    ["Kuralı bulun", `<div id="a15"></div>`]]);
   const seg = p.querySelector("#r15");
   seg.innerHTML = [-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6].map(v=>`<button data-v="${v}" aria-pressed="false" style="min-width:44px;font-size:17px;font-weight:700">${fmt(v)}</button>`).join("");
   function yeni(){ n = R(2,5); do { m = R(-9,9); } while (m === 0 || m % n === 0); den = new Map(); son = null;
@@ -913,18 +913,18 @@ function e16(p){
    <div class="row"><button class="ghost" id="n16">Yeni sayı çifti</button></div>`;
   tahmin(p.querySelector("#t16"), "İki rasyonel sayı arasında kaç rasyonel sayı bulunabilir?", ["Hiç yok","Yalnız bir tane","İstediğimiz kadar"], t=>{ tah = t; });
   const A = asamalar(p.querySelector("#as16"), [
-    ["Aralığı eş parçalara böl", `<p>Sayı doğrusunda her birimi eş parçalara bölünüz. Parça sayısını − ve + düğmeleriyle ya da “Her parçayı ikiye böl” düğmesiyle seçiniz; çentikler hemen değişir. Şu iki şart sağlanınca “Yakınlaştır” düğmesine basınız:</p>
+    ["Aralığı eş parçalara bölün", `<p>Sayı doğrusunda her birimi eş parçalara bölünüz. Parça sayısını − ve + düğmeleriyle ya da “Her parçayı ikiye bölün” düğmesiyle seçiniz; çentikler hemen değişir. Şu iki şart sağlanınca “Yakınlaştır” düğmesine basınız:</p>
       <ol class="kurallar" style="margin-top:0"><li>İki sayı da bir çentiğin üstüne gelmeli.</li><li>İki sayının arasında en az <b>3 çentik</b> olmalı.</li></ol>
       <div class="scroll" id="l16a"></div>
-      <div class="row"><span>Her birimdeki eş parça sayısı:</span>${adim("L16", 1)}<button class="ghost" id="x16">Her parçayı ikiye böl</button></div>
+      <div class="row"><span>Her birimdeki eş parça sayısı:</span>${adim("L16", 1)}<button class="ghost" id="x16">Her parçayı ikiye bölün</button></div>
       <div class="dzs" id="d16"></div>
       <div class="row"><button class="primary" id="k16a">Yakınlaştır</button></div><div id="f16a" hidden></div>
       <div class="scroll"><table class="t ctab" id="tb16" style="margin-top:8px"></table></div>`],
-    ["Aradaki sayıları bul", `<p>Yakınlaştırılmış sayı doğrusunda iki sayının <b>arasındaki</b> çentiklere dokununuz. Her çentik bir rasyonel sayı gösterir; sayı çentiğin altına ve aşağıdaki listeye yazılır. <b>Üç farklı</b> sayı bulunca aşama biter.</p>
+    ["Aradaki sayıları bulun", `<p>Yakınlaştırılmış sayı doğrusunda iki sayının <b>arasındaki</b> çentiklere dokununuz. Her çentik bir rasyonel sayı gösterir; sayı çentiğin altına ve aşağıdaki listeye yazılır. <b>Üç farklı</b> sayı bulunca aşama biter.</p>
       <div class="scroll" id="l16b"></div><div id="f16b" hidden></div>
       <div class="liste" id="liste16"><b>Bulunan sayılar:</b> <span class="dz" style="border-style:dashed">henüz yok</span></div>`],
-    ["Kuralı bul", `<p>Parçaları bir kez daha ikiye bölüp arada yeni çentik çıkıp çıkmadığına bakınız.</p>
-      <div class="row"><button class="ghost" id="z16">Her parçayı ikiye böl</button></div><div class="scroll" id="l16c"></div><div id="a16"></div>`]]);
+    ["Kuralı bulun", `<p>Parçaları bir kez daha ikiye bölüp arada yeni çentik çıkıp çıkmadığına bakınız.</p>
+      <div class="row"><button class="ghost" id="z16">Her parçayı ikiye bölün</button></div><div class="scroll" id="l16c"></div><div id="a16"></div>`]]);
   const Av = () => c[0]/c[1], Bv = () => c[2]/c[3];
   const ustunde = (v, n) => Math.abs(v*n - Math.round(v*n)) < 1e-9;
   /* Kesir etiketi: çentiğin tam altında */
@@ -970,7 +970,7 @@ function e16(p){
     denenen.set(L, [onA, onB, ara]); tablo();
     if (!onA || !onB) { const kim = !onA && !onB ? "İki sayı da" : (!onA ? FR(Math.abs(c[0]),c[1]) : FR(Math.abs(c[2]),c[3])) + " sayısı";
       return fb(f, false, `${kim} bir çentiğe denk gelmiyor. Bir sayının çentiğe gelmesi için parça sayısı onun paydasının katı olmalı. Hem ${c[1]}'${({2:"nin",3:"ün",4:"ün",5:"in",6:"nın"})[c[1]]} hem ${c[3]}'${({2:"nin",3:"ün",4:"ün",5:"in",6:"nın"})[c[3]]} katı olan bir sayı deneyiniz.`); }
-    if (ara < 3) return fb(f, false, `İki sayı da çentikte ama arada ${ara === 0 ? "hiç çentik yok" : "yalnız " + ara + " çentik var"}. Üç sayı bulmak için daha küçük parçalar gerekir: “Her parçayı ikiye böl” düğmesiyle parça sayısını iki katına çıkarınız (${L} yerine ${2*L}).`);
+    if (ara < 3) return fb(f, false, `İki sayı da çentikte ama arada ${ara === 0 ? "hiç çentik yok" : "yalnız " + ara + " çentik var"}. Üç sayı bulmak için daha küçük parçalar gerekir: “Her parçayı ikiye bölün” düğmesiyle parça sayısını iki katına çıkarınız (${L} yerine ${2*L}).`);
     zoomL = L; fb(f, true, `Harika! Birimi ${L} eş parçaya böldünüz: ${c[0]<0?M:""}${FR(Math.abs(c[0]),c[1])} = ${c[0]<0?M:""}${FR(Math.abs(Math.round(Av()*L)),L)} ve ${c[2]<0?M:""}${FR(Math.abs(c[2]),c[3])} = ${c[2]<0?M:""}${FR(Math.abs(Math.round(Bv()*L)),L)}. Arada ${ara} çentik var. Şimdi iki sayının arası yakınlaştırıldı.`);
     p.querySelectorAll("#L16 button, #x16").forEach(b=>b.disabled = true); A.ac(2); yakin(p.querySelector("#l16b"), zoomL, true); };
   const dokun = t => { if (!t.dataset || t.dataset.k === undefined || A.n !== 2) return; const k = +t.dataset.k, f = p.querySelector("#f16b");
@@ -999,13 +999,13 @@ function e17(p){
    <div class="row"><button class="ghost" id="n17">Yeni soru</button></div>`;
   tahmin(p.querySelector("#t17"), "Sayı doğrusunda yalnız iki noktanın sayısı bilinirse diğer noktaların sayısı bulunabilir mi?", ["Evet, çentikler eşit aralıklıysa","Hayır, 0 da yazılı olmalı"], t=>{ tah = t; });
   const A = asamalar(p.querySelector("#as17"), [
-    ["Parçaları say", `<p>Sayısı yazılı iki çentiğin arasında kaç eş parça (boşluk) var? Çentikleri değil, aradaki boşlukları sayınız. Kutuya <b>yalnız parça sayısını</b> (bir doğal sayı) yazınız.</p>
-      <div class="row"><label>Parça sayısı: <input class="ans" id="c17" inputmode="numeric" style="width:70px"></label><button class="primary" id="k17a">Kontrol et</button></div><div id="f17a" hidden></div>`],
+    ["Parçaları sayın", `<p>Sayısı yazılı iki çentiğin arasında kaç eş parça (boşluk) var? Çentikleri değil, aradaki boşlukları sayınız. Kutuya <b>yalnız parça sayısını</b> (bir doğal sayı) yazınız.</p>
+      <div class="row"><label>Parça sayısı: <input class="ans" id="c17" inputmode="numeric" style="width:70px"></label><button class="primary" id="k17a">Kontrol edin</button></div><div id="f17a" hidden></div>`],
     ["Bir parça kaç birim?", `<p id="q17b"></p>
-      <div class="row"><span>Uzaklık =</span>${kg("u17")}<span style="margin-left:8px">Bir parça =</span>${kg("b17")}<button class="primary" id="k17b">Kontrol et</button></div><div id="f17b" hidden></div>`],
-    ["P'nin değeri", `<p id="q17c"></p><div class="row"><span style="font-size:20px">P =</span>${kgi("e17")}<button class="primary" id="k17c">Kontrol et</button></div>
+      <div class="row"><span>Uzaklık =</span>${kg("u17")}<span style="margin-left:8px">Bir parça =</span>${kg("b17")}<button class="primary" id="k17b">Kontrol edin</button></div><div id="f17b" hidden></div>`],
+    ["P'nin değeri", `<p id="q17c"></p><div class="row"><span style="font-size:20px">P =</span>${kgi("e17")}<button class="primary" id="k17c">Kontrol edin</button></div>
       <p class="score">P'nin değerini <b>kesir olarak</b> yazınız: önce <b>+</b> ya da <b>−</b> düğmesiyle işareti seçiniz, sonra payı ve paydayı yazınız.</p><div id="f17c" hidden></div>`],
-    ["Kuralı bul", `<div id="a17"></div>`]]);
+    ["Kuralı bulun", `<div id="a17"></div>`]]);
   const deger = k => kesir(bas + k, d);
   function yeni(){ d = pick([2,3,4,5,6]); bas = R(-2*d, 0); i1 = R(0,4); i2 = R(i1+2, Math.min(n, i1+7)); do { ip = R(0, n); } while (ip === i1 || ip === i2);
     ref = Math.abs(ip - i1) <= Math.abs(ip - i2) ? i1 : i2; parca = false; yol = false; hata = [0,0,0];
@@ -1049,16 +1049,16 @@ function e17(p){
 function e18(p){
   let m, n, sa = 1, sb = 1, tah, denenen;
   p.innerHTML = `<div id="t18"></div><p class="task" id="g18"></p>
-   <div class="asama" style="border-color:var(--acc)"><div class="row" style="margin-top:0"><button class="ghost" id="a18">a'nın işaretini değiştir</button><button class="ghost" id="b18">b'nin işaretini değiştir</button></div>
+   <div class="asama" style="border-color:var(--acc)"><div class="row" style="margin-top:0"><button class="ghost" id="a18">a'nın işaretini değiştirin</button><button class="ghost" id="b18">b'nin işaretini değiştirin</button></div>
    <div class="scroll" id="l18"></div><div class="scroll"><table class="t ctab" id="tb18"></table></div></div>
    <div id="as18"></div><div class="row"><button class="ghost" id="n18">Yeni sayılar</button></div>`;
   tahmin(p.querySelector("#t18"), "|a| = 5 ve |b| = 2 ise a ile b arasındaki uzaklık ne zaman en fazla olur?", ["a ile b aynı yöndeyken","a ile b 0'ın farklı yanlarındayken","Uzaklık hep aynıdır"], t=>{ tah = t; });
   const A = asamalar(p.querySelector("#as18"), [
     ["En fazla uzaklık", `<p>İşaret düğmeleriyle a ve b'yi 0'ın sağına ya da soluna koyunuz. Denediğiniz durumlar tabloya yazılır. Uzaklık <b>en fazla</b> kaç birim olabilir?</p>
-      <div class="row"><input class="ans" id="e18a" inputmode="numeric" aria-label="En fazla uzaklık"> birim <button class="primary" id="k18a">Kontrol et</button></div><div id="f18a" hidden></div>`],
+      <div class="row"><input class="ans" id="e18a" inputmode="numeric" aria-label="En fazla uzaklık"> birim <button class="primary" id="k18a">Kontrol edin</button></div><div id="f18a" hidden></div>`],
     ["En az uzaklık", `<p>Şimdi uzaklığın <b>en az</b> kaç birim olabileceğini bulunuz.</p>
-      <div class="row"><input class="ans" id="e18b" inputmode="numeric" aria-label="En az uzaklık"> birim <button class="primary" id="k18b">Kontrol et</button></div><div id="f18b" hidden></div>`],
-    ["Kuralı bul", `<div id="x18"></div>`]]);
+      <div class="row"><input class="ans" id="e18b" inputmode="numeric" aria-label="En az uzaklık"> birim <button class="primary" id="k18b">Kontrol edin</button></div><div id="f18b" hidden></div>`],
+    ["Kuralı bulun", `<div id="x18"></div>`]]);
   function yeni(){ m = R(2,8); do { n = R(1,7); } while (n === m); sa = 1; sb = 1; denenen = new Map(); ["#e18a","#e18b"].forEach(x=>p.querySelector(x).value = ""); ["#f18a","#f18b"].forEach(x=>p.querySelector(x).hidden = true); A.ac(1); draw(); }
   function draw(){ const a = sa*m, b = sb*n; denenen.set(`${a}|${b}`, [a,b]);
     p.querySelector("#g18").innerHTML = `|a| = <b>${m}</b> ve |b| = <b>${n}</b>. a ile b arasındaki uzaklık en fazla ve en az kaç birim olabilir?`;
@@ -1087,10 +1087,10 @@ function e19(p){
   p.innerHTML = `<p class="intro">Soğuk zincirde ürünler belirli sıcaklık aralıklarında saklanır. Dondurulmuş gıda −25 °C ile −18 °C, süt ürünleri ve klasik aşılar 2 °C ile 8 °C arasında (sınırlar dâhil).</p>
    <div id="t19"></div><div id="as19"></div>`;
   const A = asamalar(p.querySelector("#as19"), [
-    ["Dolaplara ürün seç", `<p class="task">Her dolabın göstergesini okuyup dolaba konabilecek ürünü seçiniz. Dört dolabı da işaretleyince “Kontrol et” düğmesine basınız.</p>
+    ["Dolaplara ürün seçin", `<p class="task">Her dolabın göstergesini okuyup dolaba konabilecek ürünü seçiniz. Dört dolabı da işaretleyince “Kontrol edin” düğmesine basınız.</p>
    <div class="two" style="align-items:start"><svg id="s19" viewBox="0 0 200 330" width="100%" style="max-width:220px" role="img" aria-label="Dikey sayı doğrusu"></svg><div class="cards" id="c19"></div></div>
-   <div class="row"><button class="primary" id="k19">Kontrol et</button><button class="ghost" id="n19">Yeni göstergeler</button></div><div id="f19" hidden></div>`],
-    ["Kuralı bul", `<div id="a19"></div>`]]);
+   <div class="row"><button class="primary" id="k19">Kontrol edin</button><button class="ghost" id="n19">Yeni göstergeler</button></div><div id="f19" hidden></div>`],
+    ["Kuralı bulun", `<div id="a19"></div>`]]);
   tahmin(p.querySelector("#t19"), "Dondurucunun göstergesi −16 °C ise dondurulmuş gıda için uygun mudur?", ["Uygundur","Uygun değildir"], t=>{ tah = t; });
   const lo = -30, hi = 12, Y = v => 10 + (hi - v)/(hi - lo)*310;
   function yeni(){ dol = [R(-25,-18), pick([-16,-15,-14,-12]), R(2,8), pick([-3,-1,10,11])].sort(()=>Math.random()-.5);
@@ -1122,9 +1122,9 @@ function e20(p){
   p.innerHTML = `<div id="t20"></div><div id="as20"></div>`;
   tahmin(p.querySelector("#t20"), "Aşağıdaki altı ifadeden kaçı doğrudur?", ["Hepsi","Yaklaşık yarısı","Hiçbiri"], t=>{ tah = t; });
   const A = asamalar(p.querySelector("#as20"), [
-    ["Doğru mu, yanlış mı?", `<p>Her ifadeyi okuyup “Doğru” ya da “Yanlış” düğmesine basınız. Altısını da işaretleyince “Kontrol et” düğmesine basınız. Her kartın altında ifadenin <b>gerekçesi</b> görünür; kırmızı kartlarda seçiminizi değiştirip yeniden kontrol ediniz.</p>
-      <div class="cards" id="c20"></div><div class="row"><button class="primary" id="k20">Kontrol et</button><button class="ghost" id="n20">Yeni ifadeler</button></div><div id="f20" hidden></div>`],
-    ["Kuralı bul", `<div id="a20"></div>`]]);
+    ["Doğru mu, yanlış mı?", `<p>Her ifadeyi okuyup “Doğru” ya da “Yanlış” düğmesine basınız. Altısını da işaretleyince “Kontrol edin” düğmesine basınız. Her kartın altında ifadenin <b>gerekçesi</b> görünür; kırmızı kartlarda seçiminizi değiştirip yeniden kontrol ediniz.</p>
+      <div class="cards" id="c20"></div><div class="row"><button class="primary" id="k20">Kontrol edin</button><button class="ghost" id="n20">Yeni ifadeler</button></div><div id="f20" hidden></div>`],
+    ["Kuralı bulun", `<div id="a20"></div>`]]);
   function draw(){ set = havuz.slice().sort(()=>Math.random()-.5).slice(0,6); st = set.map(()=>null); deneme = 0; A.ac(1);
     p.querySelector("#c20").innerHTML = set.map((s,i)=>`<div class="cardi" data-i="${i}"><p>${kesHTML(s[0])}</p><div class="seg"><button data-v="1" aria-pressed="false">Doğru</button><button data-v="0" aria-pressed="false">Yanlış</button></div><p class="score" data-g hidden style="margin:6px 0 0;font-weight:400;font-size:15px"></p></div>`).join(""); p.querySelector("#f20").hidden = true; }
   p.querySelector("#c20").onclick = e => { const b = e.target.closest("button"); if (!b) return; const c = b.closest(".cardi"); st[+c.dataset.i] = +b.dataset.v; c.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); c.classList.remove("ok","no"); };
@@ -1153,10 +1153,10 @@ function e21(p){
   tahmin(p.querySelector("#t21"), "Payı paydasından büyük bir kesri göstermek için bir bütün yeter mi?", ["Yeter","Birden fazla bütün gerekir"], t=>{ tah = t; });
   const A = asamalar(p.querySelector("#as21"), [
     ["Kaç bütün gerekir?", `<p>Bir bütün, sayı doğrusunda ardışık iki tam sayının arasını kaplar. Sayıyı göstermeye yetecek kadar bütün ekleyiniz.</p>
-      <div class="row"><span>Bütün sayısı:</span>${adim("b21", 0)}<button class="primary" id="k21a">Kontrol et</button></div><div id="f21a" hidden></div>`],
-    ["Bütünleri eş parçalara ayır", `<p>Her bütünü paydadaki sayı kadar eş parçaya ayırınız. Sayı doğrusundaki küçük çentikler de parçalarla birlikte değişir.</p>
-      <div class="row"><span>Her bütündeki parça sayısı:</span>${adim("d21", 1)}<button class="primary" id="k21b">Kontrol et</button></div><div id="f21b" hidden></div>`],
-    ["Sayı kadar parçayı boya", `<p id="q21"></p><div class="row"><button class="primary" id="k21c">Kontrol et</button></div><div id="f21c" hidden></div>`],
+      <div class="row"><span>Bütün sayısı:</span>${adim("b21", 0)}<button class="primary" id="k21a">Kontrol edin</button></div><div id="f21a" hidden></div>`],
+    ["Bütünleri eş parçalara ayırın", `<p>Her bütünü paydadaki sayı kadar eş parçaya ayırınız. Sayı doğrusundaki küçük çentikler de parçalarla birlikte değişir.</p>
+      <div class="row"><span>Her bütündeki parça sayısı:</span>${adim("d21", 1)}<button class="primary" id="k21b">Kontrol edin</button></div><div id="f21b" hidden></div>`],
+    ["Sayı kadar parçayı boyayın", `<p id="q21"></p><div class="row"><button class="primary" id="k21c">Kontrol edin</button></div><div id="f21c" hidden></div>`],
     ["Sayı doğrusundaki yeri", `<div id="x21"></div>`]]);
   function yeni(){ hq = R(2,5); do { hp = R(hq+1, 3*hq-1); } while (hp % hq === 0 || gcd(hp,hq) !== 1); neg = Math.random() < .5; if (neg) hp = -hp;
     bl = 0; pd = 1; boya = 0; ["#f21a","#f21b","#f21c"].forEach(i=>p.querySelector(i).hidden = true); p.querySelector("#x21").innerHTML = "";
@@ -1222,12 +1222,12 @@ function e22(p){
      <div class="zbar"><i id="zb22"></i></div>
      <p class="task">P noktasının gösterdiği sayı hangisidir? Seçeneklerden birine dokununuz.</p><div class="scroll" id="l22"></div>
      <div class="secenek4" id="c22"></div><div id="f22" hidden></div>
-     <div class="row"><button class="ghost" id="q22">Oyunu bitir</button></div></div>`;
+     <div class="row"><button class="ghost" id="q22">Oyunu bitirin</button></div></div>`;
   const SEV = { kolay:["Yalnız pozitif sayılar (0 ile 2 arası)","Bütün tam sayılar yazılıdır","Paydalar 2, 3 ya da 4","Süre sınırı yoktur"],
     orta:["Negatif sayılar da vardır","Bütün tam sayılar yazılıdır","Paydalar 2'den 5'e kadar","10 sorunun tamamı için 90 saniye"],
     zor:["Negatif sayılar da vardır","Yalnız iki uçtaki tam sayı yazılıdır; aradakileri siz bulursunuz","Paydalar 2'den 6'ya kadar","10 sorunun tamamı için 60 saniye"] };
   const A = asamalar(p.querySelector("#as22"), [
-    ["Oyunun kurallarını oku", `<p style="margin-top:0"><b>Oyun nasıl oynanır?</b></p>
+    ["Oyunun kurallarını okuyun", `<p style="margin-top:0"><b>Oyun nasıl oynanır?</b></p>
      <ol class="kurallar">
       <li>Her soruda sayı doğrusunda bir <b>P</b> noktası işaretlidir. P'nin gösterdiği sayıyı dört seçenekten birine dokunarak seçersiniz.</li>
       <li>Oyun <b>10 sorudan</b> oluşur. Cevap verince bir sonraki soru kendiliğinden gelir.</li>
@@ -1241,9 +1241,9 @@ function e22(p){
      <div class="ornek"><b>Örnek soru</b><div class="scroll" id="o22"></div>
       <p style="margin:4px 0 0">0 ile 1 arası 4 eş parçaya ayrılmıştır; her parça ${FR(1,4)} birimdir. P, 0'dan 3 parça sağdadır. Bu yüzden seçeneklerden ${FR(3,4)} seçilir ve 10 puan kazanılır.</p></div>
      <div class="row"><button class="primary" id="ok22">Kuralları okudum</button></div>`],
-    ["Seviye seç ve oyna", `<p style="margin-top:0">Seviyeler sayıların türü, yazılı tam sayılar, paydalar ve süre bakımından farklıdır. Bir seviyeye dokunarak seçiniz:</p>
+    ["Seviye seçin ve oynayın", `<p style="margin-top:0">Seviyeler sayıların türü, yazılı tam sayılar, paydalar ve süre bakımından farklıdır. Bir seviyeye dokunarak seçiniz:</p>
      <div class="seviyeler" id="z22">${["kolay","orta","zor"].map((z,i)=>`<button data-z="${z}" aria-pressed="${i===0}"><b>${["Kolay","Orta","Zor"][i]}</b><ul>${SEV[z].map(x=>`<li>${x}</li>`).join("")}</ul></button>`).join("")}</div>
-     <div class="row"><button class="primary" id="b22">Oyuna başla</button><span class="dz">En yüksek puanınız: <b id="rek22">${enIyi}</b></span></div>
+     <div class="row"><button class="primary" id="b22">Oyuna başlayın</button><span class="dz">En yüksek puanınız: <b id="rek22">${enIyi}</b></span></div>
      <div id="son22" hidden></div>`]]);
   p.querySelector("#o22").innerHTML = hline({min:0, max:1, sub:4, H:84, y:40, marks:[{v:.75, t:"P", c:"var(--acc2)", tc:"var(--acc2)"}]});
   p.querySelector("#ok22").onclick = () => A.ac(2);
@@ -1283,15 +1283,15 @@ function e22(p){
     p.querySelector("#oy22").hidden = true; p.querySelector("#bas22").hidden = false; p.querySelector("#rek22").textContent = enIyi;
     const s = p.querySelector("#son22"); s.hidden = false; s.className = "fb bilgi";
     s.innerHTML = `<b>${sure ? "Süre doldu!" : yarida ? "Oyunu bitirdiniz." : "Oyun bitti!"}</b><div class="dzs"><span class="dz">Cevaplanan soru: <b>${no}</b></span><span class="dz">Doğru: <b>${dogru}</b></span><span class="dz">Puan: <b>${puan}</b></span>${yeniRekor ? `<span class="dz ok">Yeni rekor!</span>` : ""}</div>${dogru < no ? "İpucu: Önce ardışık iki tam sayı arasının kaç eş parçaya bölündüğünü sayınız; bir parça, 1 bölü parça sayısı kadardır." : "Bütün cevaplarınız doğru. Daha zor bir seviye deneyebilirsiniz."}`;
-    p.querySelector("#b22").textContent = "Yeniden oyna"; if (!yarida || no >= 3) A.bitir(); }
+    p.querySelector("#b22").textContent = "Yeniden oynayın"; if (!yarida || no >= 3) A.bitir(); }
 }
 
 /* Her etkinlik: [ad, süreç bileşeni, fonksiyon, Ne yapacaksınız?, [Nasıl yapacaksınız? adımları], Ne zaman biter?] */
 const ACT = [
  ["Sıfırın anlamı","a",e1,"Günlük hayatta 0'ın iki farklı anlamını ayırt edeceksiniz.",
-   ["Aşama 1: Her kartta 0'ın neyi anlattığını düşününüz. 0 bir niceliğin hiç olmadığını anlatıyorsa “Hiç yok”, altı ve üstü olan seçilmiş bir yer ise “Başlangıç noktası” düğmesine basınız.","Sekiz kartı da işaretleyince “Kontrol et” düğmesine basınız. Kırmızı kartlarda seçiminizi değiştirip yeniden kontrol ediniz.","Aşama 2: Kartlardan çıkardığınız kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: Her kartta 0'ın neyi anlattığını düşününüz. 0 bir niceliğin hiç olmadığını anlatıyorsa “Hiç yok”, altı ve üstü olan seçilmiş bir yer ise “Başlangıç noktası” düğmesine basınız.","Sekiz kartı da işaretleyince “Kontrol edin” düğmesine basınız. Kırmızı kartlarda seçiminizi değiştirip yeniden kontrol ediniz.","Aşama 2: Kartlardan çıkardığınız kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Asansör katları","a",e2,"Giriş katının 0 kabul edildiği bir binada katları tam sayılarla göstereceksiniz.",
-   ["Aşama 1: Görevi okuyup asansör panelinde istenen katın düğmesine basınız. İki kat istenirse iki düğmeye basınız. Sonra “Kontrol et” düğmesine basınız.","Doğru cevaptan sonra “Yeni görev” ile devam ediniz; üç görevi doğru yapınca Aşama 1 biter.","Aşama 2: Görevlerden çıkardığınız kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: Görevi okuyup asansör panelinde istenen katın düğmesine basınız. İki kat istenirse iki düğmeye basınız. Sonra “Kontrol edin” düğmesine basınız.","Doğru cevaptan sonra “Yeni görev” ile devam ediniz; üç görevi doğru yapınca Aşama 1 biter.","Aşama 2: Görevlerden çıkardığınız kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Termometre okuma","c",e3,"Termometreyi dikey bir sayı doğrusu gibi okuyacaksınız.",
    ["Aşama 1 · 1. adım: İki büyük çizgi arasının kaç eş parçaya bölündüğünü sayınız; bir parçanın kaç °C olduğunu yazınız.","Aşama 1 · 2. adım: Sıvının ucundaki sıcaklığı ondalık gösterimle yazınız: işaret (+ ya da −), tam kısım ve ondalık kısım ayrı kutulara yazılır. Üç termometreyi doğru okuyunca Aşama 1 biter.","Aşama 2: Hangi sıcaklığın daha soğuk olduğunu açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Çekirgenin sıçrayışları","a",e4,"Eşit sıçrayışlarla ilerleyen çekirgenin uğradığı bir noktanın sayısını bulacaksınız.",
@@ -1303,15 +1303,15 @@ const ACT = [
  ["Rasyonel sayıyı yerleştir","c",e7,"Verilen rasyonel sayıyı sayı doğrusunda göstereceksiniz.",
    ["Aşama 1: Sayının hangi ardışık iki tam sayı arasında olduğunu bulup sayı doğrusunda o aralığa dokununuz.","Aşama 2: Aralık, paydadaki sayı kadar eş parçaya bölünür. Parçaları sayıp doğru çentiğe dokununuz."],"Doğru çentiğe dokununca etkinlik tamamlanır. “Yeni sayı” ile tekrar edebilirsiniz."],
  ["Sayıları sınıflandır","b",e8,"Her sayının doğal sayı, tam sayı ya da rasyonel sayı olup olmadığına karar vereceksiniz.",
-   ["Aşama 1: Kesirleri önce sadeleştiriniz. Her kartta sayının ait olduğu bütün türleri işaretleyiniz; bir sayı birden fazla türe ait olabilir.","Paydası 0 olan ifadelerde yalnız “Tanımsız” düğmesini seçiniz. Altı kartı da işaretleyince “Kontrol et” düğmesine basınız.","Aşama 2: Bir kesrin ne zaman tam sayı olduğunu açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: Kesirleri önce sadeleştiriniz. Her kartta sayının ait olduğu bütün türleri işaretleyiniz; bir sayı birden fazla türe ait olabilir.","Paydası 0 olan ifadelerde yalnız “Tanımsız” düğmesini seçiniz. Altı kartı da işaretleyince “Kontrol edin” düğmesine basınız.","Aşama 2: Bir kesrin ne zaman tam sayı olduğunu açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Hata miktarı","b",e9,"Paketlerin hedef kütleden farkını ve hata miktarını bulacaksınız.",
-   ["Aşama 1: “Fark” sütununa tartım ile hedef kütle arasındaki farkı yazınız: fazlaysa pozitif, eksikse negatif.","“Hata miktarı” sütununa farkın mutlak değerini yazınız. Hata miktarı en az olan makineyi seçip “Kontrol et” düğmesine basınız.","Aşama 2: Hata miktarının neden negatif olmadığını açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: “Fark” sütununa tartım ile hedef kütle arasındaki farkı yazınız: fazlaysa pozitif, eksikse negatif.","“Hata miktarı” sütununa farkın mutlak değerini yazınız. Hata miktarı en az olan makineyi seçip “Kontrol edin” düğmesine basınız.","Aşama 2: Hata miktarının neden negatif olmadığını açıklayan seçeneği seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Mutlak değer avı","b",e10,"Mutlak değerin 0'a uzaklık olduğunu kullanarak istenen tam sayıları işaretleyeceksiniz.",
-   ["Aşama 1: Görevi okuyup sayı doğrusunda istenen sayıların çentiklerine dokununuz. Bir seçimi kaldırmak için aynı çentiğe yeniden dokununuz.","“Kontrol et” düğmesine basınız; seçtiğiniz noktaların 0'a uzaklığı doğrunun üstünde gösterilir. Üç görevi doğru yapınca Aşama 1 biter.","Aşama 2: Mutlak değerle ilgili kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: Görevi okuyup sayı doğrusunda istenen sayıların çentiklerine dokununuz. Bir seçimi kaldırmak için aynı çentiğe yeniden dokununuz.","“Kontrol edin” düğmesine basınız; seçtiğiniz noktaların 0'a uzaklığı doğrunun üstünde gösterilir. Üç görevi doğru yapınca Aşama 1 biter.","Aşama 2: Mutlak değerle ilgili kuralı seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Gelir mi, gider mi?","a",e11,"Günlük hayattaki para durumlarını tam sayılarla göstereceksiniz.",
-   ["Aşama 1: Her kartta durumun kazanç mı, kayıp mı, yoksa ikisi de değil mi olduğuna karar verip işaret düğmesini seçiniz.","Kutuya durumu gösteren tam sayıyı yazınız. Altı kartı da doldurunca “Kontrol et” düğmesine basınız.","Aşama 2: 0'ın bu kartlarda ne anlattığını seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: Her kartta durumun kazanç mı, kayıp mı, yoksa ikisi de değil mi olduğuna karar verip işaret düğmesini seçiniz.","Kutuya durumu gösteren tam sayıyı yazınız. Altı kartı da doldurunca “Kontrol edin” düğmesine basınız.","Aşama 2: 0'ın bu kartlarda ne anlattığını seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Maden ocağı asansörü","a",e12,"Kuyu ağzından galeriye inen kafesin aldığı yolu bulacaksınız.",
-   ["Aşama 1: Kafesin alacağı yolu tahmin edip yazınız.","Aşama 2: Düğmelerle kafesi hedef galeriye indiriniz ve “Kontrol et” düğmesine basınız.","Aşama 3: Yolun neden kot sayısından farklı çıktığını açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: Kafesin alacağı yolu tahmin edip yazınız.","Aşama 2: Düğmelerle kafesi hedef galeriye indiriniz ve “Kontrol edin” düğmesine basınız.","Aşama 3: Yolun neden kot sayısından farklı çıktığını açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
  ["Sayılar şeması","b",e13,"Sayıları iç içe dikdörtgenlerden oluşan şemada doğru bölgeye yerleştireceksiniz.",
    ["Aşama 1: Karttaki sayıyı gerekiyorsa sadeleştiriniz ve sayının ait olduğu en içteki bölgeye dokununuz.","Sayı tanımsızsa şemanın yanındaki “Şemada yeri yok” düğmesine basınız. Sekiz kart bitince Aşama 1 biter.","Aşama 2: Şemadan çıkardığınız sonucu seçiniz."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Payda sıfır olursa","b",e14,"Pay sabitken payda küçüldükçe bölümün nasıl değiştiğini ve paydanın neden 0 olamayacağını keşfedeceksiniz.",
@@ -1319,19 +1319,19 @@ const ACT = [
  ["Tam sayılar yetmediğinde","b",e15,"Hiçbir tam sayının sağlamadığı bir çarpma eşitliği için aranan rasyonel sayıyı bulacaksınız.",
    ["Aşama 1: Sayı düğmeleriyle tam sayıları deneyiniz; her deneme tabloya yazılır. Çarpımın hedefi geçtiği yeri bulunca “Bu eşitliği sağlayan tam sayı yok” düğmesine basınız.","Aşama 2: Eşitliği sağlayan sayıyı kesir olarak yazınız.","Aşama 3: Tam sayının neden bulunamadığını açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
  ["Yakınlaştır","c",e16,"İki rasyonel sayı arasında üç farklı rasyonel sayı bulacaksınız.",
-   ["Aşama 1: − ve + düğmeleriyle ya da “Her parçayı ikiye böl” düğmesiyle her birimi eş parçalara bölünüz. İki sayı da bir çentiğe gelince ve aralarında en az 3 çentik olunca “Yakınlaştır” düğmesine basınız.","Aşama 2: Yakınlaştırılmış sayı doğrusunda iki sayının arasındaki çentiklere dokununuz. Dokunduğunuz her çentiğin sayısı altına ve listeye yazılır.","Aşama 3: Parçaları yeniden ikiye bölüp iki sayı arasında kaç sayı olduğunu açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: − ve + düğmeleriyle ya da “Her parçayı ikiye bölün” düğmesiyle her birimi eş parçalara bölünüz. İki sayı da bir çentiğe gelince ve aralarında en az 3 çentik olunca “Yakınlaştır” düğmesine basınız.","Aşama 2: Yakınlaştırılmış sayı doğrusunda iki sayının arasındaki çentiklere dokununuz. Dokunduğunuz her çentiğin sayısı altına ve listeye yazılır.","Aşama 3: Parçaları yeniden ikiye bölüp iki sayı arasında kaç sayı olduğunu açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
  ["Sayı doğrusu dedektifi","c",e17,"Yalnız iki çentiğinin sayısı yazılı bir sayı doğrusunda P noktasının gösterdiği sayıyı bulacaksınız.",
    ["Aşama 1: Sayısı yazılı iki çentik arasında kaç eş parça olduğunu sayıp yalnız bu sayıyı yazınız.","Aşama 2: İki sayı arasındaki uzaklığı ve bir parçanın kaç birim olduğunu kesir olarak (pay ve payda) yazınız.","Aşama 3: En yakın yazılı çentikten P'ye kadar parçaları sayınız. P'nin değerini kesir olarak yazınız: önce işareti (+ ya da −) seçiniz, sonra payı ve paydayı yazınız.","Aşama 4: Yöntemin neden işe yaradığını açıklayınız."],"Dört aşama da tamamlanınca etkinlik biter."],
  ["Uzaklık ölçer","b",e18,"Mutlak değerleri verilen iki sayı arasındaki uzaklığın en az ve en fazla kaç olabileceğini bulacaksınız.",
    ["İşaret düğmeleriyle a ve b'yi 0'ın sağına ya da soluna koyunuz; her durumun uzaklığı tabloya yazılır.","Aşama 1: En fazla uzaklığı yazınız. Aşama 2: En az uzaklığı yazınız.","Aşama 3: En fazla uzaklığın nasıl bulunduğunu açıklayınız."],"Üç aşama da tamamlanınca etkinlik biter."],
  ["Soğuk zincir dolapları","a",e19,"Dolap göstergelerini dikey sayı doğrusunda okuyup her dolaba uygun ürünü seçeceksiniz.",
-   ["Aşama 1: Her dolabın sıcaklığını soldaki dikey sayı doğrusunda bulunuz. Sıcaklık renkli bantlardan birinin içindeyse o ürünü, dışındaysa “Hiçbiri” düğmesini seçiniz.","Dört dolabı da işaretleyince “Kontrol et” düğmesine basınız.","Aşama 2: Negatif sıcaklıkları karşılaştırmayla ilgili soruyu cevaplayınız."],"İki aşama da tamamlanınca etkinlik biter."],
+   ["Aşama 1: Her dolabın sıcaklığını soldaki dikey sayı doğrusunda bulunuz. Sıcaklık renkli bantlardan birinin içindeyse o ürünü, dışındaysa “Hiçbiri” düğmesini seçiniz.","Dört dolabı da işaretleyince “Kontrol edin” düğmesine basınız.","Aşama 2: Negatif sıcaklıkları karşılaştırmayla ilgili soruyu cevaplayınız."],"İki aşama da tamamlanınca etkinlik biter."],
  ["Hata avcısı","c",e20,"Sayılarla ilgili altı ifadenin doğru mu, yanlış mı olduğuna karar vereceksiniz.",
-   ["Aşama 1: Her ifadeyi okuyup “Doğru” ya da “Yanlış” düğmesine basınız. Altısını da işaretleyince “Kontrol et” düğmesine basınız.","Her kartın altında ifadenin gerekçesi çıkar. Kırmızı kartlarda seçiminizi düzeltip yeniden kontrol ediniz.","Aşama 2: Bir ifadenin yanlış olduğunu neyin gösterdiğini seçiniz."],"İki aşama da tamamlanınca etkinlik biter. “Yeni ifadeler” ile devam edebilirsiniz."],
+   ["Aşama 1: Her ifadeyi okuyup “Doğru” ya da “Yanlış” düğmesine basınız. Altısını da işaretleyince “Kontrol edin” düğmesine basınız.","Her kartın altında ifadenin gerekçesi çıkar. Kırmızı kartlarda seçiminizi düzeltip yeniden kontrol ediniz.","Aşama 2: Bir ifadenin yanlış olduğunu neyin gösterdiğini seçiniz."],"İki aşama da tamamlanınca etkinlik biter. “Yeni ifadeler” ile devam edebilirsiniz."],
  ["Rasyonel sayıyı inşa et","c",e21,"Bir rasyonel sayıyı bütünlerle oluşturup sayı doğrusundaki yerini göreceksiniz.",
    ["Aşama 1: Sayıyı göstermek için kaç bütün gerektiğini bulunuz. Her bütün, sayı doğrusunda ardışık iki tam sayının arasını tam olarak kaplar.","Aşama 2: Bütünleri paydadaki sayı kadar eş parçaya ayırınız. Aşama 3: 0'dan başlayarak sayı kadar parçayı boyayınız.","Aşama 4: Sayının hangi ardışık iki tam sayı arasında olduğunu seçiniz."],"Dört aşama da tamamlanınca etkinlik biter."],
  ["Sayı doğrusu yarışı","c",e22,"Sayı doğrusundaki P noktasının gösterdiği sayıyı dört seçenek arasından bularak puan toplayacaksınız.",
-   ["Aşama 1: Oyunun kurallarını, puan örneğini ve örnek soruyu okuyup “Kuralları okudum” düğmesine basınız.","Aşama 2: Seviyelerin açıklamasını okuyup bir seviye seçiniz ve “Oyuna başla” düğmesine basınız.","Her soruda P'nin gösterdiği sayıya dokununuz. Soru, puan, üst üste doğru ve kalan süre ayrı kutularda görünür."],"Oyun 10 soru bitince ya da süre dolunca biter ve sonucunuz gösterilir."],
+   ["Aşama 1: Oyunun kurallarını, puan örneğini ve örnek soruyu okuyup “Kuralları okudum” düğmesine basınız.","Aşama 2: Seviyelerin açıklamasını okuyup bir seviye seçiniz ve “Oyuna başlayın” düğmesine basınız.","Her soruda P'nin gösterdiği sayıya dokununuz. Soru, puan, üst üste doğru ve kalan süre ayrı kutularda görünür."],"Oyun 10 soru bitince ya da süre dolunca biter ve sonucunuz gösterilir."],
 ];
 const idx = document.getElementById("index"), panel = document.getElementById("panel");
 idx.innerHTML = ACT.map((a,i)=>`<li><a role="button" tabindex="0" style="cursor:pointer" data-i="${i}"><span class="n">${i+1}</span><span class="t">${a[0]}<span class="s">Süreç bileşeni ${a[1]}</span></span></a></li>`).join("");
@@ -1366,9 +1366,9 @@ route();
  <div class="kb-satir"><span>Yazı boyutu</span><div class="kb-seg" id="kbBoy"><button data-v="0" aria-label="Normal">A</button><button data-v="1" aria-label="Büyük">A+</button><button data-v="2" aria-label="Çok büyük">A++</button></div></div>
  <div class="kb-satir"><span>Yüksek karşıtlık</span><button class="kb-anahtar" role="switch" data-k="karsit" aria-label="Yüksek karşıtlık"></button></div>
  <div class="kb-satir"><span>Rahat okuma (geniş aralık)</span><button class="kb-anahtar" role="switch" data-k="rahat" aria-label="Rahat okuma"></button></div>
- <div class="kb-satir"><span>Hareketi azalt</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azalt"></button></div>
+ <div class="kb-satir"><span>Hareketi azaltın</span><button class="kb-anahtar" role="switch" data-k="azhareket" aria-label="Hareketi azaltın"></button></div>
  <div class="kb-satir"><span>Tema</span><div class="kb-seg" id="kbTema"><button data-v="">Oto</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
- <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dön</button></div>
+ <div class="kb-alt"><button id="kbTam">Tam ekran</button><button id="kbSifir">Varsayılana dönün</button></div>
 </div>
 <dialog class="kb-yonerge" id="kbYonerge" aria-labelledby="kbYB"><header id="kbYB">Yönerge</header><div class="ic" id="kbYIc"></div>
  <footer><button class="ghost" id="kbYOku">Sesli oku</button><button class="primary" id="kbYKapat">Anladım</button></footer></dialog>
@@ -1489,7 +1489,7 @@ function yonergeMetni(){ const p=$("#panel")||D.body, h=p.querySelector("h2"), g
   if(!g.length&&$(".lead"))g.push(metin($(".lead")));
   return {baslik:metin(h)||D.title, gorev:g}; }
 function yonergeAc(){ const y=yonergeMetni(); $("#kbYB").textContent=y.baslik;
-  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol et</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
+  $("#kbYIc").innerHTML='<p class="gorev"></p><ol><li>Görevi okuyunuz; şekil ya da sayı doğrusu üzerinde deneme yapabilirsiniz.</li><li>Cevabınızı yazıp ya da seçip <b>Kontrol edin</b> düğmesine basınız.</li><li>Geri bildirimi okuyunuz. Yanlışsa ipucuyla yeniden deneyiniz.</li><li><b>Yeni soru</b> ile aynı etkinliği farklı sayılarla tekrarlayabilir, <b>Sonraki</b> ile ilerleyebilirsiniz.</li></ol><p style="font-size:14px;color:var(--muted)">Klavye: Tab ile düğmeler arasında geçiniz, Enter ile seçiniz. Esc menüyü kapatır.</p>';
   $("#kbYIc .gorev").innerHTML=kesH(y.gorev.join(" ").replace(/[<>&]/g,""));
   const d=$("#kbYonerge"); menu(false); if(d.showModal)d.showModal(); else d.setAttribute("open",""); }
 $("#kbYon").onclick=yonergeAc;
