@@ -553,7 +553,7 @@ function sK(x,y,p,q,o={}){const fs=o.fs||17,renk=o.renk?` fill="${o.renk}"`:"",w
 /* Türkçe okunuş: −18 → "eksi on sekiz" */
 function sesle(n){if(n===0)return "sıfır";const B=["","bir","iki","üç","dört","beş","altı","yedi","sekiz","dokuz"],O=["","on","yirmi","otuz","kırk","elli","altmış","yetmiş","seksen","doksan"];
   let a=Math.abs(n);const s=[];const y=Math.floor(a/100);a%=100;if(y)s.push(y===1?"yüz":B[y]+" yüz");const o=Math.floor(a/10);if(o)s.push(O[o]);if(a%10)s.push(B[a%10]);return (n<0?"eksi ":"")+s.join(" ");}
-/* Yazılan cevabı oku: −12, -12, 7/3, −13/5, −2 3/5, 1,5 → [pay, payda] */
+/* Yazılan cevabı oku: −12, -12, 7/3, −13/5, −2 3/5 → [pay, payda] */
 function oku(s){s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g," ").replace(/\s*\/\s*/g,"/");let m;
   if((m=s.match(/^([+-]?)(\d+) (\d+)\/(\d+)$/))){const q=+m[4];if(!q)return null;const a=+m[2]*q+ +m[3];return [m[1]==="-"?-a:a,q];}
   if((m=s.match(/^\(?([+-]?\d+)\)?\/\(?([+-]?\d+)\)?$/))){const q=+m[2];if(!q)return null;return [+m[1],q];}
@@ -945,7 +945,7 @@ function avTur(k,tip,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart avk"></div><div class="stage av"></div><div class="row"><button type="button" class="primary kt">Kontrol edin</button><button type="button" class="ghost tm">Temizle</button></div><div class="fb" hidden></div>`);
   const st=k.querySelector(".av"),kr=k.querySelector(".avk"),f=k.querySelector(".fb");let tur,sec=new Set(),bitti=false,sd;
   const fm=v=>Number.isInteger(v)?T(v):rH(Math.round(v*2),2);
-  if(tip==="K"){const pp=2*ra(1,9)+1,v=pp/2;tur={m:`Mutlak değeri <b>${Math.random()<.5?kH(pp,2):(T(Math.floor(v))+",5")}</b> olan bütün sayılar`,c:[v,-v],k:v};}
+  if(tip==="K"){const pp=2*ra(1,9)+1,v=pp/2;tur={m:`Mutlak değeri <b>${Math.random()<.5?kH(pp,2):(T(Math.floor(v))+kH(1,2))}</b> olan bütün sayılar`,c:[v,-v],k:v};}
   else if(tip==="A"){const kk=ra(2,9);tur={m:`Mutlak değeri <b>${kk}</b> olan bütün tam sayılar`,c:[kk,-kk],k:kk};}
   else{const mm=ra(3,5);const c=[];for(let x=-(mm-1);x<=mm-1;x++)c.push(x);tur={m:`Mutlak değeri <b>${denT(mm)} küçük</b> olan bütün tam sayılar`,c,k:mm};}
   kr.innerHTML=`<small>Av kartı</small><p>${tur.m}</p>${tip==="K"?"<p class='ipucu'>Bu doğruda her birim iki eş parçaya (yarımlara) bölündü.</p>":""}`;
@@ -987,7 +987,7 @@ const e_av=p=>{const D=defterY(["Aranan","Bulunan sayılar","Kaç tane?"]);const
 const KUTU_H={
   d:[[7,1],[0,1],[15,5],[6,6],[0,11],[24,8],[12,1]],
   t:[[-3,1],[-8,2],[-1,1],[-12,4],[-20,5],[-15,1]],
-  r:[[-9,7],[-10,4],[7,8],[11,3],[-5,6],[34,10,"3,4"],[-15,10,EKSI+"1,5"]],
+  r:[[-9,7],[-10,4],[7,8],[11,3],[-5,6],[7,2],[-7,3]],
   y:[[1,0],[-7,0],[12,0]]};
 const kKart=c=>c[2]?c[2]:c[1]===1?T(c[0]):(c[0]<0?EKSI:"")+kH(Math.abs(c[0]),c[1]);
 const kTur=c=>c[1]===0?"y":c[0]%c[1]!==0?"r":c[0]/c[1]>=0?"d":"t";
@@ -1381,7 +1381,7 @@ const IFADE=[
   ()=>{const a=ra(2,9),q=ra(2,5);return rastgele([{m:`${EKSI}${kH(a*q,q)} bir tam sayıdır.`,d:true,a:`${EKSI}${kH(a*q,q)} = ${T(-a)}.`},{m:`${EKSI}${kH(a*q+1,q)} bir tam sayıdır.`,d:false,a:"Pay, paydanın katı değil; bu sayı iki tam sayı arasında kalır."}]);},
   ()=>rastgele([{m:"0 pozitif bir tam sayıdır.",d:false,a:"0'ın işareti yoktur; ne pozitif ne negatiftir."},{m:"0 negatif bir tam sayıdır.",d:false,a:"0'ın işareti yoktur; ne pozitif ne negatiftir."},{m:"0 bir doğal sayıdır.",d:true,a:"0 bir doğal sayıdır; aynı zamanda tam sayı ve rasyonel sayıdır."}]),
   ()=>{const x=ra(2,125);return rastgele([{m:`|${T(-x)}| = ${x}`,d:true,a:`${T(-x)}, 0'a ${x} birim uzaklıktadır.`},{m:`|${T(-x)}| = ${T(-x)}`,d:false,a:"Mutlak değer negatif olamaz."}]);},
-  ()=>{const q=ra(2,9);let a;do{a=ra(1,3*q);}while(gcd(a,q)!==1||a%q===0);const d=ra(1,9)+",5";return rastgele([{m:`|${EKSI}${kH(a,q)}| = ${kH(a,q)}`,d:true,a:`${EKSI}${kH(a,q)}, 0'a ${kH(a,q)} birim uzaklıktadır.`},{m:`|${EKSI}${kH(a,q)}| = ${EKSI}${kH(a,q)}`,d:false,a:"Mutlak değer negatif olamaz."},{m:`|${kH(a,q)}| = |${EKSI}${kH(a,q)}|`,d:true,a:"Ters işaretli sayıların mutlak değerleri eşittir."},{m:`|${EKSI}${d}| = ${d}`,d:true,a:`${EKSI}${d}, 0'a ${d} birim uzaklıktadır.`},{m:`|${EKSI}${d}| = ${EKSI}${d}`,d:false,a:"Mutlak değer negatif olamaz."}]);},
+  ()=>{const q=ra(2,9);let a;do{a=ra(1,3*q);}while(gcd(a,q)!==1||a%q===0);const d=ra(1,9)+kH(1,2);return rastgele([{m:`|${EKSI}${kH(a,q)}| = ${kH(a,q)}`,d:true,a:`${EKSI}${kH(a,q)}, 0'a ${kH(a,q)} birim uzaklıktadır.`},{m:`|${EKSI}${kH(a,q)}| = ${EKSI}${kH(a,q)}`,d:false,a:"Mutlak değer negatif olamaz."},{m:`|${kH(a,q)}| = |${EKSI}${kH(a,q)}|`,d:true,a:"Ters işaretli sayıların mutlak değerleri eşittir."},{m:`|${EKSI}${d}| = ${d}`,d:true,a:`${EKSI}${d}, 0'a ${d} birim uzaklıktadır.`},{m:`|${EKSI}${d}| = ${EKSI}${d}`,d:false,a:"Mutlak değer negatif olamaz."}]);},
   ()=>{const q=ra(2,7),w=ra(1,4);let r;do{r=ra(1,q-1);}while(gcd(r,q)!==1);const s=`${EKSI}${w}${kH(r,q)}`;return rastgele([{m:`${s} sayısı ${T(-w-1)} ile ${T(-w)} arasındadır.`,d:true,a:"“−” işareti sayının tamamına aittir."},{m:`${s} sayısı ${T(-w)} ile ${T(-w+1)} arasındadır.`,d:false,a:`${s}, ${T(-w-1)} ile ${T(-w)} arasındadır; “−” işareti sayının tamamına aittir.`}]);},
   ()=>{const x=ra(1,12);return rastgele([{m:`${kH(x,0)} bir rasyonel sayıdır.`,d:false,a:"Payda 0 olamaz; bu ifade tanımsızdır."},{m:`${kH(0,x)} bir rasyonel sayıdır.`,d:true,a:`${kH(0,x)} = 0 ve 0 bir rasyonel sayıdır.`}]);},
   ()=>{const b=ra(2,9);let a;do{a=ra(1,9);}while(gcd(a,b)!==1||a===b);return rastgele([{m:`${EKSI}${kH(a,b)} ile ${kH(a,EKSI+b)} aynı noktayı gösterir.`,d:true,a:"“−” işaretinin yeri sayıyı değiştirmez."},{m:`${EKSI}${kH(a,b)} ile ${kH(EKSI+a,EKSI+b)} aynı noktayı gösterir.`,d:false,a:"Pay da payda da negatif olunca sayı pozitif olur."}]);},
