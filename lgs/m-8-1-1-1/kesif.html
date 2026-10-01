@@ -298,6 +298,9 @@ body{background:var(--bg)}
 .ta-durum{border:1.5px solid color-mix(in srgb,var(--acc) 30%,var(--line));background:color-mix(in srgb,var(--acc) 6%,var(--card));border-radius:12px;padding:8px 12px;margin:0 0 12px}
 .ta-durum>b{display:block;font:800 12.5px Nunito,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:2px}.ta-durum p{margin:0;font-size:16.5px;line-height:1.45}
 
+/* karekök (01.10.2026) */
+.krk{display:inline-flex;align-items:flex-start;white-space:nowrap;vertical-align:baseline}.krk::before{content:"√";line-height:1.12;margin-right:-.04em;font-weight:inherit}.krk>span{border-top:.075em solid currentColor;padding:.07em .1em 0 .06em;line-height:1.12}.krk .frac{margin-top:.12em}.krk:has(>span>.frac){align-items:stretch}.krk:has(>span>.frac)::before{font-size:2.15em;line-height:1;margin-top:-.02em;transform:scaleX(.62);transform-origin:left top;margin-right:-.3em}.krk>span sup{vertical-align:.32em;font-size:.68em;line-height:0}
+
 /* TA-SON */
 
 /* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
@@ -1523,7 +1526,7 @@ kesifBaslat(ACT,{baslik:"Çarpanlar Keşif Atölyesi",kisa:"Çarpanlar Keşif At
   const reOp=new RegExp("[ \\t]+(["+OP+"])[ \\t]+","g");
   // ":" yalnız sayılar arasında bölme işaretidir (düz yazıdaki iki nokta etkilenmez)
   const reBol=/([\d)])[ \t]+:[ \t]+(?=[\d(−])/g;
-  const ATOM=el=>el.nodeType===1&&(/^(SUP|SUB)$/.test(el.tagName)||el.classList.contains("frac")||el.classList.contains("kes")||el.classList.contains("nw-islem"));
+  const ATOM=el=>el.nodeType===1&&(/^(SUP|SUB)$/.test(el.tagName)||el.classList.contains("frac")||el.classList.contains("kes")||el.classList.contains("krk")||el.classList.contains("nw-islem"));
   const ATLA=/^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|SVG|CANVAS|CODE|PRE)$/i;
   function metin(s){return s.replace(reOp,NB+"$1"+NB).replace(reBol,"$1"+NB+":"+NB).replace(/\|\u00a0/g,"|\u2060\u00a0").replace(/([“"(\[])([+−·×:=]) (?=[\d(])/g,"$1$2"+NB);}  // "|" sonrasında satır kırılabilir; WJ ile yapıştırılır (mutlak değer)
   function isle(kok){
@@ -1534,7 +1537,7 @@ kesifBaslat(ACT,{baslik:"Çarpanlar Keşif Atölyesi",kisa:"Çarpanlar Keşif At
     for(const t of tl){const y=metin(t.data);if(y!==t.data)t.data=y;}
     // 2) atomları bitişik metinle birleştir
     const ebeveyn=new Set();
-    kok.querySelectorAll("sup,sub,.frac,.kes").forEach(a=>{if(!a.closest("svg,.nw-islem")&&a.parentElement&&!(a.parentElement.classList.contains("frac")||a.parentElement.parentElement&&a.parentElement.parentElement.classList.contains("frac")))ebeveyn.add(a.parentElement);});
+    kok.querySelectorAll("sup,sub,.frac,.kes,.krk").forEach(a=>{if(!a.closest("svg,.nw-islem")&&a.parentElement&&!(a.parentElement.classList.contains("frac")||a.parentElement.parentElement&&a.parentElement.parentElement.classList.contains("frac")))ebeveyn.add(a.parentElement);});
     if(ATOM(kok)&&kok.parentElement)ebeveyn.add(kok.parentElement);
     ebeveyn.forEach(yapistir);
     // 3) işaretle başlayan öğeden (<small>= 16</small>) önceki boşluk da bölünmez
