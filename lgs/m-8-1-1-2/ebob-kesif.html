@@ -542,8 +542,11 @@ function kesifBaslat(ACT,BILGI){
     kok.querySelector(".yon").onclick=()=>yonergeEkrani(i,tekMod);
     try{a.ciz(kok.querySelector("#act"));}catch(err){kok.querySelector("#act").innerHTML=`<div class="fb no">Bu etkinlik yüklenirken bir sorun oluştu: ${String(err&&err.message||err)}</div>`;console.error(err);}
     window.scrollTo(0,0);}
-  window.addEventListener("kesif-tekrar",()=>{const m=location.hash.match(/^#e(\d+)(-k)?$/);if(m)etkinlik(+m[1]-1);});
-  function yol(){const m=location.hash.match(/^#e(\d+)(-k)?$/);const i=m?+m[1]-1:-1;
+  /* 01.10.2026: karekod adresi ?e=5 (kitaptan tıklanınca ?e=5&k=1); eski #e5 / #e5-k biçimi de okunur */
+  function hedef(){const q=new URLSearchParams(location.search);if(q.has("e")&&/^\d+$/.test(q.get("e")))return {i:+q.get("e")-1,k:q.get("k")==="1"};
+    const m=location.hash.match(/^#e(\d+)(-k)?$/);return m?{i:+m[1]-1,k:!!m[2]}:{i:-1,k:false};}
+  window.addEventListener("kesif-tekrar",()=>{const h=hedef();if(h.i>=0)etkinlik(h.i);});
+  function yol(){const H=hedef();const m=H.i>=0?[null,String(H.i+1),H.k?"-k":undefined]:null;const i=H.i;
     if(i>=0&&i<ACT.length){yonergeEkrani(i,true);if(m[2])kitapUyari(`Keşfetme Etkinliği ${i+1} · ${ACT[i].ad}`);}else liste();}
   window.addEventListener("hashchange",yol);yol();
 }
@@ -1641,6 +1644,85 @@ const ACT=[
  {ad:"EBOB Düellosu",amac:"EBOB'u hızlı bulmanın kısa yollarını bilgisayara karşı bir oyunda kullanmak.",adimlar:ynr("Bilgisayara karşı EBOB düellosu yapacaksınız.","Kurallar: 5 tur oynanır; süre çubuğu dolmadan doğru EBOB'a dokunan turu alır. Yanlış cevap turu bilgisayara verir. En az 3 tur kazanan düelloyu kazanır."),ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"EBOB Keşif Atölyesi",kisa:"EBOB Keşif Atölyesi",kod:"M.8.1.1.2",ust:"LGS · 8. Sınıf · Çarpanlar ve Katlar · M.8.1.1.2 · Fasikül 2",
   aciklama:"Ortak bölenler ve EBOB için yirmi keşfetme etkinliği: her biri farklı bir düzenek; üç aşamada deneyiniz, kuralı bulunuz ve kendinizi deneyiniz."});
+
+/* İŞLEM BÖLÜNMEZ (01.10.2026, ANA_KURALLAR §5.x-5)
+   Bir işlem (7⁰ = 1, (−4)⁰ = 1, 2/5 · 3 …) satır sonunda asla ikiye bölünmez.
+   1) Metinde işlem işaretlerinin (= ≠ + − · : × < > ≤ ≥ ≈) iki yanındaki boşluklar bölünmez boşluğa çevrilir.
+   2) Üs (sup/sub), kesir (.frac) ve bunlara bitişik metin tek bir "nowrap" kutuya alınır.
+   Virgülden sonraki boşluk bölünebilir kalır; böylece uzun işlem dizileri satırlara işlem işlem dağılır (alt alta).
+   Kitap (PDF) ve çevrim içi sayfaların hepsinde aynı betik çalışır. */
+(function(){
+  const NB=" ";
+  const OP="=≠+−·×<>≤≥≈:";  // ":" yalnız iki yanında boşluk varken (düz yazıda iki noktadan önce boşluk olmaz)
+  const reOp=new RegExp("[ \\t]+(["+OP+"])[ \\t]+","g");
+  // ":" yalnız sayılar arasında bölme işaretidir (düz yazıdaki iki nokta etkilenmez)
+  const reBol=/([\d)])[ \t]+:[ \t]+(?=[\d(−])/g;
+  const ATOM=el=>el.nodeType===1&&(/^(SUP|SUB)$/.test(el.tagName)||el.classList.contains("frac")||el.classList.contains("kes")||el.classList.contains("nw-islem"));
+  const ATLA=/^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|SVG|CANVAS|CODE|PRE)$/i;
+  function metin(s){return s.replace(reOp,NB+"$1"+NB).replace(reBol,"$1"+NB+":"+NB).replace(/\|\u00a0/g,"|\u2060\u00a0").replace(/([“"(\[])([+−·×:=]) (?=[\d(])/g,"$1$2"+NB);}  // "|" sonrasında satır kırılabilir; WJ ile yapıştırılır (mutlak değer)
+  function isle(kok){
+    if(!kok||kok.nodeType!==1||ATLA.test(kok.tagName)||kok.closest&&kok.closest("svg,.nw-islem"))return;
+    // 1) metin düğümleri
+    const w=document.createTreeWalker(kok,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;return !p||p.closest("script,style,textarea,svg,code,pre")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+    const tl=[];while(w.nextNode())tl.push(w.currentNode);
+    for(const t of tl){const y=metin(t.data);if(y!==t.data)t.data=y;}
+    // 2) atomları bitişik metinle birleştir
+    const ebeveyn=new Set();
+    kok.querySelectorAll("sup,sub,.frac,.kes").forEach(a=>{if(!a.closest("svg,.nw-islem")&&a.parentElement&&!(a.parentElement.classList.contains("frac")||a.parentElement.parentElement&&a.parentElement.parentElement.classList.contains("frac")))ebeveyn.add(a.parentElement);});
+    if(ATOM(kok)&&kok.parentElement)ebeveyn.add(kok.parentElement);
+    ebeveyn.forEach(yapistir);
+    // 3) işaretle başlayan öğeden (<small>= 16</small>) önceki boşluk da bölünmez
+    kok.querySelectorAll("*").forEach(el=>{const o=el.previousSibling;if(!o||o.nodeType!==3||!/[ \t\n]+$/.test(o.data))return;
+      if(/^[ \t\n]+$/.test(o.data)&&!o.previousSibling)return;
+      const t=(el.textContent||"").trimStart();if(t&&"=≠+·×<>≤≥≈:".includes(t[0])&&/^[=≠+·×<>≤≥≈:][ \u00a0]/.test(t))o.data=o.data.replace(/[ \t\n]+$/,NB);});
+    // 5) yalnız boşluktan oluşan düğüm: önceki öğe işaretle bitiyorsa ("… 3 ·" + " " + "C = 12") bölünmez
+    kok.querySelectorAll("*").forEach(el=>{const o=el.nextSibling;if(!o||o.nodeType!==3||!/^[ \t\n]+$/.test(o.data)||!o.nextSibling)return;
+      const t=(el.textContent||"").replace(/[ \t\n]+$/,"");if(/[ \u00a0][=≠+−·×<>≤≥≈:]$/.test(t))o.data=NB;});
+    // 4) düğüm sınırında kalan işaret: "… 3 ·" + " C = 12" ya da "A = 3" + " · C"
+    tl.forEach(t=>{if(!t.isConnected)return;let y=t.data;
+      y=y.replace(/(^|[ \u00a0])([=≠+−·×<>≤≥≈:])[ \t\n]+$/,"$1$2"+NB);
+      y=y.replace(/^[ \t\n]+([=≠+·×<>≤≥≈:])(?=[ \u00a0]|$)/,NB+"$1");
+      if(y!==t.data)t.data=y;});
+  }
+  function yapistir(p){
+    if(p.closest(".nw-islem")||p.closest(".frac"))return;
+    const d=[...p.childNodes];let i=0;
+    while(i<d.length){
+      if(!ATOM(d[i])||d[i].classList&&d[i].classList.contains("nw-islem")){i++;continue;}
+      // sola: bitişik metin parçası (son boşluktan sonrası)
+      let bas=i, sagSon=i;
+      let solMetin=null, solKes=0;
+      if(i>0&&d[i-1].nodeType===3){const s=d[i-1].data;const m=s.match(/[^ \t\n\r]*$/);if(m&&m[0].length){solMetin=d[i-1];solKes=s.length-m[0].length;}}
+      // sağa: atom/metin zinciri
+      let j=i+1, sagMetin=null, sagKes=0;
+      while(j<d.length){
+        const n=d[j];
+        if(ATOM(n)){sagSon=j;j++;continue;}
+        if(n.nodeType===3){
+          const m=n.data.match(/^[^ \t\n\r]*/);const k=m?m[0].length:0;
+          if(k===n.data.length&&j+1<d.length&&ATOM(d[j+1])){sagSon=j;j++;continue;} // tamamı bitişik, arkasında yine atom
+          if(k>0){sagMetin=n;sagKes=k;}
+        }
+        break;
+      }
+      const sp=document.createElement("span");sp.className="nw-islem";
+      p.insertBefore(sp,d[bas]);
+      if(solMetin){const r=solMetin.splitText(solKes);sp.appendChild(r);}
+      for(let x=bas;x<=sagSon;x++)sp.appendChild(d[x]);
+      if(sagMetin){const kalan=sagMetin.splitText(sagKes);sp.appendChild(sagMetin);d[j]=kalan;}
+      i=sagSon+1;
+    }
+  }
+  const st=document.createElement("style");
+  st.textContent=".nw-islem{white-space:nowrap}";
+  (document.head||document.documentElement).appendChild(st);
+  window.islemTut=isle;
+  let bekle=false;const kuyruk=new Set();
+  function calis(){bekle=false;gozcu.disconnect();kuyruk.forEach(n=>{try{isle(n.nodeType===1?n:n.parentElement)}catch(e){}});kuyruk.clear();gozcu.observe(document.body,{childList:true,subtree:true,characterData:true});}
+  const gozcu=new MutationObserver(ms=>{for(const m of ms){if(m.type==="characterData")kuyruk.add(m.target.parentElement);else m.addedNodes.forEach(n=>kuyruk.add(n.nodeType===1?n:n.parentElement));}if(!bekle){bekle=true;Promise.resolve().then(calis);}});
+  function basla(){isle(document.body);gozcu.observe(document.body,{childList:true,subtree:true,characterData:true});}
+  if(document.body)basla();else document.addEventListener("DOMContentLoaded",basla);
+})();
 
 /* Tek adım düzeni (30.09.2026) */
 asamali=adimli;
