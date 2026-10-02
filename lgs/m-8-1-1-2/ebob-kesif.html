@@ -310,6 +310,9 @@ body{background:var(--bg)}
 .ta-durum{border:1.5px solid color-mix(in srgb,var(--acc) 30%,var(--line));background:color-mix(in srgb,var(--acc) 6%,var(--card));border-radius:12px;padding:8px 12px;margin:0 0 12px}
 .ta-durum>b{display:block;font:800 12.5px Nunito,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:2px}.ta-durum p{margin:0;font-size:16.5px;line-height:1.45}
 
+/* karekök (01.10.2026) */
+.krk{display:inline-flex;align-items:flex-start;white-space:nowrap;vertical-align:baseline}.krk::before{content:"√";line-height:1.12;margin-right:-.04em;font-weight:inherit}.krk>span{border-top:.075em solid currentColor;padding:.07em .1em 0 .06em;line-height:1.12}.krk .frac{margin-top:.12em}.krk:has(>span>.frac){align-items:stretch}.krk:has(>span>.frac)::before{font-size:2.15em;line-height:1;margin-top:-.02em;transform:scaleX(.62);transform-origin:left top;margin-right:-.3em}.krk>span sup{vertical-align:.32em;font-size:.68em;line-height:0}
+
 /* TA-SON */
 
 /* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
@@ -495,7 +498,7 @@ function sayiSor(kap,ust,dogru,okMsg,ipucu,sonra){
   const d=document.createElement("div");d.className="sor";
   d.innerHTML=`${ust}<div class="row"><input class="ans" inputmode="numeric" aria-label="Cevabın"><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   kap.appendChild(d);const f=d.querySelector(".fb"),inp=d.querySelector(".ans");let den=0,ok=false;
-  const kontrol=()=>{if(!inp.value||ok)return;const v=+inp.value;den++;if(v===dogru){ok=true;fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,500);}else fb(f,false,den>=2?"İpucu: "+ipucu:"Olmadı. Bir daha deneyiniz.");};
+  const kontrol=()=>{if(!inp.value||ok)return;const v=+inp.value;den++;if(v===dogru){ok=true;fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,500);}else fb(f,false,den>=3?"Yeniden deneyiniz. Doğru cevap: "+dogru:"Yeniden deneyiniz.");};
   d.querySelector(".k").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};
   return d;
 }
@@ -616,10 +619,10 @@ function asamali(p,adlar=A8_ADLAR){document.body.classList.remove("ta-mod");
       else setTimeout(()=>s.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"}),120);
       return g;},
     kural(k,o={}){return S.ac(o.n||2,{ne:o.ne||"Aşama 1'de gördüklerinden kuralı çıkaracaksınız.",
-      nasil:o.nasil||["Soruyu okuyunuz. Yukarıdaki deney defterine ve çizime bakabilirsiniz.","Bir seçeneğe dokununuz. Yanlış seçerseniz hatanızı gösteren ipucu çıkar; ipucunu okuyup başka bir seçenek deneyiniz."],
+      nasil:o.nasil||["Soruyu okuyunuz. Yukarıdaki deney defterine ve çizime bakabilirsiniz.","Bir seçeneğe dokununuz. Yanlış seçerseniz başka bir seçenek deneyiniz."],
       biter:o.biter||`${k>1?k+" soruyu da":"Soruyu"} doğru cevaplayınca Aşama ${(o.n||2)+1} açılır.`});},
     son(o={}){return S.ac(o.n||3,{ne:o.ne||"Bulduğunuz kuralı yeni bir soruda kullanacaksınız.",
-      nasil:o.nasil||["Soruyu dikkatle okuyunuz.","Cevabınızı kutuya yazınız ve “Kontrol edin” düğmesine basınız. Yanlışsa ipucu çıkar; ipucuna göre yeniden deneyiniz."],
+      nasil:o.nasil||["Soruyu dikkatle okuyunuz.","Cevabınızı kutuya yazınız ve “Kontrol edin” düğmesine basınız. Yanlışsa yeniden deneyiniz."],
       biter:o.biter||"Doğru cevabı yazınca etkinlik biter ve “Ne öğrendim?” kartı açılır."});},
     /* Tahmin: isteğe bağlı; seçilmese de deney yapılabilir. Aşama 2 açılınca tahmin sonuçla karşılaştırılır. */
     tahmin(k,soru,secs,dogru,sonuc){const d=document.createElement("div");d.className="a8-tahmin";
@@ -638,15 +641,15 @@ function asamali(p,adlar=A8_ADLAR){document.body.classList.remove("ta-mod");
       kap.appendChild(d);const f=d.querySelector(".fb");let bitti=false;
       d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;const s=L[+b.dataset.i];
         if(s.d){bitti=true;b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,`<b>Doğru.</b> ${ok}`);bip(760,.12);sonra&&setTimeout(sonra,500);}
-        else{b.classList.add("yanlis");b.disabled=true;fb(f,false,`<b>Bu seçenek doğru değil.</b> ${s.ip||"Deney defterindeki satırlara bir daha bakınız ve başka bir seçenek deneyiniz."}`);bip(220,.15,"triangle");}});
+        else{b.classList.add("yanlis");b.disabled=true;fb(f,false,`<b>Bu seçenek doğru değil.</b> Yeniden deneyiniz.`);bip(220,.15,"triangle");}});
       return d;},
     /* Sayı cevaplı soru: yanlışta önce özel ipucu (hata türü), sonra genel ipucu gösterilir */
     sayi(kap,ust,dogru,ok,ipucu,sonra,ozel){const d=document.createElement("div");d.className="sor a8-sayi";
       d.innerHTML=`${ust}<div class="row"><label class="a8-cvp">Cevabınız: <input class="ans" inputmode="numeric" autocomplete="off"></label><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
-      kap.appendChild(d);const f=d.querySelector(".fb"),inp=d.querySelector(".ans");let bitti=false;
+      kap.appendChild(d);const f=d.querySelector(".fb"),inp=d.querySelector(".ans");let bitti=false,yd=0;
       const kontrol=()=>{if(bitti)return;const h=inp.value.replace(/[\s.]/g,"");if(!h){fb(f,false,"Önce cevabınızı kutuya yazınız.");return;}const v=+h;
         if(v===dogru){bitti=true;inp.disabled=true;fb(f,true,`<b>Doğru.</b> ${ok}`);bip(880,.2);sonra&&setTimeout(sonra,600);}
-        else{const o=ozel&&ozel(v);fb(f,false,`<b>${h} doğru değil.</b> ${o?o+" ":""}İpucu: ${ipucu}`);bip(220,.15,"triangle");}};
+        else{const o=ozel&&ozel(v);fb(f,false,`<b>${h} doğru değil.</b> ${(++yd)>=3?"Yeniden deneyiniz. Doğru cevap: "+dogru:"Yeniden deneyiniz."}`);bip(220,.15,"triangle");}};
       d.querySelector(".k").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;},
     bitir(kural){tamamla(F.length);serit(F.length+1);const d=document.createElement("section");d.className="ogrendim";
       d.innerHTML=`<div class="og-bas">Ne öğrendim?</div><p>${kural}</p><div class="row"><button class="primary tekrar">Etkinliği baştan yapın</button></div>`;
@@ -743,7 +746,7 @@ function adimli(p){document.body.classList.add("ta-mod");
         d.innerHTML=`<p class="soru">${soru}</p><div class="secler">${L.map((s,i)=>`<button class="sec" data-i="${i}">${s.t}</button>`).join("")}</div><div class="fb" hidden></div>`;kap.appendChild(d);
         const f=d.querySelector(".fb");let kl=false;d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(kl)return;const s=L[+b.dataset.i];
           if(s.d){kl=true;b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,`<b>Doğru.</b> ${ok}`);bip(760,.12);bitti(ye,"");sonra&&setTimeout(()=>{sonra();cizAlt();},300);}
-          else{b.classList.add("yanlis");b.disabled=true;fb(f,false,`<b>Bu seçenek doğru değil.</b> ${s.ip||"İpucunu okuyunuz ve başka bir seçenek deneyiniz."}`);bip(220,.15,"triangle");}});return d;}
+          else{b.classList.add("yanlis");b.disabled=true;fb(f,false,`<b>Bu seçenek doğru değil.</b> Yeniden deneyiniz.`);bip(220,.15,"triangle");}});return d;}
       kuralNo++;if(kuralNo>1)oncekiBitti();
       const e=ekran("kural",kuralSay>1?`Kuralı bulun · Soru ${kuralNo}`:"Kuralı bulun",{simdi:"Soruyu okuyunuz ve bir seçeneğe dokununuz. Deneyde bulduklarınız üstteki “Şimdiye kadar” kutusunda.",
         sonra:kuralNo<kuralSay?"Doğru seçeneği bulunca sıradaki soruya geçebilirsiniz.":"Doğru seçeneği bulunca “Yeni örnek” adımına geçebilirsiniz."});
@@ -753,7 +756,7 @@ function adimli(p){document.body.classList.add("ta-mod");
       e.ic.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(kilit)return;const s=L[+b.dataset.i];
         if(s.d){kilit=true;b.classList.add("dogru");e.ic.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,`<b>Doğru.</b> ${ok}`);bip(760,.12);
           bitti(e,`<b>Kural:</b> ${ok}`);sonra&&setTimeout(()=>{sonra();cizAlt();},300);}
-        else{b.classList.add("yanlis");b.disabled=true;fb(f,false,`<b>Bu seçenek doğru değil.</b> ${s.ip||"Üstteki deney defterine bakınız ve başka bir seçenek deneyiniz."}`);bip(220,.15,"triangle");}});
+        else{b.classList.add("yanlis");b.disabled=true;fb(f,false,`<b>Bu seçenek doğru değil.</b> Yeniden deneyiniz.`);bip(220,.15,"triangle");}});
       if(kuralNo===1){/* deney ekranının "Sonraki" düğmesi bu ekrana götürür */ if(E[cur]&&E[cur].tur==="deney")cizAlt();}
       return e.s;},
     son(o={}){const e=ekran("yeni","Şimdi yeni bir örnek",{simdi:o.ne||"Bulduğunuz kuralı yeni bir örnekte kullanınız. Cevabınızı kutuya yazıp “Kontrol edin” düğmesine basınız.",
@@ -763,10 +766,10 @@ function adimli(p){document.body.classList.add("ta-mod");
     sayi(kap,ust,dogru,ok,ipucu,sonra,ozel){const e=E.find(x=>x.ic===kap)||E[E.length-1];
       const d=document.createElement("div");d.className="sor a8-sayi";
       d.innerHTML=`${ust}<div class="row"><label class="a8-cvp">Cevabınız: <input class="ans" inputmode="numeric" autocomplete="off"></label><button class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
-      kap.appendChild(d);const f=d.querySelector(".fb"),inp=d.querySelector(".ans");let kilit=false;
+      kap.appendChild(d);const f=d.querySelector(".fb"),inp=d.querySelector(".ans");let kilit=false,yd=0;
       const kontrol=()=>{if(kilit)return;const h=inp.value.replace(/[\s.]/g,"");if(!h){fb(f,false,"Önce cevabınızı kutuya yazınız.");return;}const v=+h;
         if(v===dogru){kilit=true;inp.disabled=true;fb(f,true,`<b>Doğru.</b> ${ok}`);bip(880,.2);bitti(e,"");sonra&&setTimeout(()=>{sonra();cizAlt();},300);}
-        else{const oz=ozel&&ozel(v);fb(f,false,`<b>${h} doğru değil.</b> ${oz?oz+" ":""}İpucu: ${ipucu}`);bip(220,.15,"triangle");}};
+        else{const oz=ozel&&ozel(v);fb(f,false,`<b>${h} doğru değil.</b> ${(++yd)>=3?"Yeniden deneyiniz. Doğru cevap: "+dogru:"Yeniden deneyiniz."}`);bip(220,.15,"triangle");}};
       d.querySelector(".k").onclick=kontrol;inp.onkeydown=ev=>{if(ev.key==="Enter")kontrol();};return d;},
     bitir(kural){const e=ekran("son","Ne öğrendim?",{simdi:"Etkinliği bitirdiniz. Aşağıdaki kuralı okuyunuz.",sonra:"İsterseniz etkinliği baştan yapabilir ya da bu sekmeyi kapatıp kitaba dönebilirsiniz.",ileriAd:"Ne öğrendim? →"});
       e.tamam=true;e.ic.innerHTML=`<section class="ogrendim"><div class="og-bas">Ne öğrendim?</div><p>${kural}</p><div class="row"><button class="primary tekrar">Etkinliği baştan yapın</button></div></section>`;
@@ -834,6 +837,16 @@ function asamaliTek(p,o){document.body.classList.add("ta-mod");
 /* ================= M.8.1.1.2 · Fasikül 2 · Ortak Bölenler ve EBOB · 20 Keşfetme Etkinliği =================
    29.09.2026 revizyonu: aşamalı düzen (kesif_8_asama.js), açık yönerge, içeriği gizlemeyen tahmin, etiketli sürgü,
    yönlendirici geri bildirim, madde madde oyun kuralları, üsler HTML'de <sup> ile. */
+/* §5.ip İpucu verilmez (02.10.2026): ortak motordaki "İpucu" metni bu atölyede kullanılmaz. Yanlış seçenekte ve yanlış
+   sayıda yalnız nötr "Yeniden deneyiniz." yazılır; sayı cevaplı soruda 3. yanlıştan sonra yalnız doğru cevap gösterilir. */
+const YD="Yeniden deneyiniz.";
+const notr=S=>{const so=S.soru,sa=S.sayi;
+  S.soru=(kap,soru,secs,ok,sonra)=>so(kap,soru,secs.map((s,i)=>i===0?s:[Array.isArray(s)?s[0]:s,YD]),ok,sonra);
+  S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
+    const kontrol=()=>{const h=inp.value.replace(/[\s.]/g,"");if(!h||+h===dogru||inp.disabled)return asil();yn++;
+      fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
+    kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
+  return S;};
 /* Yardımcılar (yalnız bu dosya) */
 const OB=(a,b)=>divs(gcd(a,b));
 const UST=e=>String(e).split("").map(c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[+c]).join("");
@@ -847,7 +860,7 @@ const togDugme=(kap,ad,deger,fn)=>{const b=document.createElement("button");b.cl
   b.onclick=()=>{const v=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",v);fn(v);};kap.appendChild(b);return b;};
 
 /* 1 · KURDELE MAKASI */
-const e_kurdele=p=>{const S=adimli(p);   /* PİLOT: tek adım düzeni */const A=42,B=63;
+const e_kurdele=p=>{const S=notr(adimli(p));   /* PİLOT: tek adım düzeni */const A=42,B=63;
   const k=S.ac(1,{ne:"42 cm kırmızı ve 63 cm mavi kurdeleyi, hiç artmayacak şekilde aynı uzunlukta parçalara kesmenin bütün yollarını bulacaksınız.",
     durum:"Elinizde <b>42 cm kırmızı</b> ve <b>63 cm mavi</b> olmak üzere iki kurdele var. İki kurdele de hiç artmayacak şekilde, hepsi <b>aynı uzunlukta</b> parçalara kesilecek.<svg viewBox=\"0 0 420 118\" style=\"width:100%;max-width:520px;display:block;margin:8px 0 0\" role=\"img\" aria-label=\"42 cm kırmızı ve 63 cm mavi kurdele\"><text x=\"4\" y=\"20\" font-size=\"19\" font-weight=\"700\" fill=\"currentColor\">Kırmızı: 42 cm</text><rect x=\"4\" y=\"28\" width=\"270\" height=\"22\" rx=\"5\" fill=\"#e03131\"/><text x=\"4\" y=\"82\" font-size=\"19\" font-weight=\"700\" fill=\"currentColor\">Mavi: 63 cm</text><rect x=\"4\" y=\"90\" width=\"405\" height=\"22\" rx=\"5\" fill=\"#1c7ed6\"/></svg>",
     nasil:["“Parça uzunluğu” sürgüsüyle ya da − ve + düğmeleriyle bir uzunluk seçiniz. Makas iki kurdeleyi de bu uzunlukta keser.","Sonda kısa bir parça artarsa o parça kırmızı çizgili görünür; bu uzunluk olmaz.","Hiç parça artmayan uzunluklar deney defterine yazılır."],
@@ -887,7 +900,7 @@ const e_kurdele=p=>{const S=adimli(p);   /* PİLOT: tek adım düzeni */const A=
 };
 
 /* 2 · ORTAK BÖLEN ŞEMASI */
-const e_venn=p=>{const S=asamali(p);const A=24,B=32;
+const e_venn=p=>{const S=notr(asamali(p));const A=24,B=32;
   const k=S.ac(1,{ne:"24'ü ve 32'yi bölen sayıları iç içe geçmiş iki dairede toplayarak ortak bölenleri bulacaksınız.",
     nasil:["“Sıradaki kart”taki sayıya bakınız.","Sayı yalnız 24'ü bölüyorsa sol daireye, yalnız 32'yi bölüyorsa sağ daireye, ikisini de bölüyorsa iki dairenin kesiştiği “Ortak” bölgeye dokununuz. Hiçbirini bölmüyorsa alttaki şeride dokununuz.","Bütün kartlar yerleşince ortak bölgedeki en büyük sayıya dokununuz."],
     biter:bitG(3)});
@@ -916,7 +929,7 @@ const e_venn=p=>{const S=asamali(p);const A=24,B=32;
       const pt=svgNokta(sv,e),n=KART[i];const d1=Math.hypot(pt.x-C1.x,pt.y-C1.y)<=R,d2=Math.hypot(pt.x-C2.x,pt.y-C2.y)<=R;
       const r=d1&&d2?"o":d1?"a":d2?"b":"d";const dog=bolge(n);
       const aciklama=`${n}, ${A%n?ek(A,"i")+" bölmez":ek(A,"i")+" böler"} ve ${B%n?ek(B,"i")+" bölmez":ek(B,"i")+" böler"}.`;
-      if(r===dog){yer[r].push(n);i++;fb(f,true,aciklama+" ✓");bip(640,.08);}else{fb(f,false,aciklama+" Bu yüzden başka bir bölgeye gitmeli.");bip(220,.15,"triangle");}
+      if(r===dog){yer[r].push(n);i++;fb(f,true,aciklama+" ✓");bip(640,.08);}else{fb(f,false,aciklama+" Yeniden deneyiniz.");bip(220,.15,"triangle");}
       ciz();G.kontrol();};}
   ciz();
   function acikla(){const c=S.kural(2);
@@ -933,7 +946,7 @@ const e_venn=p=>{const S=asamali(p);const A=24,B=32;
 };
 
 /* 3 · BÖLEN MERDİVENLERİ (listeleme) */
-const e_merdiven=p=>{const S=asamali(p);const A=50,B=70;
+const e_merdiven=p=>{const S=notr(asamali(p));const A=50,B=70;
   const k=S.ac(1,{ne:"Listeleme yöntemiyle 50 ve 70'in bölenlerini bulup ortak bölenlerini ve EBOB'u belirleyeceksiniz.",
     nasil:["Üstten hangi sayının merdivenini kuracağınızı seçiniz.","Sayı tablosundaki sayılara dokununuz: sayı kalansız bölüyorsa merdivene bir basamak olur.","İki merdiven tamamlanınca iki merdivende de bulunan basamaklara dokunarak aralarına köprü kurunuz."],
     biter:bitG(3)});
@@ -979,7 +992,7 @@ const e_merdiven=p=>{const S=asamali(p);const A=50,B=70;
 };
 
 /* 4 · ALGORİTMA MAKİNESİ */
-const e_algoritma=p=>{const S=asamali(p);const P=[2,3,5,7,11,13];
+const e_algoritma=p=>{const S=notr(asamali(p));const P=[2,3,5,7,11,13];
   const k=S.ac(1,{ne:"Algoritma (bölme) yöntemiyle iki sayının EBOB'unu bulacaksınız.",
     nasil:["Üstten bir sayı çifti seçiniz.","Asal sayı düğmelerine dokunarak iki sayıyı birlikte bölünüz. Makine yalnız <b>iki sayıyı birden</b> bölen asallarla bölmeye izin verir; bölümler tabloya yazılır.","İki sayıyı birden bölen asal kalmayınca “Ortak bölen kalmadı” düğmesine basınız; çizginin sağındaki sayıların çarpımı yazılır."],
     biter:bitG(4)});
@@ -996,11 +1009,11 @@ const e_algoritma=p=>{const S=asamali(p);const P=[2,3,5,7,11,13];
   as.innerHTML=P.map(q=>`<button class="primary" data-q="${q}" style="min-width:48px">${q}</button>`).join("");
   as.querySelectorAll("button").forEach(bt=>bt.onclick=()=>{if(bitti){fb(f,true,"Bu çiftin EBOB'u bulundu. Üstten başka bir çift seçiniz.");return;}const q=+bt.dataset.q;
     if(a%q===0&&b%q===0){a/=q;b/=q;sag.push(q);fb(f,true,`${q} ikisini de böldü: ${a*q} : ${q} = ${a}, ${b*q} : ${q} = ${b}.`);bip(560+sag.length*40,.1);}
-    else if(a%q===0||b%q===0){uyari=true;const bo=a%q===0?a:b,bm=a%q===0?b:a;fb(f,false,`${q}, ${ek(bo,"i")} böler ama ${ek(bm,"i")} bölmez. EBOB bulunurken yalnız <b>ikisini birden</b> bölen asallarla bölünür.`);bip(220,.18,"triangle");}
+    else if(a%q===0||b%q===0){uyari=true;const bo=a%q===0?a:b,bm=a%q===0?b:a;fb(f,false,`${q}, ${ek(bo,"i")} böler ama ${ek(bm,"i")} bölmez. Yeniden deneyiniz.`);bip(220,.18,"triangle");}
     else{fb(f,false,`${q}, ${a} ve ${b} sayılarından hiçbirini bölmez.`);bip(220,.18,"triangle");}
     ciz();G.kontrol();});
   k.querySelector(".bitb").onclick=()=>{if(bitti)return;
-    if(gcd(a,b)>1){fb(f,false,`Hâlâ ${a} ile ${b} sayılarını birlikte bölen bir asal var. Asal düğmelerini küçükten büyüğe deneyiniz.`);bip(220,.18,"triangle");return;}
+    if(gcd(a,b)>1){fb(f,false,`Hâlâ ${a} ile ${b} sayılarını birlikte bölen bir asal var.`);bip(220,.18,"triangle");return;}
     bitti=true;const E=sag.reduce((x,y)=>x*y,1);D.ekle([`${a0} ve ${b0}`,sag.join(", ")||"—",sag.length?`${sag.join(" · ")} = ${E}`:"1"],a0+"-"+b0);
     fb(f,true,`${a} ile ${b} sayılarının 1'den başka ortak böleni yok. <b>EBOB(${a0}, ${b0}) = ${sag.join(" · ")} = ${E}</b>`);bip(880,.25);ciz();G.kontrol();};
   function ciz(){let va=a0,vb=b0,rows="";sag.forEach(q=>{rows+=`<tr><td>${va}</td><td>${vb}</td><td class="bl">${q}</td></tr>`;va/=q;vb/=q;});
@@ -1021,7 +1034,7 @@ const e_algoritma=p=>{const S=asamali(p);const P=[2,3,5,7,11,13];
 };
 
 /* 5 · ASAL KART EŞLEŞTİRME */
-const e_kartlar=p=>{const S=asamali(p);
+const e_kartlar=p=>{const S=notr(asamali(p));
   const RENK={2:"#e03131",3:"#f08c00",5:"#2f9e44",7:"#1c7ed6",11:"#7048e8",13:"#d6336c"};
   const k=S.ac(1,{ne:"İki sayının asal çarpan kartlarını eşleştirerek EBOB'u bulacaksınız.",
     nasil:["Üstten sayı çiftini seçiniz. Her sayı, asal çarpanlarının kartlarıyla gösterilir.","Üst sıradaki bir karta, sonra alt sıradaki <b>aynı asalı</b> gösteren karta dokununuz. Eşleşen iki kart ortadaki “Ortak” rafına tek kart olarak iner.","Eşleşecek kart kalmayınca ortak kartların çarpımı EBOB olarak yazılır."],
@@ -1065,7 +1078,7 @@ const e_kartlar=p=>{const S=asamali(p);
 };
 
 /* 6 · ÜS SÜTUNLARI */
-const e_usler=p=>{const S=asamali(p);
+const e_usler=p=>{const S=notr(asamali(p));
   const R=[{A:{2:3,3:2,5:1},B:{2:5,3:1,7:1}},{A:{2:2,5:2,7:1},B:{2:3,5:1,7:1}},{A:{3:3,11:1},B:{2:1,3:2,13:1}}];
   const deg=m=>Object.entries(m).reduce((s,[q,e])=>s*Number(q)**e,1);
   const k=S.ac(1,{ne:"Üslü yazımda her tabanın hangi kuvvetinin EBOB'a girdiğini bulacaksınız.",
@@ -1088,7 +1101,7 @@ const e_usler=p=>{const S=asamali(p);
       if(e===mn){sec[q]=s;if(e===0){p0=true;fb(f,true,`${q}<sup>0</sup> = 1. ${q} iki sayıda birden bulunmadığı için EBOB'a girmez.`);}else fb(f,true,`${kuv(q,e)} iki sayıda da var; küçük kuvvet ortaktır ✓`);bip(660,.1);
         if(T.every(x=>sec[x])){const yaz_=T.filter(x=>Math.min(A[x]||0,B[x]||0)>0).map(x=>kuv(x,Math.min(A[x],B[x]))).join(" · ");
           D.ekle([`${deg(A)} = ${usl(deg(A))}`,`${deg(B)} = ${usl(deg(B))}`,`${yaz_||"1"} = ${E}`],"r"+r);bip(880,.25);}}
-      else{fb(f,false,`${kuv(q,e)} daha büyük kuvvet: diğer sayıda ${mn===0?`hiç ${q} yok (gizli ${q}<sup>0</sup>)`:`yalnız ${kuv(q,mn)} var`}. İki sayıda da bulunan kuvveti, yani küçük olanı seçiniz.`);bip(220,.15,"triangle");}
+      else{fb(f,false,`${kuv(q,e)} daha büyük kuvvet: diğer sayıda ${mn===0?`hiç ${q} yok (gizli ${q}<sup>0</sup>)`:`yalnız ${kuv(q,mn)} var`}. Yeniden deneyiniz.`);bip(220,.15,"triangle");}
       ciz();G.kontrol();});}
   ciz();
   function acikla(){const c=S.kural(2);
@@ -1105,7 +1118,7 @@ const e_usler=p=>{const S=asamali(p);
 };
 
 /* 7 · PAKETLEME FABRİKASI */
-const e_paket=p=>{const S=asamali(p);const A=132,B=176;
+const e_paket=p=>{const S=notr(asamali(p));const A=132,B=176;
   const k=S.ac(1,{ne:"132 kalem ve 176 silgiyi eşit paketlere ayırırken en az paketi veren paket büyüklüğünü bulacaksınız.",
     nasil:["“Bir paketteki ürün sayısı” sürgüsüyle bir sayı seçiniz. Makine kalemleri ve silgileri ayrı paketlere doldurur; bir pakete tek çeşit ürün konur.","Paketlere sığmayan ürünler kırmızı kutuda “+ artan” olarak görünür.","Hiç ürün artmayan seçimler deftere yazılır; toplam paket sayısını karşılaştırınız."],
     biter:bitG(3)});
@@ -1140,7 +1153,7 @@ const e_paket=p=>{const S=asamali(p);const A=132,B=176;
 };
 
 /* 8 · ŞARTLI KUTULAR */
-const e_sartli=p=>{const S=asamali(p);const A=234,B=390,E=gcd(A,B);
+const e_sartli=p=>{const S=notr(asamali(p));const A=234,B=390,E=gcd(A,B);
   const R=[{m:"Bir kutuya <b>10'dan az</b> kitap konabilir.",f:x=>x<10,sinir:10},{m:"Bir kutuya <b>20'den az</b> kitap konabilir.",f:x=>x<20,sinir:20},
     {m:"Kutudaki kitap sayısı <b>çift</b> ve <b>30'dan az</b> olmalı.",f:x=>x%2===0&&x<30,sinir:30},{m:"Kutu için <b>hiçbir şart yok</b>.",f:()=>true,sinir:81}];
   R.forEach(r=>r.en=Math.max(...divs(E).filter(r.f)));
@@ -1161,7 +1174,7 @@ const e_sartli=p=>{const S=asamali(p);const A=234,B=390,E=gcd(A,B);
     sv.innerHTML=h;st.replaceChildren(sv);
     sv.querySelectorAll("[data-d]").forEach(g=>g.onclick=()=>{if(r>=R.length)return;const d=+g.dataset.d,T=R[r],n=A/d+B/d;
       if(!T.f(d)){fb(f,false,`${d}'er kitap şarta uymuyor. Yeşil alandaki sayılardan birini seçiniz${r===2?" (çift olmalı)":""}.`);bip(220,.15,"triangle");return;}
-      if(d!==T.en){fb(f,false,`${d}'er kitap şarta uyuyor ama ${n} kutu gerekiyor. Kutudaki kitap arttıkça kutu sayısı azalır: şarta uyan daha büyük bir sayı deneyiniz.`);bip(300,.15,"triangle");return;}
+      if(d!==T.en){fb(f,false,`${d}'er kitap şarta uyuyor ama ${n} kutu gerekiyor. Daha az kutu gerektiren bir seçim var. Yeniden deneyiniz.`);bip(300,.15,"triangle");return;}
       D.ekle([T.m.replace(/<[^>]+>/g,""),d,`${A/d} + ${B/d} = ${n}`],"r"+r);fb(f,true,`${d}'er kitap: ${A} : ${d} = ${A/d}, ${B} : ${d} = ${B/d}. Toplam <b>${n}</b> kutu.`);bip(880,.2);r++;ciz();G.kontrol();});}
   ciz();
   function acikla(){const c=S.kural(2);
@@ -1178,7 +1191,7 @@ const e_sartli=p=>{const S=asamali(p);const A=234,B=390,E=gcd(A,B);
 };
 
 /* 9 · EN ÇOK MU EN AZ MI? (bidon grafiği) */
-const e_bidon=p=>{const S=asamali(p);const A=50,B=80;
+const e_bidon=p=>{const S=notr(asamali(p));const A=50,B=80;
   const k=S.ac(1,{ne:"50 L zeytinyağı ve 80 L ayçiçek yağını eş hacimli bidonlara doldururken bidon hacmi ile bidon sayısı arasındaki ilişkiyi grafikte bulacaksınız.",
     nasil:["Bir bidona tek çeşit yağ konur ve hiç yağ artmaz. Bidon hacmi litre cinsinden bir doğal sayıdır.","“Bidon hacmi” sürgüsüyle bir hacim seçiniz.","Hiç yağ artmıyorsa grafiğe bir sütun eklenir; sütunun boyu toplam bidon sayısıdır."],
     biter:bitG(3)});
@@ -1216,7 +1229,7 @@ const e_bidon=p=>{const S=asamali(p);const A=50,B=80;
 };
 
 /* 10 · BUKET ATÖLYESİ */
-const e_buket=p=>{const S=asamali(p);const A=40,B=56;
+const e_buket=p=>{const S=notr(asamali(p));const A=40,B=56;
   const k=S.ac(1,{ne:"40 gül ve 56 laleyle, hiç çiçek artmayacak şekilde yapılabilecek en fazla buketi bulacaksınız.",
     nasil:["Her bukette eşit sayıda gül ve eşit sayıda lale olur; bütün çiçekler kullanılır.","“Buket sayısı” sürgüsüyle bir sayı seçiniz. Çiçekler buketlere sırayla dağıtılır.","Eşit dağıtılamayan çiçekler altta “Artan” olarak görünür. Hiç çiçek artmayan seçimler deftere yazılır."],
     biter:bitG(3)});
@@ -1251,7 +1264,7 @@ const e_buket=p=>{const S=asamali(p);const A=40,B=56;
 };
 
 /* 11 · KALANLI DAĞITIM */
-const e_kalanli=p=>{const S=asamali(p);const A=80,B=93,AR=4,EK=2;
+const e_kalanli=p=>{const S=notr(asamali(p));const A=80,B=93,AR=4,EK=2;
   const eksik=n=>(n-B%n)%n;
   const k=S.ac(1,{ne:"Kalemleri eşit dağıtınca 4 kalem artan, defterleri eşit dağıtmak için 2 defter eksik kalan sınıfın öğrenci sayısını bulacaksınız.",
     nasil:["Öğretmenin 80 kalemi ve 93 defteri var. “Öğrenci sayısı” sürgüsüyle bir sayı seçiniz ve “Dağıt” düğmesine basınız; sonuç deftere yazılır.","Çizimde kutuların üstünde kişi başına düşen sayı yazar. Kesikli kutu, o öğrenciye bir defter eksik kaldığını gösterir.","Doğru öğrenci sayısını bulunca “4 kalemi kenara ayırın” ve “2 defter ekleyin” düğmelerine basınız ve çıkan açıklamayı okuyunuz."],
@@ -1291,7 +1304,7 @@ const e_kalanli=p=>{const S=asamali(p);const A=80,B=93,AR=4,EK=2;
 };
 
 /* 12 · AĞAÇ DİKME SİMÜLATÖRÜ */
-const e_agac=p=>{const S=asamali(p);const L=36;
+const e_agac=p=>{const S=notr(asamali(p));const L=36;
   const k=S.ac(1,{ne:"36 m uzunluğundaki bir yolun kenarına dikilen ağaçların sayısının, aralık sayısına ve yolun uçlarına göre nasıl değiştiğini bulacaksınız.",
     nasil:["“Aralık” sürgüsüyle iki ağaç arasındaki uzaklığı seçiniz.","“Başa dikin” ve “Sona dikin” düğmeleriyle yolun uçlarına ağaç dikilip dikilmeyeceğini seçiniz (yeşil çerçeveli düğme: dikilir).","Aralık yolu eşit bölüyorsa ağaçlar dikilir, aralık ve ağaç sayısı deftere yazılır."],
     biter:bitG(4)});
@@ -1329,7 +1342,7 @@ const e_agac=p=>{const S=asamali(p);const L=36;
 };
 
 /* 13 · KAPALI PİST */
-const e_pist=p=>{const S=asamali(p);const L=40;
+const e_pist=p=>{const S=notr(asamali(p));const L=40;
   const k=S.ac(1,{ne:"Kapalı bir çizgide (dairesel pistte) dikilen bayrak sayısının aralık sayısıyla ilişkisini bulacaksınız.",
     nasil:["Çevresi 40 m olan dairesel bir pistin kenarına eşit aralıklarla bayrak dikilir. “Aralık” sürgüsüyle aralığı seçiniz.","“Pisti açın” düğmesi pisti başlangıç noktasından keser ve düz bir çizgi yapar; “Pisti kapatın” yeniden daire yapar.","Kapalı ve açık pistteki bayrak sayıları deftere yazılır; karşılaştırınız."],
     biter:bitG(3)});
@@ -1367,7 +1380,7 @@ const e_pist=p=>{const S=asamali(p);const L=40;
 };
 
 /* 14 · AYRI YOLLAR MI, BİRLEŞEN YOLLAR MI? */
-const e_bagli=p=>{const S=asamali(p);const A=54,B=42;
+const e_bagli=p=>{const S=notr(asamali(p));const A=54,B=42;
   const k=S.ac(1,{ne:"54 m ve 42 m'lik iki yol ayrıyken ve bir köşede birleşirken dikilen ağaç sayılarını karşılaştıracaksınız.",
     nasil:["Yolların kenarına eşit aralıklarla ağaç dikilir; yolların uçlarına da ağaç dikilir.","Üstten yolların düzenini seçiniz: <b>ayrı</b> ya da <b>köşede birleşen</b>. “Aralık” sürgüsüyle aralığı seçiniz.","Köşedeki ağaç turuncu görünür. Hesap ve ağaç sayısı deftere yazılır."],
     biter:bitG(3)});
@@ -1405,7 +1418,7 @@ const e_bagli=p=>{const S=asamali(p);const A=54,B=42;
 };
 
 /* 15 · TARLA ÇEVRESİ */
-const e_tarla=p=>{const S=asamali(p);const T=[[36,24],[44,32]];
+const e_tarla=p=>{const S=notr(asamali(p));const T=[[36,24],[44,32]];
   const k=S.ac(1,{ne:"Dikdörtgen biçimli bir tarlanın çevresine, köşelere de gelecek şekilde en az ağacı dikmenin yolunu bulacaksınız.",
     nasil:["Üstten tarlayı seçiniz; “Aralık” sürgüsüyle iki ağaç arasındaki uzaklığı seçiniz.","Ağaçlar sol üst köşeden başlayıp çevre boyunca eşit aralıklarla dikilir.","Ağaç gelmeyen köşe kırmızı halkayla gösterilir. Dört köşeye de ağaç gelen seçimler deftere yazılır."],
     biter:bitG(3)});
@@ -1440,7 +1453,7 @@ const e_tarla=p=>{const S=asamali(p);const T=[[36,24],[44,32]];
 };
 
 /* 16 · BİRLEŞTİRME USTASI (boru ekleme) */
-const e_boru=p=>{const S=asamali(p);const A=24,B=42;
+const e_boru=p=>{const S=notr(asamali(p));const A=24,B=42;
   const k=S.ac(1,{ne:"Özdeş boru parçalarını uç uca ekleyerek 24 m ve 42 m'lik iki boru yaparken kaynak sayısının parça sayısıyla ilişkisini ve en az kaynağı bulacaksınız.",
     nasil:["“Parça uzunluğu” sürgüsüyle bir uzunluk seçiniz. Parçalar kesikli kalıbın içine dizilir.","İki parçanın birleştiği her yer bir kaynaktır; kaynaklar turuncu noktayla gösterilir.","Kalıba tam oturmayan parça kırmızı görünür. İki boruya da tam oturan seçimler deftere yazılır."],
     biter:bitG(3)});
@@ -1473,7 +1486,7 @@ const e_boru=p=>{const S=asamali(p);const A=24,B=42;
 };
 
 /* 17 · EBOB PİRAMİDİ (yol oyunu) */
-const e_piramit=p=>{const S=asamali(p);
+const e_piramit=p=>{const S=notr(asamali(p));
   const HAVUZ=[12,14,21,22,24,26,32,33,36,40,42,44,50,54,56,63,70,77,78,80,81,88,91,98,99,100,105,112,132,154];
   const k=S.ac(1,{ne:"Sayı piramidinin tepesinden en altına inerken EBOB puanlarını toplayacak ve en iyi yolu bulmaya çalışacaksınız.",
     nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Tepedeki sayıdan başlarsınız. Her adımda bulunduğunuz kutunun hemen altındaki iki kutudan birine inersiniz (turuncu çerçeveli kutular).</li><li>Her inişte, bulunduğunuz sayı ile indiğiniz sayının EBOB'u kadar puan kazanırsınız. Örnek: 40'tan 12'ye inerseniz EBOB(40, 12) = 4 puan alırsınız.</li><li>En alt sıraya inince oyun biter. Puanınız bu piramitteki en iyi puanla karşılaştırılır; en iyi yol sarı kutularla gösterilir.</li></ol>","Her adımın EBOB'u puan günlüğüne yazılır. Yeni oyun için “Yeni piramit” düğmesine basınız."],
@@ -1493,7 +1506,7 @@ const e_piramit=p=>{const S=asamali(p);
     pr.querySelectorAll(".pk.aday").forEach(b=>b.onclick=()=>{const ri=+b.dataset.r,ji=+b.dataset.j,a=P[ri-1][yol[ri-1]],v=P[ri][ji],g=gcd(a,v);
       if(yol.length===1)gl.innerHTML="";
       yol.push(ji);puan+=g;gl.insertAdjacentHTML("beforeend",`<span>EBOB(${a}, ${v}) = ${g}${v%a===0||a%v===0?" ★":""}</span>`);bip(400+g*6,.1);
-      if(ri===4){biten++;if(puan===eniyiP){enIyi=true;fb(f,true,`Harika! ${puan} puan: bu piramitteki en iyi puan.`);bip(990,.3);}else fb(f,false,`${puan} puan topladınız; en iyi puan ${eniyiP} idi. En iyi yol sarı kutularla gösterildi. İpucu: bir sayı diğerini bölüyorsa (★) EBOB küçük sayının kendisidir. “Yeni piramit” ile tekrar deneyiniz.`);}
+      if(ri===4){biten++;if(puan===eniyiP){enIyi=true;fb(f,true,`Harika! ${puan} puan: bu piramitteki en iyi puan.`);bip(990,.3);}else fb(f,false,`${puan} puan topladınız; en iyi puan ${eniyiP} idi. En iyi yol sarı kutularla gösterildi. “Yeni piramit” ile tekrar deneyiniz.`);}
       ciz();G.kontrol();});
     du.innerHTML=dz(`Puan: <b>${puan}</b>`,son?"Oyun bitti.":"Turuncu çerçeveli kutulardan birini seçiniz.");}
   k.querySelector(".yeni").onclick=yeni;yeni();
@@ -1511,7 +1524,7 @@ const e_piramit=p=>{const S=asamali(p);
 };
 
 /* 18 · FARK KURALI */
-const e_fark=p=>{const S=asamali(p);
+const e_fark=p=>{const S=notr(asamali(p));
   const k=S.ac(1,{ne:"İki sayı arasındaki farkı değiştirerek ortak bölenlerin fark ile ilişkisini bulacaksınız.",
     nasil:["“Küçük sayı (A)” ve “Fark” sürgüleriyle iki sayı kurunuz; büyük sayı B = A + fark olur.","Şeritlerdeki çizgiler EBOB uzunluğundaki parçaları gösterir; sarı parça farktır. Ortak bölenler çizimin altında yazar.","“Deftere yazın” düğmesiyle kurduğunuz çifti deftere yazınız ve satırları karşılaştırınız."],
     biter:bitG(3)});
@@ -1544,7 +1557,7 @@ const e_fark=p=>{const S=asamali(p);
 };
 
 /* 19 · GİZLİ SAYI DEDEKTİFİ */
-const e_dedektif=p=>{const S=asamali(p);const KART=[8,9,25,49,11,13,19,23,29];
+const e_dedektif=p=>{const S=notr(asamali(p));const KART=[8,9,25,49,11,13,19,23,29];
   const k=S.ac(1,{ne:"EBOB ipuçlarını kullanarak 2 ile 60 arasındaki gizli sayıyı (B) bulacaksınız.",
     nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Bir sorgu kartına dokununuz: kartın sayısı ile B'nin EBOB'u ipucu olarak yazılır. Örnek: EBOB(8, B) = 4 ise B, 4'e bölünür ama 8'e bölünmez.</li><li>İpucuna uymayan sayılar tablodan silinir.</li><li>Gizli sayıyı bulduğunuzu düşünürseniz tablodaki sayıya dokununuz. Yanlış tahmin edilen sayı da silinir.</li></ol>","Yeni oyun için “Yeni gizli sayı” düğmesine basınız."],
     biter:bitG(3)});
@@ -1579,9 +1592,9 @@ const e_dedektif=p=>{const S=asamali(p);const KART=[8,9,25,49,11,13,19,23,29];
 };
 
 /* 20 · EBOB DÜELLOSU */
-const e_duello=p=>{const S=asamali(p);
+const e_duello=p=>{const S=notr(asamali(p));
   const k=S.ac(1,{ne:"Bilgisayara karşı hızlı bir EBOB düellosu yapacak ve EBOB'u hızlı bulmanın kısa yollarını keşfedeceksiniz.",
-    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Düelloyu başlatın” düğmesine basınız. Bir düello 5 turdur.</li><li>Her turda iki sayı ve dört seçenek çıkar. Süre çubuğu dolmadan doğru EBOB'a dokunursanız turu siz kazanırsınız. Örnek: EBOB(12, 18) sorulursa 6'ya dokunmalısınız.</li><li>Yanlış seçenek ya da sürenin dolması turu bilgisayara verir. Süre her turda biraz kısalır.</li><li>En az 3 tur kazanırsanız düelloyu kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır; yanlışta nedenini gösteren açıklama çıkar."],
+    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Düelloyu başlatın” düğmesine basınız. Bir düello 5 turdur.</li><li>Her turda iki sayı ve dört seçenek çıkar. Süre çubuğu dolmadan doğru EBOB'a dokunursanız turu siz kazanırsınız. Örnek: EBOB(12, 18) sorulursa 6'ya dokunmalısınız.</li><li>Yanlış seçenek ya da sürenin dolması turu bilgisayara verir. Süre her turda biraz kısalır.</li><li>En az 3 tur kazanırsanız düelloyu kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır; yanlışta doğru cevap gösterilir."],
     biter:bitG(3)});
   S.tahmin(k,"Isınma sorusu: EBOB(24, 26) kaçtır?",[[1,"1"],[2,"2"],[4,"4"],[6,"6"]],2,"EBOB(24, 26) = 2: fark 2 ve iki sayı da çift.");
   k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skor"></div><div class="dsoru"></div><div class="yaris"><i></i></div><div class="secler dsec"></div></div><div class="row"><button class="primary basl">Düelloyu başlatın</button></div><div class="fb" hidden></div>`);
@@ -1605,7 +1618,7 @@ const e_duello=p=>{const S=asamali(p);
       if(o>=1&&acik){fb(f,false,`Süre bitti. EBOB(${Q.a}, ${Q.b}) = ${Q.g}.`);bip(220,.2,"triangle");turBitti("bil",Q);}},50);
     sc.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(!acik)return;const v=+b.dataset.v;
       if(v===Q.g){b.classList.add("dogru");fb(f,true,`Doğru! EBOB(${Q.a}, ${Q.b}) = ${Q.g}.`);bip(880,.12);turBitti("sen",Q);}
-      else{b.classList.add("yanlis");fb(f,false,`Olmadı. EBOB(${Q.a}, ${Q.b}) = ${Q.g}. ${v>Math.min(Q.a,Q.b)?"EBOB küçük sayıdan büyük olamaz.":Math.max(Q.a,Q.b)%v||Math.min(Q.a,Q.b)%v?`${v} iki sayıyı birden bölmüyor.`:`${v} bir ortak bölen ama en büyüğü değil.`}`);bip(220,.2,"triangle");turBitti("bil",Q);}});}
+      else{b.classList.add("yanlis");fb(f,false,`Olmadı. EBOB(${Q.a}, ${Q.b}) = ${Q.g}.`);bip(220,.2,"triangle");turBitti("bil",Q);}});}
   bb.onclick=()=>{tur=0;sen=0;bil=0;bb.hidden=true;f.hidden=true;yeniTur();};skor();ds.innerHTML=`<span style="font-size:17px;font-weight:600">Hazır olunca “Düelloyu başlatın” düğmesine basınız.</span>`;
   function acikla(){const c=S.kural(2);
     S.soru(c,"Düelloda hangi kısa yollar işine yaradı?",
@@ -1657,7 +1670,7 @@ kesifBaslat(ACT,{baslik:"EBOB Keşif Atölyesi",kisa:"EBOB Keşif Atölyesi",kod
   const reOp=new RegExp("[ \\t]+(["+OP+"])[ \\t]+","g");
   // ":" yalnız sayılar arasında bölme işaretidir (düz yazıdaki iki nokta etkilenmez)
   const reBol=/([\d)])[ \t]+:[ \t]+(?=[\d(−])/g;
-  const ATOM=el=>el.nodeType===1&&(/^(SUP|SUB)$/.test(el.tagName)||el.classList.contains("frac")||el.classList.contains("kes")||el.classList.contains("nw-islem"));
+  const ATOM=el=>el.nodeType===1&&(/^(SUP|SUB)$/.test(el.tagName)||el.classList.contains("frac")||el.classList.contains("kes")||el.classList.contains("krk")||el.classList.contains("nw")||el.classList.contains("nw-islem"));
   const ATLA=/^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|SVG|CANVAS|CODE|PRE)$/i;
   function metin(s){return s.replace(reOp,NB+"$1"+NB).replace(reBol,"$1"+NB+":"+NB).replace(/\|\u00a0/g,"|\u2060\u00a0").replace(/([“"(\[])([+−·×:=]) (?=[\d(])/g,"$1$2"+NB);}  // "|" sonrasında satır kırılabilir; WJ ile yapıştırılır (mutlak değer)
   function isle(kok){
@@ -1668,7 +1681,7 @@ kesifBaslat(ACT,{baslik:"EBOB Keşif Atölyesi",kisa:"EBOB Keşif Atölyesi",kod
     for(const t of tl){const y=metin(t.data);if(y!==t.data)t.data=y;}
     // 2) atomları bitişik metinle birleştir
     const ebeveyn=new Set();
-    kok.querySelectorAll("sup,sub,.frac,.kes").forEach(a=>{if(!a.closest("svg,.nw-islem")&&a.parentElement&&!(a.parentElement.classList.contains("frac")||a.parentElement.parentElement&&a.parentElement.parentElement.classList.contains("frac")))ebeveyn.add(a.parentElement);});
+    kok.querySelectorAll("sup,sub,.frac,.kes,.krk,.nw").forEach(a=>{if(!a.closest("svg,.nw-islem")&&a.parentElement&&!(a.parentElement.classList.contains("frac")||a.parentElement.parentElement&&a.parentElement.parentElement.classList.contains("frac")))ebeveyn.add(a.parentElement);});
     if(ATOM(kok)&&kok.parentElement)ebeveyn.add(kok.parentElement);
     ebeveyn.forEach(yapistir);
     // 3) işaretle başlayan öğeden (<small>= 16</small>) önceki boşluk da bölünmez
