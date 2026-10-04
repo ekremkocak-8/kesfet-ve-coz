@@ -398,6 +398,17 @@ input.ans.gen{width:150px}.tus{min-width:44px;min-height:40px;font-size:18px;fon
 /* karekök (01.10.2026) */
 .krk{display:inline-flex;align-items:flex-start;white-space:nowrap;vertical-align:baseline}.krk::before{content:"√";line-height:1.12;margin-right:-.04em;font-weight:inherit}.krk>span{border-top:.075em solid currentColor;padding:.07em .1em 0 .06em;line-height:1.12}.krk .frac{margin-top:.12em}.krk:has(>span>.frac){align-items:stretch}.krk:has(>span>.frac)::before{font-size:2.15em;line-height:1;margin-top:-.02em;transform:scaleX(.62);transform-origin:left top;margin-right:-.3em}.krk>span sup{vertical-align:.32em;font-size:.68em;line-height:0}
 
+/* 04.10.2026 · soru zinciri: sıradaki soru belirgin */
+.sz-ust{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,#fff);font-weight:700}
+.sz-nok{display:flex;gap:6px}.sz-nok i{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;opacity:.35;display:inline-block}
+.sz-nok i.ok{background:#2b8a3e;border-color:#2b8a3e;opacity:1}.sz-nok i.su{background:currentColor;opacity:1;transform:scale(1.15)}
+.sz-ileri{margin-top:10px;font-size:1.05em;animation:szNab 1.2s ease-in-out 3}
+@keyframes szNab{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.sor.sz-kapali{opacity:.6}.sor.sz-kapali .secler,.sor.sz-kapali .fb{display:none}.sor.sz-kapali .soru::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.sor.sz-yeni{animation:szGel .45s ease-out}
+@keyframes szGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sz-ileri,.sor.sz-yeni{animation:none}}
+
 /* TA-SON */
 
 /* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
@@ -955,12 +966,21 @@ function soruY(kap,soru,secs,okMsg,ip,sonra){const s=karistir(secs.map((_,i)=>i)
   d.innerHTML=`<p class="soru">${soru}</p><div class="secler">${s.map(i=>`<button type="button" class="sec" data-i="${i}">${secs[i]}</button>`).join("")}</div><div class="fb" hidden></div>`;
   kap.appendChild(d);const f=d.querySelector(".fb");let bitti=false;
   d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;const i=+b.dataset.i;
-    if(i===0){bitti=true;d.dataset.ok="1";b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,okMsg);bip(760,.12);sonra&&setTimeout(sonra,450);}
+    if(i===0){bitti=true;d.dataset.ok="1";b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,okMsg);bip(760,.12);sonra&&setTimeout(sonra,250);}
     else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);fb(f,false,"Bu seçenek doğru değil. Yeniden deneyiniz.");}});
   return d;}
 /* Soruları sırayla sorar: [soru, seçenekler(ilki doğru), doğru açıklaması, ipuçları] */
 function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
-  const git=()=>{if(i>=n){bitince&&bitince();return;}const q=liste[i++];soruY(kap,(n>1?`<span class="sn">Soru ${i} / ${n}</span>`:"")+q[0],q[1],q[2],q[3],git);};git();}
+  /* 04.10.2026: sıradaki soru belirgin — ilerleme şeridi, "Sıradaki soru →" düğmesi, çözülen soru küçülür, yeni soru görünür alana gelir */
+  const ust=n>1?yeniEl("div","sz-ust"):null;if(ust)kap.appendChild(ust);
+  const ciz=()=>{if(ust)ust.innerHTML=`<span class="sz-et">Soru ${i} / ${n}</span><span class="sz-nok">${liste.map((_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span>`;};
+  const git=()=>{if(i>=n){if(ust)ust.innerHTML=`<span class="sz-et">${n} sorunun hepsi tamamlandı ✓</span>`;bitince&&bitince();return;}const q=liste[i++];ciz();
+    const d=soruY(kap,q[0],q[1],q[2],q[3],()=>{if(i>=n){git();return;}
+      const b=yeniEl("button","primary sz-ileri",`Sıradaki soru (${i+1} / ${n}) →`);b.type="button";d.appendChild(b);
+      setTimeout(()=>{if(b.isConnected)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},40);
+      b.onclick=()=>{b.remove();d.classList.add("sz-kapali");git();};});
+    d.classList.add("sz-yeni");if(i>1)setTimeout(()=>{if(d.isConnected)d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"});},40);};
+  git();}
 const kuralA=(D,liste,ozet)=>({ad:"Kuralı bulun",yon:["Deney defterindeki sonuçlarınıza bakınız.","Soruları sırayla cevaplayınız. Yanlış seçerseniz başka bir seçenek deneyiniz."],bitis:"Soruların hepsini doğru cevaplayınca.",
   kur:(k,A)=>{if(D&&D.el&&D.n){k.appendChild(D.el);}soruZincir(k,liste,()=>A.tamam(ozet||"Kuralı buldunuz."));}});
 const kendiA=(fn,yon)=>({ad:"Kendinizi deneyin",yon:yon||["Öğrendiğinizi yeni bir soruda kullanınız.","Cevabınızı veriniz. Yanlışsa yeniden deneyiniz."],bitis:"Soruyu doğru cevaplayınca etkinlik biter.",kur:(k,A)=>fn(k,()=>A.tamam(""))});
@@ -1039,7 +1059,7 @@ function sayiGir(kap,ust,dogru,okMsg,ipucu,sonra,o={}){
   kap.appendChild(d);const inp=d.querySelector("input"),f=d.querySelector(".fb"),onz=d.querySelector(".onz");let ok=false,yn=0;
   inp.oninput=()=>{const v=okuS(inp.value);onz.innerHTML=v!==null&&String(v).length>4?`Yazdığınız sayı: <b>${S(v)}</b>`:"";};
   const kontrol=()=>{if(ok)return;const v=okuS(inp.value);if(v===null){fb(f,false,inp.value.trim()?"Yalnız rakam ve boşluk kullanınız. Örnek: 4 500 000":"Önce cevabınızı yazınız.");return;}
-    if(v===dogru){ok=true;d.dataset.ok="1";inp.disabled=true;d.querySelector(".k").disabled=true;fb(f,true,okMsg);bip(760,.12);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,500);}
+    if(v===dogru){ok=true;d.dataset.ok="1";inp.disabled=true;d.querySelector(".k").disabled=true;fb(f,true,okMsg);bip(760,.12);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,250);}
     else{bip(220,.12);yn++;const oz=o.ozel&&o.ozel(v);fb(f,false,(oz?oz+" ":"")+(yn>=3?`Yeniden deneyiniz. Doğru cevap: <b>${S(dogru)}</b>`:"Yeniden deneyiniz."));}};
   d.querySelector(".k").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};
   d.oto=()=>{inp.value=S(dogru);inp.oninput();kontrol();};return d;}
@@ -1056,7 +1076,7 @@ function bolukGir(kap,dogru,nb,okMsg,sonra){
     for(let j=ilk+1;j<v.length;j++)if(v[j].length!==3)return hata(`<b>${BOLUKAD[+ins[j].dataset.i]}</b> kutusu doğru değil. Yeniden deneyiniz.`);
     if(v[ilk][0]==="0")return hata("En soldaki dolu kutu doğru değil. Yeniden deneyiniz.");
     const val=+v.slice(ilk).join("");
-    if(val===dogru){ok=true;d.dataset.ok="1";ins.forEach(x=>x.disabled=true);d.querySelector(".k").disabled=true;bip(760,.12);fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,500);return;}
+    if(val===dogru){ok=true;d.dataset.ok="1";ins.forEach(x=>x.disabled=true);d.querySelector(".k").disabled=true;bip(760,.12);fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,250);return;}
     const U=bolukler(val);for(let i=nb-1;i>=0;i--){if((U[i]||0)!==(G[i]||0))return hata(`<b>${BOLUKAD[i]}</b> doğru değil. Yeniden deneyiniz.`);}};
   d.querySelector(".k").onclick=kontrol;ins.forEach(x=>x.onkeydown=e=>{if(e.key==="Enter")kontrol();});
   d.oto=()=>{const L=G.length;ins.forEach(x=>{const i=+x.dataset.i;x.value=i>=L?"":i===L-1?String(G[i]):pad3(G[i]);});kontrol();};return d;}
