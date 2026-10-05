@@ -313,6 +313,19 @@ body{background:var(--bg)}
 /* karekök (01.10.2026) */
 .krk{display:inline-flex;align-items:flex-start;white-space:nowrap;vertical-align:baseline}.krk::before{content:"√";line-height:1.12;margin-right:-.04em;font-weight:inherit}.krk>span{border-top:.075em solid currentColor;padding:.07em .1em 0 .06em;line-height:1.12}.krk .frac{margin-top:.12em}.krk:has(>span>.frac){align-items:stretch}.krk:has(>span>.frac)::before{font-size:2.15em;line-height:1;margin-top:-.02em;transform:scaleX(.62);transform-origin:left top;margin-right:-.3em}.krk>span sup{vertical-align:.32em;font-size:.68em;line-height:0}
 
+/* 04.10.2026 · soru zinciri: sıradaki soru belirgin */
+.sz-ust{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,#fff);font-weight:700}
+.sz-nok{display:flex;gap:6px}.sz-nok i{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;opacity:.35;display:inline-block}
+.sz-nok i.ok{background:#2b8a3e;border-color:#2b8a3e;opacity:1}.sz-nok i.su{background:currentColor;opacity:1;transform:scale(1.15)}
+.sz-ileri{margin-top:10px;font-size:1.05em;animation:szNab 1.2s ease-in-out 3}
+@keyframes szNab{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.sor.sz-kapali{opacity:.6}.sor.sz-kapali .secler,.sor.sz-kapali .fb{display:none}.sor.sz-kapali .soru::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.sor.sz-yeni{animation:szGel .45s ease-out}
+@keyframes szGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sz-ileri,.sor.sz-yeni{animation:none}}
+/* 05.10.2026: dokunma hedefi en az 44 px (§19-11) */
+.ta-dug button,.row button,button.primary,button.ghost{min-height:44px}
+
 /* TA-SON */
 
 /* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
@@ -851,13 +864,30 @@ const bekle=(f,ms)=>setTimeout(f,azHareket()?0:ms);
 /* §5.ip İpucu verilmez (02.10.2026): ortak motordaki "İpucu" metni bu atölyede kullanılmaz. Yanlış seçenekte ve yanlış
    sayıda yalnız nötr "Yeniden deneyiniz." yazılır; sayı cevaplı soruda 3. yanlıştan sonra yalnız doğru cevap gösterilir. */
 const YD="Yeniden deneyiniz.";
-const notr=S=>{const so=S.soru,sa=S.sayi;
-  S.soru=(kap,soru,secs,ok,sonra)=>so(kap,soru,secs.map((s,i)=>i===0?s:[Array.isArray(s)?s[0]:s,YD]),ok,sonra);
+const notr=S=>{const so=S.soru,sa=S.sayi,ku=S.kural;let kN=0,kI=0;
+  /* 05.10.2026 (§4.k-5): "Kuralı bulun" adımında birden çok soru varsa her soru ekranında "Soru i / n" şeridi; doğru cevaptan sonra
+     ekranda ve alttaki şeritte "Sıradaki soru (i+1 / n) →" düğmesi görünür (ortak kabuğa dokunmadan, yalnız bu atölyede). */
+  S.kural=(k,o)=>{kN=k||1;kI=0;const r=ku(k,o);return r;};
+  S.soru=(kap,soru,secs,ok,sonra)=>{const km=!!(kap&&kap.kural===true);if(km)kI++;const i=kI,n=kN;let d=null;
+    const sonra2=km&&n>1&&i<n?()=>{sonra&&sonra();szIleri(d,i,n);}:sonra;
+    d=so(kap,soru,secs.map((x,j)=>j===0?x:[Array.isArray(x)?x[0]:x,YD]),ok,sonra2);
+    if(km&&n>1&&d&&d.querySelector)szSerit(d,i,n);return d;};
   S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
     const kontrol=()=>{const h=inp.value.replace(/[\s.]/g,"");if(!h||+h===dogru||inp.disabled)return asil();yn++;
       fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
   return S;};
+function szSerit(d,i,n){const ic=d.querySelector(".ta-ic")||d;const u=document.createElement("div");u.className="sz-ust";
+  u.innerHTML=`<span class="sz-et">Soru ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span>`;ic.prepend(u);d.dataset.szI=i;d.dataset.szN=n;}
+function szIleri(d,i,n){if(!d||!d.querySelector)return;const ic=d.querySelector(".ta-ic")||d;d.dataset.szBitti="1";
+  const b=document.createElement("button");b.type="button";b.className="primary sz-ileri";b.textContent=`Sıradaki soru (${i+1} / ${n}) →`;
+  b.onclick=()=>{const t=document.querySelector(".ta-ileri");if(t&&!t.disabled)t.click();};ic.appendChild(b);
+  setTimeout(()=>{if(b.isConnected&&b.offsetParent)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},60);szAlt();}
+/* alttaki şeritteki ileri düğmesi: açık ekran çözülmüş bir kural sorusuysa "Sıradaki soru" yazar */
+function szAlt(){const t=document.querySelector(".ta-ileri");if(!t)return;
+  if(!t.dataset.szGoz){t.dataset.szGoz="1";new MutationObserver(()=>szAlt()).observe(t,{childList:true,characterData:true,subtree:true});}
+  const e=[...document.querySelectorAll(".ta-ekran")].find(x=>!x.hidden);
+  if(e&&e.dataset.szBitti&&+e.dataset.szI<+e.dataset.szN&&!t.disabled){const y=`Sıradaki soru (${+e.dataset.szI+1} / ${e.dataset.szN}) →`;if(t.textContent!==y)t.textContent=y;}}
 /* SVG karekök: <text class="skok">√<tspan class="ski">içerik</tspan>[ek]</text>; çizgi kokDuz ile içerik genişliği ölçülerek çizilir */
 const sK=(x,y,ic,fs=16,o={})=>`<text class="skok" x="${x}" y="${y}" font-size="${fs}" font-weight="${o.w||700}"${o.fill?` fill="${o.fill}"`:""}${o.anchor?` text-anchor="${o.anchor}"`:""}>√<tspan class="ski">${ic}</tspan>${o.son?`<tspan>${o.son}</tspan>`:""}</text>`;
 function kokDuz(sv){sv.querySelectorAll("line.skc").forEach(l=>l.remove());
@@ -923,6 +953,16 @@ function kokIzle(sv){if(!sv)return;kokDuz(sv);requestAnimationFrame(()=>kokDuz(s
 @media (max-width:560px){.r-duel .r-ifade{font-size:22px;padding:12px 4px}.r-kart{font-size:17px;padding:6px 9px}.r-kartb{font-size:26px}.r-hz{font-size:13.5px;min-height:36px}.r-kutu{min-width:56px;height:50px;font-size:20px}.r-mak{min-width:84px;font-size:13.5px}}
 `;document.head.appendChild(st);})();
 
+/* 05.10.2026 · Aşama 2 düzenekleri (§4.k) için ek görünüm */
+(function(){const st=document.createElement("style");st.textContent=`
+.r-hes{display:inline-block;background:#343a40;border-radius:16px;padding:10px;margin:6px 0;max-width:100%}
+.r-hes .r-ekran{min-width:240px;max-width:100%}
+.r-vag.sec{box-shadow:0 0 0 4px color-mix(in srgb,var(--acc2) 45%,transparent);transform:translateY(-4px)}
+.r-vag.iyi{border-color:var(--acc3);background:color-mix(in srgb,var(--acc3) 12%,var(--card))}
+.r-vag.kotu{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--card))}
+button.r-vag{cursor:pointer;color:var(--ink)}
+.r-ok2{color:var(--acc3);font-weight:800}.r-no2{color:var(--bad);font-weight:800}
+`;document.head.appendChild(st);})();
 /* 1 · KARE TARLA ÖLÇÜMÜ (kareli kâğıtta köşe seçme) */
 const e_tarla=p=>{const S=notr(asamali(p));let s=0;const gor=new Set();const N=12,C=27,X0=30,Y0=28;
   const k=S.ac(1,{ne:"Kareli kâğıda kare tarlalar çizip alanı verilen bir karenin kenar uzunluğunu bulacaksınız.",
@@ -995,22 +1035,30 @@ const e_tablo=p=>{const S=notr(asamali(p));let s=1;const gor=new Set();
 };
 
 /* 3 · TAM KARE AVCISI (sayı ızgarası) */
-const e_avci=p=>{const S=notr(asamali(p));const bul=new Set();
-  const k=S.ac(1,{ne:"1'den 100'e kadar sayıların yazılı olduğu tabloda tam kare sayıları bulacaksınız.",
-    durum:"1'den 100'e kadar sayılar 10 · 10'luk bir tabloya yazılmış. Bir doğal sayının kendisiyle çarpımı olan sayılara <b>tam kare sayı</b> denir: 1 = 1 · 1, 4 = 2 · 2, 9 = 3 · 3 …",
-    nasil:["Tam kare olduğunu düşündüğünüz bir sayıya dokununuz.","Doğruysa sayı yeşil olur ve kaçın karesi olduğu altına yazılır; yanlışsa yeniden deneyiniz.","Bulduğunuz tam kareler deney defterine, bir öncekinden farkıyla birlikte yazılır."],biter:bitG(2)});
+const e_avci=p=>{const S=notr(asamali(p));const bul=new Set();let N=12;
+  /* 05.10.2026 (§4.k, B → A): öğrenci birim kare sayısını sürgüyle seçer; kareler kare biçiminde dizilmeye çalışılır.
+     Tam dizilen sayılar tabloda kendiliğinden yeşil olur; tam kareler denenerek bulunur. */
+  const k=S.ac(1,{ne:"Birim kare sayısını değiştirerek kareleri bir kare biçiminde dizmeyi deneyecek, hangi sayılarla tam bir kare oluştuğunu bulacaksınız.",
+    durum:"Elinizde 1 ile 100 arasında seçeceğiniz sayıda özdeş birim kare var. Kareler, satır ve sütun sayısı eşit olacak şekilde bir kare biçiminde dizilmeye çalışılır. Bir doğal sayının kendisiyle çarpımı olan sayılara <b>tam kare sayı</b> denir: 1 = 1 · 1, 4 = 2 · 2, 9 = 3 · 3 …",
+    nasil:["“Birim kare sayısı” sürgüsünü ya da − / + düğmelerini kullanınız.","Kareler en büyük kare biçiminde dizilir; artan kareler kırmızı görünür. Hiç artmıyorsa sayı tam karedir.","Bulduğunuz tam kareler 1–100 tablosunda yeşil olur ve deney defterine, bir öncekinden farkıyla birlikte yazılır."],biter:bitG(2)});
   S.tahmin(k,"1'den 100'e kadar (1 ve 100 dahil) kaç tane tam kare sayı vardır?",[[10,"10"],[50,"50"],[20,"20"],[9,"9"]],10,`${kare(1)} = 1'den ${kare(10)} = 100'e kadar 10 tam kare vardır.`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-izg" role="group" aria-label="1'den 100'e kadar sayılar"></div><div class="fb" hidden></div>`);
-  const iz=k.querySelector(".r-izg"),f=k.querySelector(".fb");
-  const G=gorevler(k,[{m:"Tabloda <b>5 tam kare</b> sayı bulunuz.",ok:()=>bul.size>=5},
-    {m:"<b>Bütün tam kareleri</b> (1'den 100'e kadar) bulunuz.",ok:()=>bul.size>=10,s:()=>"1, 4, 9, 16, 25, 36, 49, 64, 81, 100. Ardışık farklar: 3, 5, 7, 9, 11, 13, 15, 17, 19."}],acikla);
+  k.insertAdjacentHTML("beforeend",`<div class="r-den"></div><div class="stage"></div><p class="r-sonuc"></p><div class="r-izg" aria-label="1'den 100'e kadar sayılar"></div>`);
+  const dn=k.querySelector(".r-den"),st=k.querySelector(".stage"),son=k.querySelector(".r-sonuc"),iz=k.querySelector(".r-izg");
+  const sg=surgu("Birim kare sayısı",1,100,N,v=>{N=v;ciz();});dn.appendChild(sg.el);
+  const H=[];for(let n=1;n<=100;n++){const b=document.createElement("button");b.type="button";b.className="r-hz";b.textContent=n;b.onclick=()=>{sg.v=n;N=n;ciz();};iz.appendChild(b);H[n]=b;}
+  const G=gorevler(k,[{m:"Tam kare olan <b>5 sayı</b> bulunuz.",ok:()=>bul.size>=5},
+    {m:"1'den 100'e kadar <b>bütün tam kareleri</b> bulunuz.",ok:()=>bul.size>=10,s:()=>"1, 4, 9, 16, 25, 36, 49, 64, 81, 100. Ardışık farklar: 3, 5, 7, 9, 11, 13, 15, 17, 19."}],acikla);
   const D=defter(k,["Tam kare","Kaçın karesi?","Bir öncekinden farkı"]);
-  for(let n=1;n<=100;n++){const b=document.createElement("button");b.type="button";b.className="r-hz";b.textContent=n;iz.appendChild(b);
-    b.onclick=()=>{if(bul.has(n))return;const r=Math.round(Math.sqrt(n));
-      if(r*r===n){bul.add(n);b.classList.add("ok");b.innerHTML=`${n}<small>${kare(r)}</small>`;
-        D.ekle([n,`${r} · ${r}`,r>1?`${n} − ${(r-1)**2} = ${2*r-1}`:"—"],String(n));fb(f,true,`${n} = ${r} · ${r}: tam kare sayı. ${K(n)} = ${r}.`);bip(760,.1);G.kontrol();}
-      else{b.classList.add("no");setTimeout(()=>b.classList.remove("no"),900);
-        fb(f,false,`${n} tam kare değil. ${YD}`);bip(220,.15,"triangle");}};}
+  function ciz(){const r=Math.floor(Math.sqrt(N)),art=N-r*r,c=Math.min(26,230/(r+1)),sv=svgEl(300,250);let h="";
+    for(let i=0;i<r*r;i++)h+=`<rect x="${12+(i%r)*c}" y="${12+Math.floor(i/r)*c}" width="${c-2}" height="${c-2}" rx="3" fill="#a5d8ff" stroke="#1c7ed6"/>`;
+    for(let i=0;i<art;i++){const x=i<r?12+r*c:12+(i-r)*c,y=i<r?12+i*c:12+r*c;h+=`<rect x="${x}" y="${y}" width="${c-2}" height="${c-2}" rx="3" fill="#ffc9c9" stroke="#e03131" stroke-dasharray="3 2"/>`;}
+    if(!art)h+=`<rect x="10" y="10" width="${r*c+2}" height="${r*c+2}" fill="none" stroke="#2b8a3e" stroke-width="3"/>`;
+    sv.innerHTML=h;st.replaceChildren(sv);
+    son.innerHTML=art?dz(`${N} birim kare`,`${r} · ${r} = ${r*r}; <b>${art}</b> kare artıyor`,`Bir sonraki kare için ${(r+1)**2-N} kare eksik`):dz(`${N} = ${r} · ${r}`,`<b>Kare oldu!</b> ${N} tam kare sayıdır.`);
+    if(!art&&!bul.has(N)){bul.add(N);H[N].classList.add("ok");H[N].innerHTML=`${N}<small>${kare(r)}</small>`;
+      D.ekle([N,`${r} · ${r}`,r>1?`${N} − ${(r-1)**2} = ${2*r-1}`:"—"],String(N));bip(760,.1);G.kontrol();}
+    else if(art)bip(420,.03);}
+  ciz();
   function acikla(){const c=S.kural(2);
     S.soru(c,"Ardışık tam kareler arasındaki farklar (1'den 4'e 3, 4'ten 9'a 5 …) nasıl bir örüntü oluşturur?",
       ["Ardışık tek sayılar: 3, 5, 7, 9, …",["Fark hep 3'tür","4 − 1 = 3 ama 9 − 4 = 5; fark sabit değil."],["Ardışık çift sayılar","Farklar 3, 5, 7 …; bunlar tek sayıdır."]],
@@ -1182,30 +1230,36 @@ const e_karo=p=>{const S=notr(asamali(p));let n=16,r=2;const den=new Map();
 };
 
 /* 8 · ARADA KALAN KÖK (sayı doğrusunda aralık seçme) */
-const e_arada=p=>{const S=notr(asamali(p));const KART=[40,10,75,3,55];let ci=0;const yer=[];const X0=30,U=50,LY=72;
-  const k=S.ac(1,{ne:"Kartlardaki kareköklü sayıları sayı doğrusunda doğru aralığa yerleştireceksiniz.",
-    durum:`Sayı doğrusunda 0'dan 10'a kadar doğal sayılar var; her doğal sayının altında karesi küçük yazılı (6'nın altında 36 gibi). Kartta kareköklü bir sayı yazıyor; bu sayının hangi iki ardışık doğal sayı arasında olduğu bulunacak.`,
-    nasil:["Üstteki karttaki sayıya bakınız.","Sayı doğrusunda bu sayının bulunduğu aralığa (iki doğal sayının arasına) dokununuz.","Doğruysa kart o aralığa yerleşir ve sıradaki kart gelir; yanlışsa yeniden deneyiniz."],biter:bitG(3)});
+const e_arada=p=>{const S=notr(asamali(p));const KART=[40,10,75,3,55];let ci=0,kk=3;const yer=[];let den=new Set();const X0=30,U=50,LY=72;
+  /* 05.10.2026 (§4.k, B → A): öğrenci kenar sürgüsüyle kareler kurar; hedef alan iki ardışık kare arasına düşünce kart sayı doğrusunda yerine yerleşir. */
+  const k=S.ac(1,{ne:"Kenar uzunluğunu değiştirerek kareler kuracak, karttaki alanın hangi iki ardışık karenin arasına düştüğünü bulacaksınız.",
+    durum:`Kartta ${K("n")} biçiminde bir sayı var. ${K("n")}, alanı n birimkare olan karenin kenar uzunluğudur. Kenarı doğal sayı olan kareler kurup alanlarını n ile karşılaştırarak ${K("n")} sayısının hangi iki ardışık doğal sayı arasında olduğu bulunacak. Kartlar: ${KART.map(n=>K(n)).join(", ")}.`,
+    nasil:["Karttaki sayıya bakınız. “Kenar” sürgüsüyle bir kare kurunuz; karenin alanı karttaki sayıyla karşılaştırılır.","Alanı karttaki sayıdan küçük ve büyük olan iki ardışık kareyi kurunuz. Hedef iki karenin arasına düşünce kart sayı doğrusunda yerine yerleşir.","“Sıradaki kart” düğmesiyle devam ediniz. Her deneme deney defterine yazılır."],biter:bitG(3)});
   S.tahmin(k,`${K(40)} hangi iki ardışık doğal sayı arasındadır?`,[["67","6 ile 7"],["2021","20 ile 21"],["45","4 ile 5"],["78","7 ile 8"]],"67",`36 < 40 < 49 olduğu için 6 < ${K(40)} < 7.`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-ust"><span class="r-duz">Kart:</span><span class="r-kartb"></span></div><div class="stage"></div><div class="fb" hidden></div>`);
-  const kb=k.querySelector(".r-kartb"),st=k.querySelector(".stage"),f=k.querySelector(".fb");
+  k.insertAdjacentHTML("beforeend",`<div class="r-ust"><span class="r-duz">Kart:</span><span class="r-kartb"></span></div><div class="r-den"></div><div class="stage r-kare"></div><p class="r-sonuc"></p><div class="stage r-dog"></div><div class="row"><button class="primary r-sira" hidden>Sıradaki kart →</button></div>`);
+  const kb=k.querySelector(".r-kartb"),dn=k.querySelector(".r-den"),stK=k.querySelector(".r-kare"),stD=k.querySelector(".r-dog"),son=k.querySelector(".r-sonuc"),bs=k.querySelector(".r-sira");
+  const sg=surgu("Kenar (birim)",1,10,kk,v=>{kk=v;dene();});dn.appendChild(sg.el);
   const G=gorevler(k,[{m:"İlk kartı yerleştiriniz.",ok:()=>yer.length>=1},{m:"<b>3 kartı</b> yerleştiriniz.",ok:()=>yer.length>=3},
     {m:"<b>5 kartın</b> hepsini yerleştiriniz.",ok:()=>yer.length>=5,s:()=>"Her kök, kök içindeki sayının arasında kaldığı iki tam karenin kareköklerinin arasına yerleşti."}],acikla);
-  const D=defter(k,["Sayı","Alttaki tam kare","Üstteki tam kare","Aralık"]);
-  const sv=svgEl(560,132);st.appendChild(sv);
-  function ciz(){let h="";
-    yer.forEach(n=>{const a=Math.floor(Math.sqrt(n));h+=`<rect x="${X0+a*U+2}" y="${LY-34}" width="${U-4}" height="32" rx="6" fill="#d3f9d8"/>`;});
+  const D=defter(k,["Kart","Kenar","Karenin alanı","Karşılaştırma"]);
+  const svD=svgEl(560,110);stD.appendChild(svD);
+  function cizDog(){let h="";yer.forEach(n=>{const a=Math.floor(Math.sqrt(n));h+=`<rect x="${X0+a*U+2}" y="${LY-34}" width="${U-4}" height="32" rx="6" fill="#d3f9d8"/>`;});
     h+=`<line x1="${X0-12}" y1="${LY}" x2="${X0+10*U+12}" y2="${LY}" stroke="${css('--ink')}" stroke-width="2.5"/>`;
-    for(let i=0;i<=10;i++){const X=X0+i*U;h+=`<line x1="${X}" y1="${LY-8}" x2="${X}" y2="${LY+8}" stroke="${css('--ink')}" stroke-width="2"/><text x="${X}" y="${LY+28}" text-anchor="middle" font-size="16" font-weight="800">${i}</text><text x="${X}" y="${LY+50}" text-anchor="middle" font-size="13" font-weight="700" fill="${css('--muted')}">${i*i}</text>`;}
+    for(let i=0;i<=10;i++){const X=X0+i*U;h+=`<line x1="${X}" y1="${LY-8}" x2="${X}" y2="${LY+8}" stroke="${css('--ink')}" stroke-width="2"/><text x="${X}" y="${LY+28}" text-anchor="middle" font-size="16" font-weight="800">${i}</text>`;}
     yer.forEach(n=>{const a=Math.floor(Math.sqrt(n));h+=sK(X0+a*U+U/2,LY-12,String(n),15,{anchor:"middle",fill:"#2b8a3e"});});
-    for(let a=0;a<10;a++)h+=`<rect data-a="${a}" x="${X0+a*U}" y="${LY-40}" width="${U}" height="56" fill="transparent" style="cursor:pointer"/>`;
-    sv.innerHTML=h;kokIzle(sv);
-    kb.innerHTML=ci<KART.length?K(KART[ci]):`<span class="r-bitti">Bütün kartlar yerleşti ✓</span>`;}
-  sv.onclick=e=>{const r=e.target.closest("rect[data-a]");if(!r||ci>=KART.length)return;const a=+r.dataset.a,n=KART[ci],d=Math.floor(Math.sqrt(n));
-    if(a===d){yer.push(n);ci++;D.ekle([K(n),`${d*d} = ${kare(d)}`,`${(d+1)**2} = ${kare(d+1)}`,`${d} < ${K(n)} < ${d+1}`],String(n));
-      fb(f,true,`${d*d} < ${n} < ${(d+1)**2} olduğu için ${d} < ${K(n)} < ${d+1}.`);bip(780,.12);ciz();G.kontrol();}
-    else{fb(f,false,`${K(n)}, ${a} ile ${a+1} arasında değil. ${YD}`);bip(220,.15,"triangle");}};
-  ciz();
+    svD.innerHTML=h;kokIzle(svD);}
+  function dene(){if(ci>=KART.length)return;const n=KART[ci],A=kk*kk,sv=svgEl(300,250),s_=Math.min(22,226/Math.max(kk,Math.sqrt(n)+.01));let h="";
+    for(let i=0;i<kk;i++)for(let j=0;j<kk;j++)h+=`<rect x="${12+j*s_}" y="${12+i*s_}" width="${s_}" height="${s_}" fill="${A<n?"#a5d8ff":A>n?"#ffc9c9":"#b2f2bb"}" stroke="#fff"/>`;
+    const L=Math.sqrt(n)*s_;h+=`<rect x="12" y="12" width="${L}" height="${L}" fill="none" stroke="#f08c00" stroke-width="3" stroke-dasharray="7 4"/>`;
+    sv.innerHTML=h;stK.replaceChildren(sv);
+    den.add(kk);D.ekle([K(n),kk,`${kk} · ${kk} = ${A}`,A<n?`${A} < ${n}`:A>n?`${A} > ${n}`:`${A} = ${n}`],n+"-"+kk);
+    const a=Math.floor(Math.sqrt(n));
+    son.innerHTML=dz(`Kurulan kare: ${kk} · ${kk} = <b>${A}</b>`,`Karttaki alan: <b>${n}</b>`,A<n?"Kare küçük kaldı (mavi)":A>n?"Kare büyük geldi (kırmızı)":"Eşit")+` <span class="r-duz">Turuncu kesikli çizgi: alanı ${n} olan kare.</span>`;
+    if(den.has(a)&&den.has(a+1)&&!yer.includes(n)){yer.push(n);son.innerHTML+=`<br><span class="r-ok2">✔ ${a*a} < ${n} < ${(a+1)**2} olduğu için ${a} < ${K(n)} < ${a+1}. Kart sayı doğrusunda yerine yerleşti.</span>`;
+      bip(780,.12);cizDog();bs.hidden=ci>=KART.length-1;G.kontrol();}
+    else bip(500,.04);}
+  bs.onclick=()=>{if(ci<KART.length-1){ci++;den=new Set();bs.hidden=true;kb.innerHTML=K(KART[ci]);dene();}};
+  kb.innerHTML=K(KART[0]);cizDog();dene();
   function acikla(){const c=S.kural(2);
     S.soru(c,`${K("n")} sayısının hangi iki ardışık doğal sayı arasında olduğu nasıl bulunur?`,
       ["n'nin hemen altındaki ve hemen üstündeki tam kareler bulunur; onların karekökleri alınır",["n, 2'ye bölünür",`${K(40)} için 40 : 2 = 20 olurdu; ama ${K(40)}, 6 ile 7 arasında çıktı.`],["n'nin bir eksiği ve bir fazlası alınır",`${K(40)} için 39 ile 41 olurdu; ${K(40)} ise 7'den bile küçüktür.`]],
@@ -1220,31 +1274,44 @@ const e_arada=p=>{const S=notr(asamali(p));const KART=[40,10,75,3,55];let ci=0;c
 };
 
 /* 9 · HANGİSİNE YAKIN? (iki uzaklığı karşılaştırma) */
-const e_yakin=p=>{const S=notr(asamali(p));const KART=[20,47,32,85,58];let ci=0,cevap=false;const bit=[];
-  const k=S.ac(1,{ne:"Kareköklü bir sayının hangi doğal sayıya daha yakın olduğunu, tam karelere uzaklıkları karşılaştırarak bulacaksınız.",
-    durum:`Kartta ${K("n")} biçiminde bir sayı var. Sayı doğrusunda n'nin arasında kaldığı iki ardışık tam kare gösterilir: örneğin 47 için 36 = 6 · 6 ile 49 = 7 · 7. Böylece ${K(47)}, 6 ile 7 arasındadır. ${K("n")}, ya alttaki doğal sayıya ya da üstteki doğal sayıya daha yakındır.`,
-    nasil:["Karttaki sayıya ve sayı doğrusuna bakınız.",`${K("n")} sayısının hangi doğal sayıya daha yakın olduğunu düşünüp iki düğmeden birine basınız.`,"Cevaptan sonra n'nin iki tam kareye uzaklıkları doğrunun üstünde gösterilir; “Sıradaki kart” ile devam ediniz."],biter:bitG(3)});
+const e_yakin=p=>{const S=notr(asamali(p));const KART=[20,47,32,85,58];let ci=0,t=0;const bit=[];
+  /* 05.10.2026 (§4.k, C → A): öğrenci √n noktasını onda birlik adımlarla sürükler; seçtiği sayının karesi n ile karşılaştırılır,
+     n'nin iki tam kareye uzaklık çubukları canlı görünür. Nokta yerini bulunca hangi doğal sayıya yakın olduğu görülür. */
+  const k=S.ac(1,{ne:`${K("n")} noktasını sayı doğrusunda kaydırıp karesini n ile karşılaştırarak yerini bulacak, hangi doğal sayıya daha yakın olduğunu göreceksiniz.`,
+    durum:`Kartta ${K("n")} biçiminde bir sayı var. Sayı doğrusunda n'nin arasında kaldığı iki ardışık tam karenin karekökleri gösterilir: örneğin 47 için 36 = 6 · 6 ile 49 = 7 · 7, yani ${K(47)}, 6 ile 7 arasındadır. Noktayı kaydırdıkça noktanın gösterdiği sayının karesi hesaplanır. Kartlar: ${KART.map(n=>K(n)).join(", ")}.`,
+    nasil:["“Nokta” sürgüsüyle turuncu noktayı onda birlik adımlarla kaydırınız.","Noktanın gösterdiği sayının karesi n'den küçükse nokta daha sağda, büyükse daha solda olmalıdır. Karesi n'yi geçmeyen en büyük onda birlik sayıyı bulunuz.","Nokta yerine oturunca hangi doğal sayıya yakın olduğu görünür; “Sıradaki kart” ile devam ediniz."],biter:bitG(3)});
   S.tahmin(k,`${K(47)} hangi doğal sayıya daha yakındır?`,[["7","7"],["6","6"],["23","23"],["24","24"]],"7",`36 < 47 < 49 ve 47, 49'a daha yakındır (49 − 47 = 2): ${K(47)}, 7'ye daha yakındır.`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-ust"><span class="r-duz">Kart:</span><span class="r-kartb"></span></div><div class="stage"></div><div class="secler r-sec"></div><div class="fb" hidden></div><div class="row"><button class="primary r-sira" hidden>Sıradaki kart →</button></div>`);
-  const kb=k.querySelector(".r-kartb"),st=k.querySelector(".stage"),se=k.querySelector(".r-sec"),f=k.querySelector(".fb"),bs=k.querySelector(".r-sira");
-  const G=gorevler(k,[{m:"İlk kartı cevaplayınız.",ok:()=>bit.length>=1},{m:"<b>3 kartı</b> cevaplayınız.",ok:()=>bit.length>=3},
-    {m:"<b>5 kartın</b> hepsini cevaplayınız.",ok:()=>bit.length>=5,s:()=>`n hangi tam kareye daha yakınsa ${K("n")} de o tam karenin kareköküne daha yakın çıktı.`}],acikla);
-  const D=defter(k,["Sayı","Alttaki tam kareye uzaklık","Üstteki tam kareye uzaklık","En yakın doğal sayı"]);
-  function ciz(){const n=KART[ci],a=Math.floor(Math.sqrt(n)),L=a*a,R=(a+1)**2,x0=50,x1=470,X=x0+(n-L)/(R-L)*(x1-x0),Y=110;
-    const sv=svgEl(520,190);let h=`<line x1="${x0-16}" y1="${Y}" x2="${x1+16}" y2="${Y}" stroke="${css('--ink')}" stroke-width="2.5"/>`;
-    [[x0,L,a],[x1,R,a+1]].forEach(([x,v,s])=>{h+=`<line x1="${x}" y1="${Y-9}" x2="${x}" y2="${Y+9}" stroke="${css('--ink')}" stroke-width="2.5"/><text x="${x}" y="${Y+30}" text-anchor="middle" font-size="17" font-weight="800">${v}</text>`+sK(x,Y+56,String(v),15,{anchor:"middle",son:` = ${s}`,fill:"#1864ab"});});
-    h+=`<circle cx="${X}" cy="${Y}" r="8" fill="#f08c00" stroke="${css('--ink')}" stroke-width="1.5"/><text x="${X}" y="${Y+30}" text-anchor="middle" font-size="17" font-weight="800" fill="#d9480f">${n}</text>`;
-    if(cevap){const yay=(xa,xb,t)=>`<path d="M${xa} ${Y-6} Q${(xa+xb)/2} ${Y-44} ${xb} ${Y-6}" fill="none" stroke="#7048e8" stroke-width="2.2"/><text x="${(xa+xb)/2}" y="${Y-34}" text-anchor="middle" font-size="15" font-weight="800" fill="#7048e8">${t}</text>`;
-      h+=yay(x0,X,`${n-L} birim`)+yay(X,x1,`${R-n} birim`);}
+  k.insertAdjacentHTML("beforeend",`<div class="r-ust"><span class="r-duz">Kart:</span><span class="r-kartb"></span></div><div class="r-den"></div><div class="stage"></div><p class="r-sonuc"></p><div class="row"><button class="primary r-sira" hidden>Sıradaki kart →</button></div>`);
+  const kb=k.querySelector(".r-kartb"),dn=k.querySelector(".r-den"),st=k.querySelector(".stage"),son=k.querySelector(".r-sonuc"),bs=k.querySelector(".r-sira");
+  let sg=null;const yerlesti=()=>bit.length>ci;
+  const G=gorevler(k,[{m:"İlk kartın noktasını yerine oturtunuz.",ok:()=>bit.length>=1},{m:"<b>3 kartın</b> noktasını yerine oturtunuz.",ok:()=>bit.length>=3},
+    {m:"<b>5 kartın</b> hepsini yerleştiriniz.",ok:()=>bit.length>=5,s:()=>`n hangi tam kareye daha yakınsa ${K("n")} de o tam karenin kareköküne daha yakın çıktı.`}],acikla);
+  const D=defter(k,["Kart","Nokta","Noktanın karesi","Karşılaştırma"]);
+  function kur(){const n=KART[ci],a=Math.floor(Math.sqrt(n));kb.innerHTML=K(n);dn.innerHTML="";t=a*10;
+    sg=surgu("Nokta (onda birlik adım)",a*10,(a+1)*10,t,v=>{t=v;ciz();});
+    const out=sg.el.querySelector("output");const yazO=()=>{out.textContent=V(t/10,1);};sg.el.querySelector("input").addEventListener("input",yazO);sg.el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>setTimeout(yazO,0)));
+    sg.el.querySelectorAll(".a8-uc").forEach((u,i)=>u.textContent=a+i);dn.appendChild(sg.el);yazO();ciz();}
+  function ciz(){const n=KART[ci],a=Math.floor(Math.sqrt(n)),L=a*a,R=(a+1)**2,x0=50,x1=470,X=x0+(t/10-a)*(x1-x0),Y=120,x=t/10,kx=Math.round(x*x*100)/100;
+    const sv=svgEl(520,200);let h=`<line x1="${x0-16}" y1="${Y}" x2="${x1+16}" y2="${Y}" stroke="${css('--ink')}" stroke-width="2.5"/>`;
+    for(let i=0;i<=10;i++)h+=`<line x1="${x0+i*(x1-x0)/10}" y1="${Y-(i%5?5:8)}" x2="${x0+i*(x1-x0)/10}" y2="${Y+(i%5?5:8)}" stroke="${css('--ink')}" stroke-width="${i%5?1.2:2.5}"/>`;
+    [[x0,L,a],[x1,R,a+1]].forEach(([xx,v,s_])=>{h+=`<text x="${xx}" y="${Y+30}" text-anchor="middle" font-size="18" font-weight="800">${s_}</text>`+sK(xx,Y+56,String(v),15,{anchor:"middle",son:` = ${s_}`,fill:"#1864ab"});});
+    /* n'nin iki tam kareye uzaklık çubukları (alan ölçeğinde, üstte) */
+    const sk=(x1-x0)/(R-L),nx=x0+(n-L)*sk;
+    h+=`<line x1="${x0}" y1="40" x2="${x1}" y2="40" stroke="${css('--line')}" stroke-width="2"/>
+      <rect x="${x0}" y="32" width="${nx-x0}" height="16" fill="#d0bfff"/><rect x="${nx}" y="32" width="${x1-nx}" height="16" fill="#ffd8a8"/>
+      <text x="${(x0+nx)/2}" y="64" text-anchor="middle" font-size="14" font-weight="800" fill="#7048e8">${n} − ${L} = ${n-L}</text><text x="${(nx+x1)/2}" y="64" text-anchor="middle" font-size="14" font-weight="800" fill="#d9480f">${R} − ${n} = ${R-n}</text>
+      <line x1="${nx}" y1="28" x2="${nx}" y2="52" stroke="${css('--ink')}" stroke-width="2"/><text x="${nx}" y="24" text-anchor="middle" font-size="14" font-weight="800">${n}</text>`;
+    h+=`<circle cx="${X}" cy="${Y}" r="9" fill="#f08c00" stroke="${css('--ink')}" stroke-width="1.5"/><text x="${X}" y="${Y-16}" text-anchor="middle" font-size="16" font-weight="800" fill="#d9480f">${V(x,1)}</text>`;
     sv.innerHTML=h;st.replaceChildren(sv);kokIzle(sv);
-    kb.innerHTML=K(n);se.innerHTML=cevap?"":[a,a+1].map(v=>`<button class="sec" data-v="${v}">${K(n)}, ${ek(v,"e")} daha yakındır</button>`).join("");
-    se.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{const v=+b.dataset.v,dog=(n-L)<(R-n)?a:a+1;
-      if(v===dog){cevap=true;bit.push(n);D.ekle([K(n),`${n} − ${L} = ${n-L}`,`${R} − ${n} = ${R-n}`,dog],String(n));
-        fb(f,true,`${n}, ${dog===a?ek(L,"e"):ek(R,"e")} daha yakın (${Math.min(n-L,R-n)} birim): ${K(n)}, ${ek(dog,"e")} daha yakındır.`);bip(780,.12);
-        bs.hidden=bit.length>=KART.length;ciz();G.kontrol();}
-      else{b.disabled=true;b.classList.add("yanlis");fb(f,false,`Bu seçenek doğru değil. ${YD}`);bip(220,.15,"triangle");}});}
-  bs.onclick=()=>{if(ci<KART.length-1){ci++;cevap=false;f.hidden=true;bs.hidden=true;ciz();}};
-  ciz();
+    const ileri=Math.round((x+.1)*(x+.1)*100)/100;
+    let m=dz(`${V(x,1)} · ${V(x,1)} = <b>${V(kx,2)}</b>`,kx<n?`${V(kx,2)} < ${n}`:kx>n?`${V(kx,2)} > ${n}`:`${V(kx,2)} = ${n}`);
+    if(!yerlesti()&&kx<=n&&ileri>n){const dog=(n-L)<(R-n)?a:a+1;bit.push(n);
+      m+=`<br><span class="r-ok2">✔ ${V(kx,2)} < ${n} < ${V(ileri,2)}: ${K(n)} sayısı ${V(x,1)} ile ${V(x+.1,1)} arasında. Nokta ${dog===a?"sol":"sağ"} uçtaki ${ek(dog,"e")} daha yakın: ${K(n)} ≈ ${dog}.</span>`;
+      D.ekle([K(n),`${V(x,1)} ile ${V(x+.1,1)}`,`${V(kx,2)} ve ${V(ileri,2)}`,`en yakın doğal sayı ${dog}`],n+"-y");bip(780,.12);bs.hidden=ci>=KART.length-1;G.kontrol();}
+    else{D.ekle([K(n),V(x,1),V(kx,2),kx<n?"küçük":kx>n?"büyük":"eşit"],n+"-"+t);bip(480,.03);}
+    son.innerHTML=m;}
+  bs.onclick=()=>{if(ci<KART.length-1){ci++;bs.hidden=true;kur();}};
+  kur();
   function acikla(){const c=S.kural(2);
     S.soru(c,`${K("n")} sayısının hangi doğal sayıya daha yakın olduğu nasıl anlaşılır?`,
       ["n'nin hangi tam kareye daha yakın olduğuna bakılır",["n'nin yarısına bakılır",`47'nin yarısı 23,5'tir; ${K(47)} ise 7'ye yakındır.`],["Her zaman alttaki doğal sayıya daha yakındır",`${K(47)} üstteki doğal sayıya (7) daha yakın çıktı.`]],
@@ -1352,27 +1419,32 @@ const e_hesap=p=>{const S=notr(asamali(p));let ekr="0",bas_=null,op=null,yeni=tr
 
 /* 12 · KÖK SIRALAMA TRENİ (kartları sırayla vagonlara yerleştirme) */
 const e_tren=p=>{const S=notr(asamali(p));
+  /* 05.10.2026 (§4.k, B → A): kartlar vagonlara karışık biner; öğrenci iki vagona dokunarak kartların yerini değiştirir,
+     “Treni kontrol edin” ile sınar; yanlış komşular kırmızı görünür, öğrenci düzeltip yeniden sınar. */
   const TR=[[["6",36],[K(38),38],["7",49],[K(50),50],["8",64],[K(65),65]],[["4",16],[K(15),15],[K(17),17],[K(20),20],["5",25]],[["5",25],[K(23),23],[K(24),24],[K(26),26],[K(27),27]]];
-  let ti=0,dolu=[];let biten=0;
-  const k=S.ac(1,{ne:"Doğal sayı ve kareköklü sayı kartlarını trenin vagonlarına küçükten büyüğe yerleştireceksiniz.",
-    durum:`İstasyonda üzerinde sayı yazan kartlar var: bazıları doğal sayı, bazıları kareköklü sayı. Kartlar trenin vagonlarına <b>küçükten büyüğe</b> yerleştirilecek: en küçük kart 1. vagona, kalanların en küçüğü 2. vagona … 1. trenin kartları: 6, ${K(38)}, 7, ${K(50)}, 8, ${K(65)}.`,
-    nasil:["İstasyondaki kartlardan en küçük olduğunu düşündüğünüze dokununuz.","Doğruysa kart sıradaki vagona biner; yanlışsa yeniden deneyiniz.","Bir tren dolunca “Sonraki treni getiriniz” düğmesine basınız. Her sıralama deney defterine yazılır."],biter:bitG(3)});
+  let ti=0,sira=[],sec=null,kontrol=0,biten=0;
+  const k=S.ac(1,{ne:"Trenin vagonlarındaki kartların yerlerini değiştirerek kartları küçükten büyüğe dizecek, treni kontrol edip yanlış komşuları düzelteceksiniz.",
+    durum:`Bir trenin vagonlarına üzerinde sayı yazan kartlar karışık sırayla binmiş: bazıları doğal sayı, bazıları kareköklü sayı. Kartlar <b>küçükten büyüğe</b> dizilmelidir: en küçük kart 1. vagonda, en büyük kart son vagonda. 1. trenin kartları: 6, ${K(38)}, 7, ${K(50)}, 8, ${K(65)}.`,
+    nasil:["Yerini değiştirmek istediğiniz iki vagona sırayla dokununuz; iki kart yer değiştirir.","Dizilişten emin olunca “Treni kontrol edin” düğmesine basınız. Sıraya uyan komşular yeşil, uymayanlar kırmızı görünür.","Kırmızı vagonları düzeltip yeniden kontrol ediniz. Tren doğru dizilince “Sonraki treni getiriniz” düğmesine basınız."],biter:bitG(3)});
   S.tahmin(k,`7 ile ${K(50)} sayılarından hangisi büyüktür?`,[["k",K(50)],["d","7"],["e","İkisi eşittir"]],"k",`7 = ${K(49)} ve 49 < 50 olduğu için ${K(50)} > 7.`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-tren" aria-label="Tren"></div><div class="r-duz">İstasyondaki kartlar:</div><div class="r-kartlar r-ist"></div><div class="fb" hidden></div><div class="row"><button class="primary r-sonraki" hidden>Sonraki treni getiriniz →</button></div>`);
-  const tren=k.querySelector(".r-tren"),ist=k.querySelector(".r-ist"),f=k.querySelector(".fb"),bs=k.querySelector(".r-sonraki");
-  const G=gorevler(k,[{m:"<b>1. treni</b> doldurunuz.",ok:()=>biten>=1,s:()=>`6 < ${K(38)} < 7 < ${K(50)} < 8 < ${K(65)}`},{m:"<b>2. treni</b> doldurunuz.",ok:()=>biten>=2},
-    {m:"<b>3. treni</b> doldurunuz.",ok:()=>biten>=3,s:()=>"Doğal sayıları karekök biçiminde yazıp kök içindeki sayıları karşılaştırdınız."}],acikla);
-  const D=defter(k,["Tren","Küçükten büyüğe"]);
-  function ciz(){const T=TR[ti];tren.innerHTML=`<div class="r-lok">${ti+1}. tren</div>`+T.map((_,i)=>dolu[i]!==undefined?`<div class="r-vag">${T[dolu[i]][0]}</div>`:`<div class="r-vag bos">${i+1}. vagon</div>`).join("");
-    ist.innerHTML=karistir(T.map((x,i)=>i).filter(i=>!dolu.includes(i))).map(i=>`<button type="button" class="r-kart" data-i="${i}">${T[i][0]}</button>`).join("");
-    ist.querySelectorAll(".r-kart").forEach(b=>b.onclick=()=>{const i=+b.dataset.i,kal=T.map((x,j)=>j).filter(j=>!dolu.includes(j)),enk=kal.reduce((a,j)=>T[j][1]<T[a][1]?j:a,kal[0]);
-      const yaz_=j=>/krk/.test(T[j][0])?T[j][0]:`${T[j][0]} = ${K(T[j][1])}`;
-      if(i===enk){dolu.push(i);fb(f,true,`${yaz_(i)}: kalan kartların en küçüğü.`);bip(600+dolu.length*50,.1);
-        if(dolu.length===T.length){biten=Math.max(biten,ti+1);D.ekle([`${ti+1}. tren`,dolu.map(j=>T[j][0]).join(" < ")],String(ti));fb(f,true,`Tren doldu: ${dolu.map(j=>T[j][0]).join(" < ")}`);bs.hidden=ti>=TR.length-1;G.kontrol();}
-        ciz();}
-      else{b.classList.add("secili");setTimeout(()=>b.classList.remove("secili"),700);fb(f,false,`${T[i][0]} en küçük kart değil. ${YD}`);bip(220,.15,"triangle");}});}
-  bs.onclick=()=>{if(ti<TR.length-1){ti++;dolu=[];bs.hidden=true;f.hidden=true;ciz();}};
-  ciz();
+  k.insertAdjacentHTML("beforeend",`<div class="r-tren" aria-label="Tren"></div><div class="row"><button class="primary r-kont">Treni kontrol edin</button><button class="ghost r-sonraki" hidden>Sonraki treni getiriniz →</button></div><p class="r-sonuc"></p>`);
+  const tren=k.querySelector(".r-tren"),son=k.querySelector(".r-sonuc"),bK=k.querySelector(".r-kont"),bs=k.querySelector(".r-sonraki");
+  const G=gorevler(k,[{m:"<b>1. treni</b> doğru diziniz.",ok:()=>biten>=1,s:()=>`6 < ${K(38)} < 7 < ${K(50)} < 8 < ${K(65)}`},{m:"<b>2. treni</b> doğru diziniz.",ok:()=>biten>=2},
+    {m:"<b>3. treni</b> doğru diziniz.",ok:()=>biten>=3,s:()=>"Doğal sayıları karekök biçiminde yazıp kök içindeki sayıları karşılaştırdınız."}],acikla);
+  const D=defter(k,["Tren","Kontrol","Diziliş","Yanlış komşu"]);
+  let isaret=[];
+  function yeniTren(){const T=TR[ti];do{sira=karistir(T.map((_,i)=>i));}while(sira.every((v,i)=>i===0||T[sira[i-1]][1]<T[v][1]));sec=null;kontrol=0;isaret=[];bs.hidden=true;bK.disabled=false;son.innerHTML="";ciz();}
+  function ciz(){const T=TR[ti];tren.innerHTML=`<div class="r-lok">${ti+1}. tren</div>`+sira.map((v,i)=>`<button type="button" class="r-vag${sec===i?" sec":""}${isaret[i]===1?" iyi":isaret[i]===0?" kotu":""}" data-i="${i}" aria-label="${i+1}. vagon">${T[v][0]}</button>`).join("");
+    tren.querySelectorAll(".r-vag").forEach(b=>b.onclick=()=>{if(bK.disabled&&!bs.hidden)return;const i=+b.dataset.i;
+      if(sec===null){sec=i;bip(600,.05);}else if(sec===i){sec=null;}else{[sira[sec],sira[i]]=[sira[i],sira[sec]];sec=null;isaret=[];bip(680,.06);}ciz();});}
+  bK.onclick=()=>{const T=TR[ti];kontrol++;isaret=sira.map(()=>1);let yanlis=0;
+    for(let i=1;i<sira.length;i++)if(T[sira[i-1]][1]>T[sira[i]][1]){isaret[i-1]=0;isaret[i]=0;yanlis++;}
+    const dz_=sira.map(v=>T[v][0]).join(" , ");D.ekle([`${ti+1}. tren`,kontrol+". kontrol",dz_,yanlis],ti+"-"+kontrol);
+    if(!yanlis){biten=Math.max(biten,ti+1);son.innerHTML=`<span class="r-ok2">✔ Tren doğru dizildi: ${sira.map(v=>T[v][0]).join(" < ")}</span>`;bK.disabled=true;bs.hidden=ti>=TR.length-1;bip(880,.15);G.kontrol();}
+    else{son.innerHTML=`<span class="r-no2">Sıraya uymayan ${yanlis} komşu çift var (kırmızı vagonlar).</span> Kartların yerini değiştirip yeniden kontrol ediniz.`;bip(260,.12,"triangle");}
+    ciz();};
+  bs.onclick=()=>{if(ti<TR.length-1){ti++;yeniTren();}};
+  yeniTren();
   function acikla(){const c=S.kural(2);
     S.soru(c,"Kök içindeki sayıları farklı iki kareköklü sayıdan hangisi büyüktür?",
       ["Kök içindeki sayısı büyük olan",["Kök içindeki sayısı küçük olan",`${K(38)} < ${K(50)} çıktı; 38 < 50.`],["Karşılaştırılamaz","Trenlerde kök içindeki sayılar karşılaştırılarak sıralandı."]],
@@ -1503,26 +1575,30 @@ const e_kucuk=p=>{const S=notr(asamali(p));const SAY=[0,.04,.25,.49,1,2.25,4];le
 };
 
 /* 16 · RASYONEL Mİ İRRASYONEL Mİ? (kart sınıflama) */
-const e_sinif=p=>{const S=notr(asamali(p));
-  const KART=[["36",1,`6 · 6 = 36: ${K(36)} = 6`],["12",0,"9 < 12 < 16: 12 tam kare değil"],[kes(9,16),1,`${K(kes(9,16))} = ${kes(3,4)}`],["0,49",1,`${K("0,49")} = 0,7 = ${kes(7,10)}`],["50",0,"49 < 50 < 64: 50 tam kare değil"],
-    ["2",0,"1 < 2 < 4: 2 tam kare değil (1,4142…)"],["0,4",0,`0,4 = ${kes(4,10)} = ${kes(2,5)}: 2 ve 5 tam kare değil`],["100",1,`${K(100)} = 10`],[kes(2,9),0,"Pay (2) tam kare değil"],["0,09",1,`${K("0,09")} = 0,3 = ${kes(3,10)}`]];
-  const k=S.ac(1,{ne:"Kareköklü sayı kartlarını rasyonel ve irrasyonel olarak iki kutuya ayıracaksınız.",
-    durum:`10 kart var: ${KART.map(x=>K(x[0])).join(", ")}. <b>Rasyonel sayı</b>, kesir olarak (iki tam sayının bölümü biçiminde) yazılabilen sayıdır: 6, ${kes(3,4)}, 0,7 = ${kes(7,10)} gibi. Ondalık gösterimi sonsuza kadar süren ve devretmeyen sayılara <b>irrasyonel sayı</b> denir; bunlar kesir olarak yazılamaz. Örneğin hesap makinesinde ${K(2)} = 1,41421356… görünür; basamakları bir düzen olmadan sonsuza kadar sürer.`,
-    nasil:["Üstteki kartlardan birine dokununuz; kart seçilir.","Sonra “Rasyonel” ya da “İrrasyonel” kutusuna dokununuz.","Doğruysa kart kutuya yerleşir ve nedeni yazılır; yanlışsa yeniden deneyiniz."],biter:bitG(2)});
+const e_sinif=p=>{const S=notr(asamali(p));let tur="d",n=2;const ras=new Map(),irr=new Map();
+  /* 05.10.2026 (§4.k, C → A): öğrenci kök içindeki sayıyı sürgüyle değiştirir; hesap makinesi ekranı biten ya da bitmeyen açılımı gösterir,
+     kart kendiliğinden “Rasyonel” ya da “İrrasyonel” kutusuna düşer. */
+  const k=S.ac(1,{ne:"Kök içindeki sayıyı değiştirerek hesap makinesindeki karekök açılımına bakacak, kartların hangi kutuya düştüğünü inceleyeceksiniz.",
+    durum:`<b>Rasyonel sayı</b>, kesir olarak (iki tam sayının bölümü biçiminde) yazılabilen sayıdır: 6, ${kes(3,4)}, 0,7 = ${kes(7,10)} gibi. Ondalık gösterimi sonsuza kadar süren ve devretmeyen sayılara <b>irrasyonel sayı</b> denir; bunlar kesir olarak yazılamaz. Hesap makinesi bir karekökün ondalık gösterimini ekrana sığdığı kadar gösterir: ${K(2)} = 1,414213562…`,
+    nasil:["“Sayı türü” satırından doğal sayı ya da ondalık gösterim seçiniz.","“Kök içindeki sayı” sürgüsünü değiştiriniz; hesap makinesi karekökü hesaplar. Açılım bitiyorsa kart “Rasyonel”, bitmiyorsa “İrrasyonel” kutusuna düşer.","Kutulardaki kartları karşılaştırınız: Rasyonel kutusundaki kök içi sayıların ortak özelliği nedir?"],biter:bitG(3)});
   S.tahmin(k,"Üzerinde √ işareti bulunan her sayı irrasyonel midir?",[["e","Evet"],["h","Hayır"]],"h",`${K(36)} = 6 ve ${K("0,49")} = 0,7 gibi sayılar rasyoneldir; yalnız tam kare olmayan sayıların karekökleri irrasyoneldir.`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-kartlar r-deste"></div><div class="r-iki"><div class="r-kova ras" data-k="1" role="button" tabindex="0"><h4>Rasyonel</h4><p>Kesir olarak yazılabilir.</p><div class="r-kartlar"></div></div><div class="r-kova irr" data-k="0" role="button" tabindex="0"><h4>İrrasyonel</h4><p>Kesir olarak yazılamaz.</p><div class="r-kartlar"></div></div></div><div class="fb" hidden></div>`);
-  const deste=k.querySelector(".r-deste"),f=k.querySelector(".fb");let sec=null,yer=0;
-  const G=gorevler(k,[{m:"<b>4 kartı</b> doğru kutuya yerleştiriniz.",ok:()=>yer>=4},
-    {m:"<b>Bütün kartları</b> (10 kart) yerleştiriniz.",ok:()=>yer>=KART.length,s:()=>"Kök içi tam kare (ya da payı ve paydası tam kare) olanlar rasyonel, ötekiler irrasyonel çıktı."}],acikla);
-  const D=defter(k,["Kart","Neden?","Tür"]);
-  karistir(KART.map((x,i)=>i)).forEach(i=>{const b=document.createElement("button");b.type="button";b.className="r-kart";b.dataset.i=i;b.innerHTML=K(KART[i][0]);deste.appendChild(b);
-    b.onclick=()=>{if(b.classList.contains("ok"))return;deste.querySelectorAll(".r-kart").forEach(x=>x.classList.toggle("secili",x===b));sec=b;bip(600,.05);};});
-  k.querySelectorAll(".r-kova").forEach(kv=>{const bas=()=>{if(!sec){fb(f,false,"Önce üstteki kartlardan birine dokununuz.");return;}
-      const [ad,t,ac]=KART[+sec.dataset.i];
-      if(t===+kv.dataset.k){sec.classList.remove("secili");sec.classList.add("ok");sec.innerHTML=`${K(ad)} <small>${t?"tam kare":"tam kare değil"}</small>`;kv.querySelector(".r-kartlar").appendChild(sec);sec=null;yer++;
-        D.ekle([K(ad),ac,t?"Rasyonel":"İrrasyonel"],ad);fb(f,true,`${K(ad)}: ${ac}. ${t?"Rasyoneldir.":"İrrasyoneldir."}`);bip(760,.1);G.kontrol();}
-      else{fb(f,false,`${K(ad)} kartı bu kutuya ait değil. ${YD}`);bip(220,.15,"triangle");}};
-    kv.onclick=bas;kv.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();bas();}};});
+  k.insertAdjacentHTML("beforeend",`<div class="r-den"></div><div class="r-hes"><div class="r-ekran r-ekr"></div></div><p class="r-sonuc"></p><div class="r-iki"><div class="r-kova ras"><h4>Rasyonel</h4><p>Açılım bitti: kesir olarak yazılabilir.</p><div class="r-kartlar r-kr"></div></div><div class="r-kova irr"><h4>İrrasyonel</h4><p>Açılım bitmiyor ve devretmiyor.</p><div class="r-kartlar r-ki"></div></div></div>`);
+  const dn=k.querySelector(".r-den"),ekr=k.querySelector(".r-ekr"),son=k.querySelector(".r-sonuc"),kr=k.querySelector(".r-kr"),ki=k.querySelector(".r-ki");
+  const sd=document.createElement("div");sd.className="a8-sd";sd.innerHTML=`<span class="a8-sd-ad">Sayı türü:</span>`;dn.appendChild(sd);
+  segment(sd,[["d","Doğal sayı (1–50)"],["o","Ondalık (0,01–0,50)"]],tur,v=>{tur=v;ciz();});
+  const sg=surgu("Kök içindeki sayı",1,50,n,v=>{n=v;ciz();});dn.appendChild(sg.el);
+  const G=gorevler(k,[{m:"<b>Rasyonel</b> kutusuna en az <b>3 doğal sayı</b> kartı düşürünüz.",ok:()=>[...ras.keys()].filter(x=>x[0]==="d").length>=3},
+    {m:"<b>İrrasyonel</b> kutusuna en az <b>4 kart</b> düşürünüz.",ok:()=>irr.size>=4},
+    {m:"Ondalık gösterimlerden <b>2 rasyonel</b> ve <b>2 irrasyonel</b> kart bulunuz.",ok:()=>[...ras.keys()].filter(x=>x[0]==="o").length>=2&&[...irr.keys()].filter(x=>x[0]==="o").length>=2,
+      s:()=>"Kök içindeki sayı tam kare ise (ondalıkta 0,01, 0,04, 0,25 … gibi) açılım bitti; tam kare değilse açılım bitmedi."}],acikla);
+  const D=defter(k,["Sayı","Ekranda","Tür"]);
+  function ciz(){const x=tur==="d"?n:n/100,ad=tur==="d"?String(n):Vk(x),r=Math.round(Math.sqrt(n)),tam=r*r===n;
+    const deg=tam?(tur==="d"?String(r):Vk(r/10)):Math.sqrt(x).toFixed(9).replace(".",",")+"…";
+    ekr.innerHTML=`${K(ad)} = ${deg}`;
+    son.innerHTML=tam?`<span class="r-ok2">Açılım bitti:</span> ${K(ad)} = ${deg}${tur==="o"?` = ${kes(r,10)}`:""}, çünkü ${tur==="d"?`${n} = ${r} · ${r}`:`${ad} = ${kes(n,100)}; ${n} = ${r} · ${r} ve 100 = 10 · 10`}.`:`<span class="r-no2">Açılım ekrana sığmadı;</span> basamaklar bitmiyor ve bir düzenle tekrar etmiyor. ${tur==="d"?`${n} tam kare değil.`:`${ad} = ${kes(n,100)}; ${n} tam kare değil.`}`;
+    const key=tur+n,M_=tam?ras:irr,kap=tam?kr:ki;
+    if(!M_.has(key)){M_.set(key,1);const b=document.createElement("span");b.className="r-kart ok";b.style.cursor="default";b.innerHTML=K(ad);kap.appendChild(b);D.ekle([K(ad),deg,tam?"Rasyonel":"İrrasyonel"],key);bip(tam?820:420,.08);G.kontrol();}}
+  ciz();
   function acikla(){const c=S.kural(2);
     S.soru(c,`n pozitif bir tam sayı ise ${K("n")} ne zaman rasyoneldir?`,
       ["n tam kare sayı ise",["n çift sayı ise",`${K(12)} ve ${K(50)} çift sayıların karekökü ama irrasyonel.`],["Her zaman",`${K(2)} = 1,4142… sonsuza kadar devretmeden sürer.`]],
@@ -1665,43 +1741,48 @@ const e_yerlestir=p=>{const S=notr(asamali(p));const KART=[20,50,3,85,12];let ci
 };
 
 /* 20 · KAREKÖK DÜELLOSU (bilgisayara karşı karşılaştırma oyunu) */
-const e_duello=p=>{const S=notr(asamali(p));const SURE=10;
-  const HAVUZ=[[K(50),"7","s","7 = "+K(49)+" ve 50 > 49"],[K("0,25"),"0,25","s",K("0,25")+" = 0,5 > 0,25"],["6",K(36),"e",K(36)+" = 6"],[K(80),"9","g","9 = "+K(81)+" ve 80 < 81"],
-    [K(kes(9,16)),"0,75","e",K(kes(9,16))+" = "+kes(3,4)+" = 0,75"],[K(2),"1,5","g","1,5 = "+K("2,25")+" ve 2 < 2,25"],[K(99),"10","g","10 = "+K(100)+" ve 99 < 100"],[K("0,04"),"0,2","e","0,2 · 0,2 = 0,04"],
-    [K(65),"8","s","8 = "+K(64)+" ve 65 > 64"],[K(kes(1,4)),kes(1,4),"s",K(kes(1,4))+" = "+kes(1,2)+" > "+kes(1,4)],[K("1,21"),"1,1","e","1,1 · 1,1 = 1,21"],[K(17),K(19),"g","17 < 19"],
-    [K("9 + 16"),K(9)+" + "+K(16),"g",K("9 + 16")+" = 5, "+K(9)+" + "+K(16)+" = 7"],[K(0),K(1),"g",K(0)+" = 0, "+K(1)+" = 1"]];
-  let tur=0,siz=0,pc=0,enIyi=0,oyun=0,tl=null,basT=0,bekliyor=false,L=[];
-  const k=S.ac(1,{ne:"Bilgisayara karşı 6 turluk bir düelloda kareköklü sayıları hızla karşılaştıracaksınız.",
-    durum:`Bilgisayara karşı 6 turluk bir oyun oynanacak. Her turda iki sayı gösterilir. <b>Kurallar:</b><br>1) “Soldaki büyük”, “Eşit” ya da “Sağdaki büyük” düğmelerinden birine basılır.<br>2) 10 saniye dolmadan doğru cevap veren turu alır.<br>3) Cevap yanlışsa ya da süre biterse turu bilgisayar alır.<br>4) 6 turda en az 4 tur kazanan düelloyu kazanır.<br>Örnek tur: ${K(35)} ile 6 gösterilirse doğru cevap “Sağdaki büyük”tür.`,
-    nasil:["“Düelloyu başlatınız” düğmesine basınız; süre çubuğu dolmaya başlar.","İki sayıyı karşılaştırıp bir düğmeye basınız.","Her turdan sonra açıklamayı okuyup “Sonraki tur” düğmesine basınız. Puanlar ayrı kutularda görünür."],biter:bitG(3)});
-  S.tahmin(k,`Bir turda solda ${K("0,25")}, sağda 0,25 gösteriliyor. Doğru cevap hangisidir?`,[["s","Soldaki büyük"],["e","Eşit"],["g","Sağdaki büyük"]],"s",`${K("0,25")} = 0,5 > 0,25: soldaki büyük.`);
+const e_duello=p=>{const S=notr(asamali(p));const SURE=40,TOL=.2001;
+  /* 05.10.2026 (§4.k, C → A): Düello, süre içinde iki kareköklü sayıyı sayı doğrusuna yerleştirme yarışıdır. Öğrenci iki işaretçiyi kaydırır,
+     “Yerleştiriniz” ile sınar; her işaretçinin karesi kök içindeki sayıyla karşılaştırılır, öğrenci düzeltip yeniden dener. */
+  const HAVUZ=[[50,38],[20,30],[75,90],[3,8],[12,15],[55,60],[40,45],[85,70],[27,33],[6,10],[18,23],[62,67]];
+  let tur=0,siz=0,pc=0,enIyi=0,oyun=0,tl=null,basT=0,bekliyor=false,L=[],A=50,B=50,den=0;
+  const k=S.ac(1,{ne:"Bilgisayara karşı 6 turluk bir düelloda iki kareköklü sayıyı süre dolmadan sayı doğrusuna yerleştireceksiniz.",
+    durum:`Bilgisayara karşı 6 turluk bir oyun oynanacak. <b>Kurallar:</b><br>1) Her turda iki kareköklü sayı (A ve B) gösterilir; 0 ile 10 arasındaki sayı doğrusunda iki işaretçi vardır.<br>2) İşaretçileri sürgülerle onda birlik adımlarla kaydırıp “Yerleştiriniz” düğmesine basınız. Her işaretçi için gösterdiği sayının karesi kök içindeki sayıyla karşılaştırılır.<br>3) İki işaretçi de doğru yerin en fazla 0,2 yakınındaysa turu siz alırsınız; yanlışsa düzeltip yeniden yerleştirebilirsiniz. 40 saniye dolarsa turu bilgisayar alır.<br>4) 6 turda en az 4 tur kazanan düelloyu kazanır.<br>Örnek tur: ${K(50)} için 7,1 doğru bir yerdir, çünkü 7 · 7 = 49 ve 7,1 · 7,1 = 50,41.`,
+    nasil:["“Düelloyu başlatınız” düğmesine basınız; süre çubuğu dolmaya başlar.","A ve B sürgüleriyle işaretçileri kaydırınız; sonra “Yerleştiriniz” düğmesine basınız.","Doğru yerleşince “Sonraki tur” düğmesiyle devam ediniz. Puanlar ayrı kutularda görünür."],biter:bitG(3)});
+  S.tahmin(k,`${K(50)} sayı doğrusunda nerededir?`,[["s","7'nin biraz sağında"],["l","7'nin biraz solunda"],["y","25'te"]],"s",`7 · 7 = 49 < 50 olduğu için ${K(50)}, 7'nin biraz sağındadır (≈ 7,07).`);
   k.insertAdjacentHTML("beforeend",`<div class="r-skor"><div>Tur<b class="r-tur">0 / 6</b></div><div>Siz<b class="r-siz">0</b></div><div>Bilgisayar<b class="r-pc">0</b></div></div><div class="r-sure"><i></i></div>
-    <div class="r-duel"><div class="r-ifade r-sol">?</div><div class="r-vs">ile</div><div class="r-ifade r-sag">?</div></div>
-    <div class="secler r-cev" style="justify-content:center"><button class="sec" data-c="s" disabled>◀ Soldaki büyük</button><button class="sec" data-c="e" disabled>Eşit</button><button class="sec" data-c="g" disabled>Sağdaki büyük ▶</button></div>
-    <div class="row" style="justify-content:center"><button class="primary r-bas">Düelloyu başlatınız</button></div><div class="fb" hidden></div>`);
-  const $=s=>k.querySelector(s),cev=[...k.querySelectorAll(".r-cev .sec")],f=$(".fb"),bb=$(".r-bas"),bar=$(".r-sure i");
+    <div class="r-duel"><div class="r-ifade r-sol">A: ?</div><div class="r-vs">ve</div><div class="r-ifade r-sag">B: ?</div></div><div class="stage r-dd"></div><div class="r-den r-sg"></div>
+    <div class="row" style="justify-content:center"><button class="primary r-yer" disabled>Yerleştiriniz</button><button class="primary r-bas">Düelloyu başlatınız</button></div><p class="r-sonuc"></p><div class="fb" hidden></div>`);
+  const $=s=>k.querySelector(s),f=$(".fb"),bb=$(".r-bas"),bar=$(".r-sure i"),by=$(".r-yer"),st=$(".r-dd"),son=$(".r-sonuc");
+  const sgA=surgu("A işaretçisi",0,100,A,v=>{A=v;ciz();}),sgB=surgu("B işaretçisi",0,100,B,v=>{B=v;ciz();});$(".r-sg").append(sgA.el,sgB.el);
+  [[sgA,()=>A],[sgB,()=>B]].forEach(([g,f_])=>{const o=g.el.querySelector("output"),y=()=>{o.textContent=V(f_()/10,1);};g.el.querySelector("input").addEventListener("input",y);g.el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>setTimeout(y,0)));g.el.querySelectorAll(".a8-uc").forEach((u,i)=>u.textContent=i?10:0);y();});
   const G=gorevler(k,[{m:"İlk turu oynayınız.",ok:()=>oyun>0||tur>=1},{m:"Bir düellonun <b>6 turunu</b> bitiriniz.",ok:()=>oyun>0},
-    {m:"Bir düelloda en az <b>4 tur</b> kazanınız.",ok:()=>enIyi>=4,s:()=>`Düelloyu ${enIyi} turla kazandınız: karşılaştırma yollarını hızla kullandınız.`}],acikla);
-  const D=defter(k,["Tur","Karşılaştırma","Doğru cevap","Turu alan"]);
-  const AD={s:"Soldaki büyük",e:"Eşit",g:"Sağdaki büyük"};
+    {m:"Bir düelloda en az <b>4 tur</b> kazanınız.",ok:()=>enIyi>=4,s:()=>`Düelloyu ${enIyi} turla kazandınız: kareköklerin yerini karelerle hızla buldunuz.`}],acikla);
+  const D=defter(k,["Tur","Sayılar","Yerleştirme","Deneme","Turu alan"]);
   const skor=()=>{$(".r-tur").textContent=`${tur} / 6`;$(".r-siz").textContent=siz;$(".r-pc").textContent=pc;};
+  function ciz(){const r=L[tur]||[0,0],X0=20,U=32,LY=60,sv=svgEl(360,110);let h=`<line x1="${X0-10}" y1="${LY}" x2="${X0+10*U+10}" y2="${LY}" stroke="${css('--ink')}" stroke-width="2.5"/>`;
+    for(let i=0;i<=10;i++)h+=`<line x1="${X0+i*U}" y1="${LY-8}" x2="${X0+i*U}" y2="${LY+8}" stroke="${css('--ink')}" stroke-width="2"/><text x="${X0+i*U}" y="${LY+28}" text-anchor="middle" font-size="15" font-weight="800">${i}</text>`;
+    [[A,"A","#1c7ed6",-1],[B,"B","#e8590c",1]].forEach(([v,ad,rk,yo])=>{const x=X0+v/10*U;h+=`<line x1="${x}" y1="${LY}" x2="${x}" y2="${LY+yo*-26}" stroke="${rk}" stroke-width="3"/><circle cx="${x}" cy="${LY+yo*-30}" r="11" fill="${rk}"/><text x="${x}" y="${LY+yo*-30+5}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${ad}</text>`;});
+    sv.innerHTML=h;st.replaceChildren(sv);}
   function durdur(){if(tl){clearInterval(tl);tl=null;}}
   function yeniOyun(){durdur();L=karistir(HAVUZ).slice(0,6);tur=0;siz=0;pc=0;skor();f.hidden=true;sonrakiTur();}
-  function sonrakiTur(){const r=L[tur];$(".r-sol").innerHTML=r[0];$(".r-sag").innerHTML=r[1];cev.forEach(b=>{b.disabled=false;b.classList.remove("dogru","yanlis");});
-    bb.hidden=true;bekliyor=true;basT=Date.now();bar.style.width="0";durdur();
-    tl=setInterval(()=>{if(!k.isConnected){durdur();return;}const g=(Date.now()-basT)/1000;bar.style.width=Math.min(100,g/SURE*100)+"%";if(g>=SURE)bitirTur(null);},100);}
-  function bitirTur(c){if(!bekliyor)return;bekliyor=false;durdur();const r=L[tur],d=r[2],ok=c===d;tur++;if(ok)siz++;else pc++;skor();
-    cev.forEach(b=>{b.disabled=true;if(b.dataset.c===d)b.classList.add("dogru");else if(b.dataset.c===c)b.classList.add("yanlis");});
-    const ac=`${r[3]}. Doğru cevap: <b>${AD[d]}</b>.`;
-    fb(f,ok,(ok?"Turu siz aldınız! ":c===null?"Süre doldu; turu bilgisayar aldı. ":"Yanlış cevap; turu bilgisayar aldı. ")+ac);bip(ok?880:220,.15,ok?"sine":"triangle");
-    D.ekle([`${oyun+1}. düello, ${tur}. tur`,`${r[0]} ile ${r[1]}`,AD[d],ok?"Siz":"Bilgisayar"],oyun+"-"+tur);
+  function sonrakiTur(){const r=L[tur];$(".r-sol").innerHTML=`A: ${K(r[0])}`;$(".r-sag").innerHTML=`B: ${K(r[1])}`;A=50;B=50;sgA.v=50;sgB.v=50;[sgA,sgB].forEach(g=>g.el.querySelector("output").textContent="5,0");den=0;son.innerHTML="";ciz();
+    bb.hidden=true;by.disabled=false;bekliyor=true;basT=Date.now();bar.style.width="0";durdur();f.hidden=true;
+    tl=setInterval(()=>{if(!k.isConnected){durdur();return;}const g=(Date.now()-basT)/1000;bar.style.width=Math.min(100,g/SURE*100)+"%";if(g>=SURE)bitirTur(false);},100);}
+  const sat=(v,n)=>{const x=v/10,kx=Math.round(x*x*100)/100;return `${V(x,1)} · ${V(x,1)} = ${V(kx,2)} ${kx<n?"<":kx>n?">":"="} ${n}`;};
+  by.onclick=()=>{if(!bekliyor)return;den++;const r=L[tur],okA=Math.abs(A/10-Math.sqrt(r[0]))<=TOL,okB=Math.abs(B/10-Math.sqrt(r[1]))<=TOL;
+    son.innerHTML=`A: ${sat(A,r[0])} ${okA?'<span class="r-ok2">✔</span>':'<span class="r-no2">✘</span>'}<br>B: ${sat(B,r[1])} ${okB?'<span class="r-ok2">✔</span>':'<span class="r-no2">✘</span>'}`;
+    if(okA&&okB)bitirTur(true);else bip(260,.1,"triangle");};
+  function bitirTur(ok){if(!bekliyor)return;bekliyor=false;durdur();by.disabled=true;const r=L[tur];tur++;if(ok)siz++;else pc++;skor();
+    const a=Math.sqrt(r[0]),b=Math.sqrt(r[1]);
+    fb(f,ok,(ok?`İki sayı da yerine yerleşti! Turu siz aldınız (${den} deneme). `:"Süre doldu; turu bilgisayar aldı. ")+`${K(r[0])} ≈ ${V(a,2)}, ${K(r[1])} ≈ ${V(b,2)}; ${a<b?`${K(r[0])} < ${K(r[1])}`:`${K(r[0])} > ${K(r[1])}`}.`);bip(ok?880:220,.15,ok?"sine":"triangle");
+    D.ekle([`${oyun+1}. düello, ${tur}. tur`,`${K(r[0])} ve ${K(r[1])}`,ok?`A ${V(A/10,1)}, B ${V(B/10,1)}`:"—",den,ok?"Siz":"Bilgisayar"],oyun+"-"+tur);
     if(tur>=6){oyun++;enIyi=Math.max(enIyi,siz);bb.hidden=false;bb.textContent="Yeni düello başlatınız";
       f.innerHTML+=siz>=4?` <br><b>Düelloyu kazandınız: ${siz} – ${pc}.</b>`:` <br><b>Bu düelloyu bilgisayar kazandı: ${siz} – ${pc}.</b> Yeniden deneyebilirsiniz.`;}
     else{bb.hidden=false;bb.textContent="Sonraki tur →";}
     G.kontrol();}
-  cev.forEach(b=>b.onclick=()=>bitirTur(b.dataset.c));
   bb.onclick=()=>{if(tur>=6||tur===0&&!L.length)yeniOyun();else sonrakiTur();};
-  skor();
+  skor();ciz();
   function acikla(){durdur();const c=S.kural(2);
     S.soru(c,`${K(50)} ile 7'yi hızlı karşılaştırmanın yolu hangisidir?`,
       [`7'yi ${K(49)} biçiminde yazıp kök içindeki sayıları karşılaştırmak`,["50'yi 2'ye bölüp 25 ile 7'yi karşılaştırmak",`${K(50)}, 50'nin yarısı değildir.`],["İki sayının da karesini alıp toplamak","Karşılaştırmak için kök içindeki sayılara bakmak yeter: 49 < 50."]],
@@ -1720,24 +1801,24 @@ const e_duello=p=>{const S=notr(asamali(p));const SURE=10;
 const ACT=[
  {ad:"Kare Tarla Ölçümü",amac:"Kareli kâğıtta kareler çizerek alanı verilen bir karenin kenar uzunluğunu bulmak ve karekökü kenar uzunluğu olarak tanımak.",adimlar:ynr("Kareli kâğıda kare tarlalar çizip alanı verilen karenin kenarını bulacaksınız.","Kareli kâğıtta bir kareye dokununuz; karenin kenarını ve alanını deney defterinde izleyiniz."),ciz:e_tarla},
  {ad:"Kenar–Alan Tablosu",amac:"Kenarı 1'den 20'ye kadar olan karelerin alanlarını tabloya yazarak tam kare sayıları ve kareköklerini keşfetmek.",adimlar:ynr("Bir karenin kenarını 1 cm'den 20 cm'ye kadar büyütüp kenar–alan tablosunu dolduracaksınız.","“Kenar uzunluğu” sürgüsünü kullanınız; her kenar için alan deney defterine yazılır."),ciz:e_tablo},
- {ad:"Tam Kare Avcısı",amac:"1'den 100'e kadar sayılar arasında tam kareleri bulup ardışık tam kareler arasındaki farkların ardışık tek sayılar olduğunu keşfetmek.",adimlar:ynr("Sayı tablosunda tam kare sayıları bulacaksınız.","Tam kare olduğunu düşündüğünüz sayılara dokununuz; deney defterindeki farklara bakınız."),ciz:e_avci},
+ {ad:"Tam Kare Avcısı",amac:"1'den 100'e kadar sayılar arasında tam kareleri bulup ardışık tam kareler arasındaki farkların ardışık tek sayılar olduğunu keşfetmek.",adimlar:ynr("Birim kareleri kare biçiminde dizerek tam kare sayıları bulacaksınız.","“Birim kare sayısı” sürgüsünü kullanınız; kareler tam dizilince sayı tabloda yeşil olur, deney defterindeki farklara bakınız."),ciz:e_avci},
  {ad:"Tek Sayılar Merdiveni",amac:"Bir kareye L biçiminde sıralar ekleyerek 1 + 3 + 5 + … toplamının bir tam kare olduğunu keşfetmek.",adimlar:ynr("Bir kareye L biçiminde sıralar ekleyerek ardışık tek sayıları toplayacaksınız.","“Bir sıra ekleyiniz” düğmesine basınız; toplam ile karenin kenarını karşılaştırınız."),ciz:e_merdiven},
  {ad:"Karekök Makinesi",amac:"Kare alma ile karekök almanın birbirinin tersi olduğunu makine zinciriyle keşfetmek.",adimlar:ynr("Bir sayıyı Kare ve Karekök makinelerinden art arda geçireceksiniz.","Bir giriş sayısı seçiniz; makinelerin sırasını seçip çıkan sayıya bakınız."),ciz:e_makine},
  {ad:"Negatif Olur mu?",amac:"Bir sayının karesinin negatif olmadığını ve karekökün negatif olmayan bir sayı olduğunu keşfetmek.",adimlar:ynr("Sayı doğrusundaki sayıların karelerini alıp karekökün işaretini inceleyeceksiniz.","Sayı doğrusunda bir sayıya dokununuz; karesine ve kare çizimine bakınız."),ciz:e_negatif},
  {ad:"Kare mi Değil mi?",amac:"Birim kareleri satırlara dizerek yalnız tam kare sayıda birim kareyle kare kurulabildiğini keşfetmek.",adimlar:ynr("Birim kare karoları satırlara dizerek kare kurmayı deneyeceksiniz.","Karo sayısını ve satır sayısını seçiniz; dizilimin kare olup olmadığına bakınız."),ciz:e_karo},
- {ad:"Arada Kalan Kök",amac:"Tam kare olmayan bir sayının karekökünün hangi iki ardışık doğal sayı arasında olduğunu sayı doğrusunda bulmak.",adimlar:ynr("Kartlardaki kareköklü sayıları sayı doğrusunda doğru aralığa yerleştireceksiniz.","Karttaki sayıya bakınız; sayı doğrusunda doğru aralığa dokununuz."),ciz:e_arada},
- {ad:"Hangisine Yakın?",amac:"Kareköklü bir sayının en yakın doğal sayısını, kök içindeki sayının tam karelere uzaklıklarını karşılaştırarak bulmak.",adimlar:ynr("Kareköklü bir sayının hangi doğal sayıya daha yakın olduğunu bulacaksınız.","Sayı doğrusuna bakıp iki düğmeden birine basınız; uzaklıkları karşılaştırınız."),ciz:e_yakin},
+ {ad:"Arada Kalan Kök",amac:"Tam kare olmayan bir sayının karekökünün hangi iki ardışık doğal sayı arasında olduğunu sayı doğrusunda bulmak.",adimlar:ynr("Kenarı doğal sayı olan kareler kurarak karttaki sayının hangi iki ardışık doğal sayı arasında olduğunu bulacaksınız.","“Kenar” sürgüsüyle kareler kurunuz; karttaki alan iki ardışık karenin arasına düşünce kart sayı doğrusuna yerleşir."),ciz:e_arada},
+ {ad:"Hangisine Yakın?",amac:"Kareköklü bir sayının en yakın doğal sayısını, kök içindeki sayının tam karelere uzaklıklarını karşılaştırarak bulmak.",adimlar:ynr("Kareköklü bir sayının noktasını sayı doğrusunda yerleştirip hangi doğal sayıya daha yakın olduğunu bulacaksınız.","“Nokta” sürgüsüyle noktayı kaydırınız; noktanın karesini karttaki sayıyla karşılaştırınız."),ciz:e_yakin},
  {ad:"Ondalık Kök Avı",amac:"Karekökü onda birler basamağına kadar tahmin edip karesini alarak sınamak.",adimlar:ynr("Kareköklerin onda birlik aralığını tahmin edip karesini alarak bulacaksınız.","Bir hedef seçiniz; sayı doğrusundaki onda birlik çentiklere dokunup karelere bakınız."),ciz:e_ondalik},
  {ad:"Kesme mi Yuvarlama mı?",amac:"Hesap makinesiyle kareköklerin ondalık gösterimini bulmak ve kesme ile yuvarlamayla yaklaşık değer yazmak.",adimlar:ynr("Hesap makinesiyle kareköklerin yaklaşık değerlerini kesme ve yuvarlama ile bulacaksınız.","Bir sayı yazıp √ tuşuna basınız; sonra kesme ve yuvarlama düğmelerini deneyiniz."),ciz:e_hesap},
- {ad:"Kök Sıralama Treni",amac:"Kareköklü sayıları ve doğal sayıları, kök içindeki sayıları karşılaştırarak küçükten büyüğe sıralamak.",adimlar:ynr("Sayı kartlarını trenin vagonlarına küçükten büyüğe yerleştireceksiniz.","Kalan kartların en küçüğüne dokununuz; tren dolunca sonraki treni getiriniz."),ciz:e_tren},
+ {ad:"Kök Sıralama Treni",amac:"Kareköklü sayıları ve doğal sayıları, kök içindeki sayıları karşılaştırarak küçükten büyüğe sıralamak.",adimlar:ynr("Trenin vagonlarındaki kartların yerini değiştirerek kartları küçükten büyüğe dizeceksiniz.","İki vagona dokunarak kartların yerini değiştiriniz; “Treni kontrol edin” düğmesiyle sınayıp kırmızı vagonları düzeltiniz."),ciz:e_tren},
  {ad:"Kesrin Karekökü",amac:"Kenarı kesir olan kareler kurarak bir kesrin karekökünün payın ve paydanın kareköklerinden oluştuğunu keşfetmek.",adimlar:ynr("Kenarı kesir olan kareler kurarak alanı kesir olan karenin kenarını bulacaksınız.","Kenarın payını ve paydasını seçiniz; boyalı karenin alanına bakınız."),ciz:e_kesir},
  {ad:"Ondalığın Karekökü",amac:"Kenarı ondalık gösterimle verilen kareler kurarak ondalık sayıların kareköklerini bulmak ve tam bulunamayanları ayırt etmek.",adimlar:ynr("Kenarı 0,1 birim adımlarla değişen kareler kurarak ondalık sayıların kareköklerini bulacaksınız.","“Kenar” sürgüsünü kullanınız; boyalı karenin alanına bakınız."),ciz:e_ondkok},
  {ad:"Küçük Sayıların Kökü",amac:"0 ile 1 arasındaki sayıların karekökünün sayıdan büyük, 1'den büyük sayıların karekökünün sayıdan küçük olduğunu keşfetmek.",adimlar:ynr("Bir sayı ile karekökünü çubuklarla karşılaştıracaksınız.","“Sayı” satırından bir sayı seçiniz; iki çubuğun uzunluğunu karşılaştırınız."),ciz:e_kucuk},
- {ad:"Rasyonel mi İrrasyonel mi?",amac:"Kareköklü sayı kartlarını, kök içindeki sayının tam kare olup olmadığına bakarak rasyonel ve irrasyonel diye ayırmak.",adimlar:ynr("Kareköklü sayı kartlarını rasyonel ve irrasyonel olarak iki kutuya ayıracaksınız.","Bir karta, sonra doğru kutuya dokununuz; kök içindeki sayının tam kare olup olmadığına bakınız."),ciz:e_sinif},
+ {ad:"Rasyonel mi İrrasyonel mi?",amac:"Kök içindeki sayıyı değiştirip hesap makinesindeki açılımı inceleyerek kareköklü sayıların ne zaman rasyonel, ne zaman irrasyonel olduğunu keşfetmek.",adimlar:ynr("Kök içindeki sayıyı değiştirerek kartların rasyonel ya da irrasyonel kutusuna düşmesini inceleyeceksiniz.","Sayı türünü seçip “Kök içindeki sayı” sürgüsünü kullanınız; hesap makinesindeki açılımın bitip bitmediğine bakınız."),ciz:e_sinif},
  {ad:"Toplamın Kökü Dedektifi",amac:"Bir toplamın karekökünün, kareköklerin toplamına genellikle eşit olmadığını karelerle ve karşı örnekle göstermek.",adimlar:ynr("İki kareyi yan yana koyup alanları toplamı kadar olan tek kareyle karşılaştıracaksınız.","a ve b için sayılar seçiniz; iki uzunluk çubuğunu karşılaştırınız."),ciz:e_toplam},
  {ad:"Kare Karo Döşeme",amac:"Eldeki karolarla döşenebilecek en büyük kare zemini, karo sayısını aşmayan en büyük tam kareyi bularak belirlemek.",adimlar:ynr("Eldeki karolarla döşenebilecek en büyük kare zemini bulacaksınız.","Kenardaki karo sayısını değiştiriniz; en büyük kareyi bulunca “Kontrol edin” düğmesine basınız."),ciz:e_doseme},
  {ad:"Kökü Sayı Doğrusuna Yerleştir",amac:"Kareköklü sayıların sayı doğrusundaki yerini, ardışık tam kareleri ve yakınlığı kullanarak tahmin etmek.",adimlar:ynr("Kareköklü sayıların sayı doğrusundaki yerini tahmin edeceksiniz.","Turuncu işaretçiyi sürükleyiniz ya da ◀ ▶ düğmelerini kullanınız; “Yerleştiriniz” düğmesine basınız."),ciz:e_yerlestir},
- {ad:"Karekök Düellosu",amac:"Kareköklü sayıları karşılaştırma yollarını kullanarak bilgisayara karşı hızlı karşılaştırma yapmak.",adimlar:ynr("Bilgisayara karşı 6 turluk bir karşılaştırma düellosu yapacaksınız.","Kurallar: Her turda iki sayı gösterilir; 10 saniye dolmadan “Soldaki büyük”, “Eşit” ya da “Sağdaki büyük” düğmesine basınız. Doğru cevap turu size, yanlış cevap ya da süre bitimi turu bilgisayara verir. 6 turda en az 4 tur kazanan düelloyu kazanır."),ciz:e_duello}];
+ {ad:"Karekök Düellosu",amac:"Kareköklü sayıları bilgisayara karşı süreli bir yarışta sayı doğrusuna yerleştirerek karşılaştırmak.",adimlar:ynr("Bilgisayara karşı 6 turluk bir yerleştirme düellosu yapacaksınız.","Kurallar: Her turda iki kareköklü sayı gösterilir. A ve B işaretçilerini sayı doğrusunda kaydırıp “Yerleştiriniz” düğmesine basınız; iki işaretçi de doğru yerin en fazla 0,2 yakınındaysa turu siz alırsınız, değilse düzeltip yeniden deneyebilirsiniz. 40 saniye dolarsa turu bilgisayar alır. 6 turda en az 4 tur kazanan düelloyu kazanır."),ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"Kareköklü İfadeler Keşif Atölyesi",kisa:"Kareköklü İfadeler Keşif Atölyesi",kod:"MAT.8.1.2",ust:"8. Sınıf · Sayılar ve Nicelikler · MAT.8.1.2 · Fasikül 2",
   aciklama:"Kareköklü ifadeler için yirmi keşfetme etkinliği: karenin alanı ve kenarı, tam kare sayılar, karekökün hangi iki doğal sayı arasında olduğu, onda birlik tahmin, kesme ve yuvarlama, sıralama, kesir ve ondalık gösterimlerin karekökleri ve irrasyonel sayılar. Her etkinlik farklı bir düzenek; tahmin ediniz, deneyiniz, kuralı bulunuz ve yeni bir örnekte kullanınız."});
 
