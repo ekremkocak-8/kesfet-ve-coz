@@ -408,6 +408,8 @@ input.ans.gen{width:150px}.tus{min-width:44px;min-height:40px;font-size:18px;fon
 .sor.sz-yeni{animation:szGel .45s ease-out}
 @keyframes szGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.sz-ileri,.sor.sz-yeni{animation:none}}
+/* 05.10.2026: dokunma hedefi en az 44 px (§19-11) */
+.ta-dug button,.row button,button.primary,button.ghost{min-height:44px}
 
 /* TA-SON */
 /* 713-BAS · Sıralama Keşif Atölyesi düzenekleri */
@@ -1323,11 +1325,11 @@ function paydaTur(k,a,b,aday,D,A){let n=null,bekle=null;
   A.oto=()=>{if(bekleyenOto(bekle))return;const x=bt.find(y=>!y.disabled&&+y.dataset.n%a[1]===0&&+y.dataset.n%b[1]===0);x&&x.click();};ciz();}
 const e_payda=p=>{const D=defterY(["Kesirler","Ortak payda","Genişletilmiş","Sonuç"]);
   const P2=rastgele([{a:[3,8],b:[5,12],d:[16,20,24,36]},{a:[5,6],b:[7,9],d:[12,15,18,24]},{a:[3,10],b:[4,15],d:[20,25,30,45]}]);
-  const yon=["Üstteki iki şerit aynı bütünü gösteriyor; boyalı kısımlar kesirleri gösteriyor.","Bir ortak payda düğmesine dokununuz. Seçtiğiniz sayı iki paydanın da katıysa şeritler o kadar eş parçaya bölünür.","Sonra paydaları eşitlenmiş kesirleri karşılaştırınız."];
+  const yon=["İki şerit aynı bütünü gösteriyor; boyalı kısımlar kesirleri gösteriyor.","<b>Ortak payda</b> sayacıyla bir sayı seçip <b>Şeritleri bölün</b> düğmesine basınız: Şeritler o kadar eş parçaya bölünür. Boyalı kısım çizgilere oturuyor mu, izleyiniz.","Görevler bitince paydaları eşitlenmiş kesirleri karşılaştırınız."];
   asamali(p,{tahmin:{giris:[`Elif bir kurdelenin ${kH(2,3)} kadarını, Mert aynı uzunluktaki başka bir kurdelenin ${kH(3,4)} kadarını kullandı.`],soru:"Kim daha çok kurdele kullandı?",secs:[["m","Mert"],["e","Elif"],["a","İkisi aynı miktarda"]],dogru:"m",neden:`${kH(2,3)} = ${kH(8,12)} ve ${kH(3,4)} = ${kH(9,12)}.`},
     asamalar:[
-      {ad:"Üçte ikiler ve dörtte üçler",yon,bitis:"Ortak paydayı bulup kesirleri karşılaştırınca.",kur:(k,A)=>paydaTur(k,[2,3],[3,4],[6,8,9,12],D,A)},
-      {ad:"Yeni bir çift",yon,bitis:"Ortak paydayı bulup kesirleri karşılaştırınca.",kur:(k,A)=>paydaTur(k,P2.a,P2.b,P2.d,D,A)},
+      {ad:"Üçte ikiler ve dörtte üçler",yon,bitis:"Ortak paydayı bulup kesirleri karşılaştırınca.",kur:(k,A)=>paydaTur2(k,[2,3],[3,4],D,A)},
+      {ad:"Yeni bir çift",yon,bitis:"Ortak paydayı bulup kesirleri karşılaştırınca.",kur:(k,A)=>paydaTur2(k,P2.a,P2.b,D,A)},
       kuralA(D,[[`${kH(2,3)} ile ${kH(3,4)} karşılaştırılırken ortak payda neden 12 seçilebilir?`,["12 hem 3'ün hem 4'ün katıdır.","12 seçeneklerin en büyüğüdür.","3 ile 4'ün toplamı 12'dir."],`Doğru! ${kH(2,3)} = ${kH(8,12)} ve ${kH(3,4)} = ${kH(9,12)}.`,["Seçilen sayı, iki paydanın da katı olmalıdır.","3 ile 4'ün toplamı 7'dir; ortak payda paydaların katı olmalıdır."]],
         ["Paydaları eşitlenmiş iki pozitif kesirden hangisi büyüktür?",["Payı büyük olan","Paydası büyük olan","Payı küçük olan"],"Doğru! Paydalar eşitse eş parçalar aynı büyüklüktedir; çok parça büyüktür.",["Paydalar artık eşit; paydaya bakarak karar verilemez.","Pozitif kesirlerde payı küçük olan daha küçüktür."]]]),
       kendiA((m,son)=>{const S=rastgele([[[-3,4],[-5,6],12],[[-2,3],[-5,8],24],[[-4,5],[-7,10],10]]),[a,b,n]=S,A_=[a[0]*n/a[1],n],B_=[b[0]*n/b[1],n],c=kars(a,b);
@@ -1354,11 +1356,11 @@ function payTur(k,a,b,D,A){let sa=null,sb=null,bekle=null,bitti=false;const mer=
   A.oto=()=>{if(bekleyenOto(bekle))return;if(bitti)return;const L=a[0]*b[0]/gcd(a[0],b[0]);k.querySelector(`[data-y="a"] [data-m="${L/a[0]}"]`).click();k.querySelector(`[data-y="b"] [data-m="${L/b[0]}"]`).click();pk.click();};A.durum("Kesir seçilmedi");}
 const e_pay=p=>{const D=defterY(["Kesirler","Payları eşit hâli","Sonuç"]);
   const P1=rastgele([[[4,7],[8,15]],[[3,5],[6,11]],[[2,9],[4,17]]]),P2=rastgele([[[6,11],[3,5]],[[10,13],[5,7]],[[4,9],[6,13]]]);
-  const yon=["Her kesrin altında denk kesirleri sıralandı (pay ve payda aynı sayıyla çarpıldı).","İki listeden <b>payları eşit</b> olan birer kesir seçiniz ve <b>Seçtiğim kesirleri karşılaştır</b> düğmesine basınız.","Şeritlere bakarak kesirleri karşılaştırınız."];
+  const yon=["Her kesrin <b>çarpan</b> sayacı var: Pay ve payda bu sayıyla çarpılır, şerit yeniden çizilir ve her deneme deney defterine yazılır.","Çarpanları değiştirerek iki kesrin <b>paylarını eşitleyiniz</b>.","Paylar eşitlenince şeritlere bakarak kesirleri karşılaştırınız."];
   asamali(p,{tahmin:{giris:[`${kH(3,7)} ile ${kH(3,8)} kesirlerinin payları eşittir: İkisinde de 3 parça var.`,`${kH(3,7)} kesrinde bütün 7 eş parçaya, ${kH(3,8)} kesrinde 8 eş parçaya bölünmüş.`],soru:"Hangisi büyüktür?",secs:[["a",kH(3,7)],["b",kH(3,8)],["e","İkisi eşittir."]],dogru:"a",neden:"Parça sayısı aynı; bütün 7 eş parçaya bölününce parçalar, 8 eş parçaya bölünmesine göre daha büyük olur."},
     asamalar:[
-      {ad:"Payları eşitleyin",yon,bitis:"Payları eşit kesirleri bulup karşılaştırınca.",kur:(k,A)=>payTur(k,P1[0],P1[1],D,A)},
-      {ad:"İkisini de genişletin",yon:["Bu çiftte iki kesrin de genişletilmesi gerekebilir.",...yon.slice(1)],bitis:"Payları eşit kesirleri bulup karşılaştırınca.",kur:(k,A)=>payTur(k,P2[0],P2[1],D,A)},
+      {ad:"Payları eşitleyin",yon,bitis:"Payları eşit kesirleri bulup karşılaştırınca.",kur:(k,A)=>payTur2(k,P1[0],P1[1],D,A)},
+      {ad:"İkisini de genişletin",yon:["Bu çiftte iki kesrin de genişletilmesi gerekebilir.",...yon.slice(1)],bitis:"Payları eşit kesirleri bulup karşılaştırınca.",kur:(k,A)=>payTur2(k,P2[0],P2[1],D,A)},
       kuralA(D,[["Payları eşit iki pozitif kesirden hangisi büyüktür?",["Paydası küçük olan","Paydası büyük olan","İkisi her zaman eşittir."],"Doğru! Parça sayısı aynı; paydası küçük olanın parçaları büyüktür.",["Paydası büyük olan bütün daha çok parçaya bölünür; parçaları küçülür.","Paydaları farklı, payları eşit iki kesir eşit olamaz."]],
         [`${kH(4,7)} ile ${kH(8,15)} karşılaştırılırken pay eşitleme neden kısa yoldur?`,[`8, 4'ün katıdır; yalnız ${kH(4,7)} kesrini 2 ile genişletmek yeter.`,"Paydalar zaten eşittir.","Paylar toplanınca sonuç bulunur."],`Doğru! ${kH(8,14)} > ${kH(8,15)}. Payda eşitlemede ortak payda 105 olurdu.`,["Paydalar 7 ve 15; eşit değil.","Karşılaştırmada pay ve paydalar toplanmaz."]]]),
       kendiA((m,son)=>{const S=rastgele([[[-5,9],[-10,17]],[[-3,8],[-6,17]],[[-2,7],[-4,15]]]),[a,b]=S,c=kars(a,b),g=b[0]/a[0];
@@ -1386,7 +1388,7 @@ const e_yarim=p=>{const D=defterY(["Kesir","Payın 2 katı","Payda","Yeri"]);
   const yon=["Kartta bir kesir var. Kesir "+kH(1,2)+"'den küçük mü, "+kH(1,2)+"'ye eşit mi, büyük mü?","Doğru kutuya dokununuz."];
   asamali(p,{tahmin:{giris:[`${kH(5,11)} kesrinde payın 2 katı 10, payda 11'dir.`,`${kH(1,2)} kesrinde ise payın 2 katı paydaya eşittir.`],soru:`${kH(5,11)} kesri ${kH(1,2)}'den büyük müdür, küçük müdür?`,secs:[["k","Küçüktür."],["b","Büyüktür."],["e","Eşittir."]],dogru:"k",neden:`10 < 11 olduğu için ${kH(5,11)} < ${kH(1,2)}.`},
     asamalar:[
-      {ad:"Kartları ayırın",yon,bitis:"6 kartın hepsi doğru kutuya girince.",kur:(k,A)=>yarimDeste(k,d1,false,D,A)},
+      {ad:"Payı değiştirin",yon:["<b>Pay</b> ve <b>Payda</b> sayaçlarıyla kesri değiştiriniz. Şerit ve turuncu yarım çizgisi anında yeniden çizilir; her kesir deney defterine yazılır.","Görev listesindeki kesirleri kurunuz."],bitis:"Üç görevi de yapınca.",kur:(k,A)=>yarimTur2(k,D,A)},
       {ad:"İki kesri karşılaştırın",yon:[...yon,"İki kart da yerleşince kesirleri karşılaştırınız."],bitis:"İki kartı yerleştirip karşılaştırınca.",kur:(k,A)=>yarimDeste(k,d2,true,D,A)},
       kuralA(D,[[`Bir kesrin ${kH(1,2)}'den küçük olduğunu nasıl anlarsınız?`,["Payın 2 katı paydadan küçükse","Pay tek sayıysa","Payda çift sayıysa"],`Doğru! Örneğin 2 · 4 = 8 < 9 olduğu için ${kH(4,9)} < ${kH(1,2)}.`,[`${kH(3,5)} kesrinin payı tek ama ${kH(1,2)}'den büyüktür.`,`${kH(5,12)} kesrinin paydası çift ama ${kH(1,2)}'den küçüktür.`]],
         [`${kH(4,9)} ile ${kH(5,8)} kesirlerini karşılaştırmanın kısa yolu hangisidir?`,[`${kH(4,9)} < ${kH(1,2)} < ${kH(5,8)} olduğundan ${kH(4,9)} < ${kH(5,8)}`,"Paydası büyük olan kesir büyüktür.","Payı küçük olan kesir büyüktür."],`Doğru! ${kH(1,2)} iki kesrin arasında bir köprüdür.`,[`${kH(1,2)} ile karşılaştırınız: 8 < 9, 10 > 8.`,"Payı küçük olan her zaman büyük değildir."]]]),
@@ -1417,7 +1419,7 @@ const e_butun=p=>{const D=defterY(["Kesirler","Eksik parçalar","Sonuç"]);let b
   const yon=["Şeritlerde boyalı kısım kesri gösteriyor; boyasız kısım bütüne (1'e) eksik kalan parçadır.","Her şeritte eksik parçaya dokununuz. Sonra eksik parçaları ve kesirleri karşılaştırınız."];
   asamali(p,{tahmin:{giris:[`${kH(99,100)} ile ${kH(100,101)} kesirlerinin ikisi de 1'e çok yakındır.`,`${kH(99,100)} kesrinde bütünün 100 eş parçasından 1'i, ${kH(100,101)} kesrinde 101 eş parçasından 1'i eksiktir.`],soru:"Hangisi büyüktür?",secs:[["b",kH(100,101)],["a",kH(99,100)],["e","İkisi eşittir."]],dogru:"b",neden:`Eksik parçalar: ${kH(1,100)} > ${kH(1,101)}; eksiği küçük olan büyüktür.`},
     asamalar:[
-      {ad:"Eksik parçayı bulun",yon,bitis:"İki eksik parçayı bulup karşılaştırmaları yapınca.",kur:(k,A)=>butunTur(k,P[0],P[1],D,A)},
+      {ad:"Paydayı büyütün",yon:["Şeritte bütünün bir parçası eksik (turuncu). <b>Payda</b> sayacını değiştiriniz: Kesir her seferinde bütüne bir parça eksik olur.","Payda büyüdükçe eksik parça nasıl değişiyor? Görevleri yapınız, sonra iki kesri karşılaştırınız."],bitis:"Görevleri yapıp karşılaştırınca.",kur:(k,A)=>eksikTur2(k,D,A)},
       {ad:"Bütüne çok yakın iki kesir",yon:["Bu kesirlerin parçaları çok küçük olduğu için şerit çizilmemiştir.","Soruları sırayla cevaplayınız, sonra kesirleri karşılaştırınız."],bitis:"İki kesri karşılaştırınca.",kur:(k,A)=>{
         el(k,"dkart",`<small>İki kesir</small><p class="buyuk">${kH(99,100)} ve ${kH(100,101)}</p>`);
         soruY(k,`${kH(99,100)} kesrinin bütüne (1'e) eksik parçası hangisidir?`,[kH(1,100),kH(1,99),kH(99,100)],"Doğru! Bütünün 100 parçasından 99'u var; 1 parça eksik.",["Bütün 100 eş parçaya bölünmüş; 1 parça eksik.","Bu, kesrin kendisi; eksik parça değil."],()=>
@@ -1446,12 +1448,12 @@ function ondTur(k,fr,ds,D,A){const dv=oku(ds).v,neg=fr[0]<0;let bekle=null;
       D.ekle([yH(fr),dMet(...fr),yH(dv,"o"),`${yH(fr)} ${sem(cc)} ${yH(dv,"o")}`],"od"+fr+ds);A.tamam(`${yH(fr)} ${sem(cc)} ${yH(dv,"o")}`);});});
   A.oto=()=>{if(bekleyenOto(bekle))return;if(!c.dataset.ok){const i=c.querySelector("input");i.value=c.dataset.cvp;c.querySelector(".k").click();}};}
 const e_ondalik=p=>{const D=defterY(["Kesir","Ondalık gösterimi","Diğer sayı","Sonuç"]);
-  const P1=rastgele([[[3,8],"0,4"],[[7,20],"0,3"],[[5,8],"0,6"],[[9,25],"0,4"],[[3,4],"0,8"]]),P2=rastgele([[[-3,5],"−0,65"],[[-7,8],"−0,9"],[[-1,4],"−0,2"],[[-9,20],"−0,4"]]);
-  const yon=["Kesri ondalık gösterime çeviriniz: Payı paydaya bölünüz ve sonucu virgülle yazınız.","Sonra iki ondalık gösterimi karşılaştırınız. Sayı doğrusu iki sayının yerini gösterir."];
+  const P1=rastgele([[[7,20],"0,4"],[[13,20],"0,6"],[[9,25],"0,4"],[[3,4],"0,8"]]),P2=rastgele([[[-3,5],"−0,65"],[[-9,20],"−0,4"],[[-13,25],"−0,5"]]);
+  const yon=["Sayı doğrusunda turuncu nokta kesrin yeri. Mavi ondalık işaretçisini <b>± 0,1</b> ve <b>± 0,01</b> düğmeleriyle kaydırınız; işaretçinin değeri anında yazılır.","İşaretçi kesrin üstüne gelince <b>Buraya işaretle</b> düğmesine basınız; her işaretleme deney defterine yazılır. Sonra iki ondalık gösterimi karşılaştırınız."];
   asamali(p,{tahmin:{giris:[`Bir kek tarifinde ${kH(3,4)} su bardağı süt, bir kurabiye tarifinde 0,7 su bardağı süt kullanılıyor.`],soru:"Hangi tarifte daha çok süt kullanılıyor?",secs:[["k",`Kek (${kH(3,4)} su bardağı)`],["u","Kurabiye (0,7 su bardağı)"],["e","İkisinde eşit"]],dogru:"k",neden:`${kH(3,4)} = 0,75 ve 0,75 > 0,7.`},
     asamalar:[
-      {ad:"Kesir mi, ondalık mı?",yon,bitis:"Çeviriyi yapıp iki sayıyı karşılaştırınca.",kur:(k,A)=>ondTur(k,P1[0],P1[1],D,A)},
-      {ad:"Negatif sayılarla",yon:[...yon,"Bu kez sayılar negatif: Önce sayı kısmını çeviriniz, sonra işareti ekleyiniz."],bitis:"Çeviriyi yapıp iki sayıyı karşılaştırınca.",kur:(k,A)=>ondTur(k,P2[0],P2[1],D,A)},
+      {ad:"Kesir mi, ondalık mı?",yon,bitis:"Çeviriyi yapıp iki sayıyı karşılaştırınca.",kur:(k,A)=>kaydirTur(k,P1[0],P1[1],D,A)},
+      {ad:"Negatif sayılarla",yon:[...yon,"Bu kez sayılar negatif: Sayı doğrusu −1 ile 0 arasını gösterir; işaretçi 0'ın solunda hareket eder."],bitis:"Çeviriyi yapıp iki sayıyı karşılaştırınca.",kur:(k,A)=>kaydirTur(k,P2[0],P2[1],D,A)},
       kuralA(D,[[`${kH(3,8)} ile 0,4 nasıl karşılaştırılır?`,[`${kH(3,8)} = 0,375 yazılır; 0,375 < 0,4 olduğundan ${kH(3,8)} < 0,4.`,"Kesir her zaman ondalık gösterimden büyüktür.","3 ile 4 karşılaştırılır: 3 < 4."],"Doğru! Aynı gösterime çevirince karşılaştırma kolaylaşır.",["Kesir de ondalık gösterim de aynı sayı doğrusunda birer noktadır; biri her zaman büyük değildir.","Kesrin payı ile ondalık gösterimin rakamı karşılaştırılamaz; önce çeviriniz."]],
         [`${yH([-3,5])} ile −0,65 için hangisi doğrudur?`,[`${yH([-3,5])} = −0,6 ve −0,6 > −0,65`,"−0,6 < −0,65 çünkü 6 < 65","İkisi eşittir."],"Doğru! Negatiflerde 0'a daha yakın olan büyüktür.",["0,6 = 0,60 > 0,65 değil; 0,60 < 0,65. Negatiflerde sıra ters döner.","−0,6 = −0,60 ile −0,65 farklıdır."]]]),
       kendiA((m,son)=>{const S=rastgele([[[2,5],"0,35","0,42"],[[3,5],"0,55","0,65"],[[1,4],"0,2","0,3"]]),[f,x,y]=S,fv=f[0]/f[1];const L=[[f,"k"],[oku(x).v,"o"],[oku(y).v,"o"]].sort((u,v)=>kars(v[0],u[0]));
@@ -1487,11 +1489,11 @@ function basTur(k,ciftler,D,A){let ci=0,faz="s",bekle=null;
   A.oto=()=>{if(bekleyenOto(bekle))return;if(faz==="s")sec(fark);};kur_();}
 const e_basamak=p=>{const D=defterY(["Sayılar","İlk farklı basamak","Sonuç"]);
   const C1=karistir([["0,125","0,5"],["0,7","0,68"],["0,09","0,1"],["0,306","0,36"],["0,45","0,405"],["1,05","0,975"]]).slice(0,2).map(x=>Math.random()<.5?x:[x[1],x[0]]),C2=rastgele([["−0,4","−0,38"],["−0,25","−0,5"],["−0,7","−0,65"]]);
-  const yon=["Sayılar basamak tablosuna yazıldı. Soldan başlayarak iki sayının <b>ilk farklı basamağını</b> bulunuz ve o sütuna dokununuz.","Sonra iki sayıyı <b>&lt;</b>, <b>&gt;</b>, <b>=</b> ile karşılaştırınız."];
+  const yon=["Sayılar basamak tablosuna yazıldı; sütunlar kapalı. <b>Sonraki sütunu açın</b> düğmesiyle sütunları soldan sağa tek tek açınız: Aynı rakamlar yeşil, ilk farklı rakam turuncu olur.","Bir sayının basamağı bitmişse önce <b>Kısa sayıya 0 ekleyin</b>. İlk fark bulununca sayıları <b>&lt;</b>, <b>&gt;</b>, <b>=</b> ile karşılaştırınız."];
   asamali(p,{tahmin:{giris:["Ali: “0,125 sayısının virgülden sonra üç basamağı var, 0,5 sayısının bir basamağı var. Bu yüzden 0,125 daha büyüktür.” diyor."],soru:"Ali haklı mı?",secs:[["h","Hayır, 0,5 daha büyüktür."],["e","Evet, 0,125 daha büyüktür."],["a","İkisi eşittir."]],dogru:"h",neden:"Onda birler basamağında 1 < 5 olduğundan 0,125 < 0,5."},
     asamalar:[
-      {ad:"İlk farklı basamak",yon,bitis:"İki çifti de karşılaştırınca.",kur:(k,A)=>basTur(k,C1,D,A)},
-      {ad:"Negatif ondalıklar",yon:[...yon,"Bu sayılar negatif: Önce sayı kısımlarını, sonra negatif sayıları karşılaştırınız."],bitis:"Çifti karşılaştırınca.",kur:(k,A)=>basTur(k,[C2],D,A)},
+      {ad:"İlk farklı basamak",yon,bitis:"İki çifti de karşılaştırınca.",kur:(k,A)=>sutunTur(k,C1,D,A)},
+      {ad:"Negatif ondalıklar",yon:[...yon,"Bu sayılar negatif: Önce sayı kısımlarını, sonra negatif sayıları karşılaştırınız."],bitis:"Çifti karşılaştırınca.",kur:(k,A)=>sutunTur(k,[C2],D,A)},
       kuralA(D,[["Ondalık gösterimleri karşılaştırırken neye bakılır?",["Soldan başlayarak ilk farklı basamağa","Virgülden sonraki basamak sayısına","Son basamağa"],"Doğru! Önce tam kısımlar, eşitse onda birler, sonra yüzde birler … karşılaştırılır.",["0,125 sayısının basamağı çok ama 0,5'ten küçüktür.","Son basamak en küçük basamak değeridir; karar soldaki basamaklarda verilir."]],
         ["−0,4 ile −0,38 için hangisi doğrudur?",["−0,4 < −0,38","−0,4 > −0,38","−0,4 = −0,38"],"Doğru! 0,40 > 0,38 ama negatiflerde sıra ters döner.",["0,4 = 0,40 > 0,38; negatiflerde sayı kısmı büyük olan daha küçüktür.","0,40 ile 0,38 farklıdır."]]]),
       kendiA((m,son)=>{const S=rastgele([["0,09","0,1","0,089","0,099"],["0,7","0,69","0,701","0,07"],["0,3","0,29","0,298","0,03"]]);
@@ -1514,11 +1516,11 @@ function devTur(k,ciftler,D,A){let ci=0,n=2,bekle=null,fk=-1;
   ab.onclick=()=>{if(fk>=0||n>=8)return;n++;bip(560+n*30,.05);ciz();};
   A.oto=()=>{if(bekleyenOto(bekle))return;if(fk<0)ab.click();};kur_();}
 const e_devirli=p=>{const D=defterY(["Devirli","Sonlu","Sonuç"]);
-  const yon=["İki sayının basamakları alt alta yazıldı. Devirli sayıda devreden basamak hiç bitmez; sonlu sayının sağına 0 eklenebilir.","Basamaklar aynıysa <b>Bir basamak daha açın</b> düğmesine basınız. İlk fark görününce sayıları karşılaştırınız."];
+  const yon=["Üstte devirli bir sayı var; devreden basamakları hiç bitmez. Altta sonlu bir sayı var: Rakamlarını ▲ ve ▼ ile değiştirebilir, <b>Basamak ekleyin</b> ile uzatabilirsiniz.","Her değişiklikte iki sayı basamakları açılarak karşılaştırılır ve deney defterine yazılır. Görevleri yapınız."];
   asamali(p,{tahmin:{giris:[`${dvH(0,"","3")} = 0,333… sayısında 3'ler hiç bitmez.`,"0,33 sayısının ise virgülden sonra iki basamağı vardır."],soru:`${dvH(0,"","3")} ile 0,33 için hangisi doğrudur?`,secs:[["b",`${dvH(0,"","3")} > 0,33`],["e",`${dvH(0,"","3")} = 0,33`],["k",`${dvH(0,"","3")} < 0,33`]],dogru:"b",neden:"0,333… ile 0,330 karşılaştırılınca binde birler basamağında 3 > 0."},
     asamalar:[
-      {ad:`${dvH(0,"","3")} ile 0,33`,yon,bitis:"Çifti karşılaştırınca.",kur:(k,A)=>devTur(k,[[[1,3],"0,33"]],D,A)},
-      {ad:"Devirli her zaman büyük mü?",yon,bitis:"İki çifti de karşılaştırınca.",kur:(k,A)=>devTur(k,[[[5,11],"0,45"],rastgele([[[1,6],"0,17"],[[2,9],"0,23"]])],D,A)},
+      {ad:`${dvH(0,"","3")} ile 0,33`,yon,bitis:"Çifti karşılaştırınca.",kur:(k,A)=>devTur2(k,[1,3],dvH(0,"","3"),D,A)},
+      {ad:"Devirli her zaman büyük mü?",yon,bitis:"İki çifti de karşılaştırınca.",kur:(k,A)=>devTur2(k,[5,11],dvH(0,"","45"),D,A)},
       kuralA(D,[["Devirli bir ondalık gösterim ile sonlu bir ondalık gösterim nasıl karşılaştırılır?",["Devreden basamaklar açılıp basamak sayısı eşitlenir; ilk farklı basamağa bakılır.","Devirli olan her zaman büyüktür.","Basamağı çok olan büyüktür."],"Doğru!",["Deftere bakınız: Devirli sayının küçük çıktığı bir çift de vardı.","Basamak sayısı karar vermez; ilk farklı basamak karar verir."]],
         [`${dvH(0,"1","6")} ile 0,17 için hangisi doğrudur?`,[`${dvH(0,"1","6")} < 0,17`,`${dvH(0,"1","6")} > 0,17`,`${dvH(0,"1","6")} = 0,17`],"Doğru! 0,1666… ile 0,17: yüzde birler basamağında 6 < 7.",["Devirli olması büyük olduğunu göstermez; 0,1666… ile 0,1700 karşılaştırınız.","Yüzde birler basamakları farklı: 6 ve 7."]]]),
       kendiA((m,son)=>{const S=rastgele([[[5,9],"0,56"],[[7,9],"0,78"],[[4,9],"0,44"],[[2,3],"0,66"]]),[dv,sn]=S,c=kars(dv,oku(sn).v);
@@ -1563,7 +1565,7 @@ const e_negkesir=p=>{const D=defterY(["Yükselmeler","Düşüşler"]);
   const yon=["Sütun grafiği bir barajdaki su seviyesinin günlük değişimini metre olarak gösteriyor. Yükselme 0'ın üstünde, düşüş 0'ın altında çizilir.","Önce yükselmeleri karşılaştırınız. Sonra <b>Düşüş olarak gösterin</b> düğmesine basınız ve aynı miktarlardaki düşüşleri karşılaştırınız."];
   asamali(p,{tahmin:{giris:[`Bir barajda su seviyesi pazartesi ${kH(1,2)} m, salı ${kH(1,3)} m düştü.`,`Düşüşler ${yH([-1,2])} m ve ${yH([-1,3])} m ile gösteriliyor.`],soru:`${yH([-1,2])} ile ${yH([-1,3])} için hangisi doğrudur?`,secs:[["k",`${yH([-1,2])} < ${yH([-1,3])}`],["b",`${yH([-1,2])} > ${yH([-1,3])}`],["e",`${yH([-1,2])} = ${yH([-1,3])}`]],dogru:"k",neden:`${kH(1,2)} > ${kH(1,3)} olduğu için negatiflerde sıra ters döner.`},
     asamalar:[
-      {ad:"Yükselme ve düşüş",yon,bitis:"Düşüşleri de karşılaştırınca.",kur:(k,A)=>negKesirTur(k,P[0],P[1],D,A)},
+      {ad:"Yükselme ve düşüş",yon:["Sütunlar iki günün su seviyesi değişimini gösteriyor (metre, paydası 8). Sayaçlarla payları değiştiriniz; sütunlar ve aradaki sembol anında değişir.","<b>Düşüşe çevirin</b> düğmesi değişimleri negatif yapar. Görevleri yapınız; her durum deney defterine yazılır."],bitis:"Düşüşleri de karşılaştırınca.",kur:(k,A)=>tersTur(k,8,D,A)},
       {ad:"Üç günlük düşüş",yon:["Bu kez su üç gün boyunca düştü.","Görev kartındaki soruya göre sütuna dokununuz."],bitis:"En küçük ve en büyük değişimi bulunca.",kur:(k,A)=>enTur(k,T3,D,A)},
       kuralA(D,[[`${kH(1,2)} > ${kH(1,3)} olduğuna göre ${yH([-1,2])} ile ${yH([-1,3])} nasıl sıralanır?`,[`${yH([-1,2])} < ${yH([-1,3])}`,`${yH([-1,2])} > ${yH([-1,3])}`,`${yH([-1,2])} = ${yH([-1,3])}`],"Doğru! İşaret değişince sıra ters döner.",["Düşüş sütunlarına bakınız: Hangisi daha aşağıda?","Farklı uzunlukta sütunlar eşit sayı göstermez."]],
         ["İki negatif kesirden hangisi büyüktür?",["Sayı kısmı (mutlak değeri) küçük olan","Sayı kısmı büyük olan","Paydası küçük olan"],`Doğru! Örneğin ${yH([-1,3])} > ${yH([-1,2])}.`,["Sayı kısmı büyük olan 0'dan daha uzaktır; daha küçüktür.",`${yH([-1,2])} kesrinin paydası küçük ama ${yH([-1,3])}'ten küçüktür.`]]]),
@@ -1597,11 +1599,11 @@ function rafTur(k,kartlar,D,A){const fl=v=>Math.floor(v[0]/v[1]);const raflar=[.
     else if(faz==="s"){const R=raflar[ri],L=kartlar.map((v,j)=>j).filter(j=>yer[j]===R);kucukSec(R,L.reduce((m,j)=>kars(kartlar[j],kartlar[m])<0?j:m,L[0]));}};ciz();}
 const e_tamsayili=p=>{const D=defterY(["Sayı","Hangi iki tam sayı arasında?"]);
   const K1=karistir([...rastgele([[[7,3],[11,4]],[[12,5],[9,4]]]),...rastgele([[[17,5],[13,4]],[[10,3],[23,6]]])]),K2=karistir([...rastgele([[[-9,4],[-13,5]],[[-7,3],[-17,6]]]),...rastgele([[[-5,3],[-7,6]],[[-9,5],[-5,4]]])]);
-  const yon=["Her raf iki ardışık tam sayının arasını gösterir.","Bir karta, sonra o sayının bulunduğu rafa dokununuz.","Kartların hepsi yerleşince her raftaki küçük sayıyı seçiniz."];
+  const syon=["Kartları ▲ ve ▼ ile <b>küçükten büyüğe</b> sıralayınız. Kartların arasındaki işaret anında değişir.","Altta sayı doğrusunda her kartın gerçek yeri, sizin verdiğiniz sıra numarasıyla görünür: Sıra yanlışsa numaralar kırmızı olur ve soldan sağa 1, 2, 3 … dizilmez."];
   asamali(p,{tahmin:{giris:[`Bir tarifte ${karmaH(2,3,4)} su bardağı un, başka bir tarifte ${karmaH(3,1,5)} su bardağı un kullanılıyor.`],soru:"Hangi tarifte daha çok un kullanılıyor?",secs:[["b",`${karmaH(3,1,5)} su bardağı olan`],["a",`${karmaH(2,3,4)} su bardağı olan`],["e","İkisinde eşit"]],dogru:"b",neden:`Önce tam kısım: 3 > 2 olduğu için ${karmaH(3,1,5)} > ${karmaH(2,3,4)}.`},
     asamalar:[
-      {ad:"Pozitif raflar",yon,bitis:"Kartlar raflara girip raflar sıralanınca.",kur:(k,A)=>rafTur(k,K1,D,A)},
-      {ad:"Negatif raflar",yon:[...yon],bitis:"Kartlar raflara girip raflar sıralanınca.",kur:(k,A)=>rafTur(k,K2,D,A)},
+      {ad:"Pozitif sayılar",yon:syon,bitis:"Bütün işaretler yeşil olunca.",kur:(k,A)=>sirDogru(k,K1,D,A)},
+      {ad:"Negatif sayılar",yon:syon,bitis:"Bütün işaretler yeşil olunca.",kur:(k,A)=>sirDogru(k,K2,D,A)},
       kuralA(D,[["Tam sayılı iki kesir karşılaştırılırken önce neye bakılır?",["Tam kısımlara","Kesir kısımlarının paydalarına","Kesir kısımlarının paylarına"],`Doğru! Tam kısımları farklıysa tam kısmı büyük olan büyüktür: ${karmaH(3,1,5)} > ${karmaH(2,3,4)}.`,["Tam kısım farklıysa kesir kısmına bakmaya gerek yoktur.","Tam kısım farklıysa kesir kısmına bakmaya gerek yoktur."]],
         [`${yH([-9,4],"m")} ile ${yH([-5,3],"m")} için hangisi doğrudur?`,[`${yH([-9,4],"m")} < ${yH([-5,3],"m")}`,`${yH([-9,4],"m")} > ${yH([-5,3],"m")}`,`${yH([-9,4],"m")} = ${yH([-5,3],"m")}`],`Doğru! ${yH([-9,4],"m")} sayısı −3 ile −2 arasında, ${yH([-5,3],"m")} sayısı −2 ile −1 arasındadır.`,["Negatif sayılarda tam kısmının sayı kısmı büyük olan daha küçüktür.","Bu iki sayı farklı raflardadır."]]]),
       kendiA((m,son)=>{const S=rastgele([[[-11,4],[-8,3]],[[-13,5],[-7,3]],[[-17,6],[-11,4]]]),[a,b]=S,c=kars(a,b);
@@ -1741,11 +1743,11 @@ function ikiyeTur(k,a,b,tur,D,A){let L_=a,R_=b,t=0,faz="o",yan=0;
   yk.querySelectorAll("button").forEach(b=>b.onclick=()=>{if(faz!=="y")return;const m=orta();if(b.dataset.y==="L")R_=m;else L_=m;bip(600,.06);f.hidden=true;ciz();secenek();});
   A.oto=()=>{if(faz==="o")op.querySelector('.s3-om[data-c="1"]').click();else if(!yk.hidden)yk.querySelector(`[data-y="${Math.random()<.5?"L":"R"}"]`).click();};ciz();secenek();}
 const e_ikiye=p=>{const D=defterY(["Bölme","Sol uç","Sağ uç","Orta nokta"]);
-  const yon=["Sayı doğrusunda iki uç arası büyütülerek gösteriliyor. Uçların tam ortasındaki sayıyı seçiniz.","Sonra sol ya da sağ yarıya yakınlaştırınız: Yeni uçlar arasında yine orta noktayı bulunuz."];
+  const yon=["İki uç arası 8 eş parçaya bölündü. Mavi işaretçiyi ◀ ve ▶ ile kaydırınız: İki uca uzaklıklar (turuncu ve yeşil çizgi) anında yazılır.","Uzaklıklar eşit olunca <b>Orta nokta burası</b> düğmesine basınız; sonra bir yarıya yakınlaştırıp yeniden orta noktayı arayınız."];
   asamali(p,{tahmin:{giris:["Can: “0 ile 1 ardışık tam sayılardır. Aralarında başka sayı yoktur.” diyor.","Ece ise 0 ile 1'in arasını tekrar tekrar ikiye bölmeyi öneriyor."],soru:"Can'ın söylediği doğru mudur?",secs:[["h","Hayır; 0 ile 1 arasında rasyonel sayılar vardır."],["e","Evet; aralarında hiç sayı yoktur."]],dogru:"h",neden:`0 ile 1 arasında ${kH(1,2)}, ${kH(1,4)}, ${kH(3,4)} gibi sayılar vardır; ikiye bölme hep yeni bir sayı verir.`},
     asamalar:[
-      {ad:"0 ile 1 arasını bölün",yon,bitis:"3 kez ikiye bölünce.",kur:(k,A)=>ikiyeTur(k,[0,1],[1,1],3,D,A)},
-      {ad:"İki negatif kesir arasında",yon,bitis:"2 kez ikiye bölünce.",kur:(k,A)=>ikiyeTur(k,[-1,2],[-1,3],2,D,A)},
+      {ad:"0 ile 1 arasını bölün",yon,bitis:"3 kez ikiye bölünce.",kur:(k,A)=>ortaTur(k,[0,1],[1,1],3,D,A)},
+      {ad:"İki negatif kesir arasında",yon,bitis:"2 kez ikiye bölünce.",kur:(k,A)=>ortaTur(k,[-1,2],[-1,3],2,D,A)},
       kuralA(D,[["İki sayının arasını ikiye böldüğünüzde her seferinde ne oldu?",["Arada yeni bir rasyonel sayı (orta nokta) bulundu.","Bir süre sonra arada sayı kalmadı.","Sayılar eşit oldu."],"Doğru! Yakınlaştırdıkça uçlar birbirine yaklaştı ama arada hep bir sayı vardı.",["Deftere bakınız: Her bölmede yeni bir orta nokta yazıldı.","Uçlar hiçbir zaman eşit olmadı."]],
         ["Hangisi doğrudur?",["Herhangi iki rasyonel sayı arasında daima bir rasyonel sayı bulunur.","Ardışık iki tam sayı arasında rasyonel sayı yoktur.","İki kesir arasında en fazla üç rasyonel sayı vardır."],"Doğru!",[`0 ile 1 arasında ${kH(1,2)} bulundu.`,"İkiye bölmeyi sürdürdükçe yeni sayılar bulunur."]]]),
       kendiA((m,son)=>{const S=rastgele([[[1,8],[1,4],[3,16]],[[1,3],[2,3],[1,2]],[[-1,4],[0,1],[-1,8]],[[3,5],[4,5],[7,10]]]),[a,b,o]=S,ds=sade(3*b[0]*a[1]-a[0]*b[1],2*a[1]*b[1]),ce=sade(3*a[0]*b[1]+b[0]*a[1],4*a[1]*b[1]);
@@ -1781,11 +1783,11 @@ function strTur(k,kartlar,D,A){let ki=0,ilk=0,den=0,faz="s",bekle=null;
       if(ki<kartlar.length)setTimeout(kur_,500);else{kn.textContent=`${kartlar.length} / ${kartlar.length}`;A.tamam(`${kartlar.length} kartın ${ilk} tanesinde kısa yolu ilk denemede buldunuz.`);}});});
   A.oto=()=>{if(bekleyenOto(bekle))return;if(faz==="s")k.querySelector(`.s3-str[data-s="${kartlar[ki].iyi[0]}"]`).click();};kur_();}
 const e_strateji=p=>{const D=defterY(["Sayılar","Kısa yol","Sonuç"]);
-  const yon=["Kartta iki sayı var. Önce bu iki sayıyı karşılaştırmanın <b>en kısa yolunu</b> seçiniz.","Sonra sayıları <b>&lt;</b>, <b>&gt;</b>, <b>=</b> ile karşılaştırınız. Kısa yolu ilk denemede bulursanız puan kutusu artar."];
+  const yon=["Kartta iki sayı var. Bir strateji düğmesine basınız: Düzenek o yolu bu sayılara uygular ve kaç adımda karar verdiğini yazar.","En az <b>iki strateji</b> deneyiniz ve deney defterinde karşılaştırınız; sonra sayıları <b>&lt;</b>, <b>&gt;</b>, <b>=</b> ile karşılaştırınız."];
   asamali(p,{tahmin:{giris:[`Elif ${kH(6,13)} ile ${kH(6,11)} kesirlerini karşılaştıracak.`,"Paydaları eşitlerse ortak payda 143 olur."],soru:"Daha kısa bir yol var mıdır?",secs:[["e","Evet: Paylar zaten eşit; paydası küçük olan büyüktür."],["h","Hayır: Her zaman paydalar eşitlenmelidir."]],dogru:"e",neden:`${kH(6,11)} > ${kH(6,13)}; payları eşit kesirlerde paydası küçük olan büyüktür.`},
     asamalar:[
-      {ad:"Dört kart",yon,bitis:"4 kartın hepsi bitince.",kur:(k,A)=>strTur(k,karistir(STR_K1).slice(0,4),D,A)},
-      {ad:"Negatif sayılarla dört kart",yon:[...yon,"Bu kartlarda negatif sayılar var."],bitis:"4 kartın hepsi bitince.",kur:(k,A)=>strTur(k,karistir(STR_K2).slice(0,4),D,A)},
+      {ad:"Dört kart",yon,bitis:"4 kartın hepsi bitince.",kur:(k,A)=>stratTur(k,karistir(STR_K1).slice(0,4).map(x=>[x.a,x.b]),D,A)},
+      {ad:"Negatif sayılarla dört kart",yon:[...yon,"Bu kartlarda negatif sayılar var."],bitis:"4 kartın hepsi bitince.",kur:(k,A)=>stratTur(k,karistir(STR_K2).slice(0,4).map(x=>[x.a,x.b]),D,A)},
       kuralA(D,[["Biri negatif, biri pozitif iki sayıyı karşılaştırmanın en kısa yolu hangisidir?",["İşarete bakmak: Negatif sayı pozitif sayıdan küçüktür.","Paydaları eşitlemek","Ondalık gösterime çevirmek"],"Doğru! Hiç hesap yapmadan karar verilir.",["Bu yol da sonuca götürür ama gereksiz uzundur.","Bu yol da sonuca götürür ama gereksiz uzundur."]],
         [`${kH(11,12)} ile ${kH(14,15)} için en kısa yol hangisidir?`,["Bütüne eksik parçalara bakmak","Payları eşitlemek","Tam kısma bakmak"],`Doğru! ${kH(1,12)} > ${kH(1,15)} olduğundan ${kH(11,12)} < ${kH(14,15)}.`,["Payları eşitlemek uzun sürer.","İki kesrin de tam kısmı 0'dır."]]]),
       kendiA((m,son)=>{const S=rastgele([[NS3(5,11),NS3(8,15),"yarim"],[NS3(-9,10),NS3(-10,11),"butun"],[NS3(7,9),NS3(7,10),"pay"]]),[a,b,s]=S,c=kars(a.v,b.v),ad=STR.find(x=>x[0]===s)[1];
@@ -1836,8 +1838,8 @@ function duelloKurallar3(k,A,bitince){const o=DQ(NS3(-3,4),NS3(-2,3),"");
 const e_duello=p=>{const D=defterY(["Karşılaştırma","Turu alan"]);
   asamali(p,{tahmin:{giris:["Bilgisayara karşı hızlı bir karşılaştırma düellosu yapacaksınız. Her turda iki sayı gelecek ve aradaki kutuya &lt;, &gt; ya da = işaretinden birini koyacaksınız.","Isınmak için: 0,5 ile "+kH(1,2)+" sayıları karşılaştırılıyor."],soru:"0,5 ile "+kH(1,2)+" arasına hangi işaret gelir?",secs:[["e","="],["k","<"],["b",">"]],dogru:"e",neden:kH(1,2)+" = 1 ÷ 2 = 0,5"},
     asamalar:[
-      {ad:"Kuralları öğrenin",yon:["Düello kurallarını madde madde okuyunuz.","Süresiz ısınma sorusunu cevaplayınız."],bitis:"Isınma sorusunu doğru cevaplayınca.",kur:(k,A)=>duelloKurallar3(k,A,()=>A.tamam("Kuralları öğrendiniz."))},
-      {ad:"Düello",yon:["<b>Düelloyu başlatın</b> düğmesine basınız.","Her turda süre çubuğu dolmadan <b>&lt;</b>, <b>&gt;</b> ya da <b>=</b> düğmesine basınız."],bitis:"8 tur bitince (kazanıp kaybetmeniz fark etmez; çok tur almaya çalışınız).",kur:(k,A)=>duelloKur3(k,D,A)},
+      {ad:"Kuralları öğrenin",yon:["Yarış kurallarını madde madde okuyunuz.","Isınma turunda iki sayıyı sayı doğrusundaki yerlerine dokunarak yerleştiriniz."],bitis:"Isınma sayılarını yerleştirince.",kur:(k,A)=>{k.insertAdjacentHTML("beforeend",`<div class="kurallar"><h4>Yarış kuralları</h4><ul><li><b>Tur:</b> Yarış 5 turdur. Her turda iki rasyonel sayı gelir.<span class="orn">Örnek: ${kH(3,8)} ve −0,25</span></li><li><b>Yerleştirme:</b> Önce 1. sayının, sonra 2. sayının yerine sayı doğrusunda dokununuz. Her çentik ${kH(1,8)}'dir. Yanlış yere dokunursanız yeniden deneyiniz.</li><li><b>Karşılaştırma:</b> İki sayı da yerleşince sağdaki sayının büyük olduğu sembolle gösterilir.</li><li><b>Süre ve puan:</b> Her tur 40 saniyedir. Doğru yerleştirilen tur 10 puan, sürenin yarısı dolmadan bitirilen tur 15 puandır.<span class="orn">Örnek: 3 hızlı ve 2 yavaş tur: 3 x 15 + 2 x 10 = 65 puan.</span></li></ul></div>`);dogruYaris(k,D,A,1,true);}},
+      {ad:"Sayı doğrusu yarışı",yon:["<b>Yarışı başlatın</b> düğmesine basınız.","Her turda iki sayıyı süre bitmeden sayı doğrusundaki yerlerine yerleştiriniz; sembol iki sayının yerinden okunur."],bitis:"5 tur bitince (puanınız ne olursa olsun).",kur:(k,A)=>dogruYaris(k,D,A,5,false)},
       kuralA(D,[["Hangisi her zaman doğrudur?",["Negatif bir sayı her pozitif sayıdan küçüktür.","Paydası büyük olan kesir büyüktür.","Basamak sayısı çok olan ondalık gösterim büyüktür."],"Doğru!",[`${kH(1,9)} < ${kH(1,2)}: Paydası büyük olan küçük de olabilir.`,"0,125 < 0,5: Basamak sayısı karar vermez."]],
         ["Aşağıdakilerden hangisi doğrudur?",[`${dvH(0,"","3")} > 0,33`,"−0,5 > −0,25",`${kH(3,4)} < 0,7`],"Doğru! 0,333… > 0,330.",["Negatiflerde 0'a yakın olan büyüktür: −0,25 > −0,5.",`${kH(3,4)} = 0,75 > 0,7.`]]]),
       kendiA((m,son)=>{const y=rastgele([`${yH([-1,2])} > ${yH([-1,3])}`,"0,125 > 0,5",`${kH(5,8)} < ${kH(5,9)}`,`${dvH(0,"1","6")} > 0,17`]);
@@ -1849,27 +1851,265 @@ const e_duello=p=>{const D=defterY(["Karşılaştırma","Turu alan"]);
 /* ================= liste ================= */
 const SON="Sonra <b>Kuralı bulun</b> ve <b>Yeni örnek</b> adımlarını yapınız. Son soruyu doğru cevaplayınca etkinlik biter.";
 const TAH="Önce durumu okuyup bir tahmin seçiniz.";
+
+/* ================= Aşama 2 (05.10.2026, §4.k): düzenekli deney aşamaları =================
+   C → A: 8 Yarımdan Büyük mü?, 10 Ondalığa Çevir Karşılaştır, 11 Basamak Basamak, 19 Strateji Seçici, 20 Karşılaştırma Düellosu (sayı doğrusu yarışı)
+   B → A: 6 Payda Eşitleme, 7 Pay Eşitleme, 9 Bütüne Ne Kadar Kaldı?, 12 Devirli mi Daha Büyük?, 13 Negatif Kesirler Ters Döner,
+          14 Tam Sayılı Kesir Sıralaması, 18 İkiye Böl Yine Bul */
+(()=>{const st=document.createElement("style");st.id="k713b";st.textContent=`
+.a2-sat{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.a2-bilgi{margin:8px 0;padding:8px 12px;border-radius:12px;background:var(--soft,#f1f3f5);font-weight:700;min-height:44px}
+.a2-bilgi small{display:block;font-size:12px;font-weight:800;color:var(--muted)}
+.a2-tab{border-collapse:collapse;font-variant-numeric:tabular-nums;margin:6px 0}.a2-tab td,.a2-tab th{border:1px solid var(--line);min-width:34px;padding:6px;text-align:center;font-weight:800;font-size:1.15rem}
+.a2-tab th{font-size:12px;color:var(--muted)}.a2-tab td.gri{color:var(--muted);font-style:normal;opacity:.6}.a2-tab td.kapali{color:transparent;background:repeating-linear-gradient(45deg,var(--line) 0 4px,transparent 4px 8px)}
+.a2-tab td.ayni{background:color-mix(in srgb,#2b8a3e 16%,var(--card))}.a2-tab td.fark{background:color-mix(in srgb,#e8590c 28%,var(--card))}
+.a2-liste{display:grid;gap:4px}.a2-oge{display:flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:12px;padding:6px 8px;background:var(--card)}
+.a2-oge>div{flex:1;min-width:0;font-size:1.15rem;font-weight:800}.a2-isr{text-align:center;font-weight:900}.a2-isr.ok{color:#2b8a3e}.a2-isr.no{color:#c92a2a}
+.a2-str{display:flex;flex-wrap:wrap;gap:6px}.a2-str .sec{min-height:44px}
+.a2-cark{display:inline-flex;flex-direction:column;align-items:center;gap:2px}.a2-cark b{font:800 26px/1.1 Arimo,Arial,sans-serif;min-width:30px;text-align:center}
+.a2-cark button{min-width:44px;min-height:40px}
+`;document.head.appendChild(st);})();
+const lcmN=(a,b)=>a/gcd(a,b)*b;
+const kAy=a=>{const [p,q]=sade(a[0],a[1]);return q===1?T(p):(p<0?EKSI:"")+kH(Math.abs(p),q);};   /* sadeleştirilmiş kesir HTML */
+const kAyM=a=>{const [p,q]=sade(a[0],a[1]),A_=Math.abs(p);if(q===1)return T(p);return A_>q?`${p<0?EKSI:""}${Math.floor(A_/q)}${kH(A_%q,q)}`:(p<0?EKSI:"")+kH(A_,q);};
+const topF=(a,b)=>sade(a[0]*b[1]+b[0]*a[1],a[1]*b[1]),carpF=(a,k)=>sade(a[0]*k[0],a[1]*k[1]);
+
+/* 6 · PAYDA EŞİTLEME (B → A): ortak payda sayacı; şeritler her denenen sayıyla yeniden bölünür */
+function paydaTur2(k,a,b,D,A){let bekle=null,son=null;const den=new Set(),uy=new Set();
+  k.insertAdjacentHTML("beforeend",`<div class="stage s3-st"><p class="s3-sad p2-la"></p><div class="s3-sv p2-s1"></div><p class="s3-sad p2-lb"></p><div class="s3-sv p2-s2"></div></div><div class="a2-sat p2-den"></div><div class="a2-bilgi p2-bil"></div><div class="s3-sor"></div>`);
+  const sy=sayac("Ortak payda:",2,48,Math.max(a[1],b[1]),()=>{});const bt=yeniEl("button","primary","Şeritleri bölün ▶");bt.type="button";k.querySelector(".p2-den").append(sy.el,bt);
+  const so=k.querySelector(".s3-sor"),bil=k.querySelector(".p2-bil");let g=null;
+  function ciz(n){const W=gW(600);k.querySelector(".p2-s1").replaceChildren(seritSVG(W,a,n||a[1],"#f4b942"));k.querySelector(".p2-s2").replaceChildren(seritSVG(W,b,n||b[1],"#74c0fc"));
+    const ok1=n&&n%a[1]===0,ok2=n&&n%b[1]===0;
+    k.querySelector(".p2-la").innerHTML=ok1?`${kH(...a)} = ${kH(a[0]*n/a[1],n)}`:n?`${kH(...a)}: boyalı kısım ${n} parçanın çizgilerine oturmuyor`:kH(...a);
+    k.querySelector(".p2-lb").innerHTML=ok2?`${kH(...b)} = ${kH(b[0]*n/b[1],n)}`:n?`${kH(...b)}: boyalı kısım ${n} parçanın çizgilerine oturmuyor`:kH(...b);}
+  bt.onclick=()=>{if(bekle)return;const n=sy.v,ok=n%a[1]===0&&n%b[1]===0;den.add(n);if(ok)uy.add(n);ciz(n);bip(ok?700:420,.06);
+    bil.innerHTML=ok?`<small>${n} eş parça</small>${n}, hem ${a[1]}'in hem ${b[1]}'in katı: iki şeritte de boyalı kısım çizgilere tam oturdu.`.replace(`${a[1]}'in`,ekN(a[1],"in")).replace(`${b[1]}'in`,ekN(b[1],"in")):`<small>${n} eş parça</small>${n} iki paydanın da katı değil; şeritlerden en az birinde boyalı kısım parçalara bölünemedi.`;
+    D.ekle([`${kH(...a)} ve ${kH(...b)}`,String(n),ok?`${kH(a[0]*n/a[1],n)} ve ${kH(b[0]*n/b[1],n)}`:"bölünemedi","—"],"t"+a+b+n);if(ok)son=n;g.kontrol();A.durum(`${den.size} deneme`);};
+  ciz(null);bil.innerHTML="<small>Ortak payda</small>Bir sayı seçip <b>Şeritleri bölün</b> düğmesine basınız.";
+  g=gorevler(k,[{m:"Paydalardan birinin katı <b>olmayan</b> bir sayı deneyiniz. Şeritlerde ne oluyor?",ok:()=>[...den].some(n=>n%a[1]||n%b[1]),s:()=>"Boyalı kısım çizgilere oturmadı."},
+    {m:"İki şeridi de tam bölen bir ortak payda bulunuz.",ok:()=>uy.size>=1,s:()=>"Paydalar eşitlendi."},{m:"Bir ortak payda <b>daha</b> bulunuz.",ok:()=>uy.size>=2,s:()=>`Ortak paydalar: ${[...uy].join(", ")}.`}],()=>{
+      const n=son,A_=[a[0]*n/a[1],n],B_=[b[0]*n/b[1],n],c=kars(a,b);el(so,"lab2",`Şeritler ${n} eş parçaya bölündü. Şimdi karşılaştırınız:`);
+      bekle=sembolSor(so,kH(...A_),kH(...B_),c,`Doğru! Paydalar eşit; payı büyük olan büyüktür. Yani ${kH(...a)} ${sem(c)} ${kH(...b)}.`,"",()=>{D.ekle([`${kH(...a)} ve ${kH(...b)}`,String(n),`${kH(...A_)} ve ${kH(...B_)}`,`${kH(...a)} ${sem(c)} ${kH(...b)}`],"pd"+a+b);A.tamam(`${kH(...a)} ${sem(c)} ${kH(...b)}`);});});
+  k.appendChild(D.el);
+  A.oto=()=>{if(bekleyenOto(bekle))return;const L=lcmN(a[1],b[1]);const hed=![...den].some(n=>n%a[1]||n%b[1])?L+1:uy.size===0?L:2*L;sy.v=hed;bt.click();};}
+
+/* 7 · PAY EŞİTLEME (B → A): iki genişletme sayacı; paylar eşitlenince şeritler aynı parça sayısını gösterir */
+function payTur2(k,a,b,D,A){let m=1,n=1,bekle=null;
+  k.insertAdjacentHTML("beforeend",`<div class="a2-sat p7-d"></div><div class="stage s3-st"><p class="s3-sad p7-la"></p><div class="s3-sv p7-s1"></div><p class="s3-sad p7-lb"></p><div class="s3-sv p7-s2"></div></div><div class="a2-bilgi p7-bil"></div><div class="s3-sor"></div>`);
+  const s1=sayac(`${kH(...a)} için çarpan:`,1,6,1,v=>{m=v;ciz(true);}),s2=sayac(`${kH(...b)} için çarpan:`,1,6,1,v=>{n=v;ciz(true);});k.querySelector(".p7-d").append(s1.el,s2.el);
+  const so=k.querySelector(".s3-sor");
+  function ciz(log){const W=gW(600),A_=[a[0]*m,a[1]*m],B_=[b[0]*n,b[1]*n];k.querySelector(".p7-s1").replaceChildren(seritSVG(W,A_,A_[1],"#f4b942"));k.querySelector(".p7-s2").replaceChildren(seritSVG(W,B_,B_[1],"#74c0fc"));
+    k.querySelector(".p7-la").innerHTML=`${kH(...a)} = ${kH(...A_)}: ${A_[0]} parça, her parça ${kH(1,A_[1])}`;k.querySelector(".p7-lb").innerHTML=`${kH(...b)} = ${kH(...B_)}: ${B_[0]} parça, her parça ${kH(1,B_[1])}`;
+    const es=A_[0]===B_[0];k.querySelector(".p7-bil").innerHTML=es?`<small>Paylar eşit</small>İki şeritte de ${A_[0]} parça boyalı; parçaların büyüklüğüne bakınız.`:`<small>Paylar</small>${A_[0]} ve ${B_[0]}: eşit değil. Çarpanları değiştiriniz.`;
+    if(log)D.ekle([`${kH(...a)} ve ${kH(...b)}`,`${kH(...A_)} ve ${kH(...B_)}`,es?"paylar eşit":"paylar farklı"],"pe"+a+b+m+"-"+n);
+    if(es&&!bekle&&log){const c=kars(a,b);el(so,"lab2","Paylar eşitlendi. Şimdi karşılaştırınız:");
+      bekle=sembolSor(so,kH(...A_),kH(...B_),c,`Doğru! Parça sayıları aynı; paydası küçük olanın parçaları büyüktür. Yani ${kH(...a)} ${sem(c)} ${kH(...b)}.`,"",()=>{D.ekle([`${kH(...a)} ve ${kH(...b)}`,`${kH(...A_)} ve ${kH(...B_)}`,`${kH(...a)} ${sem(c)} ${kH(...b)}`],"py"+a+b);A.tamam(`${kH(...a)} ${sem(c)} ${kH(...b)}`);});}
+    A.durum(`${kH(...A_)} ve ${kH(...B_)}`);}
+  k.appendChild(D.el);ciz(false);
+  A.oto=()=>{if(bekleyenOto(bekle))return;const L=lcmN(a[0],b[0]);if(m!==L/a[0]){s1.v=L/a[0];m=L/a[0];ciz(true);return;}s2.v=L/b[0];n=L/b[0];ciz(true);};}
+
+/* 8 · YARIMDAN BÜYÜK MÜ? (C → A): pay ve payda sayaçları; şerit yarım çizgisini geçti mi? */
+function yarimSerit(W,p,q){const sv=seritSVG(W,[Math.min(p,q),q],q,"#f4b942");const L=8,R=W-8;sv.innerHTML+=`<line x1="${(L+R)/2}" y1="0" x2="${(L+R)/2}" y2="46" stroke="#e8590c" stroke-width="3"/><text x="${(L+R)/2+6}" y="12" font-size="12" font-weight="800" fill="#e8590c">yarım</text>`;return sv;}
+function yarimTur2(k,D,A){let p=3,q=11;
+  k.insertAdjacentHTML("beforeend",`<div class="a2-sat y8-d"></div><div class="stage s3-st"><p class="s3-sad y8-l"></p><div class="s3-sv y8-s"></div></div><div class="a2-bilgi y8-b"></div>`);
+  const sp=sayac("Pay:",0,20,p,v=>{p=v;ciz();}),sq=sayac("Payda:",2,20,q,v=>{q=v;if(p>q){p=q;sp.v=q;}ciz();});k.querySelector(".y8-d").append(sp.el,sq.el);let g=null;
+  function ciz(){if(p>q){p=q;sp.v=q;}k.querySelector(".y8-s").replaceChildren(yarimSerit(gW(600),p,q));const t=Math.sign(2*p-q);k.querySelector(".y8-l").innerHTML=kH(p,q);
+    k.querySelector(".y8-b").innerHTML=`<small>Payın 2 katı ile payda</small>2 · ${p} = ${2*p} ${t<0?"&lt;":t>0?"&gt;":"="} ${q} → ${kH(p,q)} ${t<0?`${kH(1,2)}'den küçük`:t>0?`${kH(1,2)}'den büyük`:`${kH(1,2)}'ye eşit`}`;
+    D.ekle([kH(p,q),`2 · ${p} = ${2*p}`,String(q),t<0?`${kH(1,2)}'den küçük`:t>0?`${kH(1,2)}'den büyük`:`${kH(1,2)}'ye eşit`],"y"+p+"/"+q);if(g)g.kontrol();A.durum(kH(p,q));}
+  ciz();k.appendChild(D.el);
+  g=gorevler(k,[{m:`Payda 11 iken payı artırınız: Şerit yarım çizgisini <b>ilk kez</b> hangi payda geçiyor? O kesri kurunuz.`,ok:()=>p===6&&q===11&&D.satirlar.some(x=>x.key==="y5/11"),s:()=>`${kH(5,11)} yarımdan küçük, ${kH(6,11)} büyük: 2 · 6 = 12 > 11.`},
+    {m:`<b>Yarıma eşit</b> bir kesir kurunuz (paydayı da değiştirebilirsiniz).`,ok:()=>2*p===q,s:()=>"Payın 2 katı paydaya eşit."},
+    {m:`Payda 9 iken <b>yarımdan küçük en büyük</b> kesri kurunuz.`,ok:()=>q===9&&p===4&&D.satirlar.some(x=>x.key==="y5/9"),s:()=>`${kH(4,9)}: 2 · 4 = 8 < 9; ${kH(5,9)} ise yarımı geçiyor.`}],()=>A.tamam("Payın 2 katını paydayla karşılaştırarak kesri yarımla karşılaştırdınız."));
+  k.appendChild(D.el);
+  A.oto=()=>{const t=k.querySelectorAll(".gorevler li.tamam").length;const H=[[5,11],[6,11],[6,12],[5,9],[4,9]];const yol=t===0?(D.satirlar.some(x=>x.key==="y5/11")?[6,11]:[5,11]):t===1?[6,12]:(D.satirlar.some(x=>x.key==="y5/9")?[4,9]:[5,9]);
+    q=yol[1];sq.v=q;p=yol[0];sp.v=p;ciz();};}
+
+/* 9 · BÜTÜNE NE KADAR KALDI? (B → A): payda büyüdükçe eksik parça küçülür */
+function eksikTur2(k,D,A){let q=4,bekle=null;const den=new Set();
+  k.insertAdjacentHTML("beforeend",`<div class="a2-sat e9-d"></div><div class="stage s3-st"><p class="s3-sad e9-l"></p><div class="s3-sv e9-s"></div></div><div class="a2-bilgi e9-b"></div><div class="s3-sor"></div>`);
+  const sq=sayac("Payda:",2,20,q,v=>{q=v;ciz();});k.querySelector(".e9-d").append(sq.el);let g=null;const so=k.querySelector(".s3-sor");
+  function ciz(){const a=[q-1,q];k.querySelector(".e9-s").replaceChildren(seritSVG(gW(600),a,q,"#74c0fc",{eksik:true}));k.querySelector(".e9-l").innerHTML=`${kH(...a)}: bütüne eksik ${kH(1,q)}`;
+    k.querySelector(".e9-b").innerHTML=`<small>Eksik parça (turuncu)</small>${kH(1,q)}. Payda büyüdükçe eksik parça ${den.size>1?"küçülüyor":"nasıl değişiyor?"}`;den.add(q);
+    D.ekle([kH(...a),kH(1,q),q>10?`${kH(1,10)}'dan küçük`:"—"],"e"+q);if(g)g.kontrol();A.durum(`${den.size} payda`);}
+  ciz();g=gorevler(k,[{m:"Paydayı değiştirerek en az <b>4 farklı</b> kesir deneyiniz.",ok:()=>den.size>=4,s:()=>"Payda büyüdükçe turuncu eksik parça küçüldü."},
+    {m:`Eksik parçası ${kH(1,10)}'dan <b>küçük</b> olan bir kesir kurunuz.`,ok:()=>q>10,s:()=>`Payda 10'dan büyük olunca eksik ${kH(1,10)}'dan küçük.`}],()=>{
+      el(so,"lab2",`Deneyinize göre ${kH(7,8)} ile ${kH(11,12)} kesirlerini karşılaştırınız:`);const c=kars([7,8],[11,12]);
+      bekle=sembolSor(so,kH(7,8),kH(11,12),c,`Doğru! Eksikler ${kH(1,8)} > ${kH(1,12)}; eksiği küçük olan ${kH(11,12)} bütüne daha yakındır.`,"",()=>{D.ekle([`${kH(7,8)} ve ${kH(11,12)}`,`${kH(1,8)} ve ${kH(1,12)}`,`${kH(7,8)} &lt; ${kH(11,12)}`],"k78");A.tamam(`${kH(7,8)} &lt; ${kH(11,12)}`);});});
+  k.appendChild(D.el);
+  A.oto=()=>{if(bekleyenOto(bekle))return;q=Math.min(20,den.size<4?q+1:12);sq.v=q;ciz();};}
+
+/* 10 · ONDALIĞA ÇEVİR (C → A): ondalık işaretçisi kaydırılarak kesrin yerine oturtulur */
+function kaydirTur(k,fr,diger,D,A){const neg=fr[0]<0,min=neg?-1:0,max=neg?0:1;let v=neg?-50:50,bekle=null;const hed=Math.round(fr[0]/fr[1]*100);
+  k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>Kesir</small><p class="buyuk">${kAy(fr)}</p><p>Mavi ondalık işaretçisini kesrin (turuncu nokta) üstüne getiriniz.</p></div><div class="stage s3-mini k10-sv"></div><div class="a2-sat k10-d"></div><div class="a2-bilgi k10-b"></div><div class="s3-sor"></div>`);
+  const d=k.querySelector(".k10-d");[[-10,"− 0,1"],[-1,"− 0,01"],[1,"+ 0,01"],[10,"+ 0,1"]].forEach(([s,t])=>{const b=yeniEl("button","ghost",t);b.type="button";b.onclick=()=>{if(bekle)return;v=Math.max(min*100,Math.min(max*100,v+s));bip(600,.03);ciz();};d.appendChild(b);});
+  const bi=yeniEl("button","primary","Buraya işaretle ✓");bi.type="button";d.appendChild(bi);const so=k.querySelector(".s3-sor");
+  const yz=x=>dMet(x,100);
+  function ciz(){const W=gW(600),sv=svgEl(W,120),o=dogruH(W,min,max,10,{y:84}),xk=o.x(fr[0]/fr[1]),xm=o.x(v/100);
+    sv.innerHTML=o.h+`<circle cx="${xk}" cy="84" r="8" fill="#e8590c" stroke="#fff" stroke-width="2"/>${sK(xk,28,Math.abs(fr[0]),fr[1],{fs:14,renk:"#c2410c"})}${neg?`<text x="${xk-14}" y="32" font-size="14" font-weight="800" fill="#c2410c">${EKSI}</text>`:""}
+      <path d="M${xm} 70 l-7 -12 h14 z" fill="#1c7ed6"/><text x="${xm}" y="${v===hed?112:52}" text-anchor="middle" font-size="14" font-weight="800" fill="#1864ab">${yz(v)}</text>`;
+    k.querySelector(".k10-sv").replaceChildren(sv);const c=Math.sign(v-hed);k.querySelector(".k10-b").innerHTML=`<small>İşaretçi</small>${yz(v)} ${c===0?"kesrin tam üstünde.":c<0?"kesrin solunda (küçük).":"kesrin sağında (büyük)."}`;}
+  bi.onclick=()=>{if(bekle)return;const c=Math.sign(v-hed);D.ekle([kAy(fr),yz(v),"—",c===0?"kesrin yerinde ✓":c<0?"kesrin solunda":"kesrin sağında"],"m"+fr+v);
+    if(c!==0){bip(320,.08);return;}bip(760,.1);const dv=oku(diger).v,cc=kars(fr,dv);el(so,"lab2",`${kAy(fr)} = ${yz(v)}. Şimdi ${diger} ile karşılaştırınız:`);
+    bekle=sembolSor(so,`<span class="ond">${yz(v)}</span>`,`<span class="ond">${diger}</span>`,cc,`Doğru! ${kAy(fr)} ${sem(cc)} ${diger}.`,"",()=>{D.ekle([kAy(fr),yz(v),diger,`${kAy(fr)} ${sem(cc)} ${diger}`],"s"+fr);A.tamam(`${kAy(fr)} = ${yz(v)} ${sem(cc)} ${diger}`);});};
+  ciz();k.appendChild(D.el);A.durum("İşaretçiyi kaydırınız");
+  A.oto=()=>{if(bekleyenOto(bekle))return;if(v!==hed){v=hed;ciz();}bi.click();};}
+
+/* 11 · BASAMAK BASAMAK (C → A): kısa sayıya 0 eklenir, sütunlar tek tek açılır, ilk fark kararı verir */
+function sutunTur(k,ciftler,D,A){let ci=0,bekle=null,acik=0,ek=0,P1,P2,neg,L;
+  k.insertAdjacentHTML("beforeend",`<div class="dkart b11-g"></div><div class="tsar b11-t"></div><div class="a2-sat"><button type="button" class="ghost b11-0">Kısa sayıya 0 ekleyin</button><button type="button" class="primary b11-a">Sonraki sütunu açın ▶</button></div><div class="a2-bilgi b11-b"></div><div class="s3-sor"></div>`);
+  const tw=k.querySelector(".b11-t"),bil=k.querySelector(".b11-b"),so=k.querySelector(".s3-sor");
+  const par=s=>{const [t,o=""]=s.replace(EKSI,"").split(",");return {t,o};};
+  function kur(){const [s1,s2]=ciftler[ci];neg=s1.startsWith(EKSI);P1=par(s1);P2=par(s2);L=Math.max(P1.o.length,P2.o.length);acik=0;ek=0;bekle=null;so.innerHTML="";
+    k.querySelector(".b11-g").innerHTML=`<small>Çift ${ci+1} / ${ciftler.length}</small><p class="buyuk"><span class="ond">${s1}</span> ve <span class="ond">${s2}</span></p>${neg?"<p>İki sayı da negatif; tabloda sayı kısımları var.</p>":""}`;ciz();A.durum(`${ci} / ${ciftler.length}`);}
+  const hane=(P,j)=>j===0?P.t:(P.o[j-1]!=null?P.o[j-1]:(j-1<P.o.length+ek&&P.o.length<L?"0":null));
+  function ciz(){const ad=["Tam kısım","Onda birler","Yüzde birler","Binde birler","On binde birler"];const sat=(P,s)=>`<tr><th><span class="ond">${s.replace(EKSI,"")}</span></th>${[...Array(L+1)].map((_,j)=>{const x=hane(P,j),gri=j>0&&j-1>=P.o.length;
+      const kp=j>=acik;const f=!kp&&hane(P1,j)!==hane(P2,j);return `${j===1?'<td class="s3-vg">,</td>':""}<td class="${kp?"kapali":f?"fark":"ayni"}${gri?" gri":""}">${x==null?"":x}</td>`;}).join("")}</tr>`;
+    tw.innerHTML=`<table class="a2-tab"><thead><tr><th></th>${[...Array(L+1)].map((_,j)=>`${j===1?'<th class="s3-vg"></th>':""}<th>${ad[j].replace(" ","<br>")}</th>`).join("")}</tr></thead><tbody>${sat(P1,ciftler[ci][0])}${sat(P2,ciftler[ci][1])}</tbody></table>`;}
+  k.querySelector(".b11-0").onclick=()=>{if(bekle)return;if(P1.o.length===P2.o.length||ek>=Math.abs(P1.o.length-P2.o.length)){bil.innerHTML="<small>0 ekleme</small>Basamak sayıları zaten eşit.";return;}ek++;bip(620,.04);ciz();bil.innerHTML="<small>0 ekleme</small>Ondalık kısmın sonuna 0 eklemek sayıyı değiştirmez: basamak sayıları eşitlendi.";};
+  k.querySelector(".b11-a").onclick=()=>{if(bekle||acik>L)return;const j=acik,x=hane(P1,j),y=hane(P2,j);if(x==null||y==null){bip(220,.12);bil.innerHTML="<small>Sütun açılamadı</small>Bu sütunda bir sayının basamağı yok. Önce <b>Kısa sayıya 0 ekleyin</b>.";return;}
+    acik++;ciz();const ad=["Tam kısım","Onda birler","Yüzde birler","Binde birler","On binde birler"][j];D.ekle([`${ciftler[ci][0]} ve ${ciftler[ci][1]}`,`${ad}: ${x} ve ${y}`,x===y?"aynı → sonraki sütun":"farklı → karar"],"c"+ci+j+ciftler[ci]);
+    if(x===y){bil.innerHTML=`<small>${ad}</small>${x} ve ${y} aynı. Sonraki sütunu açınız.`;bip(600,.04);return;}
+    bil.innerHTML=`<small>${ad}</small>İlk fark burada: ${x} ${+x>+y?"&gt;":"&lt;"} ${y}.${neg?" Sayılar negatif; sıra tersine döner.":""}`;bip(760,.08);
+    const a=oku(ciftler[ci][0]).v,b=oku(ciftler[ci][1]).v,c=kars(a,b);el(so,"lab2","Şimdi sayıları karşılaştırınız:");
+    bekle=sembolSor(so,`<span class="ond">${ciftler[ci][0]}</span>`,`<span class="ond">${ciftler[ci][1]}</span>`,c,`Doğru! ${ciftler[ci][0]} ${sem(c)} ${ciftler[ci][1]}.`,"",()=>{D.ekle([`${ciftler[ci][0]} ve ${ciftler[ci][1]}`,ad,`${ciftler[ci][0]} ${sem(c)} ${ciftler[ci][1]}`],"s"+ciftler[ci]);ci++;if(ci<ciftler.length)setTimeout(kur,700);else A.tamam("İlk farklı basamak kararı verdi.");});};
+  kur();k.appendChild(D.el);
+  A.oto=()=>{if(bekleyenOto(bekle))return;const j=acik;if(hane(P1,j)==null||hane(P2,j)==null){k.querySelector(".b11-0").click();return;}k.querySelector(".b11-a").click();};}
+
+/* 12 · DEVİRLİ Mİ DAHA BÜYÜK? (B → A): sonlu sayı rakam çarklarıyla değiştirilir; devirliyle karşılaştırma canlı */
+function devTur2(k,dev,devH,D,A){let d=[2,0],bekle=null;const q=dev[1];
+  k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>Devirli sayı</small><p class="buyuk">${devH}</p></div><p class="lab2">Sonlu sayı (çarklarla değiştiriniz)</p><div class="a2-sat d12-c"></div><div class="a2-sat"><button type="button" class="ghost d12-e">Basamak ekleyin</button></div><div class="a2-bilgi d12-b"></div>`);
+  const cz=k.querySelector(".d12-c"),bil=k.querySelector(".d12-b");let g=null;const son=()=>[+d.join(""),10**d.length];
+  function ciz(){cz.innerHTML=`<b style="font:800 26px Arimo,Arial,sans-serif">0,</b>`+d.map((x,j)=>`<span class="a2-cark"><button type="button" class="ghost" data-j="${j}" data-d="1" aria-label="${j+1}. ondalık basamağı artır">▲</button><b>${x}</b><button type="button" class="ghost" data-j="${j}" data-d="-1" aria-label="${j+1}. ondalık basamağı azalt">▼</button></span>`).join("");
+    cz.querySelectorAll("button").forEach(b=>b.onclick=()=>{const j=+b.dataset.j,v=d[j]+ +b.dataset.d;if(v<0||v>9)return;d[j]=v;bip(620,.03);ciz();});
+    const s=son(),c=kars(s,dev),n=d.length+2,sH=`0,${d.join("")}`;bil.innerHTML=`<small>Basamaklar açık (${n} basamak)</small><span class="ond">0,${basam(dev[0],q,n)}…</span> ile <span class="ond">0,${d.join("").padEnd(n,"0")}</span> → devirli ${c<0?"&gt;":c>0?"&lt;":"="} ${sH}`;
+    D.ekle([devH,`<span class="ond">${sH}</span>`,c<0?`devirli büyük`:c>0?"sonlu büyük":"eşit"],"d"+sH);if(g)g.kontrol();A.durum(sH);}
+  k.querySelector(".d12-e").onclick=()=>{if(d.length<5){d.push(0);bip(600,.04);ciz();}};
+  ciz();const dg=basam(dev[0],q,5);
+  g=gorevler(k,[{m:"Sonlu sayıyı devirli sayıdan <b>büyük</b> yapınız.",ok:()=>kars(son(),dev)>0,s:()=>"İlk farklı basamakta sonlu sayının rakamı büyük."},
+    {m:`İlk iki basamağı devirliyle aynı (0,${dg.slice(0,2)}) olan sonlu sayıyı kurunuz. Hangisi büyük?`,ok:()=>d.length===2&&d.join("")===dg.slice(0,2),s:()=>"Sonlu sayı bitti; devirlinin basamakları sürüyor: devirli büyük."},
+    {m:"Basamak ekleyerek devirliye daha da yakın ama ondan <b>küçük</b> bir sonlu sayı kurunuz (en az 3 ondalık basamak).",ok:()=>d.length>=3&&d.join("")===dg.slice(0,d.length),s:()=>"Kaç basamak eklenirse eklensin devirli sayı biraz daha büyük kaldı."}],()=>A.tamam("Devirli sayıyı basamaklarını açarak sonlu sayıyla karşılaştırdınız."));
+  k.appendChild(D.el);
+  A.oto=()=>{const t=k.querySelectorAll(".gorevler li.tamam").length;if(t===0){d=[Math.min(9,+dg[0]+1),0];ciz();return;}if(t===1){d=[+dg[0],+dg[1]];ciz();return;}if(d.length<3){d.push(0);}d=dg.slice(0,d.length).split("").map(Number);ciz();};}
+
+/* 13 · NEGATİF KESİRLER TERS DÖNER (B → A): yükselme miktarları sayaçla değişir, "düşüşe çevir" ile sıra ters döner */
+function tersTur(k,q,D,A){let a=3,b=5,neg=false;
+  k.insertAdjacentHTML("beforeend",`<div class="a2-sat t13-d"></div><div class="stage s3-mini t13-s"></div><div class="a2-bilgi t13-b"></div>`);
+  const sa=sayac("Pazartesi (pay):",1,q,a,v=>{a=v;ciz();}),sb=sayac("Salı (pay):",1,q,b,v=>{b=v;ciz();});const bn=yeniEl("button","primary","Düşüşe çevirin ↕");bn.type="button";
+  bn.onclick=()=>{neg=!neg;bn.textContent=neg?"Yükselmeye çevirin ↕":"Düşüşe çevirin ↕";bip(560,.06);ciz();};k.querySelector(".t13-d").append(sa.el,sb.el,bn);let g=null;
+  function ciz(){const W=gW(520),H=230,y0=115,s=90/q,sv=svgEl(W,H),sg=neg?-1:1;let h=`<line x1="20" y1="${y0}" x2="${W-10}" y2="${y0}" stroke="currentColor" stroke-width="2"/><text x="24" y="${y0-6}" font-size="12" font-weight="800">0</text>`;
+    [[a,"Pazartesi","#f4b942"],[b,"Salı","#74c0fc"]].forEach(([v,ad,r],i)=>{const x=W*.28+i*W*.3,hh=v*s;h+=`<rect x="${x}" y="${neg?y0:y0-hh}" width="${W*.16}" height="${hh}" fill="${r}" stroke="currentColor"/>`+sK(x+W*.08,neg?y0+hh+24:y0-hh-26,v,q,{fs:14})+(neg?`<text x="${x+W*.08-16}" y="${y0+hh+28}" font-size="14" font-weight="800">${EKSI}</text>`:"")+`<text x="${x+W*.08}" y="${neg?y0-8:y0+18}" text-anchor="middle" font-size="12" font-weight="800">${ad}</text>`;});
+    sv.innerHTML=h;k.querySelector(".t13-s").replaceChildren(sv);const A_=[sg*a,q],B_=[sg*b,q],c=kars(A_,B_);
+    k.querySelector(".t13-b").innerHTML=`<small>${neg?"Düşüş (negatif)":"Yükselme (pozitif)"}</small>${kAy(A_)} ${sem(c).replace("<","&lt;").replace(">","&gt;")} ${kAy(B_)}`;
+    D.ekle([`${neg?"düşüş":"yükselme"}: ${kAy(A_)} ve ${kAy(B_)}`,`${kAy(A_)} ${sem(c).replace("<","&lt;").replace(">","&gt;")} ${kAy(B_)}`],"t"+neg+a+"-"+b);if(g)g.kontrol();A.durum(neg?"düşüş":"yükselme");}
+  ciz();g=gorevler(k,[{m:"Yükselmede Pazartesi'nin değişimini Salı'dan <b>büyük</b> yapınız.",ok:()=>!neg&&a>b,s:()=>"Pozitiflerde payı büyük olan büyük."},
+    {m:"Sayıları değiştirmeden <b>Düşüşe çevirin</b> düğmesine basınız. Sembol ne oldu?",ok:()=>neg&&a>b,s:()=>"Sembol ters döndü."},
+    {m:"Düşüşteyken Pazartesi'nin değişimini Salı'dan <b>büyük</b> yapınız.",ok:()=>neg&&a<b,s:()=>"Negatiflerde sütunu kısa olan (0'a yakın) büyük."}],()=>A.tamam("İşaret değişince sıranın tersine döndüğünü gördünüz."));
+  k.appendChild(D.el);
+  A.oto=()=>{const t=k.querySelectorAll(".gorevler li.tamam").length;if(t===0){a=b+1;sa.v=a;ciz();return;}if(t===1){bn.click();return;}a=1;b=Math.max(2,b);sa.v=a;ciz();};}
+
+/* 14 · TAM SAYILI KESİR SIRALAMASI (B → A): kartlar ▲▼ ile sıralanır; altta sayı doğrusunda sıra numaraları canlı görünür */
+function sirDogru(k,kartlar,D,A){let sira=karistir(kartlar.map((_,i)=>i));if(sira.every((x,i)=>!i||kars(kartlar[sira[i-1]],kartlar[x])<=0))sira.reverse();
+  const L=el(k,"a2-liste"),dg=el(k,"stage s3-mini"),f=el(k,"fb");f.hidden=true;k.appendChild(D.el);
+  const v=kartlar.map(x=>x[0]/x[1]),min=Math.floor(Math.min(...v)),max=Math.ceil(Math.max(...v));
+  function ciz(){let iyi=0;L.innerHTML="";sira.forEach((j,t)=>{if(t){const ok=kars(kartlar[sira[t-1]],kartlar[j])<0;if(ok)iyi++;L.appendChild(yeniEl("div","a2-isr "+(ok?"ok":"no"),ok?"&lt; ✓":"&gt; ✗"));}
+      const r=yeniEl("div","a2-oge");r.innerHTML=`<b style="min-width:24px">${t+1}.</b><div>${kAyM(kartlar[j])}</div><button type="button" class="ghost" aria-label="yukarı"${t?"":" disabled"}>▲</button><button type="button" class="ghost" aria-label="aşağı"${t<sira.length-1?"":" disabled"}>▼</button>`;
+      const [u,a]=r.querySelectorAll("button");u.onclick=()=>{[sira[t-1],sira[t]]=[sira[t],sira[t-1]];bip(640,.03);ciz();};a.onclick=()=>{[sira[t+1],sira[t]]=[sira[t],sira[t+1]];bip(640,.03);ciz();};L.appendChild(r);});
+    const W=gW(600),sv=svgEl(W,110),o=dogruH(W,min,max,1,{y:70});let h=o.h;
+    sira.forEach((j,t)=>{const x=o.x(v[j]),ok=(t===0||kars(kartlar[sira[t-1]],kartlar[j])<0)&&(t===sira.length-1||kars(kartlar[j],kartlar[sira[t+1]])<0);h+=`<circle cx="${x}" cy="70" r="11" fill="${ok?"#2b8a3e":"#e03131"}"/><text x="${x}" y="75" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${t+1}</text>`;});
+    sv.innerHTML=h;dg.replaceChildren(sv);D.ekle([sira.map(j=>kAyM(kartlar[j])).join(" ; "),`${iyi} / ${sira.length-1} komşu doğru`],"s"+sira.join(""));A.durum(`${iyi} / ${sira.length-1}`);
+    if(iyi===sira.length-1){fb(f,true,`Doğru! Sayı doğrusunda sıra numaraları soldan sağa 1, 2, 3 … dizildi.`);bip(760,.1);A.tamam(sira.map(j=>kAyM(kartlar[j])).join(" &lt; "));}}
+  ciz();A.oto=()=>{const t=sira.findIndex((j,i)=>i&&kars(kartlar[sira[i-1]],kartlar[j])>0);if(t>0){[sira[t-1],sira[t]]=[sira[t],sira[t-1]];ciz();}};}
+
+/* 18 · İKİYE BÖL, YİNE BUL (B → A): işaretçi kaydırılır, iki uca uzaklık canlı; orta bulununca bir yarıya yakınlaştırılır */
+function ortaTur(k,a,b,tur,D,A){let L_=a,R_=b,t=0,i=1,bekle=false;
+  k.insertAdjacentHTML("beforeend",`<div class="dkart o18-g"></div><div class="stage s3-mini o18-s"></div><div class="a2-sat o18-d"><button type="button" class="ghost o18-l">◀ Sola</button><button type="button" class="ghost o18-r">Sağa ▶</button><button type="button" class="primary o18-k">Orta nokta burası ✓</button></div><div class="a2-bilgi o18-b"></div><div class="a2-sat o18-y" hidden><button type="button" class="ghost o18-ys">Sol yarıya yakınlaştırın</button><button type="button" class="ghost o18-yr">Sağ yarıya yakınlaştırın</button></div><div class="fb" hidden></div>`);
+  const f=k.querySelector(".fb"),y=k.querySelector(".o18-y");
+  const nok=j=>topF(L_,carpF(topF(R_,[-L_[0],L_[1]]),[j,8]));
+  function ciz(){const W=gW(600),sv=svgEl(W,120),x0=30,x1=W-30,X=j=>x0+(x1-x0)*j/8;let h=`<line x1="${x0-14}" y1="70" x2="${x1+14}" y2="70" stroke="currentColor" stroke-width="2.5"/>`;
+    for(let j=0;j<=8;j++)h+=`<line x1="${X(j)}" y1="${j%8?64:58}" x2="${X(j)}" y2="${j%8?76:82}" stroke="currentColor" stroke-width="${j%8?1.3:2.2}"/>`;
+    h+=sKy(x0,100,{v:L_,t:"k"},{fs:14})+sKy(x1,100,{v:R_,t:"k"},{fs:14})+`<path d="M${X(i)} 56 l-7 -12 h14 z" fill="#1c7ed6"/><line x1="${X(0)}" y1="38" x2="${X(i)}" y2="38" stroke="#e8590c" stroke-width="3"/><line x1="${X(i)}" y1="30" x2="${X(8)}" y2="30" stroke="#2b8a3e" stroke-width="3"/>`;
+    sv.innerHTML=h;k.querySelector(".o18-s").replaceChildren(sv);const d1=carpF(topF(R_,[-L_[0],L_[1]]),[i,8]),d2=carpF(topF(R_,[-L_[0],L_[1]]),[8-i,8]);
+    k.querySelector(".o18-g").innerHTML=`<small>Bölme ${t+1} / ${tur}</small><p>Uçlar: <b>${kAy(L_)}</b> ve <b>${kAy(R_)}</b></p>`;
+    k.querySelector(".o18-b").innerHTML=`<small>İşaretçi: ${kAy(nok(i))}</small>Sol uca uzaklık (turuncu) ${kAy(d1)} · sağ uca uzaklık (yeşil) ${kAy(d2)}`;A.durum(`${t} / ${tur}`);}
+  k.querySelector(".o18-l").onclick=()=>{if(bekle||i<=1)return;i--;bip(600,.03);ciz();};k.querySelector(".o18-r").onclick=()=>{if(bekle||i>=7)return;i++;bip(600,.03);ciz();};
+  k.querySelector(".o18-k").onclick=()=>{if(bekle)return;if(i!==4){bip(220,.12);fb(f,false,"İki uca uzaklıklar eşit değil. Yeniden deneyiniz.");D.ekle([`${t+1}. bölme (deneme)`,kAy(L_),kAy(R_),`${kAy(nok(i))} ✗`],"x"+t+i);return;}
+    const m=nok(4);bip(760,.1);fb(f,true,`Doğru! ${kAy(m)}, ${kAy(L_)} ile ${kAy(R_)} sayılarının tam ortasında.`);D.ekle([`${t+1}. bölme`,kAy(L_),kAy(R_),kAy(m)],"o"+t);t++;
+    if(t>=tur){bekle=true;A.tamam("Her bölmede iki sayı arasında yeni bir rasyonel sayı buldunuz.");return;}bekle=true;y.hidden=false;};
+  const yak=s=>{const m=nok(4);if(s)R_=m;else L_=m;i=1;bekle=false;y.hidden=true;f.hidden=true;bip(640,.05);ciz();};
+  k.querySelector(".o18-ys").onclick=()=>yak(true);k.querySelector(".o18-yr").onclick=()=>yak(false);
+  ciz();k.appendChild(D.el);A.oto=()=>{if(!y.hidden){yak(true);return;}if(bekle)return;if(i!==4){i=4;ciz();}k.querySelector(".o18-k").click();};}
+
+/* 19 · STRATEJİ SEÇİCİ (C → A): seçilen strateji düzenekte uygulanır, yazılan ara sayı adedi karşılaştırılır */
+function stratUygula(s,a,b){const A_=a.v,B_=b.v;
+  if(s==="payda"){const L=lcmN(A_[1],B_[1]),kN=(p,q)=>(p<0?EKSI:"")+kH(Math.abs(p),q);return {ok:true,adim:3,m:`Ortak payda ${L}: ${kN(A_[0]*L/A_[1],L)} ve ${kN(B_[0]*L/B_[1],L)}`};}
+  if(s==="pay"){if(!A_[0]||!B_[0])return {ok:false,m:"Paylardan biri 0; pay eşitleme kullanılamaz."};const P=lcmN(Math.abs(A_[0]),Math.abs(B_[0]));const a2=[P,A_[1]*P/Math.abs(A_[0])],b2=[P,B_[1]*P/Math.abs(B_[0])];
+    return {ok:true,adim:P===Math.abs(A_[0])||P===Math.abs(B_[0])?2:3,m:`Paylar ${P}: ${A_[0]<0?EKSI:""}${kH(...a2)} ve ${B_[0]<0?EKSI:""}${kH(...b2)}`};}
+  if(s==="yarim"){const ya=Math.sign(2*Math.abs(A_[0])-A_[1]),yb=Math.sign(2*Math.abs(B_[0])-B_[1]);if(Math.sign(A_[0])!==Math.sign(B_[0]))return {ok:false,m:"İşaretler farklı; yarıma bakmaya gerek yok."};
+    return ya!==yb&&ya*yb<=0&&ya!==0&&yb!==0?{ok:true,adim:1,m:`Biri ${kH(1,2)}'den küçük, diğeri büyük: köprü ${kH(1,2)} karar verdi.`}:{ok:false,m:`İkisi de ${kH(1,2)}'nin aynı tarafında; bu yol karar vermedi.`};}
+  if(s==="ondalik")return {ok:true,adim:2,m:`${dH(...A_,{nokta:true})} ve ${dH(...B_,{nokta:true})}`};
+  if(s==="eksik"){const ea=[A_[1]-Math.abs(A_[0]),A_[1]],eb=[B_[1]-Math.abs(B_[0]),B_[1]];if(ea[0]<=0||eb[0]<=0)return {ok:false,m:"Sayılardan biri 1'den küçük değil; eksik parça yolu kullanılamaz."};
+    return ea[0]===eb[0]?{ok:true,adim:1,m:`Eksik parçalar ${kH(...ea)} ve ${kH(...eb)}: payları eşit, hemen karşılaştırılır.`}:{ok:false,m:`Eksik parçalar ${kH(...ea)} ve ${kH(...eb)}; bunlar da karşılaştırılmalı, yol uzadı.`};}
+  if(s==="isaret")return Math.sign(A_[0])!==Math.sign(B_[0])?{ok:true,adim:0,m:"İşaretler farklı: negatif sayı her pozitif sayıdan küçüktür."}:{ok:false,m:"İşaretler aynı; işaret karar vermedi."};}
+const STR_AD={isaret:"İşarete bak",yarim:"Yarıma göre",eksik:"Bütüne eksik",pay:"Pay eşitle",payda:"Payda eşitle",ondalik:"Ondalığa çevir"};
+function stratTur(k,kartlar,D,A){let ki=0,bekle=null;const den=new Set();
+  k.insertAdjacentHTML("beforeend",`<div class="dkart s19-k"></div><p class="lab2">Bir strateji seçiniz; düzenek o yolu uygular:</p><div class="a2-str s19-s"></div><div class="a2-bilgi s19-b"></div><div class="s3-sor"></div>`);
+  const ss=k.querySelector(".s19-s"),bil=k.querySelector(".s19-b"),so=k.querySelector(".s3-sor");
+  ss.innerHTML=Object.keys(STR_AD).map(s=>`<button type="button" class="sec" data-s="${s}">${STR_AD[s]}</button>`).join("");
+  function kur(){const [a,b]=kartlar[ki];den.clear();bekle=null;so.innerHTML="";k.querySelector(".s19-k").innerHTML=`<small>Kart ${ki+1} / ${kartlar.length}</small><p class="buyuk">${nH(a)} ve ${nH(b)}</p>`;bil.innerHTML="<small>Strateji</small>En az iki strateji deneyiniz; hangisi en az adımda karar veriyor?";ss.querySelectorAll("button").forEach(x=>x.disabled=false);A.durum(`${ki} / ${kartlar.length}`);}
+  ss.querySelectorAll("button").forEach(x=>x.onclick=()=>{if(bekle)return;const [a,b]=kartlar[ki],s=x.dataset.s,r=stratUygula(s,a,b);den.add(s);x.disabled=true;bip(r.ok?700:420,.05);
+    bil.innerHTML=`<small>${STR_AD[s]}</small>${r.m}${r.ok?` <b>(${r.adim===0?"hemen":r.adim+" adım"})</b>`:""}`;D.ekle([`${nH(a)} ve ${nH(b)}`,STR_AD[s],r.ok?`karar verdi (${r.adim===0?"hemen":r.adim+" adım"})`:"karar vermedi"],"s"+ki+s);
+    if(den.size>=2&&!bekle){const c=kars(a.v,b.v);el(so,"lab2","Şimdi sayıları karşılaştırınız:");bekle=sembolSor(so,nH(a),nH(b),c,`Doğru! ${nH(a)} ${sem(c)} ${nH(b)}.`,"",()=>{ki++;if(ki<kartlar.length)setTimeout(kur,600);else A.tamam("Her çift için stratejileri deneyip karşılaştırdınız.");});}});
+  kur();k.appendChild(D.el);A.oto=()=>{if(bekleyenOto(bekle))return;const b=[...ss.querySelectorAll("button")].find(x=>!x.disabled);b&&b.click();};}
+
+/* 20 · KARŞILAŞTIRMA DÜELLOSU → sayı doğrusu yarışı (C → A): iki sayı süre içinde sayı doğrusuna yerleştirilir, sembol doğrudan okunur */
+const YR_HAVUZ=[[-3,4,"k"],[5,8,"k"],[-1,2,"k"],[3,8,"k"],[-7,8,"k"],[1,4,"o"],[-1,4,"o"],[3,4,"o"],[-5,8,"k"],[1,8,"k"],[-3,8,"k"],[7,8,"k"],[1,2,"o"],[-3,4,"o"],[-1,8,"k"],[5,4,"m"],[-5,4,"m"],[-11,8,"m"],[9,8,"m"]];
+function dogruYaris(k,D,A,TUR,isinma){let tur=0,puan=0,dog=0,cift=null,yer=[null,null],acik=false,zam=null,t0=0;const SURE=40000;
+  k.insertAdjacentHTML("beforeend",`${isinma?"":`<div class="skorlar"><div><small>Tur</small><b class="y-tur">0 / ${TUR}</b></div><div><small>Doğru</small><b class="y-dog">0</b></div><div><small>Puan</small><b class="y-pu">0</b></div><div><small>Kalan süre</small><b class="y-su">40 sn</b></div></div>`}<div class="dkart y-ok"></div>${isinma?"":`<div class="yaris"><i></i></div>`}<div class="stage s3-mini y-sv"></div><div class="a2-sat"><button type="button" class="ghost y-l">◀ ${kH(1,8)} sola</button><button type="button" class="ghost y-r">${kH(1,8)} sağa ▶</button><button type="button" class="primary y-k">İşaretçideki yere yerleştirin ✓</button></div><div class="a2-bilgi y-b"></div><div class="row">${isinma?"":`<button type="button" class="primary y-bas">Yarışı başlatın</button>`}</div><div class="fb" hidden></div>`);
+  const f=k.querySelector(".fb"),bb=k.querySelector(".y-bas"),bil=k.querySelector(".y-b");const W=gW(600),min=-1.5,max=1.5;let im=0;
+  k.querySelector(".y-l").onclick=()=>{if(im>-12){im--;ciz();}};k.querySelector(".y-r").onclick=()=>{if(im<12){im++;ciz();}};k.querySelector(".y-k").onclick=()=>koy(im);
+  const skor=()=>{if(isinma)return;k.querySelector(".y-tur").textContent=`${tur} / ${TUR}`;k.querySelector(".y-dog").textContent=dog;k.querySelector(".y-pu").textContent=puan;A.durum(`Tur ${tur} / ${TUR}`);};
+  function ciz(){const sv=svgEl(W,130),o=dogruH(W,min,max,8,{y:80});let h=o.h;
+    yer.forEach((p,i)=>{if(p==null)return;const x=o.x(p/8);h+=`<circle cx="${x}" cy="80" r="9" fill="${i?"#1c7ed6":"#e8590c"}" stroke="#fff" stroke-width="2"/>`+sKy(x,40-(i?0:0),cift[i],{fs:14,renk:i?"#1864ab":"#c2410c"});});
+    h+=`<path d="M${o.x(im/8)} 64 l-7 -12 h14 z" fill="#5f3dc4"/>`;sv.innerHTML=h;sv.style.cursor="pointer";sv.style.touchAction="manipulation";sv.addEventListener("pointerdown",e=>{const pt=svgNokta(sv,e),v=min+(pt.x-o.L)/(o.R-o.L)*(max-min);im=Math.max(-12,Math.min(12,Math.round(v*8)));ciz();koy(im);});
+    k.querySelector(".y-sv").replaceChildren(sv);}
+  function koy(p){if(!acik)return;const i=yer[0]==null?0:1;const n=cift[i],hed=n.v[0]*8/n.v[1];
+    if(p!==hed){bip(260,.08);bil.innerHTML=`<small>${i+1}. sayı</small>Dokunduğunuz nokta ${kAyM([p,8])}; ${nH(n)} burada değil. Yeniden deneyiniz.`;return;}
+    yer[i]=p;bip(700,.06);ciz();if(i===0){bil.innerHTML=`<small>2. sayı</small>Şimdi ${nH(cift[1])} sayısını yerleştiriniz.`;return;}
+    const c=kars(cift[0].v,cift[1].v),hiz=Date.now()-t0<SURE/2;acik=false;clearInterval(zam);dog++;puan+=hiz?15:10;skor();
+    fb(f,true,`Sağdaki sayı büyüktür: ${nH(cift[0])} ${sem(c).replace("<","&lt;").replace(">","&gt;")} ${nH(cift[1])}. ${isinma?"":hiz?"15 puan.":"10 puan."}`);D.ekle([`${nH(cift[0])} ${sem(c).replace("<","&lt;").replace(">","&gt;")} ${nH(cift[1])}`,isinma?"ısınma ✓":`yerleştirildi (${hiz?15:10} puan)`],"y"+tur+cift.map(x=>x.v).join());
+    if(isinma){A.tamam("Isınma tamam.");return;}setTimeout(()=>{if(k.isConnected)yeni();},1500);}
+  function yeni(){if(!isinma&&tur>=TUR){fb(f,true,`Yarış bitti: ${dog} / ${TUR} tur, ${puan} puan.`);A.tamam(`Sayı doğrusu yarışı: ${puan} puan.`);return;}
+    tur++;skor();const h=karistir(YR_HAVUZ);let x=h[0],y=h.find(z=>z[0]*x[1]!==x[0]*z[1]);cift=[NS3(x[0],x[1],x[2]),NS3(y[0],y[1],y[2])];yer=[null,null];acik=true;f.hidden=true;
+    k.querySelector(".y-ok").innerHTML=`<small>${isinma?"Isınma (süre yok)":"Tur "+tur}</small><p class="buyuk">${nH(cift[0])} ve ${nH(cift[1])}</p>`;bil.innerHTML=`<small>1. sayı</small>${nH(cift[0])} sayısının yerine dokununuz ya da mor işaretçiyi kaydırıp yerleştiriniz (her çentik ${kH(1,8)}).`;ciz();
+    if(isinma)return;t0=Date.now();clearInterval(zam);const bar=k.querySelector(".yaris i");zam=setInterval(()=>{if(!k.isConnected){clearInterval(zam);return;}const o=(Date.now()-t0)/SURE;bar.style.width=Math.min(100,o*100)+"%";k.querySelector(".y-su").textContent=Math.max(0,Math.ceil((SURE-(Date.now()-t0))/1000))+" sn";
+      if(o>=1&&acik){acik=false;clearInterval(zam);fb(f,false,`Süre bitti. ${nH(cift[0])} ${sem(kars(cift[0].v,cift[1].v)).replace("<","&lt;").replace(">","&gt;")} ${nH(cift[1])}.`);D.ekle([`${nH(cift[0])} ve ${nH(cift[1])}`,"süre bitti (0 puan)"],"z"+tur);skor();setTimeout(()=>{if(k.isConnected)yeni();},1600);}},100);}
+  if(bb)bb.onclick=()=>{bb.hidden=true;yeni();};
+  if(isinma)yeni();else{k.querySelector(".y-ok").innerHTML="<p>Hazır olunca <b>Yarışı başlatın</b> düğmesine basınız.</p>";cift=[NS3(0,1),NS3(0,1)];acik=false;ciz();}
+  k.appendChild(D.el);skor();
+  A.oto=()=>{if(bb&&!bb.hidden){bb.click();return;}if(!acik)return;const i=yer[0]==null?0:1;koy(cift[i].v[0]*8/cift[i].v[1]);};}
+
 const ACT=[
  {ad:"Termometre Sıralaması",amac:"Dikey sayı doğrusu olan termometrede sıcaklıkları yerleştirip en soğuktan en sıcağa sıralamak.",adimlar:[TAH,"<b>Deney:</b> Şehir kartlarını termometreye yerleştiriniz, sonra kartları en soğuktan en sıcağa sıralayınız.",SON],sure:6,ciz:e_termo},
  {ad:"Deniz Seviyesi Asansörü",amac:"Deniz seviyesinin üstündeki ve altındaki yükseklikleri asansörle gezip başlangıç ile varışı karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Asansörü düğmelerle hedeflere götürünüz; her varışta iki yüksekliği &lt;, &gt; ya da = ile karşılaştırınız.",SON],sure:6,ciz:e_asansor},
  {ad:"Ayna Sayı Doğrusu",amac:"Pozitif sayılardaki sıranın, 0'a göre ayna görüntüleri olan negatif sayılarda tersine döndüğünü keşfetmek.",adimlar:[TAH,"<b>Deney:</b> Pozitif sayıları sayı doğrusunda işaretleyiniz; ayna görüntüleri çizilince pozitifleri ve negatifleri karşılaştırınız.",SON],sure:6,ciz:e_ayna},
  {ad:"Averaj Tablosu",amac:"Puanları eşit sınıfları averajlarına göre büyükten küçüğe sıralayarak tam sayıları karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Tablonun satırlarını sürükleyerek ya da ▲ ▼ düğmeleriyle averajı büyük olan üstte olacak biçimde diziniz.",SON],sure:6,ciz:e_averaj},
  {ad:"Kesir Şeridi Yarışı",amac:"Paydaları eşit kesirleri pist şeritlerinde göstererek pozitif ve negatif kesirleri karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Koşucuları düğmelerle parça parça hedef noktalara götürünüz, sonra iki kesri karşılaştırınız.",SON],sure:6,ciz:e_yaris},
- {ad:"Payda Eşitleme Atölyesi",amac:"Paydaları farklı kesirleri ortak paydaya genişleterek kesir şeritleriyle karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> İki paydanın da katı olan bir ortak payda seçiniz; şeritler yeniden bölününce kesirleri karşılaştırınız.",SON],sure:6,ciz:e_payda},
- {ad:"Pay Eşitleme Kısayolu",amac:"Payları eşitleyerek kesirleri karşılaştırmanın kısa yolunu keşfetmek: Paylar eşitse paydası küçük olan büyüktür.",adimlar:[TAH,"<b>Deney:</b> İki denk kesir listesinden payları eşit olan birer kesir seçiniz; şeritlere bakarak karşılaştırınız.",SON],sure:6,ciz:e_pay},
- {ad:"Yarımdan Büyük mü?",amac:`Kesirleri ${kH(1,2)} ile karşılaştırarak sınıflandırmak ve ${kH(1,2)} kesrini köprü olarak kullanıp iki kesri karşılaştırmak.`,adimlar:[TAH,"<b>Deney:</b> Kartlardaki kesirleri yarımdan küçük, yarıma eşit ya da yarımdan büyük kutusuna koyunuz.",SON],sure:5,ciz:e_yarim},
- {ad:"Bütüne Ne Kadar Kaldı?",amac:"Bire yakın kesirleri bütüne eksik kalan parçalarına bakarak karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Şeritlerde bütüne eksik kalan parçaya dokununuz; eksik parçaları ve kesirleri karşılaştırınız.",SON],sure:6,ciz:e_butun},
- {ad:"Ondalığa Çevir, Karşılaştır",amac:"Kesri ondalık gösterime çevirip ondalık gösterimle karşılaştırmak; sonucu sayı doğrusunda görmek.",adimlar:[TAH,"<b>Deney:</b> Kesrin ondalık gösterimini yazınız, sonra iki ondalık gösterimi karşılaştırınız.",SON],sure:6,ciz:e_ondalik},
- {ad:"Basamak Basamak",amac:"Ondalık gösterimleri basamak tablosunda soldan ilk farklı basamağa bakarak karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Basamak tablosunda ilk farklı basamağın sütununa dokununuz, sonra sayıları karşılaştırınız.",SON],sure:6,ciz:e_basamak},
- {ad:"Devirli mi Daha Büyük?",amac:"Devirli ve sonlu ondalık gösterimleri basamaklarını açarak karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Basamaklar aynıysa bir basamak daha açınız; ilk fark görününce sayıları karşılaştırınız.",SON],sure:6,ciz:e_devirli},
- {ad:"Negatif Kesirler Ters Döner",amac:"Su seviyesi grafiğinde pozitif kesirlerin sırasının işaret değişince tersine döndüğünü keşfetmek.",adimlar:[TAH,"<b>Deney:</b> Yükselmeleri karşılaştırınız, sonra işaretleri değiştirip düşüşleri karşılaştırınız.",SON],sure:5,ciz:e_negkesir},
- {ad:"Tam Sayılı Kesir Sıralaması",amac:"Tam sayılı kesirleri önce tam kısımlarına göre raflara yerleştirmek, sonra raf içinde sıralamak.",adimlar:[TAH,"<b>Deney:</b> Kartları hangi iki tam sayı arasındaysa o rafa koyunuz; sonra her raftaki küçük sayıyı seçiniz.",SON],sure:6,ciz:e_tamsayili},
+ {ad:"Payda Eşitleme Atölyesi",amac:"Paydaları farklı kesirleri ortak paydaya genişleterek kesir şeritleriyle karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Ortak payda sayacıyla farklı sayılar deneyiniz; şeritler her sayıyla yeniden bölünür. Uygun paydaları bulup kesirleri karşılaştırınız.",SON],sure:6,ciz:e_payda},
+ {ad:"Pay Eşitleme Kısayolu",amac:"Payları eşitleyerek kesirleri karşılaştırmanın kısa yolunu keşfetmek: Paylar eşitse paydası küçük olan büyüktür.",adimlar:[TAH,"<b>Deney:</b> İki kesrin çarpan sayaçlarını değiştirerek paylarını eşitleyiniz; şeritlere bakarak karşılaştırınız.",SON],sure:6,ciz:e_pay},
+ {ad:"Yarımdan Büyük mü?",amac:`Kesirleri ${kH(1,2)} ile karşılaştırarak sınıflandırmak ve ${kH(1,2)} kesrini köprü olarak kullanıp iki kesri karşılaştırmak.`,adimlar:[TAH,"<b>Deney:</b> Pay ve payda sayaçlarıyla kesri değiştirip şeridin yarım çizgisini ne zaman geçtiğini bulunuz; sonra iki kesri yarıma göre karşılaştırınız.",SON],sure:5,ciz:e_yarim},
+ {ad:"Bütüne Ne Kadar Kaldı?",amac:"Bire yakın kesirleri bütüne eksik kalan parçalarına bakarak karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Paydayı büyüterek bütüne eksik parçanın nasıl küçüldüğünü izleyiniz; eksik parçalarla kesirleri karşılaştırınız.",SON],sure:6,ciz:e_butun},
+ {ad:"Ondalığa Çevir, Karşılaştır",amac:"Kesri ondalık gösterime çevirip ondalık gösterimle karşılaştırmak; sonucu sayı doğrusunda görmek.",adimlar:[TAH,"<b>Deney:</b> Ondalık işaretçisini sayı doğrusunda kaydırarak kesrin yerine oturtunuz, sonra iki ondalık gösterimi karşılaştırınız.",SON],sure:6,ciz:e_ondalik},
+ {ad:"Basamak Basamak",amac:"Ondalık gösterimleri basamak tablosunda soldan ilk farklı basamağa bakarak karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Kısa sayıya 0 ekleyip sütunları soldan sağa tek tek açınız; ilk farklı basamak bulununca sayıları karşılaştırınız.",SON],sure:6,ciz:e_basamak},
+ {ad:"Devirli mi Daha Büyük?",amac:"Devirli ve sonlu ondalık gösterimleri basamaklarını açarak karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Sonlu sayının rakamlarını çarklarla değiştirip basamak ekleyiniz; devirli sayıyla karşılaştırma her seferinde yenilenir.",SON],sure:6,ciz:e_devirli},
+ {ad:"Negatif Kesirler Ters Döner",amac:"Su seviyesi grafiğinde pozitif kesirlerin sırasının işaret değişince tersine döndüğünü keşfetmek.",adimlar:[TAH,"<b>Deney:</b> Yükselme miktarlarını sayaçlarla değiştiriniz, sonra düşüşe çevirip sembolün nasıl ters döndüğünü izleyiniz.",SON],sure:5,ciz:e_negkesir},
+ {ad:"Tam Sayılı Kesir Sıralaması",amac:"Tam sayılı kesirleri önce tam kısımlarına göre raflara yerleştirmek, sonra raf içinde sıralamak.",adimlar:[TAH,"<b>Deney:</b> Kartları ▲ ve ▼ ile sıralayınız; sayı doğrusundaki sıra numaraları soldan sağa dizilene kadar düzenleyiniz.",SON],sure:6,ciz:e_tamsayili},
  {ad:"Sıralama Treni",amac:"Kesir, tam sayılı kesir, ondalık gösterim ve tam sayılardan oluşan karışık rasyonel sayıları vagonlara sırayla dizmek.",adimlar:[TAH,"<b>Deney:</b> Sayı kartlarını vagonlara küçükten büyüğe, sonra büyükten küçüğe diziniz ve treni kontrol ediniz.",SON],sure:7,ciz:e_tren},
  {ad:"Sayı Doğrusuna Yerleştir",amac:"Rasyonel sayıları sayı doğrusunda doğru noktaya sürükleyerek yerleştirmek.",adimlar:[TAH,"<b>Deney:</b> Turuncu noktayı sürükleyip hedef sayının yerinde bırakınız.",SON],sure:6,ciz:e_yerlestir},
  {ad:"Arada Kim Var?",amac:"İki rasyonel sayı arasında payda genişleterek sayı bulmak ve iki sayının orta noktasını belirlemek.",adimlar:[TAH,"<b>Deney:</b> Genişletme sayısını değiştirip aradaki çentiklere dokununuz; sonra iki uç arasındaki sayı kartlarını seçiniz.",SON],sure:7,ciz:e_arada},
- {ad:"İkiye Böl, Yine Bul",amac:"İki sayının arasını tekrar tekrar ikiye bölerek arada hep bir rasyonel sayı bulunduğunu keşfetmek.",adimlar:[TAH,"<b>Deney:</b> Orta noktayı seçiniz, sonra bir yarıya yakınlaştırıp yeniden orta noktayı bulunuz.",SON],sure:6,ciz:e_ikiye},
- {ad:"Strateji Seçici",amac:"İki rasyonel sayıyı karşılaştırmanın en kısa yolunu seçmek ve kullanmak.",adimlar:[TAH,"<b>Deney:</b> Her kartta önce en kısa yolu seçiniz, sonra sayıları karşılaştırınız.",SON],sure:7,ciz:e_strateji},
- {ad:"Karşılaştırma Düellosu",amac:"Rasyonel sayıları bilgisayara karşı süreli bir &lt;, &gt;, = düellosunda hızlıca karşılaştırmak.",adimlar:["Önce durumu okuyup ısınma tahmininizi seçiniz.","<b>Deney:</b> Düello kurallarını okuyunuz, ısınma sorusunu cevaplayınız ve 8 turluk düelloyu oynayınız.",SON],sure:7,ciz:e_duello}];
+ {ad:"İkiye Böl, Yine Bul",amac:"İki sayının arasını tekrar tekrar ikiye bölerek arada hep bir rasyonel sayı bulunduğunu keşfetmek.",adimlar:[TAH,"<b>Deney:</b> İşaretçiyi kaydırıp iki uca uzaklıkları eşitleyerek orta noktayı bulunuz, sonra bir yarıya yakınlaştırıp yeniden bulunuz.",SON],sure:6,ciz:e_ikiye},
+ {ad:"Strateji Seçici",amac:"İki rasyonel sayıyı karşılaştırmanın en kısa yolunu seçmek ve kullanmak.",adimlar:[TAH,"<b>Deney:</b> Her kartta en az iki stratejiyi düzenekte uygulayınız, adım sayılarını karşılaştırınız ve sayıları karşılaştırınız.",SON],sure:7,ciz:e_strateji},
+ {ad:"Karşılaştırma Düellosu",amac:"Rasyonel sayıları süre içinde sayı doğrusuna yerleştirerek karşılaştırmak: sağdaki sayı büyüktür.",adimlar:["Önce durumu okuyup ısınma tahmininizi seçiniz.","<b>Deney:</b> Yarış kurallarını okuyunuz, ısınma sayılarını yerleştiriniz ve 5 turluk sayı doğrusu yarışını oynayınız.",SON],sure:7,ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"Sıralama Keşif Atölyesi",kisa:"Sıralama Keşif Atölyesi",kod:"MAT.7.1.3",ust:"7. Sınıf · Sayılar · MAT.7.1.3",
   aciklama:"Rasyonel sayılarda karşılaştırma ve sıralama için yirmi keşfetme etkinliği. Her etkinlik adım adım ilerler: tahmin ediniz, deneyiniz, kuralı kendiniz bulunuz ve yeni bir örnekte kullanınız."});
 
