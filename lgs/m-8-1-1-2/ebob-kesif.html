@@ -313,6 +313,19 @@ body{background:var(--bg)}
 /* karekök (01.10.2026) */
 .krk{display:inline-flex;align-items:flex-start;white-space:nowrap;vertical-align:baseline}.krk::before{content:"√";line-height:1.12;margin-right:-.04em;font-weight:inherit}.krk>span{border-top:.075em solid currentColor;padding:.07em .1em 0 .06em;line-height:1.12}.krk .frac{margin-top:.12em}.krk:has(>span>.frac){align-items:stretch}.krk:has(>span>.frac)::before{font-size:2.15em;line-height:1;margin-top:-.02em;transform:scaleX(.62);transform-origin:left top;margin-right:-.3em}.krk>span sup{vertical-align:.32em;font-size:.68em;line-height:0}
 
+/* 04.10.2026 · soru zinciri: sıradaki soru belirgin */
+.sz-ust{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,#fff);font-weight:700}
+.sz-nok{display:flex;gap:6px}.sz-nok i{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;opacity:.35;display:inline-block}
+.sz-nok i.ok{background:#2b8a3e;border-color:#2b8a3e;opacity:1}.sz-nok i.su{background:currentColor;opacity:1;transform:scale(1.15)}
+.sz-ileri{margin-top:10px;font-size:1.05em;animation:szNab 1.2s ease-in-out 3}
+@keyframes szNab{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.sor.sz-kapali{opacity:.6}.sor.sz-kapali .secler,.sor.sz-kapali .fb{display:none}.sor.sz-kapali .soru::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.sor.sz-yeni{animation:szGel .45s ease-out}
+@keyframes szGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sz-ileri,.sor.sz-yeni{animation:none}}
+/* 05.10.2026: dokunma hedefi en az 44 px (§19-11) */
+.ta-dug button,.row button,button.primary,button.ghost{min-height:44px}
+
 /* TA-SON */
 
 /* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
@@ -847,6 +860,17 @@ const notr=S=>{const so=S.soru,sa=S.sayi;
       fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
   return S;};
+/* §4.k-5 (05.10.2026): "Sıradaki soru" düğmesi. 8. sınıf tek adım düzeninde (adimli) "Kuralı bulun" soruları ayrı ekranlardadır;
+   bir soru doğru cevaplanınca alttaki düğme, sıradaki ekran yine bir kural sorusuysa "Sıradaki soru (i / n) →" olur.
+   Ortak dosyaya (kesif_tekadim.js) dokunmadan adimli sarmalanır; kur.py dosyanın sonunda asamali=adimli atar. */
+adimli=(A0=>function(p){const S=A0(p),il=p.querySelector(".ta-ileri");if(!il)return S;let n=1;const k0=S.kural;S.kural=x=>{n=x||1;return k0(x);};
+  const kuralMi=e=>!!e&&(e.querySelector(".ta-evre")||{}).textContent==="Kuralı bulun";
+  const duz=()=>{const E=[...p.querySelectorAll(".ta-ekran")],c=E.find(e=>!e.hidden);if(!c)return;const i=E.indexOf(c);
+    if(kuralMi(c)&&kuralMi(E[i+1])&&!il.disabled){const j=E.slice(0,i+2).filter(kuralMi).length,t=`Sıradaki soru (${j} / ${Math.max(n,j)}) →`;if(il.textContent!==t)il.textContent=t;}};
+  new MutationObserver(duz).observe(il,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:["disabled","class"]});
+  return S;})(adimli);
+/* 05.10.2026: sayı düğmeleri (çift / vapur seçimi) telefonda da en az 44 px (§19-11, §4.x-11) */
+(()=>{const st=document.createElement("style");st.textContent=".a8-sd .seg button{min-height:44px}";document.head.appendChild(st);})();
 /* Yardımcılar (yalnız bu dosya) */
 const OB=(a,b)=>divs(gcd(a,b));
 const UST=e=>String(e).split("").map(c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[+c]).join("");
@@ -899,50 +923,56 @@ const e_kurdele=p=>{const S=notr(adimli(p));   /* PİLOT: tek adım düzeni */co
       v=>v===38||v===57?"Parça iki kurdeleyi de bölmeli; bu sayı ikisini birden bölmüyor.":v===1?"1 cm olur ama en uzun parça değildir.":null);}
 };
 
-/* 2 · ORTAK BÖLEN ŞEMASI */
+/* 2 · ORTAK BÖLEN ŞEMASI (05.10.2026, §4.k: B → A) — öğrenci sayıyı kendisi seçer, "24'ü böl" ve "32'yi böl" makinelerinden geçirir;
+   kart, makinelerin sonucuna göre şemadaki bölgeye kendiliğinden düşer. Ortak bölgede ortak bölenler birikir. */
 const e_venn=p=>{const S=notr(asamali(p));const A=24,B=32;
-  const k=S.ac(1,{ne:"24'ü ve 32'yi bölen sayıları iç içe geçmiş iki dairede toplayarak ortak bölenleri bulacaksınız.",
-    nasil:["“Sıradaki kart”taki sayıya bakınız.","Sayı yalnız 24'ü bölüyorsa sol daireye, yalnız 32'yi bölüyorsa sağ daireye, ikisini de bölüyorsa iki dairenin kesiştiği “Ortak” bölgeye dokununuz. Hiçbirini bölmüyorsa alttaki şeride dokununuz.","Bütün kartlar yerleşince ortak bölgedeki en büyük sayıya dokununuz."],
+  const k=S.ac(1,{ne:"Seçtiğiniz sayıları “24'ü böl” ve “32'yi böl” makinelerinden geçirecek, her sayının iç içe iki dairede kendi yerine düşmesini izleyeceksiniz.",
+    nasil:["“Sayı” sürgüsüyle ya da − ve + düğmeleriyle 1'den 40'a kadar bir sayı seçiniz.","“Makinelerden geçirin” düğmesine basınız. İki makine bölme işlemini yapar; kart sonuca göre şemadaki yerine kendiliğinden düşer.","Farklı sayılar deneyiniz. İki dairenin kesiştiği “Ortak” bölgede hangi sayılar birikiyor?"],
     biter:bitG(3)});
   S.tahmin(k,"24 ile 32'nin kaç ortak böleni vardır?",[[2,"2"],[3,"3"],[4,"4"],[6,"6"]],4,"24 ile 32'nin 4 ortak böleni var: 1, 2, 4 ve 8.");
-  k.insertAdjacentHTML("beforeend",`<div class="kartsira"><span class="ks-ad">Sıradaki kart:</span><div class="kartlar kk"></div></div><div class="stage"></div><div class="fb" hidden></div>`);
-  const kk=k.querySelector(".kk"),st=k.querySelector(".stage"),f=k.querySelector(".fb");
-  const KART=karistir([1,2,3,4,6,8,12,16,24,32,5,9,10]);let i=0,enb=false;const yer={a:[],o:[],b:[],d:[]};
-  const bolge=n=>A%n===0&&B%n===0?"o":A%n===0?"a":B%n===0?"b":"d";
-  const G=gorevler(k,[{m:"<b>4 kart</b> yerleştiriniz.",ok:()=>i>=4},{m:"Bütün kartları (13 kart) yerleştiriniz.",ok:()=>i>=KART.length,s:()=>"Ortak bölgede: 1, 2, 4, 8"},
+  k.insertAdjacentHTML("beforeend",`<div class="row ay"></div><div class="row"><button class="primary gec">Makinelerden geçirin ▶</button></div><div class="mak2"></div><div class="stage"></div><div class="fb" hidden></div>`);
+  const ay=k.querySelector(".ay"),mk=k.querySelector(".mak2"),st=k.querySelector(".stage"),f=k.querySelector(".fb");
+  let n=6,enb=false;const yer={a:[],o:[],b:[],d:[]},den=new Set();
+  const D=defter(k,["Sayı","24 : sayı","32 : sayı","Düştüğü yer"]);
+  const G=gorevler(k,[{m:"<b>6 farklı</b> sayıyı makinelerden geçiriniz.",ok:()=>den.size>=6},
+    {m:"“Ortak” bölgeye düşen sayıların <b>hepsini</b> bulunuz: 24 ile 32'yi birlikte bölen bütün sayılar.",ok:()=>OB(A,B).every(x=>yer.o.includes(x)),s:()=>"Ortak bölgede: 1, 2, 4, 8"},
     {m:"Ortak bölgedeki <b>en büyük</b> sayıya dokununuz.",ok:()=>enb,s:()=>"EBOB(24, 32) = 8"}],acikla);
+  const K=surgu("Sayı",1,40,n,v=>{n=v;mak();});ay.appendChild(K.el);
+  const bolg=x=>A%x===0&&B%x===0?"o":A%x===0?"a":B%x===0?"b":"d";
+  const AD={o:"Ortak bölge",a:"Yalnız 24'ü böler",b:"Yalnız 32'yi böler",d:"Hiçbirini bölmez"};
+  const satir=(N,x)=>`${N} : ${x} = ${Math.floor(N/x)}${N%x?`, kalan ${N%x} ✗`:" ✓"}`;
+  function mak(){mk.innerHTML=dz(`24'ü böl makinesi: <b>${satir(A,n)}</b>`,`32'yi böl makinesi: <b>${satir(B,n)}</b>`);}
   const C1={x:215,y:150},C2={x:385,y:150},R=135;
-  const konum=(r,j)=>r==="a"?[118+(j%2)*50,110+Math.floor(j/2)*46]:r==="o"?[275+(j%2)*50,110+Math.floor(j/2)*46]:r==="b"?[432+(j%2)*50,110+Math.floor(j/2)*46]:[250+j*50,318];
-  function ciz(){kk.innerHTML=i<KART.length?`<button class="pkart secili" style="border-color:var(--acc)">${KART[i]}</button>`:'<span class="bosk">Kartlar bitti. Ortak bölgedeki en büyük sayıya dokununuz.</span>';
-    const sv=svgEl(600,345);let h=`<rect x="0" y="0" width="600" height="345" fill="transparent"/>
-      <circle cx="${C1.x}" cy="${C1.y}" r="${R}" fill="#e03131" fill-opacity=".13" stroke="#e03131" stroke-width="3"/>
+  const konum=(r,j)=>r==="a"?[112+(j%2)*48,105+Math.floor(j/2)*48]:r==="o"?[276+(j%2)*48,105+Math.floor(j/2)*48]:r==="b"?[440+(j%2)*48,105+Math.floor(j/2)*48]:[200+j*44,318];
+  function ciz(yeni){const sv=svgEl(600,345);let h=`<circle cx="${C1.x}" cy="${C1.y}" r="${R}" fill="#e03131" fill-opacity=".13" stroke="#e03131" stroke-width="3"/>
       <circle cx="${C2.x}" cy="${C2.y}" r="${R}" fill="#1c7ed6" fill-opacity=".13" stroke="#1c7ed6" stroke-width="3"/>
       <text x="20" y="22" font-size="20" font-weight="800" fill="#c92a2a">24'ün bölenleri</text><text x="580" y="22" text-anchor="end" font-size="20" font-weight="800" fill="#1864ab">32'nin bölenleri</text>
       <text x="300" y="72" text-anchor="middle" font-size="17" font-weight="800">Ortak</text>
-      <rect x="6" y="294" width="588" height="46" rx="10" fill="none" stroke="${css('--muted')}" stroke-dasharray="6 5"/><text x="14" y="323" font-size="16" font-weight="700">Hiçbirini bölmez</text>`;
-    for(const r in yer)yer[r].forEach((n,j)=>{const [x,y]=konum(r,j);const par=r==="o"&&enb&&n===8;
-      h+=`<g data-n="${n}" data-r="${r}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="22" fill="${par?"#ffe066":css('--card')}" stroke="${css('--ink')}" stroke-width="2"/><text x="${x}" y="${y+6}" text-anchor="middle" font-size="20" font-weight="800">${n}</text></g>`;});
+      <rect x="6" y="294" width="588" height="46" rx="10" fill="none" stroke="${css('--muted')}" stroke-dasharray="6 5"/><text x="14" y="323" font-size="15" font-weight="700">Hiçbirini bölmez</text>`;
+    for(const r in yer){const L=r==="d"?yer.d.slice(-9):yer[r];L.forEach((x,j)=>{const [cx,cy]=konum(r,j);const par=r==="o"&&enb&&x===8;
+      h+=`<g data-n="${x}" data-r="${r}" style="cursor:pointer"><circle cx="${cx}" cy="${cy}" r="21" fill="${par?"#ffe066":x===yeni?"#fff3bf":css('--card')}" stroke="${x===yeni?"#e8590c":css('--ink')}" stroke-width="${x===yeni?3.5:2}"/><text x="${cx}" y="${cy+6}" text-anchor="middle" font-size="19" font-weight="800">${x}</text></g>`;});}
+    if(yer.d.length>9)h+=`<text x="${590}" y="323" text-anchor="end" font-size="13" fill="${css('--muted')}">+${yer.d.length-9}</text>`;
     sv.innerHTML=h;st.replaceChildren(sv);
-    sv.onclick=e=>{const g=e.target.closest("[data-n]");
-      if(i>=KART.length){if(g&&g.dataset.r==="o"){const n=+g.dataset.n;if(n===8){enb=true;fb(f,true,"8, ortak bölenlerin en büyüğüdür: <b>EBOB(24, 32) = 8</b>.");bip(880,.2);}else fb(f,false,`${n} bir ortak bölen ama ortak bölgede ondan büyük bir sayı var.`);ciz();G.kontrol();}
-        else fb(f,false,"Ortak bölgedeki (iki dairenin kesiştiği yerdeki) sayılara dokununuz.");return;}
-      const pt=svgNokta(sv,e),n=KART[i];const d1=Math.hypot(pt.x-C1.x,pt.y-C1.y)<=R,d2=Math.hypot(pt.x-C2.x,pt.y-C2.y)<=R;
-      const r=d1&&d2?"o":d1?"a":d2?"b":"d";const dog=bolge(n);
-      const aciklama=`${n}, ${A%n?ek(A,"i")+" bölmez":ek(A,"i")+" böler"} ve ${B%n?ek(B,"i")+" bölmez":ek(B,"i")+" böler"}.`;
-      if(r===dog){yer[r].push(n);i++;fb(f,true,aciklama+" ✓");bip(640,.08);}else{fb(f,false,aciklama+" Yeniden deneyiniz.");bip(220,.15,"triangle");}
+    sv.onclick=e=>{const g=e.target.closest("[data-n]");if(!g)return;const x=+g.dataset.n;
+      if(g.dataset.r!=="o"){fb(f,false,`${x}, ortak bölgede değil. Ortak bölgedeki sayılara bakınız.`);return;}
+      if(!OB(A,B).every(y=>yer.o.includes(y))){fb(f,false,"Önce görev listesindeki görevleri sırayla yapınız.");return;}
+      if(x===8){enb=true;fb(f,true,"8, ortak bölgedeki en büyük sayıdır: <b>EBOB(24, 32) = 8</b>.");bip(880,.2);}else{fb(f,false,`${x} bir ortak bölen; ama en büyüğü değil. ${YD}`);bip(220,.15,"triangle");}
       ciz();G.kontrol();};}
-  ciz();
+  k.querySelector(".gec").onclick=()=>{const r=bolg(n);den.add(n);
+    if(!yer[r].includes(n)){yer[r].push(n);if(r!=="d")yer[r].sort((a,b)=>a-b);}
+    D.ekle([n,satir(A,n),satir(B,n),AD[r]],String(n));
+    fb(f,r==="o",`Kart <b>${n}</b> → ${AD[r]}${r==="o"?`: ${n}, hem 24'ü hem 32'yi kalansız böler.`:"."}`);bip(r==="o"?760:520,.1);ciz(n);G.kontrol();};
+  mak();ciz();
   function acikla(){const c=S.kural(2);
     S.soru(c,"Ortak bölgedeki 1, 2, 4 ve 8 sayılarının hepsi hangi sayının bölenidir?",
-      ["8'in, yani EBOB'un",["24'ün katlarının","Bu sayılar 24'ten küçüktür; 24'ün katı olamazlar. Ortak bölgedeki en büyük sayıya bakınız."],["32'nin katlarının","Katlar sayıdan küçük olamaz. 1, 2, 4 ve 8'in hepsi hangi sayıyı böler?"]],
+      ["8'in, yani EBOB'un",["24'ün katlarının",""],["32'nin katlarının",""]],
       "8'in bölenleri 1, 2, 4, 8'dir. İki sayının ortak bölenleri, EBOB'larının bölenleridir.",()=>
-    S.soru(c,"Ortak bölgede 1 neden her zaman bulunur?",
-      ["1 her doğal sayıyı kalansız böler",["1 asal sayı olduğu için","1 asal değildir. 1'in iki sayıyı da bölüp bölmediğini düşününüz."],["1 en büyük bölen olduğu için","1 en küçük bölendir. Neden her iki daireye de girer?"]],
+    S.soru(c,"Ortak bölgeye her zaman düşen sayı hangisidir?",
+      ["1, çünkü 1 her doğal sayıyı kalansız böler",["2, çünkü 2 en küçük asal sayıdır",""],["Küçük sayının kendisi",""]],
       "1, her iki sayının da ortak bölenidir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("İki sayının EBOB'u 12'dir. Bu iki sayının kaç ortak böleni vardır?"),6,"Ortak bölenler 12'nin bölenleridir: 1, 2, 3, 4, 6, 12.","Ortak bölenler EBOB'un bölenleridir. 12'nin bölenlerini sayınız.",
-      ()=>S.bitir("İki sayının <b>ortak bölenleri</b>, EBOB'larının bölenleridir. EBOB'u bulunca bütün ortak bölenleri de bulmuş oluruz."),
-      v=>v===1?"EBOB bir tanedir; soru bütün ortak bölenleri soruyor.":null);}
+    S.sayi(m,soruKut("İki sayının EBOB'u 12'dir. Bu iki sayının kaç ortak böleni vardır?"),6,"Ortak bölenler 12'nin bölenleridir: 1, 2, 3, 4, 6, 12.","",
+      ()=>S.bitir("İki sayının <b>ortak bölenleri</b>, EBOB'larının bölenleridir. EBOB'u bulunca bütün ortak bölenleri de bulmuş oluruz."));}
 };
 
 /* 3 · BÖLEN MERDİVENLERİ (listeleme) */
@@ -1077,44 +1107,57 @@ const e_kartlar=p=>{const S=notr(asamali(p));
       v=>v===84||v===294?"B'de yalnız bir tane 7 var; ikinci 7'nin eşi yok.":null);}
 };
 
-/* 6 · ÜS SÜTUNLARI */
+/* 6 · ÜS SÜTUNLARI (05.10.2026, §4.k: C → A) — her taban için A ve B'nin kuvvet kuleleri yan yana; öğrenci “ortak kule”yi − / + ile
+   büyütür. Ortak kule iki kulenin ikisine de sığdığı sürece kurulan sayı iki sayıyı da böler; sığmayan blok kırmızı görünür. */
 const e_usler=p=>{const S=notr(asamali(p));
   const R=[{A:{2:3,3:2,5:1},B:{2:5,3:1,7:1}},{A:{2:2,5:2,7:1},B:{2:3,5:1,7:1}},{A:{3:3,11:1},B:{2:1,3:2,13:1}}];
   const deg=m=>Object.entries(m).reduce((s,[q,e])=>s*Number(q)**e,1);
-  const k=S.ac(1,{ne:"Üslü yazımda her tabanın hangi kuvvetinin EBOB'a girdiğini bulacaksınız.",
-    nasil:["Üstten bir sayı çifti seçiniz. A ve B'nin asal çarpanları, aynı tabanlar alt alta gelecek şekilde tabloya yazılmıştır.","Her sütunda EBOB'a girecek kuvvete dokununuz. Seçiminiz doğruysa kuvvet çizginin altına yazılır.","Bir sayıda bulunmayan asal, o sayıda gri <b>p<sup>0</sup></b> olarak görünür (p<sup>0</sup> = 1)."],
-    biter:bitG(3)});
+  const k=S.ac(1,{ne:"Asal çarpanların kuvvetlerini kule gibi üst üste koyarak iki sayıyı da bölen en büyük sayıyı kuracaksınız.",
+    nasil:["Üstten bir sayı çifti seçiniz. Her taban için A'nın (kırmızı) ve B'nin (mavi) kuleleri yan yana çizilir; kuledeki blok sayısı o tabanın kuvvetidir.","Yeşil “ortak kule”yi her tabanın altındaki − ve + düğmeleriyle büyütünüz ya da küçültünüz. Kurduğunuz sayı ve iki sayıyı bölüp bölmediği anında yazılır.","Ortak kuledeki bir blok A'nın ya da B'nin kulesinden yüksekte kalırsa kırmızı görünür: bu blok sığmıyor demektir. İki sayıyı da bölen en büyük sayıyı kurunuz."],
+    biter:bitG(4)});
   S.tahmin(k,"A = 2<sup>3</sup> · 3<sup>2</sup> · 5 ve B = 2<sup>5</sup> · 3 · 7 ise EBOB'da 2'nin hangi kuvveti bulunur?",[["3","2<sup>3</sup>"],["5","2<sup>5</sup>"],["8","2<sup>8</sup>"]],"3","EBOB'a küçük kuvvet girer: 2<sup>3</sup>. B'de beş tane 2 olsa da A'da yalnız üç tane var.");
-  k.insertAdjacentHTML("beforeend",`<div class="row sy"></div><div class="tsar" style="margin-top:8px"><div class="uslt"></div></div><div class="fb" hidden></div>`);
-  const sy=k.querySelector(".sy"),ut=k.querySelector(".uslt"),f=k.querySelector(".fb");let r=0,sec={},p0=false;
-  const D=defter(k,["A","B","EBOB"]);const var_=i=>D.satirlar.some(x=>x.key==="r"+i);
-  const G=gorevler(k,[{m:"<b>1. çiftin</b> EBOB'unu bulunuz.",ok:()=>var_(0),s:()=>"2<sup>3</sup> · 3 = 24"},{m:"Gizli <b>p<sup>0</sup></b> olan bir sütunda doğru kuvveti seçiniz.",ok:()=>p0},
-    {m:"<b>2. ve 3. çiftlerin</b> EBOB'unu bulunuz.",ok:()=>var_(1)&&var_(2),s:()=>"2<sup>2</sup> · 5 · 7 = 140 ve 3<sup>2</sup> = 9"}],acikla);
-  sayiDugme(sy,"Sayı çifti:",R.map((x,i)=>[i,`${i+1}. çift`]),0,v=>{r=+v;sec={};f.hidden=true;ciz();});
-  function ciz(){const {A,B}=R[r];const T=[...new Set([...Object.keys(A),...Object.keys(B)])].map(Number).sort((a,b)=>a-b);
-    const hucre=(m,s,q)=>{const e=m[q]||0;return `<td><button class="uk ${e===0?"gizli":""} ${sec[q]===s?"on":""}" data-s="${s}" data-q="${q}">${e===0?q+"<sup>0</sup>":kuv(q,e)}</button></td>`;};
-    const bitti=T.every(q=>sec[q]);const E=T.reduce((s,q)=>s*q**Math.min(A[q]||0,B[q]||0),1);
-    ut.innerHTML=`<table class="t ustab"><tbody><tr><th>A<small>${deg(A)}</small></th>${T.map(q=>hucre(A,"A",q)).join("")}</tr><tr><th>B<small>${deg(B)}</small></th>${T.map(q=>hucre(B,"B",q)).join("")}</tr>
-      <tr class="cizgi"><th>EBOB</th>${T.map(q=>{const e=Math.min(A[q]||0,B[q]||0);return `<td>${sec[q]?`<b style="${e===0?"color:#adb5bd":""}">${e===0?q+"<sup>0</sup>":kuv(q,e)}</b>`:"?"}</td>`;}).join("")}</tr></tbody></table>
-      ${bitti?`<p class="durum">EBOB = ${T.filter(q=>Math.min(A[q]||0,B[q]||0)>0).map(q=>kuv(q,Math.min(A[q],B[q]))).join(" · ")} = <b>${E}</b></p>`:""}`;
-    ut.querySelectorAll(".uk").forEach(b=>b.onclick=()=>{const q=+b.dataset.q,s=b.dataset.s;if(sec[q])return;const eA=A[q]||0,eB=B[q]||0,e=s==="A"?eA:eB,mn=Math.min(eA,eB);
-      if(e===mn){sec[q]=s;if(e===0){p0=true;fb(f,true,`${q}<sup>0</sup> = 1. ${q} iki sayıda birden bulunmadığı için EBOB'a girmez.`);}else fb(f,true,`${kuv(q,e)} iki sayıda da var; küçük kuvvet ortaktır ✓`);bip(660,.1);
-        if(T.every(x=>sec[x])){const yaz_=T.filter(x=>Math.min(A[x]||0,B[x]||0)>0).map(x=>kuv(x,Math.min(A[x],B[x]))).join(" · ");
-          D.ekle([`${deg(A)} = ${usl(deg(A))}`,`${deg(B)} = ${usl(deg(B))}`,`${yaz_||"1"} = ${E}`],"r"+r);bip(880,.25);}}
-      else{fb(f,false,`${kuv(q,e)} daha büyük kuvvet: diğer sayıda ${mn===0?`hiç ${q} yok (gizli ${q}<sup>0</sup>)`:`yalnız ${kuv(q,mn)} var`}. Yeniden deneyiniz.`);bip(220,.15,"triangle");}
-      ciz();G.kontrol();});}
-  ciz();
+  k.insertAdjacentHTML("beforeend",`<div class="row sy"></div><div class="stage"></div><div class="row ortk" style="justify-content:center;gap:10px"></div><p class="durum"></p><div class="fb" hidden></div>`);
+  const sy=k.querySelector(".sy"),st=k.querySelector(".stage"),ok_=k.querySelector(".ortk"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
+  let r=0,o={},p0=false;const bulundu=new Set();let birden=false;
+  const D=defter(k,["Çift","Ortak kule","A'yı böler mi?","B'yi böler mi?"]);
+  const G=gorevler(k,[{m:"1. çiftte iki sayıyı da bölen, <b>1'den büyük</b> bir sayı kurunuz.",ok:()=>birden},
+    {m:"1. çiftte iki sayıyı da bölen <b>en büyük</b> sayıyı kurunuz.",ok:()=>bulundu.has(0),s:()=>"2<sup>3</sup> · 3 = 24"},
+    {m:"Bir sayıda hiç bulunmayan bir tabanda (gizli <b>p<sup>0</sup></b>) ortak kuleyi büyütmeyi deneyiniz.",ok:()=>p0,s:()=>"Gizli p<sup>0</sup> olan tabanın kulesine hiç blok sığmaz."},
+    {m:"<b>2. ve 3. çiftlerde</b> de iki sayıyı da bölen en büyük sayıyı kurunuz.",ok:()=>bulundu.has(1)&&bulundu.has(2),s:()=>"2<sup>2</sup> · 5 · 7 = 140 ve 3<sup>2</sup> = 9"}],acikla);
+  sayiDugme(sy,"Sayı çifti:",R.map((x,i)=>[i,`${i+1}. çift`]),0,v=>{r=+v;o={};f.hidden=true;kur();});
+  const T=()=>{const {A,B}=R[r];return [...new Set([...Object.keys(A),...Object.keys(B)])].map(Number).sort((a,b)=>a-b);};
+  function kur(){ok_.innerHTML="";T().forEach(q=>{o[q]=o[q]||0;const w=document.createElement("div");w.className="a8-sd";w.style.cssText="display:flex;align-items:center;gap:6px;font-weight:800";
+      w.innerHTML=`<span>${q}:</span><button class="ghost az" aria-label="${q} kulesini küçült" style="min-width:44px;min-height:44px">−</button><button class="ghost ar" aria-label="${q} kulesini büyüt" style="min-width:44px;min-height:44px">+</button>`;
+      w.querySelector(".az").onclick=()=>{if(o[q]>0){o[q]--;ciz();}};w.querySelector(".ar").onclick=()=>{if(o[q]<6){o[q]++;ciz();}};ok_.appendChild(w);});ciz();}
+  function ciz(){const {A,B}=R[r],TT=T(),n=TT.length,gw=600/n,bh=26;const sv=svgEl(600,250);let h="";
+    TT.forEach((q,i)=>{const x0=i*gw+gw/2-66,eA=A[q]||0,eB=B[q]||0,mn=Math.min(eA,eB);
+      const kule=(x,e,renk,ad,kir)=>{let s="";for(let j=0;j<e;j++){const bad=kir&&j>=mn;s+=`<rect x="${x}" y="${200-(j+1)*bh}" width="38" height="${bh-3}" rx="4" fill="${bad?"#ffc9c9":renk}" stroke="${bad?"#c92a2a":"#fff"}" stroke-width="${bad?2.5:1}"/>`;}
+        return s+`<text x="${x+19}" y="218" text-anchor="middle" font-size="15" font-weight="800">${ad}</text>`;};
+      h+=kule(x0,eA,"#e03131","A")+kule(x0+46,eB,"#1c7ed6","B")+kule(x0+92,o[q],"#2f9e44","Ortak",true);
+      if(eA===0||eB===0)h+=`<text x="${x0+(eA===0?19:65)}" y="190" text-anchor="middle" font-size="16" fill="#adb5bd" font-weight="800">${q}⁰</text>`;
+      h+=`<line x1="${x0-6}" y1="${200-mn*bh}" x2="${x0+136}" y2="${200-mn*bh}" stroke="${css('--muted')}" stroke-dasharray="4 4"/>`;
+      h+=`<text x="${x0+65}" y="244" text-anchor="middle" font-size="18" font-weight="900">taban ${q}</text>`;});
+    sv.innerHTML=h;st.replaceChildren(sv);
+    const deger=TT.reduce((s,q)=>s*q**o[q],1),bA=deg(A)%deger===0,bB=deg(B)%deger===0;
+    const yaz_=TT.filter(q=>o[q]>0).map(q=>kuv(q,o[q])).join(" · ")||"1";
+    du.innerHTML=dz(`A = ${usl(deg(A))} = ${deg(A)}`,`B = ${usl(deg(B))} = ${deg(B)}`,`Ortak kule: <b>${yaz_} = ${deger}</b>`,`A'yı ${bA?"böler ✓":"bölmez ✗"}`,`B'yi ${bB?"böler ✓":"bölmez ✗"}`);
+    TT.forEach(q=>{if(o[q]>0&&Math.min(A[q]||0,B[q]||0)===0)p0=true;});
+    if(bA&&bB&&deger>1&&r===0)birden=true;
+    const enb=TT.every(q=>o[q]===Math.min(A[q]||0,B[q]||0));
+    if(bA&&bB&&enb){if(!bulundu.has(r))bip(880,.2);bulundu.add(r);fb(f,true,`Ortak kule iki kulenin de içine sığıyor ve bir blok daha eklenemiyor: <b>${deger}</b>, A ile B'nin ortak bölenlerinin en büyüğüdür.`);}
+    else f.hidden=true;
+    D.ekle([`${r+1}. çift`,`${yaz_} = ${deger}`,bA?"✓":"✗",bB?"✓":"✗"],r+":"+TT.map(q=>o[q]).join(","));G.kontrol();}
+  kur();
   function acikla(){const c=S.kural(2);
-    S.soru(c,"Her sütunda hangi kuvveti seçtiniz?",
-      ["Kuvveti küçük olanı",["Kuvveti büyük olanı","Büyük kuvvet diğer sayıda yok; ortak olamaz. Deney defterindeki EBOB satırlarına bakınız."],["İki kuvvetin toplamını","Toplam kuvvet iki sayıdan birinde bile bulunmaz; ortak bölen olamaz."]],
+    S.soru(c,"Ortak kule her tabanda en fazla kaç blok olabildi?",
+      ["İki kuleden kısa olanın blok sayısı kadar (küçük kuvvet)",["Uzun olanın blok sayısı kadar (büyük kuvvet)",""],["İki kulenin blok sayılarının toplamı kadar",""]],
       "Küçük kuvvet iki sayıda da bulunur; bu yüzden ortaktır.",()=>
     S.soru(c,"1. çiftte A'da 5 var, B'de yok. EBOB'a 5 girer mi?",
-      ["Hayır. B'de gizli 5<sup>0</sup> var; küçük kuvvet 5<sup>0</sup> = 1",["Evet, 5 girer","5, B'yi bölmez. EBOB iki sayıyı da bölmelidir."],["Evet, 5<sup>2</sup> girer","A'da yalnız bir tane 5 var; B'de hiç yok."]],
+      ["Hayır. B'de gizli 5<sup>0</sup> var; küçük kuvvet 5<sup>0</sup> = 1",["Evet, 5 girer",""],["Evet, 5<sup>2</sup> girer",""]],
       "Bir sayıda bulunmayan asal için o sayıda gizli p<sup>0</sup> vardır; küçük kuvvet p<sup>0</sup> olur.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["A = 2<sup>5</sup> · 3<sup>2</sup> · 7","B = 2<sup>2</sup> · 3<sup>4</sup> · 11"])+soruKut("EBOB(A, B) kaçtır?"),36,"EBOB = 2<sup>2</sup> · 3<sup>2</sup> · 7<sup>0</sup> · 11<sup>0</sup> = 4 · 9 = 36.","Her tabanın küçük kuvvetini alınız: 2<sup>2</sup> ve 3<sup>2</sup>. 7 ve 11 ortak değil.",
-      ()=>S.bitir("Sayılar üslü biçimde, <b>aynı tabanlar alt alta</b> gelecek şekilde yazılır. Her tabanın <b>kuvveti küçük olanı</b> EBOB'a girer. Bir sayıda bulunmayan asal için o sayıda gizli <b>p<sup>0</sup></b> vardır; bu asal EBOB'a girmez."),
-      v=>v===252?"7'yi de aldınız; B'de 7 yok (gizli 7<sup>0</sup>).":v===2592?"Büyük kuvvetleri aldınız; EBOB'a küçük kuvvetler girer.":null);}
+    S.sayi(m,yaz(["A = 2<sup>5</sup> · 3<sup>2</sup> · 7","B = 2<sup>2</sup> · 3<sup>4</sup> · 11"])+soruKut("EBOB(A, B) kaçtır?"),36,"EBOB = 2<sup>2</sup> · 3<sup>2</sup> · 7<sup>0</sup> · 11<sup>0</sup> = 4 · 9 = 36.","",
+      ()=>S.bitir("Sayılar üslü biçimde, <b>aynı tabanlar alt alta</b> gelecek şekilde yazılır. Her tabanın <b>kuvveti küçük olanı</b> EBOB'a girer. Bir sayıda bulunmayan asal için o sayıda gizli <b>p<sup>0</sup></b> vardır; bu asal EBOB'a girmez."));}
 };
 
 /* 7 · PAKETLEME FABRİKASI */
@@ -1152,42 +1195,48 @@ const e_paket=p=>{const S=notr(asamali(p));const A=132,B=176;
       v=>v===21?"21, bir kasadaki meyve sayısıdır; soru kasa sayısını istiyor.":null);}
 };
 
-/* 8 · ŞARTLI KUTULAR */
+/* 8 · ŞARTLI KUTULAR (05.10.2026, §4.k: B → A) — öğrenci kutudaki kitap sayısını sürgüyle değiştirir; kitaplar anında kutulanır,
+   artan kitap, kutu sayısı ve şart lambası canlı izlenir. Her turda şarta uyan en az kutu denenerek bulunur. */
 const e_sartli=p=>{const S=notr(asamali(p));const A=234,B=390,E=gcd(A,B);
-  const R=[{m:"Bir kutuya <b>10'dan az</b> kitap konabilir.",f:x=>x<10,sinir:10},{m:"Bir kutuya <b>20'den az</b> kitap konabilir.",f:x=>x<20,sinir:20},
-    {m:"Kutudaki kitap sayısı <b>çift</b> ve <b>30'dan az</b> olmalı.",f:x=>x%2===0&&x<30,sinir:30},{m:"Kutu için <b>hiçbir şart yok</b>.",f:()=>true,sinir:81}];
+  const R=[{m:"Bir kutuya <b>10'dan az</b> kitap konabilir.",f:x=>x<10},{m:"Bir kutuya <b>20'den az</b> kitap konabilir.",f:x=>x<20},
+    {m:"Kutudaki kitap sayısı <b>çift</b> ve <b>30'dan az</b> olmalı.",f:x=>x%2===0&&x<30},{m:"Kutu için <b>hiçbir şart yok</b>.",f:()=>true}];
   R.forEach(r=>r.en=Math.max(...divs(E).filter(r.f)));
-  const k=S.ac(1,{ne:"Bir kütüphaneye gelen 234 hikâye ve 390 bilgi kitabını kutulara koyarken, verilen şarta göre en az kutuyu bulacaksınız.",
-    nasil:["Her kutuda eşit sayıda kitap olur, bir kutuya tek çeşit kitap konur ve hiç kitap artmaz. EBOB(234, 390) = 78; kutudaki kitap sayısı 78'in bölenlerinden biri olmalı. Bu bölenler dairelerde yazılı.","Her turda bir şart var; şart çizimin üstünde yazar. Yeşil alan şarta uyan sayıları gösterir.","Şarta uyan ve <b>en az kutu</b> gerektiren sayıya dokununuz. Doğru seçim deftere yazılır ve sonraki tur başlar."],
+  const k=S.ac(1,{ne:"Bir kütüphaneye gelen 234 hikâye ve 390 bilgi kitabını kutulara koyarken, her turdaki şarta göre en az kutuyu bulacaksınız.",
+    nasil:["Her kutuda eşit sayıda kitap olur, bir kutuya tek çeşit kitap konur ve hiç kitap artmaz.","“Bir kutudaki kitap” sürgüsünü değiştiriniz. Kitaplar anında kutulanır; artan kitaplar kırmızı, şart lambası yeşil ya da kırmızı görünür.","Şarta uyan ve en az kutu gerektiren sayıyı bulduğunuzu düşününce “Bu seçimle kutulayın” düğmesine basınız."],
     biter:bitG(4)});
   S.tahmin(k,"Bir kutuya 10'dan az kitap konabiliyorsa en az kaç kutu gerekir?",[[104,"104 kutu"],[78,"78 kutu"],[65,"65 kutu"],[8,"8 kutu"]],104,"78'in 10'dan küçük en büyük böleni 6: 234 : 6 + 390 : 6 = 39 + 65 = 104 kutu.");
-  k.insertAdjacentHTML("beforeend",`<p class="soru sartm"></p><div class="stage"></div><div class="fb" hidden></div>`);
-  const sm=k.querySelector(".sartm"),st=k.querySelector(".stage"),f=k.querySelector(".fb");let r=0;
-  const D=defter(k,["Şart","Kutudaki kitap","Kutu sayısı"]);
-  const G=gorevler(k,R.map((x,i)=>({m:`${i+1}. tur: ${x.m}`,ok:()=>r>i,s:()=>`${x.en}'er kitap; ${A/x.en+B/x.en} kutu`})),acikla);
-  const L=divs(E),X=i=>45+i*78;
-  function ciz(){const T=R[Math.min(r,R.length-1)];sm.innerHTML=r<R.length?`${r+1}. tur şartı: ${T.m}`:"Bütün turlar bitti!";
-    const sv=svgEl(640,120);const son=L.filter(x=>x<T.sinir).length;let h=`<rect x="12" y="22" width="${son>=L.length?616:X(son)-39-12}" height="60" rx="10" fill="#2f9e44" fill-opacity=".16" stroke="#2f9e44" stroke-dasharray="5 4"/>
-      <text x="16" y="16" font-size="12" font-weight="700" fill="#2b8a3e">${T.sinir>80?"Bütün ortak bölenler":({10:"10'dan",20:"20'den",30:"30'dan"})[T.sinir]+" küçük olanlar"}</text>
-      <line x1="20" y1="52" x2="620" y2="52" stroke="${css('--ink')}" stroke-width="2"/><text x="620" y="112" text-anchor="end" font-size="12" fill="${css('--muted')}">Kutudaki kitap sayısı (78'in bölenleri)</text>`;
-    L.forEach((d,i)=>{h+=`<g data-d="${d}" style="cursor:pointer"><circle cx="${X(i)}" cy="52" r="24" fill="${css('--card')}" stroke="#1c7ed6" stroke-width="3"/><text x="${X(i)}" y="59" text-anchor="middle" font-size="19" font-weight="800">${d}</text></g>`;});
-    sv.innerHTML=h;st.replaceChildren(sv);
-    sv.querySelectorAll("[data-d]").forEach(g=>g.onclick=()=>{if(r>=R.length)return;const d=+g.dataset.d,T=R[r],n=A/d+B/d;
-      if(!T.f(d)){fb(f,false,`${d}'er kitap şarta uymuyor. Yeşil alandaki sayılardan birini seçiniz${r===2?" (çift olmalı)":""}.`);bip(220,.15,"triangle");return;}
-      if(d!==T.en){fb(f,false,`${d}'er kitap şarta uyuyor ama ${n} kutu gerekiyor. Daha az kutu gerektiren bir seçim var. Yeniden deneyiniz.`);bip(300,.15,"triangle");return;}
-      D.ekle([T.m.replace(/<[^>]+>/g,""),d,`${A/d} + ${B/d} = ${n}`],"r"+r);fb(f,true,`${d}'er kitap: ${A} : ${d} = ${A/d}, ${B} : ${d} = ${B/d}. Toplam <b>${n}</b> kutu.`);bip(880,.2);r++;ciz();G.kontrol();});}
+  k.insertAdjacentHTML("beforeend",`<p class="soru sartm"></p><div class="row ay"></div><div class="stage"></div><p class="durum"></p><div class="row"><button class="primary kutula">Bu seçimle kutulayın</button></div><div class="fb" hidden></div>`);
+  const sm=k.querySelector(".sartm"),ay=k.querySelector(".ay"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let r=0,x=5;
+  const D=defter(k,["Tur","Kutudaki kitap","Kutu sayısı","Sonuç"]);
+  const G=gorevler(k,R.map((t,i)=>({m:`${i+1}. tur: ${t.m}`,ok:()=>r>i,s:()=>`${t.en}'er kitap; ${A/t.en+B/t.en} kutu`})),acikla);
+  const K=surgu("Bir kutudaki kitap",1,100,x,v=>{x=v;ciz();});ay.appendChild(K.el);
+  function serit(y,n,ad,renk){const sk=560/390,t=Math.floor(n/x),a=n%x;let h=`<text x="10" y="${y-6}" font-size="15" font-weight="800">${ad}: ${n} kitap</text><rect x="10" y="${y}" width="${n*sk}" height="28" rx="4" fill="#f1f3f5" stroke="#ced4da"/>`;
+    if(t<=80)for(let i=0;i<t;i++)h+=`<rect x="${10+i*x*sk+.8}" y="${y}" width="${Math.max(.8,x*sk-1.6)}" height="28" rx="3" fill="${renk}"/>`;
+    else{h+=`<rect x="10" y="${y}" width="${t*x*sk}" height="28" rx="3" fill="${renk}"/>`;}
+    if(a)h+=`<rect x="${10+t*x*sk}" y="${y}" width="${a*sk}" height="28" rx="3" fill="#ffc9c9" stroke="#c92a2a" stroke-width="2"/>`;
+    return h;}
+  function ciz(){const T=R[Math.min(r,R.length-1)],aA=A%x,aB=B%x,uy=T.f(x),n=A/x+B/x;
+    sm.innerHTML=r<R.length?`${r+1}. tur şartı: ${T.m}`:"Bütün turlar bitti!";
+    const sv=svgEl(600,150);sv.innerHTML=serit(32,A,"Hikâye","#f08c00")+serit(100,B,"Bilgi","#7048e8")+
+      `<circle cx="560" cy="16" r="11" fill="${uy?"#2f9e44":"#e03131"}"/><text x="544" y="21" text-anchor="end" font-size="14" font-weight="800">Şart ${uy?"sağlanıyor":"sağlanmıyor"}</text>`;
+    st.replaceChildren(sv);
+    du.innerHTML=dz(`Hikâye: ${aA?`${Math.floor(A/x)} kutu, <b>${aA} kitap artıyor</b>`:`<b>${A/x}</b> kutu`}`,`Bilgi: ${aB?`${Math.floor(B/x)} kutu, <b>${aB} kitap artıyor</b>`:`<b>${B/x}</b> kutu`}`,!aA&&!aB?`Toplam: <b>${n}</b> kutu`:"");}
+  k.querySelector(".kutula").onclick=()=>{if(r>=R.length)return;const T=R[r],art=A%x||B%x,n=A/x+B/x;
+    if(art){D.ekle([r+1,x,"—","kitap artıyor"],"t"+r+":"+x);fb(f,false,`${x}'er kitapla kitap artıyor. ${YD}`);bip(220,.15,"triangle");return;}
+    if(!T.f(x)){D.ekle([r+1,x,n,"şarta uymuyor"],"t"+r+":"+x);fb(f,false,`${x}'er kitap şarta uymuyor. ${YD}`);bip(220,.15,"triangle");return;}
+    if(x!==T.en){D.ekle([r+1,x,n,"şarta uyuyor"],"t"+r+":"+x);fb(f,false,`${x}'er kitap şarta uyuyor: ${n} kutu. Bu turda daha az kutuyla da olur. ${YD}`);bip(300,.15,"triangle");return;}
+    D.ekle([r+1,x,`<b>${n}</b>`,"en az kutu ✓"],"t"+r+":"+x);fb(f,true,`${x}'er kitap: ${A} : ${x} = ${A/x}, ${B} : ${x} = ${B/x}. Toplam <b>${n}</b> kutu; bu şartla en az kutu bu.`);bip(880,.2);r++;ciz();G.kontrol();};
   ciz();
   function acikla(){const c=S.kural(2);
-    S.soru(c,"Şart varken kutudaki kitap sayısını nasıl seçtiniz?",
-      ["Şarta uyan ortak bölenlerin en büyüğünü",["Her zaman EBOB'u","78, “10'dan az” şartına uymaz. Şart varken EBOB seçilemeyebilir."],["Şarta uyan en küçük ortak böleni","En küçüğü (1) seçerseniz en fazla kutu gerekir; soru en az kutuyu istiyor."]],
-      "En az kutu için şarta uyan en büyük ortak bölen seçilir. Şart yoksa bu EBOB'dur.",()=>
-    S.soru(c,"Neden yalnız 78'in bölenlerine baktık?",
-      ["Bütün ortak bölenler EBOB'un bölenleridir",["78 en küçük ortak bölen olduğu için","En küçük ortak bölen her zaman 1'dir; 78 en büyüğüdür."],["78 asal sayı olduğu için","78 = 2 · 3 · 13; asal değildir."]],
-      "EBOB'u bulunca ortak bölenlerin hepsi EBOB'un bölenleri olarak bulunur.",meydan));}
+    S.soru(c,"Her turda en az kutuyu veren kitap sayısını nasıl buldunuz?",
+      ["Şarta uyan ortak bölenlerin en büyüğünü seçtim",["Her zaman EBOB'u seçtim",""],["Şarta uyan en küçük ortak böleni seçtim",""]],
+      "En az kutu için şarta uyan en büyük ortak bölen seçilir. Şart yoksa bu EBOB'dur: EBOB(234, 390) = 78.",()=>
+    S.soru(c,"Deney defterindeki kitap sayılarının (6, 13, 26, 78 …) hepsi hangi sayının bölenidir?",
+      ["78'in, yani EBOB'un",["234'ün katlarının",""],["390'ın katlarının",""]],
+      "Ortak bölenlerin hepsi EBOB'un bölenleridir; şartlı sorularda bu bölenler arasından seçim yapılır.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["100 kg pirinç ve 140 kg mercimek, eşit kütleli paketlere hiç artmayacak şekilde konacaktır. Bir pakete tek çeşit ürün konacaktır.","Bir paketin kütlesi kilogram cinsinden bir doğal sayı ve <b>8 kg'dan az</b> olacaktır."])+soruKut("En az kaç paket gerekir?"),48,"EBOB(100, 140) = 20. 20'nin 8'den küçük en büyük böleni 5. 100 : 5 + 140 : 5 = 20 + 28 = 48 paket.","EBOB(100, 140)'ı bulunuz. Onun 8'den küçük en büyük bölenini seçiniz.",
-      ()=>S.bitir("Sorularda çoğu zaman bir <b>şart</b> vardır (“10'dan az”, “çift”). Önce EBOB bulunur; ortak bölenler EBOB'un bölenleridir. Bunların içinden şarta uyanlar seçilir. En az parça için şarta uyan <b>en büyük</b> ortak bölen alınır."),
-      v=>v===12?"Bu, 20 kg'lık paketlerle olurdu; ama paket 8 kg'dan az olmalı.":v===60?"4 kg'lık paketler şarta uyar ama daha büyük bir uygun paket var.":null);}
+    S.sayi(m,yaz(["100 kg pirinç ve 140 kg mercimek, eşit kütleli paketlere hiç artmayacak şekilde konacaktır. Bir pakete tek çeşit ürün konacaktır.","Bir paketin kütlesi kilogram cinsinden bir doğal sayı ve <b>8 kg'dan az</b> olacaktır."])+soruKut("En az kaç paket gerekir?"),48,"EBOB(100, 140) = 20. 20'nin 8'den küçük en büyük böleni 5. 100 : 5 + 140 : 5 = 20 + 28 = 48 paket.","",
+      ()=>S.bitir("Sorularda çoğu zaman bir <b>şart</b> vardır (“10'dan az”, “çift”). Önce EBOB bulunur; ortak bölenler EBOB'un bölenleridir. Bunların içinden şarta uyanlar seçilir. En az parça için şarta uyan <b>en büyük</b> ortak bölen alınır."));}
 };
 
 /* 9 · EN ÇOK MU EN AZ MI? (bidon grafiği) */
@@ -1591,58 +1640,63 @@ const e_dedektif=p=>{const S=notr(asamali(p));const KART=[8,9,25,49,11,13,19,23,
       v=>v===8||v===5?"Bu sayı iki EBOB bilgisinden yalnız birine uyuyor.":null);}
 };
 
-/* 20 · EBOB DÜELLOSU */
+/* 20 · EBOB DÜELLOSU (05.10.2026, §4.k: C → A) — kurdele kesme yarışı: öğrenci süre dolmadan parça uzunluğunu sürgüyle ayarlar,
+   iki kurdele anında kesilir; “Kes!” dediğinde kurdeleler artıksız ve olabilecek en uzun eş parçalara kesildiyse turu kazanır. */
 const e_duello=p=>{const S=notr(asamali(p));
-  const k=S.ac(1,{ne:"Bilgisayara karşı hızlı bir EBOB düellosu yapacak ve EBOB'u hızlı bulmanın kısa yollarını keşfedeceksiniz.",
-    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Düelloyu başlatın” düğmesine basınız. Bir düello 5 turdur.</li><li>Her turda iki sayı ve dört seçenek çıkar. Süre çubuğu dolmadan doğru EBOB'a dokunursanız turu siz kazanırsınız. Örnek: EBOB(12, 18) sorulursa 6'ya dokunmalısınız.</li><li>Yanlış seçenek ya da sürenin dolması turu bilgisayara verir. Süre her turda biraz kısalır.</li><li>En az 3 tur kazanırsanız düelloyu kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır; yanlışta doğru cevap gösterilir."],
+  const k=S.ac(1,{ne:"Bilgisayara karşı bir kurdele kesme yarışı yapacak ve iki kurdeleyi en uzun eş parçalara hızla kesmenin yollarını keşfedeceksiniz.",
+    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Yarışı başlatın” düğmesine basınız. Bir yarış 5 turdur.</li><li>Her turda iki kurdele çıkar. “Parça uzunluğu” sürgüsünü ayarlayınız; kurdeleler anında kesilir, artan parça kırmızı görünür.</li><li>Süre çubuğu dolmadan “Kes! ✂” düğmesine basınız. Kurdeleler hiç artmadan ve olabilecek <b>en uzun</b> eş parçalara kesildiyse turu siz kazanırsınız. Örnek: 12 cm ve 18 cm için 6 cm.</li><li>Parça artarsa, parçalar en uzun değilse ya da süre dolarsa turu bilgisayar kazanır.</li><li>En az 3 tur kazanırsanız yarışı kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır."],
     biter:bitG(3)});
-  S.tahmin(k,"Isınma sorusu: EBOB(24, 26) kaçtır?",[[1,"1"],[2,"2"],[4,"4"],[6,"6"]],2,"EBOB(24, 26) = 2: fark 2 ve iki sayı da çift.");
-  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skor"></div><div class="dsoru"></div><div class="yaris"><i></i></div><div class="secler dsec"></div></div><div class="row"><button class="primary basl">Düelloyu başlatın</button></div><div class="fb" hidden></div>`);
-  const sk=k.querySelector(".skor"),ds=k.querySelector(".dsoru"),bar=k.querySelector(".yaris i"),sc=k.querySelector(".dsec"),bb=k.querySelector(".basl"),f=k.querySelector(".fb");
-  let tur=0,sen=0,bil=0,zam=null,acik=false,turK=0,bitenD=0,yendi=false;
-  const D=defter(k,["Sayılar","EBOB","Turu alan"]);
-  const G=gorevler(k,[{m:"Bir tur <b>kazan</b>.",ok:()=>turK>=1},{m:"Bir düelloyu sonuna kadar oynayınız (5 tur).",ok:()=>bitenD>=1},{m:"Bilgisayarı <b>yen</b>: bir düelloda en az 3 tur kazan.",ok:()=>yendi}],acikla);
-  function uret(){let g,m,n;do{g=rastgele([2,3,4,5,6,7,8,9,11,12,13,14,15]);m=1+Math.floor(Math.random()*9);n=2+Math.floor(Math.random()*8);}while(m===n||gcd(m,n)!==1||g*Math.max(m,n)>200||KONU.includes(g*m)||KONU.includes(g*n));
-    let a=g*m,b=g*n;if(Math.random()<.5)[a,b]=[b,a];
-    const y=new Set();[divs(g).filter(x=>x<g&&x>1).pop(),2*g<=Math.min(a,b)?2*g:null,Math.min(a,b),Math.abs(a-b),g*3<=Math.max(a,b)?g*3:null,g+1,g+2].forEach(x=>{if(x&&x!==g&&y.size<3)y.add(x);});
-    return {a,b,g,sec:karistir([g,...y])};}
+  S.tahmin(k,"Isınma sorusu: 24 cm ve 26 cm'lik iki kurdele en fazla kaç santimetrelik eş parçalara kesilir?",[[1,"1 cm"],[2,"2 cm"],[4,"4 cm"],[6,"6 cm"]],2,"EBOB(24, 26) = 2: fark 2 ve iki sayı da çift.");
+  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skor"></div><div class="dsoru"></div><div class="yaris"><i></i></div><div class="row ay"></div><div class="stage"></div><div class="row"><button class="primary kes" disabled>Kes! ✂</button></div></div><div class="row"><button class="primary basl">Yarışı başlatın</button></div><div class="fb" hidden></div>`);
+  const sk=k.querySelector(".skor"),ds=k.querySelector(".dsoru"),bar=k.querySelector(".yaris i"),ay=k.querySelector(".ay"),st=k.querySelector(".stage"),kb=k.querySelector(".kes"),bb=k.querySelector(".basl"),f=k.querySelector(".fb");
+  let tur=0,sen=0,bil=0,zam=null,acik=false,turK=0,bitenD=0,yendi=false,Q=null,L=3;
+  const D=defter(k,["Kurdeleler","Sizin parçanız","En uzun eş parça","Turu alan"]);
+  const G=gorevler(k,[{m:"Bir tur <b>kazanınız</b>.",ok:()=>turK>=1},{m:"Bir yarışı sonuna kadar oynayınız (5 tur).",ok:()=>bitenD>=1},{m:"Bilgisayarı <b>yeniniz</b>: bir yarışta en az 3 tur kazanınız.",ok:()=>yendi}],acikla);
+  const K=surgu("Parça uzunluğu",1,60,L,v=>{L=v;ciz();},{birim:"cm"});ay.appendChild(K.el);
+  function uret(){let g,m,n;do{g=rastgele([2,3,4,5,6,7,8,9,11,12,13,14,15]);m=1+Math.floor(Math.random()*7);n=2+Math.floor(Math.random()*7);}while(m===n||gcd(m,n)!==1||g*Math.max(m,n)>96||KONU.includes(g*m)||KONU.includes(g*n));
+    let a=g*m,b=g*n;if(Math.random()<.5)[a,b]=[b,a];return {a,b,g};}
+  function ciz(){if(!Q){st.replaceChildren();return;}const s=560/Math.max(Q.a,Q.b);const sv=svgEl(600,130);let h="";
+    [[Q.a,"#e03131",28],[Q.b,"#1c7ed6",92]].forEach(([n,renk,y])=>{const t=Math.floor(n/L),a=n%L;h+=`<text x="10" y="${y-6}" font-size="15" font-weight="800">${n} cm</text>`;
+      for(let i=0;i<t;i++)h+=`<rect x="${10+i*L*s+.8}" y="${y}" width="${Math.max(.8,L*s-1.6)}" height="24" rx="3" fill="${renk}"/>`;
+      if(a)h+=`<rect x="${10+t*L*s}" y="${y}" width="${a*s}" height="24" rx="3" fill="#ffc9c9" stroke="#c92a2a" stroke-width="2"/>`;});
+    sv.innerHTML=h;st.replaceChildren(sv);}
   function skor(){sk.innerHTML=dz(`Tur <b>${Math.min(tur,5)}</b> / 5`,`Siz: <b>${sen}</b>`,`Bilgisayar: <b>${bil}</b>`);}
   function durdur(){if(zam){clearInterval(zam);zam=null;}}
-  function turBitti(kazanan,Q){acik=false;durdur();if(kazanan==="sen"){sen++;turK++;}else bil++;D.ekle([`${Q.a} ve ${Q.b}`,Q.g,kazanan==="sen"?"Siz":"Bilgisayar"],"t"+Date.now()+Math.random());skor();G.kontrol();
-    if(tur>=5){bitenD++;if(sen>=3)yendi=true;fb(f,sen>=3,sen>=3?`Düelloyu kazandınız! ${sen} – ${bil}`:`Bilgisayar kazandı: ${bil} – ${sen}. Kısa yolları düşününüz ve yeniden deneyiniz: biri diğerini bölüyor mu, farkları kaç?`);bip(sen>=3?990:220,.3);bb.hidden=false;bb.textContent="Yeni düello";G.kontrol();}
-    else setTimeout(()=>{if(k.isConnected)yeniTur();},1600);}
-  function yeniTur(){tur++;skor();const Q=uret();acik=true;ds.innerHTML=`EBOB(<b>${Q.a}</b>, <b>${Q.b}</b>) = ?`;
-    sc.innerHTML=Q.sec.map(x=>`<button class="sec" data-v="${x}" style="min-width:64px;text-align:center;font-size:20px">${x}</button>`).join("");
-    const sure=Math.max(3500,8000-tur*800),t0=Date.now();bar.style.width="0%";durdur();
+  function turBitti(kazanan){acik=false;kb.disabled=true;durdur();if(kazanan==="sen"){sen++;turK++;}else bil++;D.ekle([`${Q.a} cm ve ${Q.b} cm`,L+" cm",Q.g+" cm",kazanan==="sen"?"Siz":"Bilgisayar"],"t"+Date.now()+Math.random());skor();G.kontrol();
+    if(tur>=5){bitenD++;if(sen>=3)yendi=true;fb(f,sen>=3,sen>=3?`Yarışı kazandınız! ${sen} – ${bil}`:`Bilgisayar kazandı: ${bil} – ${sen}. Yeniden deneyiniz.`);bip(sen>=3?990:220,.3);bb.hidden=false;bb.textContent="Yeni yarış";G.kontrol();}
+    else setTimeout(()=>{if(k.isConnected)yeniTur();},1800);}
+  function yeniTur(){tur++;skor();Q=uret();acik=true;kb.disabled=false;ds.innerHTML=`<b>${Q.a} cm</b> ve <b>${Q.b} cm</b>`;
+    K.maks(Math.min(Q.a,Q.b));L=1+Math.floor(Math.random()*3);K.v=L;ciz();
+    const sure=Math.max(9000,16000-tur*1500),t0=Date.now();bar.style.width="0%";durdur();
     zam=setInterval(()=>{if(!k.isConnected){durdur();return;}const o=(Date.now()-t0)/sure;bar.style.width=Math.min(100,o*100)+"%";
-      if(o>=1&&acik){fb(f,false,`Süre bitti. EBOB(${Q.a}, ${Q.b}) = ${Q.g}.`);bip(220,.2,"triangle");turBitti("bil",Q);}},50);
-    sc.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(!acik)return;const v=+b.dataset.v;
-      if(v===Q.g){b.classList.add("dogru");fb(f,true,`Doğru! EBOB(${Q.a}, ${Q.b}) = ${Q.g}.`);bip(880,.12);turBitti("sen",Q);}
-      else{b.classList.add("yanlis");fb(f,false,`Olmadı. EBOB(${Q.a}, ${Q.b}) = ${Q.g}.`);bip(220,.2,"triangle");turBitti("bil",Q);}});}
-  bb.onclick=()=>{tur=0;sen=0;bil=0;bb.hidden=true;f.hidden=true;yeniTur();};skor();ds.innerHTML=`<span style="font-size:17px;font-weight:600">Hazır olunca “Düelloyu başlatın” düğmesine basınız.</span>`;
+      if(o>=1&&acik){fb(f,false,`Süre bitti. En uzun eş parça ${Q.g} cm idi.`);bip(220,.2,"triangle");turBitti("bil");}},50);}
+  kb.onclick=()=>{if(!acik)return;
+    if(Q.a%L||Q.b%L){fb(f,false,`${L} cm'lik parçalarla kurdele artıyor. Turu bilgisayar aldı; en uzun eş parça ${Q.g} cm idi.`);bip(220,.2,"triangle");turBitti("bil");}
+    else if(L!==Q.g){fb(f,false,`Artık yok ama parçalar en uzun değil. Turu bilgisayar aldı; en uzun eş parça ${Q.g} cm idi.`);bip(260,.2,"triangle");turBitti("bil");}
+    else{fb(f,true,`Doğru! ${Q.a} ile ${Q.b} cm'lik kurdeleler ${Q.g} cm'lik parçalara artıksız kesildi.`);bip(880,.12);turBitti("sen");}};
+  bb.onclick=()=>{tur=0;sen=0;bil=0;bb.hidden=true;f.hidden=true;yeniTur();};skor();ds.innerHTML=`<span style="font-size:17px;font-weight:600">Hazır olunca “Yarışı başlatın” düğmesine basınız.</span>`;
   function acikla(){const c=S.kural(2);
-    S.soru(c,"Düelloda hangi kısa yollar işine yaradı?",
-      ["Biri diğerini bölüyorsa EBOB küçük sayıdır; EBOB farkı da böler",["EBOB her zaman büyük sayıdır","EBOB iki sayıyı da böler; büyük sayı küçük sayıyı bölemez (eşit değilse)."],["EBOB iki sayının toplamıdır","Toplam iki sayıdan da büyüktür; bölen olamaz."]],
-      "Örneğin EBOB(24, 26): fark 2, iki sayı da çift; EBOB = 2.",()=>
-    S.soru(c,"Seçeneklerde küçük sayıdan büyük bir sayı görürseniz ne yaparsınız?",
-      ["Onu hemen elerim; EBOB küçük sayıdan büyük olamaz",["Onu seçerim","Küçük sayıdan büyük bir sayı küçük sayıyı bölemez."],["Hiçbir şey yapmam","Bu seçeneği elemek seçimi kolaylaştırır; neden olduğunu düşününüz."]],
-      "Böylece seçenekler azalır ve daha hızlı cevap verirsiniz.",meydan));}
+    S.soru(c,"Turları kazandığınız parça uzunluğu iki kurdele uzunluğuyla nasıl ilişkili?",
+      ["İki uzunluğu da bölen en büyük sayıdır (EBOB)",["İki uzunluğun farkıdır",""],["Kısa kurdelenin uzunluğudur",""]],
+      "En uzun eş parça, iki uzunluğun EBOB'udur. Örneğin 24 ile 26 için fark 2, iki sayı da çift; EBOB = 2.",()=>
+    S.soru(c,"Sürgüde kısa kurdeleden daha uzun bir parça seçebilir misiniz?",
+      ["Hayır; EBOB küçük sayıdan büyük olamaz",["Evet, büyük kurdele kadar seçebilirim",""],["Evet, iki kurdelenin toplamı kadar",""]],
+      "Kısa kurdeleden uzun bir parça kısa kurdeleden kesilemez. Biri diğerini bölüyorsa en uzun parça kısa kurdeledir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("EBOB(91, 104) kaçtır?"),13,"Fark 13; 13 iki sayıyı da böler (91 = 7 · 13, 104 = 8 · 13).","Önce farka bakınız: 104 − 91. Fark iki sayıyı da bölüyor mu?",
-      ()=>S.bitir("EBOB'u hızlı bulmak için kısa yollar: EBOB <b>küçük sayıdan büyük olamaz</b>; biri diğerini bölüyorsa EBOB <b>küçük sayıdır</b>; EBOB iki sayının <b>farkını böler</b>."),
-      v=>v===7?"7, 104'ü bölmez.":v===1?"İki sayının 1'den büyük bir ortak böleni var; farka bakınız.":null);}
+    S.sayi(m,soruKut("91 cm ve 104 cm'lik iki kurdele en fazla kaç santimetrelik eş parçalara kesilir?"),13,"Fark 13; 13 iki sayıyı da böler (91 = 7 · 13, 104 = 8 · 13).","",
+      ()=>S.bitir("EBOB'u hızlı bulmak için kısa yollar: EBOB <b>küçük sayıdan büyük olamaz</b>; biri diğerini bölüyorsa EBOB <b>küçük sayıdır</b>; EBOB iki sayının <b>farkını böler</b>."));}
 };
 
 /* ================= liste ================= */
 const ACT=[
  {ad:"Kurdele Makası",amac:"İki kurdeleyi aynı uzunlukta parçalara keserek ortak bölen ve EBOB kavramını keşfetmek.",adimlar:["İki kurdeleyi hiç artmayacak şekilde aynı uzunlukta parçalara kesmenin yollarını bulacaksınız.","<b>Nasıl?</b> Her ekranda yalnız bir adım var. Adımı bitirince alttaki <b>“Sonraki adım →”</b> düğmesine basınız; eski adım kapanır, yenisi açılır.","<b>Adımlar:</b> 1) Tahmin · 2) Deney · 3) Kuralı bulun · 4) Yeni örnek · 5) Ne öğrendim?","<b>Ne zaman biter?</b> Yeni örnekteki soruyu doğru cevaplayınca etkinlik biter."],ciz:e_kurdele},
- {ad:"Ortak Bölen Şeması",amac:"Ortak bölenlerin EBOB'un bölenleri olduğunu iç içe dairelerle keşfetmek.",adimlar:ynr("24 ile 32'nin ortak bölenlerini iç içe dairelerde toplayacaksınız.","Sıradaki kartı şemada doğru bölgeye yerleştiriniz; sonra ortak bölgedeki en büyük sayıyı bulunuz."),ciz:e_venn},
+ {ad:"Ortak Bölen Şeması",amac:"Ortak bölenlerin EBOB'un bölenleri olduğunu iç içe dairelerle keşfetmek.",adimlar:ynr("Sayıları “24'ü böl” ve “32'yi böl” makinelerinden geçirerek ortak bölenleri iç içe dairelerde toplayacaksınız.","Bir sayı seçip makinelerden geçiriniz; kart kendi bölgesine düşer. Farklı sayılar deneyiniz; sonra ortak bölgedeki en büyük sayıyı bulunuz."),ciz:e_venn},
  {ad:"Bölen Merdivenleri",amac:"Listeleme yöntemiyle iki sayının ortak bölenlerini ve EBOB'unu bulmak.",adimlar:ynr("50 ile 70'in ortak bölenlerini listeleme yöntemiyle bulacaksınız.","Bölenleri bularak iki merdiveni kurunuz; iki merdivende de olan basamaklar arasına köprü kurunuz."),ciz:e_merdiven},
  {ad:"Algoritma Makinesi",amac:"Algoritma yöntemiyle, yalnız ortak asal bölenlerle bölerek EBOB'u bulmak.",adimlar:ynr("Algoritma yöntemiyle iki sayının EBOB'unu bulacaksınız.","İki sayıyı birden bölen asallara dokununuz; ortak bölen kalmayınca sağdakileri çarpınız."),ciz:e_algoritma},
  {ad:"Asal Kart Eşleştirme",amac:"Asal çarpan kartlarını eşleştirerek EBOB'un ortak asal çarpanların çarpımı olduğunu keşfetmek.",adimlar:ynr("Asal çarpan kartlarını eşleştirerek EBOB'u bulacaksınız.","Üst ve alt sıradan aynı asalı gösteren iki karta dokununuz; eşler ortak rafa iner."),ciz:e_kartlar},
- {ad:"Üs Sütunları",amac:"Üslü yazımda her tabanın küçük kuvvetini seçerek EBOB'u bulmak.",adimlar:ynr("Üslü yazımla EBOB'u bulacaksınız.","Alt alta yazılmış kuvvetlerden her sütunda EBOB'a gireni seçiniz; gizli p<sup>0</sup> sütunlarına dikkat ediniz."),ciz:e_usler},
+ {ad:"Üs Sütunları",amac:"Üslü yazımda her tabanın küçük kuvvetini seçerek EBOB'u bulmak.",adimlar:ynr("Kuvvet kulelerini karşılaştırarak üslü yazımla EBOB'u kuracaksınız.","Her taban için ortak kuleyi − ve + ile büyütünüz; kule iki sayının kulesine de sığmalı. İki sayıyı da bölen en büyük sayıyı kurunuz."),ciz:e_usler},
  {ad:"Paketleme Fabrikası",amac:"İki ürünü eş paketlere ayırırken en az paketin EBOB ile bulunduğunu keşfetmek.",adimlar:ynr("Kalem ve silgileri en az pakete ayırmanın yolunu bulacaksınız.","Bir paketteki ürün sayısını seçiniz; artan ürün olup olmadığına ve toplam paket sayısına bakınız."),ciz:e_paket},
- {ad:"Şartlı Kutular",amac:"Şartlı sorularda EBOB'un bölenleri arasından seçim yapmayı keşfetmek.",adimlar:ynr("Şartlara göre kitapları en az kutuya koyacaksınız.","Her turda şartı okuyunuz; şarta uyan ve en az kutu gerektiren sayıya dokununuz."),ciz:e_sartli},
+ {ad:"Şartlı Kutular",amac:"Şartlı sorularda EBOB'un bölenleri arasından seçim yapmayı keşfetmek.",adimlar:ynr("Şartlara göre kitapları en az kutuya koyacaksınız.","Bir kutudaki kitap sayısını sürgüyle değiştiriniz; artan kitapları, kutu sayısını ve şart lambasını izleyiniz. Her turda en az kutuyu bulunuz."),ciz:e_sartli},
  {ad:"En Çok mu En Az mı?",amac:"Parça büyüklüğü ile parça sayısı arasındaki ilişkiyi grafikle keşfetmek.",adimlar:ynr("Bidon hacmi ile bidon sayısı arasındaki ilişkiyi bulacaksınız.","Bidon hacmini seçiniz; grafiğe eklenen sütunları karşılaştırınız."),ciz:e_bidon},
  {ad:"Buket Atölyesi",amac:"Eşit gruplara paylaştırmada en fazla grup sayısının EBOB olduğunu keşfetmek.",adimlar:ynr("Güllerle ve lalelerle en fazla buketi yapacaksınız.","Buket sayısını seçiniz; artan çiçek olup olmadığına bakınız."),ciz:e_buket},
  {ad:"Kalanlı Dağıtım",amac:"Artan ve eksik durumlarında EBOB'un nasıl bulunduğunu keşfetmek.",adimlar:ynr("Artan ve eksik bilgisinden öğrenci sayısını bulacaksınız.","Öğrenci sayısını seçip dağıtınız; artan kalemlere ve eksik defterlere bakınız."),ciz:e_kalanli},
@@ -1654,7 +1708,7 @@ const ACT=[
  {ad:"EBOB Piramidi",amac:"EBOB'un küçük sayıdan büyük olamayacağını bir yol oyunuyla keşfetmek.",adimlar:ynr("Piramitte EBOB puanlarını toplayarak en iyi yolu bulmaya çalışacaksınız.","Kurallar: Tepeden başlayınız; her adımda alttaki iki kutudan birine in. Her inişte iki sayının EBOB'u kadar puan alırsınız. En alta inince oyun biter."),ciz:e_piramit},
  {ad:"Fark Kuralı",amac:"İki sayının ortak bölenlerinin farklarını da böldüğünü keşfetmek.",adimlar:ynr("Ortak bölenlerin iki sayının farkıyla ilişkisini bulacaksınız.","Küçük sayıyı ve farkı seçiniz; ortak bölenlere bakınız ve deftere yazınız."),ciz:e_fark},
  {ad:"Gizli Sayı Dedektifi",amac:"EBOB ipuçlarını kullanarak gizli bir sayıyı bulmak.",adimlar:ynr("EBOB ipuçlarıyla gizli sayıyı bulacaksınız.","Kurallar: Bir sorgu kartı seçince kart ile gizli sayının EBOB'u yazılır; uymayan sayılar silinir. Bulduğunuzu düşündüğünüz sayıya dokununuz."),ciz:e_dedektif},
- {ad:"EBOB Düellosu",amac:"EBOB'u hızlı bulmanın kısa yollarını bilgisayara karşı bir oyunda kullanmak.",adimlar:ynr("Bilgisayara karşı EBOB düellosu yapacaksınız.","Kurallar: 5 tur oynanır; süre çubuğu dolmadan doğru EBOB'a dokunan turu alır. Yanlış cevap turu bilgisayara verir. En az 3 tur kazanan düelloyu kazanır."),ciz:e_duello}];
+ {ad:"EBOB Düellosu",amac:"EBOB'u hızlı bulmanın kısa yollarını bilgisayara karşı bir oyunda kullanmak.",adimlar:ynr("Bilgisayara karşı kurdele kesme yarışı yapacaksınız.","Kurallar: 5 tur oynanır. Her turda parça uzunluğunu sürgüyle ayarlayıp süre dolmadan “Kes!” düğmesine basınız. Kurdeleler artıksız ve en uzun eş parçalara kesilirse turu siz alırsınız. En az 3 tur kazanan yarışı kazanır."),ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"EBOB Keşif Atölyesi",kisa:"EBOB Keşif Atölyesi",kod:"M.8.1.1.2",ust:"LGS · 8. Sınıf · Çarpanlar ve Katlar · M.8.1.1.2 · Fasikül 2",
   aciklama:"Ortak bölenler ve EBOB için yirmi keşfetme etkinliği: her biri farklı bir düzenek; üç aşamada deneyiniz, kuralı bulunuz ve kendinizi deneyiniz."});
 
