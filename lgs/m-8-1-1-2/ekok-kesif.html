@@ -313,6 +313,19 @@ body{background:var(--bg)}
 /* karekök (01.10.2026) */
 .krk{display:inline-flex;align-items:flex-start;white-space:nowrap;vertical-align:baseline}.krk::before{content:"√";line-height:1.12;margin-right:-.04em;font-weight:inherit}.krk>span{border-top:.075em solid currentColor;padding:.07em .1em 0 .06em;line-height:1.12}.krk .frac{margin-top:.12em}.krk:has(>span>.frac){align-items:stretch}.krk:has(>span>.frac)::before{font-size:2.15em;line-height:1;margin-top:-.02em;transform:scaleX(.62);transform-origin:left top;margin-right:-.3em}.krk>span sup{vertical-align:.32em;font-size:.68em;line-height:0}
 
+/* 04.10.2026 · soru zinciri: sıradaki soru belirgin */
+.sz-ust{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,#fff);font-weight:700}
+.sz-nok{display:flex;gap:6px}.sz-nok i{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;opacity:.35;display:inline-block}
+.sz-nok i.ok{background:#2b8a3e;border-color:#2b8a3e;opacity:1}.sz-nok i.su{background:currentColor;opacity:1;transform:scale(1.15)}
+.sz-ileri{margin-top:10px;font-size:1.05em;animation:szNab 1.2s ease-in-out 3}
+@keyframes szNab{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.sor.sz-kapali{opacity:.6}.sor.sz-kapali .secler,.sor.sz-kapali .fb{display:none}.sor.sz-kapali .soru::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.sor.sz-yeni{animation:szGel .45s ease-out}
+@keyframes szGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sz-ileri,.sor.sz-yeni{animation:none}}
+/* 05.10.2026: dokunma hedefi en az 44 px (§19-11) */
+.ta-dug button,.row button,button.primary,button.ghost{min-height:44px}
+
 /* TA-SON */
 
 /* ==== Keşfet ve Çöz · Etkinlik Standardı ==== */
@@ -847,6 +860,17 @@ const notr=S=>{const so=S.soru,sa=S.sayi;
       fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
   return S;};
+/* §4.k-5 (05.10.2026): "Sıradaki soru" düğmesi. 8. sınıf tek adım düzeninde (adimli) "Kuralı bulun" soruları ayrı ekranlardadır;
+   bir soru doğru cevaplanınca alttaki düğme, sıradaki ekran yine bir kural sorusuysa "Sıradaki soru (i / n) →" olur.
+   Ortak dosyaya (kesif_tekadim.js) dokunmadan adimli sarmalanır; kur.py dosyanın sonunda asamali=adimli atar. */
+adimli=(A0=>function(p){const S=A0(p),il=p.querySelector(".ta-ileri");if(!il)return S;let n=1;const k0=S.kural;S.kural=x=>{n=x||1;return k0(x);};
+  const kuralMi=e=>!!e&&(e.querySelector(".ta-evre")||{}).textContent==="Kuralı bulun";
+  const duz=()=>{const E=[...p.querySelectorAll(".ta-ekran")],c=E.find(e=>!e.hidden);if(!c)return;const i=E.indexOf(c);
+    if(kuralMi(c)&&kuralMi(E[i+1])&&!il.disabled){const j=E.slice(0,i+2).filter(kuralMi).length,t=`Sıradaki soru (${j} / ${Math.max(n,j)}) →`;if(il.textContent!==t)il.textContent=t;}};
+  new MutationObserver(duz).observe(il,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:["disabled","class"]});
+  return S;})(adimli);
+/* 05.10.2026: sayı düğmeleri (çift / vapur seçimi) telefonda da en az 44 px (§19-11, §4.x-11) */
+(()=>{const st=document.createElement("style");st.textContent=".a8-sd .seg button{min-height:44px}";document.head.appendChild(st);})();
 /* Yardımcılar (yalnız bu dosya) */
 const ekok=(a,b)=>a/gcd(a,b)*b;
 const UST=e=>String(e).split("").map(c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[+c]).join("");
@@ -908,51 +932,43 @@ const e_kurbaga=p=>{const S=notr(asamali(p));const CIFT=[[6,10],[8,14],[9,12]];
       v=>v===1?"İlk ortak nokta 60; 150'ye kadar bir tane daha var.":v===60?"60 ilk ortak noktadır; soru kaç nokta olduğunu soruyor.":null);}
 };
 
-/* 2 · KAT BOYAMA TABLOSU (listeleme) */
-const e_boyama=p=>{const S=notr(asamali(p));const A=6,B=14,N=100;
-  const KA=[],KB=[];for(let x=1;x<=N;x++){if(x%A===0)KA.push(x);if(x%B===0)KB.push(x);}const KO=KA.filter(x=>x%B===0);
-  const k=S.ac(1,{ne:"Listeleme yöntemiyle 6'nın ve 14'ün 100'e kadar olan katlarını boyayıp ortak katlarını bulacaksınız.",
-    nasil:["Üstten bir fırça seçiniz, sonra tablodaki sayılara dokununuz.","Kırmızı fırça 6'nın katlarını, mavi fırça 14'ün katlarını boyar. Kat olmayan bir sayıya dokunursanız nedenini gösteren açıklama çıkar.","İki renge de boyanan sayıları “★ Yıldız” fırçasıyla işaretleyiniz."],
+/* 2 · KAT BOYAMA TABLOSU (05.10.2026, §4.k: B → A) — öğrenci iki adım uzunluğunu sürgülerle seçer; “Boya” deyince tablo iki renkte
+   zıplayarak kendiliğinden boyanır, iki renge de boyanan kareler yıldız alır. Farklı çiftler denenerek ortak katların düzeni görülür. */
+const e_boyama=p=>{const S=notr(asamali(p));const N=100;
+  const k=S.ac(1,{ne:"İki sayının 100'e kadar olan katlarını tabloda iki renkte zıplatarak boyayacak ve ortak katların düzenini keşfedeceksiniz.",
+    nasil:["“Kırmızı adım” ve “Mavi adım” sürgüleriyle iki sayı seçiniz.","“Boyayın ▶” düğmesine basınız. Kırmızı kurbağa kırmızı adımla, mavi kurbağa mavi adımla zıplar ve konduğu kareleri boyar. İki renge de boyanan karelere yıldız konur.","Farklı sayı çiftleri deneyiniz; ortak katlar (yıldızlar) nasıl diziliyor?"],
     biter:bitG(3)});
   S.tahmin(k,"100'e kadar olan sayılarda 6 ile 14'ün kaç ortak katı vardır?",[[1,"1"],[2,"2"],[3,"3"],[7,"7"]],2,"100'e kadar 2 ortak kat var: 42 ve 84.");
-  k.insertAdjacentHTML("beforeend",`<div class="row fr"></div><div class="izgara10 tb" style="margin-top:8px"></div><p class="durum"></p><div class="fb" hidden></div>`);
-  const fr=k.querySelector(".fr"),tb=k.querySelector(".tb"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
-  let fir="a";const ka=new Set(),kb=new Set(),yi=new Set();
-  const D=defter(k,["Liste","Sayılar"]);
-  const G=gorevler(k,[{m:"Kırmızı fırçayla 6'nın <b>bütün</b> katlarını boyayınız.",ok:()=>ka.size===KA.length,s:()=>`${KA.length} sayı boyandı.`},
-    {m:"Mavi fırçayla 14'ün <b>bütün</b> katlarını boyayınız.",ok:()=>kb.size===KB.length,s:()=>`${KB.length} sayı boyandı.`},
-    {m:"İki renge de boyanan <b>bütün</b> sayıları yıldızla işaretleyiniz.",ok:()=>yi.size===KO.length,s:()=>"Ortak katlar: 42 ve 84"}],acikla);
-  sayiDugme(fr,"Fırça:",[["a","Kırmızı: 6'nın katları"],["b","Mavi: 14'ün katları"],["y","★ Yıldız"]],"a",v=>{fir=v;});
-  function ciz(){tb.innerHTML=Array.from({length:N},(_,i)=>i+1).map(x=>{const a=ka.has(x),b=kb.has(x),y=yi.has(x);
-      const bg=a&&b?"linear-gradient(135deg,#ffc9c9 50%,#a5d8ff 50%)":a?"#ffc9c9":b?"#a5d8ff":"";
-      return `<button class="hz" data-x="${x}" style="${bg?`background:${bg};color:#111;`:""}${y?"border:2px solid #f08c00;":""}">${y?"★":""}${x}</button>`;}).join("");
-    tb.querySelectorAll("button").forEach(b=>b.onclick=()=>boya(+b.dataset.x));
-    du.innerHTML=dz(`Kırmızı: <b>${ka.size}</b> / ${KA.length}`,`Mavi: <b>${kb.size}</b> / ${KB.length}`,`Yıldız: <b>${yi.size}</b>`);}
-  function boya(x){
-    if(fir==="a"||fir==="b"){const n=fir==="a"?A:B,s=fir==="a"?ka:kb;
-      if(s.has(x)){fb(f,false,`${x} zaten boyalı.`);return;}
-      if(x%n===0){s.add(x);fb(f,true,`${x} = ${n} · ${x/n}. ${x}, ${ek(n,"in")} katıdır.`);bip(620,.06);}
-      else{fb(f,false,`${x} = ${n} · ${Math.floor(x/n)} + ${x%n}. ${x}, ${ek(n,"in")} katı değil.`);bip(220,.12,"triangle");}}
-    else{if(yi.has(x))return;
-      if(ka.has(x)&&kb.has(x)){yi.add(x);fb(f,true,`${x} hem 6'nın hem 14'ün katıdır: <b>ortak kat</b>.`);bip(880,.15);}
-      else if(x%A===0&&x%B===0){fb(f,false,`Önce ${x} sayısını iki renge de boyayınız.`);bip(300,.12,"triangle");}
-      else{fb(f,false,`${x}, iki renge birden boyanmıyor; ortak kat değil.`);bip(220,.12,"triangle");}}
-    if(ka.size===KA.length)D.ekle(["6'nın katları",KA.join(", ")],"a");
-    if(kb.size===KB.length)D.ekle(["14'ün katları",KB.join(", ")],"b");
-    if(yi.size===KO.length)D.ekle(["Ortak katlar",`${KO.join(", ")} (en küçüğü ${KO[0]})`],"o");
-    ciz();G.kontrol();}
-  ciz();
+  k.insertAdjacentHTML("beforeend",`<div class="row ay"></div><div class="row"><button class="primary boya">Boyayın ▶</button></div><div class="izgara10 tb" style="margin-top:8px"></div><p class="durum"></p><div class="fb" hidden></div>`);
+  const ay=k.querySelector(".ay"),tb=k.querySelector(".tb"),du=k.querySelector(".durum"),f=k.querySelector(".fb"),bb=k.querySelector(".boya");
+  let A=6,B=14,ka=new Set(),kb=new Set(),calis=false,ciftSay=new Set(),bosVar=false;
+  const D=defter(k,["Kırmızı adım","Mavi adım","100'e kadar ortak katlar","En küçüğü"]);
+  const G=gorevler(k,[{m:"<b>6 ve 14</b> ile tabloyu boyayınız.",ok:()=>D.satirlar.some(r=>r.key==="6-14"),s:()=>"Ortak katlar: 42 ve 84"},
+    {m:"En az <b>iki farklı</b> sayı çiftini daha deneyiniz.",ok:()=>ciftSay.size>=3},
+    {m:"100'e kadar <b>hiç</b> ortak katı olmayan bir sayı çifti bulunuz.",ok:()=>bosVar,s:()=>"EKOK 100'den büyükse tabloda yıldız çıkmaz."}],acikla);
+  const KA=surgu("Kırmızı adım",2,20,A,v=>{A=v;temiz();}),KB=surgu("Mavi adım",2,20,B,v=>{B=v;temiz();});ay.append(KA.el,KB.el);
+  function ciz(yeni){tb.innerHTML=Array.from({length:N},(_,i)=>i+1).map(x=>{const a=ka.has(x),b=kb.has(x);
+      const bg=a&&b?"#ffe066":a?"#ffc9c9":b?"#a5d8ff":"";
+      return `<span class="hz" style="${bg?`background:${bg};color:#111;`:""}${a&&b?"border:2px solid #f08c00;":""}${x===yeni?"transform:scale(1.15);box-shadow:0 0 0 2px #e8590c;":""}text-align:center">${a&&b?"★":""}${x}</span>`;}).join("");}
+  function temiz(){ka=new Set();kb=new Set();ciz();du.innerHTML=dz(`Kırmızı adım: <b>${A}</b>`,`Mavi adım: <b>${B}</b>`,"“Boyayın” düğmesine basınız.");}
+  bb.onclick=async()=>{if(calis)return;calis=true;bb.disabled=true;ka=new Set();kb=new Set();const bk=ms=>new Promise(r=>setTimeout(r,azHareket()?0:ms));
+    for(let x=A;x<=N;x+=A){ka.add(x);ciz(x);await bk(110);}for(let x=B;x<=N;x+=B){kb.add(x);ciz(x);await bk(110);}ciz();
+    const O=[...ka].filter(x=>kb.has(x));const key=Math.min(A,B)+"-"+Math.max(A,B);
+    if(A!==B){ciftSay.add(key);if(!O.length)bosVar=true;D.ekle([A,B,O.length?O.join(", "):"yok",O.length?`<b>${O[0]}</b>`:"100'den büyük"],key);}
+    du.innerHTML=dz(`Kırmızı (${A}): ${ka.size} kare`,`Mavi (${B}): ${kb.size} kare`,`Ortak katlar: <b>${O.length?O.join(", "):"yok"}</b>`);
+    fb(f,O.length>0,O.length?`İki renge de boyanan sayılar ${A} ile ${ek(B,"in")} ortak katlarıdır. En küçüğü ${O[0]}${O.length>1?`; diğerleri ${O.slice(1).join(", ")}`:""}.`:`100'e kadar ${A} ile ${ek(B,"in")} ortak katı yok; ilk ortak kat 100'den büyük.`);
+    bip(O.length?760:400,.1);calis=false;bb.disabled=false;G.kontrol();};
+  temiz();
   function acikla(){const c=S.kural(2);
-    S.soru(c,"Ortak katlar 42 ve 84 oldu. Bu iki sayı arasında nasıl bir ilişki var?",
-      ["84, 42'nin 2 katıdır; ortak katlar en küçük ortak katın katlarıdır",["84, 42'nin yarısıdır","84, 42'den büyüktür; 42'nin 2 katıdır."],["Aralarında bir ilişki yoktur","42 · 2 = 84. Ortak katlar belli bir sayının katları olarak sıralanıyor."]],
+    S.soru(c,"6 ile 14'te ortak katlar 42 ve 84 oldu. Bu iki sayı arasında nasıl bir ilişki var?",
+      ["84, 42'nin 2 katıdır; ortak katlar en küçük ortak katın katlarıdır",["84, 42'nin yarısıdır",""],["Aralarında bir ilişki yoktur",""]],
       "EKOK(6, 14) = 42 ve ortak katlar 42, 84, 126 … biçiminde devam eder. Dikkat: 6 · 14 = 84 olsa da EKOK 42'dir.",()=>
     S.soru(c,"Tablo 1000'e kadar uzasaydı ortak katlar ne olurdu?",
-      ["Artmaya devam ederdi; ortak katlar sonsuzdur, bu yüzden sorularda bir sınır verilir",["84'te biterdi","84'ten sonra 126, 168 … da hem 6'nın hem 14'ün katıdır."],["Hiç değişmezdi","Tablo büyüyünce yeni ortak katlar eklenir: 126, 168 …"]],
+      ["Artmaya devam ederdi; ortak katlar sonsuzdur, bu yüzden sorularda bir sınır verilir",["84'te biterdi",""],["Hiç değişmezdi",""]],
       "Katlar sonsuza kadar sürer; ortak katlar da sonsuzdur. Sorularda “100'den küçük” gibi bir <b>sınır</b> verilir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("İki sayının EKOK'u 15'tir. Bu iki sayının 100'den küçük kaç ortak katı vardır?"),6,"Ortak katlar 15'in katlarıdır: 15, 30, 45, 60, 75, 90.","Ortak katlar EKOK'un katlarıdır. 15'in 100'den küçük katlarını sayınız.",
-      ()=>S.bitir("<b>Listeleme yönteminde</b> iki sayının katları yazılır, ikisinde de bulunanlar işaretlenir. Bunlar <b>ortak katlardır</b>; en küçüğü <b>EKOK</b>'tur. Ortak katlar EKOK'un katlarıdır ve sonsuzdur; bu yüzden sorularda bir sınır verilir."),
-      v=>v===7?"105, 100'den büyüktür.":v===1?"15 ilk ortak kattır; sonraki katları da sayınız.":null);}
+    S.sayi(m,soruKut("İki sayının EKOK'u 15'tir. Bu iki sayının 100'den küçük kaç ortak katı vardır?"),6,"Ortak katlar 15'in katlarıdır: 15, 30, 45, 60, 75, 90.","",
+      ()=>S.bitir("<b>Listeleme yönteminde</b> iki sayının katları yazılır, ikisinde de bulunanlar işaretlenir. Bunlar <b>ortak katlardır</b>; en küçüğü <b>EKOK</b>'tur. Ortak katlar EKOK'un katlarıdır ve sonsuzdur; bu yüzden sorularda bir sınır verilir."));}
 };
 
 /* 3 · ALGORİTMA MAKİNESİ (kalanlar sağa taşınır) */
@@ -1206,46 +1222,42 @@ const e_fener=p=>{const S=notr(asamali(p));const A=4,B=14,T=180,E=ekok(A,B);
       v=>v===2?"2 dakikayı saniyeye çevirmeyi unutmayınız: 120 saniye.":v===5?"Başlangıçtaki birlikte yanış sayılmaz.":null);}
 };
 
-/* 8 · KALKIŞ ÇİZELGESİ (saat aralığı) */
-const e_cizelge=p=>{const S=notr(asamali(p));const CIFT=[[15,25],[25,30]],SON=300;
-  const k=S.ac(1,{ne:"Farklı aralıklarla kalkan iki vapurun 08.00 ile 13.00 arasında birlikte kalktığı saatleri bulacaksınız.",
-    nasil:["Üstten vapur çiftini seçiniz. İki vapur 08.00'de birlikte kalktı.","Çizelgede her satır bir saati, her sütun o saatin dakikasını (5'er dakika) gösterir. Kırmızı nokta A vapurunun, mavi nokta B vapurunun kalkışıdır.","İki vapurun birlikte kalktığı kutulara dokununuz; doğru kutular sarı yıldız olur."],
+/* 8 · KALKIŞ ÇİZELGESİ (05.10.2026, §4.k: B → A) — öğrenci iki vapurun kalkış aralığını sürgülerle değiştirir; 08.00–13.00 çizelgesi
+   anında dolar, birlikte kalkışlar yıldızla görünür. Ortak kalkışların kaç dakikada bir geldiği farklı aralıklar denenerek bulunur. */
+const e_cizelge=p=>{const S=notr(asamali(p));const SON=300;
+  const k=S.ac(1,{ne:"İki vapurun kalkış aralıklarını değiştirerek 08.00 ile 13.00 arasında birlikte kalktıkları saatleri ve bunların kaç dakikada bir geldiğini keşfedeceksiniz.",
+    nasil:["İki vapur 08.00'de birlikte kalkar. “A vapuru” ve “B vapuru” sürgüleriyle kalkış aralıklarını (dakika) seçiniz.","Çizelge anında dolar: her satır bir saat, her sütun o saatin dakikasıdır (5'er dakika). Kırmızı nokta A'nın, mavi nokta B'nin kalkışıdır; yıldız birlikte kalkıştır.","Farklı aralıklar deneyiniz; yıldızlar kaç dakikada bir geliyor?"],
     biter:bitG(3)});
   S.tahmin(k,"15 dakikada bir ve 25 dakikada bir kalkan vapurlar 08.00'den sonra ilk kez saat kaçta birlikte kalkar?",[["0840","08.40"],["0915","09.15"],["1015","10.15"],["1115","11.15"]],"0915","İlk ortak kalkış 09.15'tedir: 08.00'den 75 dakika sonra (75 = 15 · 5 = 25 · 3).");
-  k.insertAdjacentHTML("beforeend",`<div class="row sy"></div><div class="tsar" style="margin-top:8px"><div class="harita cz"></div></div><p class="durum"></p><div class="fb" hidden></div>`);
-  const sy=k.querySelector(".sy"),cz=k.querySelector(".cz"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
-  let c=0,A=15,B=25;const bul={0:new Set(),1:new Set()};
-  const D=defter(k,["Vapurlar","Birlikte kalkış","08.00'den sonra"]);
-  const hepsi=i=>{const E=ekok(...CIFT[i]);let ok=true;for(let d=E;d<=SON;d+=E)if(!bul[i].has(d))ok=false;return ok;};
-  const G=gorevler(k,[{m:"15 ve 25 dakikalık vapurların 08.00'den sonraki <b>ilk</b> ortak kalkışına dokununuz.",ok:()=>bul[0].has(75),s:()=>"09.15 (75 dakika sonra)"},
-    {m:"Bu vapurların 13.00'e kadar <b>bütün</b> ortak kalkışlarını bulunuz.",ok:()=>hepsi(0),s:()=>"09.15, 10.30, 11.45, 13.00"},
-    {m:"25 ve 30 dakikalık vapurları seçiniz ve bütün ortak kalkışlarını bulunuz.",ok:()=>hepsi(1),s:()=>"10.30 ve 13.00"}],acikla);
-  sayiDugme(sy,"Vapurlar:",CIFT.map((x,i)=>[i,`${x[0]} ve ${x[1]} dakikada bir`]),0,v=>{c=+v;[A,B]=CIFT[c];f.hidden=true;ciz();});
-  function ciz(){let h=`<span class="hk bas" style="font-size:10px">saat</span>`+Array.from({length:12},(_,j)=>`<span class="hk bas">${String(j*5).padStart(2,"0")}</span>`).join("");
+  k.insertAdjacentHTML("beforeend",`<div class="row ay"></div><div class="tsar" style="margin-top:8px"><div class="harita cz"></div></div><p class="durum"></p><div class="fb" hidden></div>`);
+  const ay=k.querySelector(".ay"),cz=k.querySelector(".cz"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
+  let A=15,B=25,saatlik=false;
+  const D=defter(k,["A (dk)","B (dk)","Birlikte kalkışlar (08.00'den sonra)","Kaç dakikada bir?"]);
+  const G=gorevler(k,[{m:"<b>15 ve 25 dakikalık</b> vapurların çizelgesini inceleyiniz.",ok:()=>D.satirlar.some(r=>r.key==="15-25"),s:()=>"09.15, 10.30, 11.45, 13.00"},
+    {m:"<b>25 ve 30 dakikalık</b> vapurları deneyiniz.",ok:()=>D.satirlar.some(r=>r.key==="25-30"),s:()=>"10.30 ve 13.00"},
+    {m:"Birlikte kalkışları <b>tam saat başlarında</b> (60 dakikada bir) olan iki farklı aralık bulunuz.",ok:()=>saatlik,s:()=>"Örneğin 15 ve 20 dakika: EKOK(15, 20) = 60"}],acikla);
+  const KA=surgu("A vapuru: kaç dakikada bir",5,60,A,v=>{A=v;ciz();},{adim:5,birim:"dk"}),KB=surgu("B vapuru: kaç dakikada bir",5,60,B,v=>{B=v;ciz();},{adim:5,birim:"dk"});ay.append(KA.el,KB.el);
+  function ciz(){let h=`<span class="hk bas" style="font-size:10px">saat</span>`+Array.from({length:12},(_,j)=>`<span class="hk bas">${String(j*5).padStart(2,"0")}</span>`).join("");const O=[];
     for(let s=8;s<=13;s++){h+=`<span class="hk bas">${String(s).padStart(2,"0")}</span>`;
       for(let j=0;j<12;j++){const d=(s-8)*60+j*5;if(d>SON){h+=`<span class="hk bas"></span>`;continue;}
-        const a=d%A===0,b=d%B===0,y=bul[c].has(d)||d===0;
-        h+=`<button class="hk" data-d="${d}" style="background:${y?"#ffe066":a||b?"#fff":"#f1f3f5"};display:grid;place-items:center;font-size:10px;line-height:1" aria-label="${saat(d)}">${y?"★":`${a?'<span style="color:#e03131">●</span>':""}${b?'<span style="color:#1c7ed6">●</span>':""}`}</button>`;}}
-    cz.innerHTML=h;
-    cz.querySelectorAll("button").forEach(bt=>bt.onclick=()=>{const d=+bt.dataset.d;
-      if(d===0){fb(f,true,"08.00: iki vapur birlikte kalktı; sayım buradan başlıyor.");return;}
-      if(d%A===0&&d%B===0){if(!bul[c].has(d)){bul[c].add(d);D.ekle([`${A} ve ${B} dk`,saat(d),`${d} dakika`],c+"-"+d);bip(880,.18);}
-        fb(f,true,`Saat ${saat(d)}: 08.00'den ${d} dakika sonra. ${d} = ${A} · ${d/A} = ${B} · ${d/B}`);}
-      else{fb(f,false,d%A===0?`${saat(d)}'de yalnız A vapuru kalkıyor (yalnız kırmızı nokta).`:d%B===0?`${saat(d)}'de yalnız B vapuru kalkıyor (yalnız mavi nokta).`:`${saat(d)}'de hiçbir vapur kalkmıyor.`);bip(220,.12,"triangle");}
-      ciz();G.kontrol();});
-    du.innerHTML=dz(`Bulunan ortak kalkış: <b>${bul[c].size}</b>`);}
+        const a=d%A===0,b=d%B===0,y=a&&b;if(y&&d>0)O.push(d);
+        h+=`<span class="hk" style="background:${y?"#ffe066":a||b?"#fff":"#f1f3f5"};display:grid;place-items:center;font-size:10px;line-height:1">${y?"★":`${a?'<span style="color:#e03131">●</span>':""}${b?'<span style="color:#1c7ed6">●</span>':""}`}</span>`;}}
+    cz.innerHTML=h;const ara=O.length?O[0]:null;
+    du.innerHTML=dz(`A: ${A} dakikada bir`,`B: ${B} dakikada bir`,O.length?`Birlikte kalkış: <b>${O.map(saat).join(", ")}</b>`:"08.00'den sonra 13.00'e kadar birlikte kalkış yok");
+    if(A!==B){const key=Math.min(A,B)+"-"+Math.max(A,B);D.ekle([A,B,O.length?O.map(saat).join(", "):"yok",ara?`<b>${ara}</b> dakikada bir`:"300'den fazla"],key);
+      if(ara===60&&A!==60&&B!==60)saatlik=true;}
+    G.kontrol();}
   ciz();
   function acikla(){const c=S.kural(2);
     S.soru(c,"15 ve 25 dakikalık vapurlar kaç dakikada bir birlikte kalkıyor?",
-      ["75 dakikada bir: EKOK(15, 25) = 75",["40 dakikada bir (15 + 25)","08.40'ta çizelgede ortak kalkış yok; 40, 15'in katı değildir."],["375 dakikada bir (15 · 25)","375 dakika 6 saatten fazladır; çizelgede 09.15'te ortak kalkış vardı."]],
+      ["75 dakikada bir: EKOK(15, 25) = 75",["40 dakikada bir (15 + 25)",""],["375 dakikada bir (15 · 25)",""]],
       "Ortak kalkışlar 75., 150., 225. ve 300. dakikalardadır.",()=>
     S.soru(c,"08.00 ile 13.00 arası 300 dakikadır. 08.00'den sonraki ortak kalkış sayısı nasıl bulunur?",
-      ["300 : 75 = 4",["300 : 15 = 20","Bu, yalnız A vapurunun kalkış sayısıdır."],["300 : 25 = 12","Bu, yalnız B vapurunun kalkış sayısıdır."]],
+      ["300 : 75 = 4",["300 : 15 = 20",""],["300 : 25 = 12",""]],
       "Süre EKOK'a bölünür: 4 ortak kalkış.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Bir duraktan A otobüsü 12 dakikada bir, B otobüsü 30 dakikada bir kalkmaktadır. İki otobüs saat 07.00'de birlikte kalkmıştır."])+soruKut("07.00'den sonra 12.00'ye kadar (12.00 dâhil) iki otobüs kaç kez birlikte kalkar?"),5,"EKOK(12, 30) = 60 dakika. 07.00 ile 12.00 arası 300 dakika; 300 : 60 = 5.","EKOK(12, 30)'u bulunuz. 5 saati dakikaya çeviriniz ve EKOK'a bölünüz.",
-      ()=>S.bitir("İki araç birlikte kalktıktan sonra <b>EKOK</b> kadar dakikada bir yeniden birlikte kalkar. Belli bir saate kadar kaç kez birlikte kalktıklarını bulmak için aradaki süre dakikaya çevrilir ve EKOK'a bölünür."),
-      v=>v===6?"07.00'deki kalkış sayılmaz; 07.00'den sonrakileri sayınız.":null);}
+    S.sayi(m,yaz(["Bir duraktan A otobüsü 12 dakikada bir, B otobüsü 30 dakikada bir kalkmaktadır. İki otobüs saat 07.00'de birlikte kalkmıştır."])+soruKut("07.00'den sonra 12.00'ye kadar (12.00 dâhil) iki otobüs kaç kez birlikte kalkar?"),5,"EKOK(12, 30) = 60 dakika. 07.00 ile 12.00 arası 300 dakika; 300 : 60 = 5.","",
+      ()=>S.bitir("İki araç birlikte kalktıktan sonra <b>EKOK</b> kadar dakikada bir yeniden birlikte kalkar. Belli bir saate kadar kaç kez birlikte kalktıklarını bulmak için aradaki süre dakikaya çevrilir ve EKOK'a bölünür."));}
 };
 
 /* 9 · BONCUK KOLYE (iki parçadan oluşan birim) */
@@ -1572,46 +1584,40 @@ const e_market=p=>{const S=notr(asamali(p));const A=6,B=15,FA=12,FB=20,BUT=250;
       v=>v===20?"20 ürün sayısıdır; soru paket sayısını istiyor.":v===14?"10 · 4 = 40 ürünle hesapladınız; EKOK 20'dir.":null);}
 };
 
-/* 17 · NÖBET TAKVİMİ */
-const e_takvim=p=>{const S=notr(asamali(p));const A=3,B=5,G0=(new Date(2026,9,1).getDay()+6)%7;
-  const DA=[],DB=[];for(let d=1;d<=31;d++){if((d-1)%A===0)DA.push(d);if((d-1)%B===0)DB.push(d);}const DO=DA.filter(d=>DB.includes(d));
-  const k=S.ac(1,{ne:"3 günde bir ve 5 günde bir nöbet tutan iki öğrencinin Ekim ayında birlikte nöbet tuttuğu günleri takvimde bulacaksınız.",
-    nasil:["Deniz 3 günde bir, Arda 5 günde bir nöbet tutar; 1 Ekim'de birlikte nöbet tuttular (1 Ekim işaretli).","Üstten bir kalem seçiniz ve takvimdeki günlere dokunarak nöbetleri işaretleyiniz: Deniz kırmızı, Arda mavi nokta.","İkisinin birlikte nöbet tuttuğu günleri “★ Birlikte” kalemiyle işaretleyiniz."],
+/* 17 · NÖBET TAKVİMİ (05.10.2026, §4.k: B → A) — öğrenci iki kişinin nöbet aralığını sürgülerle değiştirir; Ekim takvimi anında boyanır,
+   birlikte nöbet günleri yıldızla görünür. Ortak günlerin kaç günde bir geldiği farklı aralıklar denenerek bulunur. */
+const e_takvim=p=>{const S=notr(asamali(p));const G0=(new Date(2026,9,1).getDay()+6)%7;
+  const k=S.ac(1,{ne:"İki öğrencinin nöbet aralıklarını değiştirerek Ekim ayında birlikte nöbet tuttukları günleri ve bunların kaç günde bir geldiğini keşfedeceksiniz.",
+    nasil:["Deniz ile Arda 1 Ekim'de birlikte nöbet tuttu. “Deniz” ve “Arda” sürgüleriyle kaç günde bir nöbet tuttuklarını seçiniz.","Takvim anında boyanır: kırmızı nokta Deniz'in, mavi nokta Arda'nın nöbet günüdür; yıldız birlikte nöbettir.","Farklı aralıklar deneyiniz; yıldızlı günler kaç günde bir geliyor?"],
     biter:bitG(3)});
-  S.tahmin(k,"1 Ekim'den sonra Deniz ile Arda ilk kez hangi tarihte birlikte nöbet tutar?",[[9,"9 Ekim"],[15,"15 Ekim"],[16,"16 Ekim"],[31,"31 Ekim"]],16,"16 Ekim'de: 1 Ekim'den 15 gün sonra (15 = 3 · 5).");
-  k.insertAdjacentHTML("beforeend",`<div class="row kl"></div><div class="a8-et">Ekim 2026</div><div class="takv tk"></div><p class="durum"></p><div class="fb" hidden></div>`);
-  const kl=k.querySelector(".kl"),tk=k.querySelector(".tk"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
-  let kal="d";const ma=new Set([1]),mb=new Set([1]),yi=new Set([1]);
-  const D=defter(k,["Kişi","Nöbet günleri"]);
-  const G=gorevler(k,[{m:"Deniz'in Ekim ayındaki <b>bütün</b> nöbet günlerini işaretleyiniz.",ok:()=>ma.size===DA.length,s:()=>DA.join(", ")},
-    {m:"Arda'nın Ekim ayındaki <b>bütün</b> nöbet günlerini işaretleyiniz.",ok:()=>mb.size===DB.length,s:()=>DB.join(", ")},
-    {m:"İkisinin birlikte nöbet tuttuğu <b>bütün</b> günlere yıldız koyunuz.",ok:()=>yi.size===DO.length,s:()=>DO.join(", ")+" Ekim"}],acikla);
-  sayiDugme(kl,"Kalem:",[["d","Deniz (3 günde bir)"],["a","Arda (5 günde bir)"],["y","★ Birlikte"]],"d",v=>{kal=v;});
-  function ciz(){let h=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"].map(g=>`<span class="tg">${g}</span>`).join("")+Array.from({length:G0},()=>"<span></span>").join("");
-    for(let d=1;d<=31;d++)h+=`<button class="tgun ${yi.has(d)?"ort":""}" data-d="${d}"><b>${yi.has(d)?"★ ":""}${d}</b><span>${ma.has(d)?'<i class="nk kr"></i>':""}${mb.has(d)?'<i class="nk mv"></i>':""}</span></button>`;
-    tk.innerHTML=h;tk.querySelectorAll(".tgun").forEach(b=>b.onclick=()=>isaretle(+b.dataset.d));
-    du.innerHTML=dz(`Deniz: <b>${ma.size}</b> / ${DA.length} gün`,`Arda: <b>${mb.size}</b> / ${DB.length} gün`,`Birlikte: <b>${yi.size}</b> gün`);}
-  function isaretle(d){
-    if(kal==="d"||kal==="a"){const n=kal==="d"?A:B,s=kal==="d"?ma:mb,ad=kal==="d"?"Deniz'in":"Arda'nın";if(s.has(d))return;
-      if((d-1)%n===0){s.add(d);fb(f,true,`${d} Ekim: 1 Ekim'den ${d-1} gün sonra; ${d-1} = ${n} · ${(d-1)/n} ✓`);bip(620,.06);}
-      else{fb(f,false,`${d} Ekim, ${ad} nöbet günü değil: 1 Ekim'den ${d-1} gün sonra ve ${d-1}, ${ek(n,"in")} katı değil.`);bip(220,.12,"triangle");}}
-    else{if(yi.has(d))return;
-      if(ma.has(d)&&mb.has(d)){yi.add(d);fb(f,true,`${d} Ekim'de ikisi de nöbette: 1 Ekim'den ${d-1} gün sonra ve ${d-1} hem 3'ün hem 5'in katı.`);bip(880,.18);}
-      else if(DA.includes(d)&&DB.includes(d)){fb(f,false,"Önce bu güne iki nöbeti de işaretleyiniz.");}
-      else{fb(f,false,`${d} Ekim'de ikisi birlikte nöbette değil; günde hem kırmızı hem mavi nokta olmalı.`);bip(220,.12,"triangle");}}
-    if(ma.size===DA.length)D.ekle(["Deniz",DA.join(", ")],"d");if(mb.size===DB.length)D.ekle(["Arda",DB.join(", ")],"a");if(yi.size===DO.length)D.ekle(["Birlikte",DO.join(", ")],"y");
-    ciz();G.kontrol();}
+  S.tahmin(k,"3 günde bir ve 5 günde bir nöbet tutan Deniz ile Arda, 1 Ekim'den sonra ilk kez hangi tarihte birlikte nöbet tutar?",[[9,"9 Ekim"],[15,"15 Ekim"],[16,"16 Ekim"],[31,"31 Ekim"]],16,"16 Ekim'de: 1 Ekim'den 15 gün sonra (15 = 3 · 5).");
+  k.insertAdjacentHTML("beforeend",`<div class="row ay"></div><div class="a8-et">Ekim 2026</div><div class="takv tk"></div><p class="durum"></p><div class="fb" hidden></div>`);
+  const ay=k.querySelector(".ay"),tk=k.querySelector(".tk"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
+  let A=3,B=5,yok=false,katli=false;
+  const D=defter(k,["Deniz (gün)","Arda (gün)","Birlikte nöbet (Ekim)","Kaç günde bir?"]);
+  const G=gorevler(k,[{m:"Deniz <b>3</b>, Arda <b>5</b> günde bir nöbet tutsun; takvimi inceleyiniz.",ok:()=>D.satirlar.some(r=>r.key==="3-5"),s:()=>"1, 16, 31 Ekim: 15 günde bir"},
+    {m:"1 Ekim'den sonra Ekim ayında <b>hiç</b> birlikte nöbet olmayan iki aralık bulunuz.",ok:()=>yok,s:()=>"Ortak gün aralığı 30 günden fazla."},
+    {m:"Aralıklardan biri diğerinin <b>katı</b> olsun (ör. 2 ve 6); birlikte nöbetler kaç günde bir geliyor?",ok:()=>katli,s:()=>"Büyük aralık kadar günde bir"}],acikla);
+  const KA=surgu("Deniz: kaç günde bir",2,12,A,v=>{A=v;ciz();},{birim:"gün"}),KB=surgu("Arda: kaç günde bir",2,12,B,v=>{B=v;ciz();},{birim:"gün"});ay.append(KA.el,KB.el);
+  function ciz(){const O=[];let h=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"].map(g=>`<span class="tg">${g}</span>`).join("")+Array.from({length:G0},()=>"<span></span>").join("");
+    for(let d=1;d<=31;d++){const a=(d-1)%A===0,b=(d-1)%B===0,y=a&&b;if(y)O.push(d);
+      h+=`<span class="tgun ${y?"ort":""}"><b>${y?"★ ":""}${d}</b><span>${a?'<i class="nk kr"></i>':""}${b?'<i class="nk mv"></i>':""}</span></span>`;}
+    tk.innerHTML=h;const ara=A*B/gcd(A,B),sonraki=O.length>1?O[1]-1:null;
+    du.innerHTML=dz(`Deniz: ${A} günde bir`,`Arda: ${B} günde bir`,`Birlikte: <b>${O.map(d=>d+" Ekim").join(", ")}</b>`);
+    if(A!==B){const key=Math.min(A,B)+"-"+Math.max(A,B);D.ekle([A,B,O.join(", "),sonraki?`<b>${sonraki}</b> günde bir`:"Ekim'de tekrar yok"],key);
+      if(O.length===1)yok=true;if((A%B===0||B%A===0))katli=true;}
+    G.kontrol();}
   ciz();
   function acikla(){const c=S.kural(2);
-    S.soru(c,"1 Ekim'den sonra ikisi kaç günde bir birlikte nöbet tutuyor?",
-      ["15 günde bir: EKOK(3, 5) = 15",["8 günde bir (3 + 5)","9 Ekim'de (8 gün sonra) birlikte nöbet yok; 8, 3'ün katı değil."],["3 günde bir","Deniz 3 günde bir nöbet tutar ama Arda her seferinde onunla değildir."]],
+    S.soru(c,"Deniz 3, Arda 5 günde bir nöbet tutarken 1 Ekim'den sonra kaç günde bir birlikte nöbet tutuyorlar?",
+      ["15 günde bir: EKOK(3, 5) = 15",["8 günde bir (3 + 5)",""],["3 günde bir",""]],
       "Birlikte nöbetler 1, 16 ve 31 Ekim'de: 15'er gün arayla.",()=>
     S.soru(c,"Ekim ayı 31 gündür. 31 Ekim'den sonraki ilk birlikte nöbet hangi tarihtedir?",
-      ["15 Kasım",["16 Kasım","31 Ekim'den 15 gün sonrası: Ekim'den taşan gün yok; 31 + 15 = 46, 46 − 31 = 15 Kasım."],["1 Kasım","1 Kasım, 31 Ekim'den yalnız 1 gün sonradır."]],
+      ["15 Kasım",["16 Kasım",""],["1 Kasım",""]],
       "31 Ekim'den 15 gün sonrası: Ekim'in son günü 31 olduğu için 15 Kasım.",meydan));}
   function meydan(){const m=S.son({nasil:["Soruyu dikkatle okuyunuz.","Doğru olduğunu düşündüğünüz seçeneğe dokununuz. Yanlışsa “Yeniden deneyiniz.” yazısı çıkar."],biter:"Doğru seçeneği bulunca etkinlik biter ve “Ne öğrendim?” kartı açılır."});
     S.soru(m,yaz(["Can 6 günde bir, Efe 10 günde bir nöbet tutmaktadır. İkisi 3 Mart'ta birlikte nöbet tutmuştur. Mart ayı 31 gündür."])+soruKut("İkisinin bir sonraki ortak nöbeti hangi tarihtedir?"),
-      ["2 Nisan",["3 Nisan","Mart 31 gündür; 3 Mart'tan 30 gün sonrası 2 Nisan'dır. 3 Nisan'ı bulduysanız ayı 30 gün saydınız."],["1 Nisan","1 Nisan, 3 Mart'tan 29 gün sonradır; EKOK(6, 10) = 30."],["18 Mart","18 Mart, 15 gün sonradır; 15, 6'nın katı değil."]],
+      ["2 Nisan",["3 Nisan",""],["1 Nisan",""],["18 Mart",""]],
       "EKOK(6, 10) = 30 gün. 3 Mart'tan 30 gün sonrası: Mart'ın kalan 28 günü + 2 gün = 2 Nisan.",
       ()=>S.bitir("Belirli aralıklarla tekrar eden iki görev <b>EKOK</b> kadar günde bir aynı güne denk gelir. Tarih bulunurken ayın kaç gün çektiğine dikkat edilir."));}
 };
@@ -1702,58 +1708,68 @@ const e_labirent=p=>{const S=notr(asamali(p));const N=5;
       v=>v===1183?"13 · 91'i hesapladınız; 91 zaten 13'ün katıdır.":v===13?"EKOK büyük sayıdan küçük olamaz.":null);}
 };
 
-/* 20 · EKOK DÜELLOSU */
+/* 20 · EKOK DÜELLOSU (05.10.2026, §4.k: C → A) — kurbağa yarışı: iki kurbağanın zıplama sayısını − / + ile ayarlayıp onları ilk ortak
+   noktada buluşturmak; konumlar sayı doğrusunda anında görünür. Süre dolmadan ilk buluşma noktasında “Buluştu!” denirse tur kazanılır. */
 const e_duello=p=>{const S=notr(asamali(p));
-  const k=S.ac(1,{ne:"Bilgisayara karşı hızlı bir EKOK düellosu yapacak ve EKOK'u hızlı bulmanın kısa yollarını keşfedeceksiniz.",
-    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Düelloyu başlatın” düğmesine basınız. Bir düello 5 turdur.</li><li>Her turda iki sayı ve dört seçenek çıkar. Süre çubuğu dolmadan doğru EKOK'a dokunursanız turu siz kazanırsınız. Örnek: EKOK(4, 10) sorulursa 20'ye dokunmalısınız.</li><li>Yanlış seçenek ya da sürenin dolması turu bilgisayara verir. Süre her turda biraz kısalır.</li><li>En az 3 tur kazanırsanız düelloyu kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır; yanlışta doğru cevap gösterilir."],
+  const k=S.ac(1,{ne:"Bilgisayara karşı bir kurbağa yarışı yapacak ve iki kurbağayı ilk ortak noktada hızla buluşturmanın yollarını keşfedeceksiniz.",
+    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Yarışı başlatın” düğmesine basınız. Bir yarış 5 turdur.</li><li>Her turda iki kurbağa 0'dan başlar; kırmızı kurbağa kendi adımıyla, mavi kurbağa kendi adımıyla zıplar. Her kurbağanın zıplama sayısını − ve + düğmeleriyle ayarlayınız; kurbağalar sayı doğrusunda anında yer değiştirir.</li><li>İki kurbağayı 0'dan sonraki <b>ilk</b> ortak noktada buluşturunca süre dolmadan “Buluştu!” düğmesine basınız. Örnek: 4 ve 6 adımlı kurbağalar ilk kez 12'de buluşur.</li><li>Kurbağalar aynı noktada değilse, buluştukları nokta ilk ortak nokta değilse ya da süre dolarsa turu bilgisayar alır.</li><li>En az 3 tur kazanırsanız yarışı kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır."],
     biter:bitG(3)});
-  S.tahmin(k,"Isınma sorusu: EKOK(8, 24) kaçtır?",[[8,"8"],[24,"24"],[48,"48"],[192,"192"]],24,"EKOK(8, 24) = 24: 24, 8'in katıdır.");
-  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skor"></div><div class="dsoru"></div><div class="yaris"><i></i></div><div class="secler dsec"></div></div><div class="row"><button class="primary basl">Düelloyu başlatın</button></div><div class="fb" hidden></div>`);
-  const sk=k.querySelector(".skor"),ds=k.querySelector(".dsoru"),bar=k.querySelector(".yaris i"),sc=k.querySelector(".dsec"),bb=k.querySelector(".basl"),f=k.querySelector(".fb");
-  let tur=0,sen=0,bil=0,zam=null,acik=false,turK=0,bitenD=0,yendi=false;
-  const D=defter(k,["Sayılar","EKOK","Turu alan"]);
-  const G=gorevler(k,[{m:"Bir tur <b>kazan</b>.",ok:()=>turK>=1},{m:"Bir düelloyu sonuna kadar oynayınız (5 tur).",ok:()=>bitenD>=1},{m:"Bilgisayarı <b>yen</b>: bir düelloda en az 3 tur kazan.",ok:()=>yendi}],acikla);
-  function uret(){let g,m,n,a,b;do{g=rastgele([1,2,3,4,5,6,7,8]);m=1+Math.floor(Math.random()*9);n=2+Math.floor(Math.random()*8);a=g*m;b=g*n;}while(m===n||gcd(m,n)!==1||a<2||g*m*n>200||KONU_CIFT.has(ciftAnahtar(a,b)));
-    if(Math.random()<.5)[a,b]=[b,a];const l=ekok(a,b);
-    const y=new Set();[a*b,Math.max(a,b),2*l,gcd(a,b)*l===a*b&&gcd(a,b)>1?l/gcd(a,b):null,l+Math.min(a,b),a+b].forEach(x=>{if(x&&x!==l&&x>1&&y.size<3)y.add(x);});
-    return {a,b,l,sec:karistir([l,...y])};}
+  S.tahmin(k,"Isınma sorusu: 8 ve 24 adımlı iki kurbağa 0'dan sonra ilk kez hangi noktada buluşur?",[[8,"8"],[24,"24"],[48,"48"],[192,"192"]],24,"24'te: 24, 8'in katıdır (8 · 3 = 24).");
+  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skor"></div><div class="dsoru"></div><div class="yaris"><i></i></div><div class="stage"></div><div class="row zs" style="justify-content:center;gap:14px"></div><div class="row"><button class="primary bul" disabled>Buluştu! ✓</button></div></div><div class="row"><button class="primary basl">Yarışı başlatın</button></div><div class="fb" hidden></div>`);
+  const sk=k.querySelector(".skor"),ds=k.querySelector(".dsoru"),bar=k.querySelector(".yaris i"),st=k.querySelector(".stage"),zs=k.querySelector(".zs"),bu=k.querySelector(".bul"),bb=k.querySelector(".basl"),f=k.querySelector(".fb");
+  let tur=0,sen=0,bil=0,zam=null,acik=false,turK=0,bitenD=0,yendi=false,Q=null,na=0,nb=0;
+  const D=defter(k,["Adımlar","Buluşturduğunuz nokta","İlk ortak nokta","Turu alan"]);
+  const G=gorevler(k,[{m:"Bir tur <b>kazanınız</b>.",ok:()=>turK>=1},{m:"Bir yarışı sonuna kadar oynayınız (5 tur).",ok:()=>bitenD>=1},{m:"Bilgisayarı <b>yeniniz</b>: bir yarışta en az 3 tur kazanınız.",ok:()=>yendi}],acikla);
+  function uret(){let g,m,n,a,b;do{g=rastgele([1,2,3,4,5,6]);m=1+Math.floor(Math.random()*6);n=2+Math.floor(Math.random()*6);a=g*m;b=g*n;}while(m===n||gcd(m,n)!==1||a<2||b<2||g*m*n>90||KONU_CIFT.has(ciftAnahtar(a,b)));
+    if(Math.random()<.5)[a,b]=[b,a];return {a,b,l:ekok(a,b)};}
+  const zKut=(ad,renk,get,set)=>{const w=document.createElement("div");w.style.cssText="display:flex;align-items:center;gap:6px;font-weight:800";
+    w.innerHTML=`<span style="color:${renk}">${ad}</span><button class="ghost" style="min-width:44px;min-height:44px" aria-label="${ad}: azalt">−</button><b class="zn" style="min-width:28px;text-align:center"></b><button class="ghost" style="min-width:44px;min-height:44px" aria-label="${ad}: artır">+</button>`;
+    const [m_,p_]=w.querySelectorAll("button");m_.onclick=()=>{if(acik&&get()>0){set(get()-1);ciz();}};p_.onclick=()=>{if(acik&&get()<40){set(get()+1);ciz();}};zs.appendChild(w);return w.querySelector(".zn");};
+  const zA=zKut("Kırmızı zıplama:","#e03131",()=>na,v=>na=v),zB=zKut("Mavi zıplama:","#1c7ed6",()=>nb,v=>nb=v);
+  function ciz(){zA.textContent=na;zB.textContent=nb;if(!Q){st.replaceChildren();return;}const L=Math.max(Q.l*2,Q.a*na,Q.b*nb,1),sk=560/L,X=v=>20+v*sk;const sv=svgEl(600,120);
+    let h=`<line x1="20" y1="70" x2="580" y2="70" stroke="${css('--ink')}" stroke-width="2"/>`;const adim=L<=60?1:L<=150?5:10;
+    for(let v=0;v<=L;v+=adim)h+=`<line x1="${X(v)}" y1="${v%(adim*5)?66:62}" x2="${X(v)}" y2="74" stroke="${css('--muted')}"/>`+(v%(adim*(L<=60?5:2))?"":`<text x="${X(v)}" y="92" text-anchor="middle" font-size="13">${v}</text>`);
+    for(let i=1;i<=na;i++)h+=`<path d="M${X(Q.a*(i-1))} 66 Q${X(Q.a*(i-.5))} 36 ${X(Q.a*i)} 66" fill="none" stroke="#e03131" stroke-width="2"/>`;
+    for(let i=1;i<=nb;i++)h+=`<path d="M${X(Q.b*(i-1))} 74 Q${X(Q.b*(i-.5))} 104 ${X(Q.b*i)} 74" fill="none" stroke="#1c7ed6" stroke-width="2"/>`;
+    h+=`<circle cx="${X(Q.a*na)}" cy="58" r="8" fill="#e03131"/><circle cx="${X(Q.b*nb)}" cy="82" r="8" fill="#1c7ed6"/>`;
+    h+=`<text x="${X(Q.a*na)}" y="44" text-anchor="middle" font-size="14" font-weight="800" fill="#c92a2a">${Q.a*na}</text><text x="${X(Q.b*nb)}" y="116" text-anchor="middle" font-size="14" font-weight="800" fill="#1864ab">${Q.b*nb}</text>`;
+    sv.innerHTML=h;st.replaceChildren(sv);}
   function skor(){sk.innerHTML=dz(`Tur <b>${Math.min(tur,5)}</b> / 5`,`Siz: <b>${sen}</b>`,`Bilgisayar: <b>${bil}</b>`);}
   function durdur(){if(zam){clearInterval(zam);zam=null;}}
-  function turBitti(kazanan,Q){acik=false;durdur();if(kazanan==="sen"){sen++;turK++;}else bil++;D.ekle([`${Q.a} ve ${Q.b}`,Q.l,kazanan==="sen"?"Siz":"Bilgisayar"],"t"+Date.now()+Math.random());skor();G.kontrol();
-    if(tur>=5){bitenD++;if(sen>=3)yendi=true;fb(f,sen>=3,sen>=3?`Düelloyu kazandınız! ${sen} – ${bil}`:`Bilgisayar kazandı: ${bil} – ${sen}. Kısa yolları düşününüz ve yeniden deneyiniz: büyük sayı küçüğün katı mı, ortak bölenleri var mı?`);bip(sen>=3?990:220,.3);bb.hidden=false;bb.textContent="Yeni düello";G.kontrol();}
-    else setTimeout(()=>{if(k.isConnected)yeniTur();},1600);}
-  function yeniTur(){tur++;skor();const Q=uret();acik=true;ds.innerHTML=`EKOK(<b>${Q.a}</b>, <b>${Q.b}</b>) = ?`;
-    sc.innerHTML=Q.sec.map(x=>`<button class="sec" data-v="${x}" style="min-width:64px;text-align:center;font-size:20px">${x}</button>`).join("");
-    const sure=Math.max(4000,9000-tur*900),t0=Date.now();bar.style.width="0%";durdur();
+  function turBitti(kazanan,nokta){acik=false;bu.disabled=true;durdur();if(kazanan==="sen"){sen++;turK++;}else bil++;D.ekle([`${Q.a} ve ${Q.b}`,nokta,Q.l,kazanan==="sen"?"Siz":"Bilgisayar"],"t"+Date.now()+Math.random());skor();G.kontrol();
+    if(tur>=5){bitenD++;if(sen>=3)yendi=true;fb(f,sen>=3,sen>=3?`Yarışı kazandınız! ${sen} – ${bil}`:`Bilgisayar kazandı: ${bil} – ${sen}. Yeniden deneyiniz.`);bip(sen>=3?990:220,.3);bb.hidden=false;bb.textContent="Yeni yarış";G.kontrol();}
+    else setTimeout(()=>{if(k.isConnected)yeniTur();},1800);}
+  function yeniTur(){tur++;skor();Q=uret();na=0;nb=0;acik=true;bu.disabled=false;ds.innerHTML=`<span style="font-size:20px;display:block">Kırmızı kurbağa: <b style="color:#e03131">${Q.a}</b> adım</span><span style="font-size:20px;display:block">Mavi kurbağa: <b style="color:#1c7ed6">${Q.b}</b> adım</span>`;ciz();
+    const sure=Math.max(10000,18000-tur*1600),t0=Date.now();bar.style.width="0%";durdur();
     zam=setInterval(()=>{if(!k.isConnected){durdur();return;}const o=(Date.now()-t0)/sure;bar.style.width=Math.min(100,o*100)+"%";
-      if(o>=1&&acik){fb(f,false,`Süre bitti. EKOK(${Q.a}, ${Q.b}) = ${Q.l}.`);bip(220,.2,"triangle");turBitti("bil",Q);}},50);
-    sc.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(!acik)return;const v=+b.dataset.v;
-      if(v===Q.l){b.classList.add("dogru");fb(f,true,`Doğru! EKOK(${Q.a}, ${Q.b}) = ${Q.l}.`);bip(880,.12);turBitti("sen",Q);}
-      else{b.classList.add("yanlis");fb(f,false,`Olmadı. EKOK(${Q.a}, ${Q.b}) = ${Q.l}.`);bip(220,.2,"triangle");turBitti("bil",Q);}});}
-  bb.onclick=()=>{tur=0;sen=0;bil=0;bb.hidden=true;f.hidden=true;yeniTur();};skor();ds.innerHTML=`<span style="font-size:17px;font-weight:600">Hazır olunca “Düelloyu başlatın” düğmesine basınız.</span>`;
+      if(o>=1&&acik){fb(f,false,`Süre bitti. İlk ortak nokta ${Q.l} idi.`);bip(220,.2,"triangle");turBitti("bil","—");}},50);}
+  bu.onclick=()=>{if(!acik)return;const pa=Q.a*na,pb=Q.b*nb;
+    if(pa!==pb||pa===0){fb(f,false,`Kurbağalar aynı noktada değil (${pa} ve ${pb}). Turu bilgisayar aldı; ilk ortak nokta ${Q.l} idi.`);bip(220,.2,"triangle");turBitti("bil",`${pa} / ${pb}`);}
+    else if(pa!==Q.l){fb(f,false,`${pa}'da buluştular ama bu ilk ortak nokta değil. Turu bilgisayar aldı; ilk ortak nokta ${Q.l} idi.`);bip(260,.2,"triangle");turBitti("bil",pa);}
+    else{fb(f,true,`Doğru! ${Q.a} · ${na} = ${Q.b} · ${nb} = ${Q.l}: ilk ortak nokta.`);bip(880,.12);turBitti("sen",pa);}};
+  bb.onclick=()=>{tur=0;sen=0;bil=0;bb.hidden=true;f.hidden=true;yeniTur();};skor();ciz();ds.innerHTML=`<span style="font-size:17px;font-weight:600">Hazır olunca “Yarışı başlatın” düğmesine basınız.</span>`;
   function acikla(){const c=S.kural(2);
-    S.soru(c,"Düelloda hangi kısa yollar işine yaradı?",
-      ["Büyük sayı küçüğün katıysa EKOK büyük sayıdır; EKOK = a · b : EBOB",["EKOK her zaman iki sayının çarpımıdır","EKOK(8, 24) = 24'tür; 8 · 24 = 192 değil."],["EKOK her zaman küçük sayıdır","EKOK iki sayının da katıdır; küçük sayı büyük sayının katı olamaz."]],
-      "Örneğin EKOK(8, 24) = 24, çünkü 24 = 8 · 3.",()=>
-    S.soru(c,"Seçeneklerde büyük sayıdan küçük bir sayı görürseniz ne yaparsınız?",
-      ["Onu hemen elerim; EKOK büyük sayıdan küçük olamaz",["Onu seçerim","Büyük sayıdan küçük bir sayı, büyük sayının katı olamaz."],["Hiçbir şey yapmam","Bu seçeneği elemek seçimi kolaylaştırır."]],
-      "İki sayının çarpımı da her zaman EKOK değildir; önce ortak bölene bakınız.",meydan));}
+    S.soru(c,"Kurbağalar 0'dan sonra ilk kez hangi noktada buluştu?",
+      ["İki adım uzunluğunun EKOK'unda",["İki adım uzunluğunun çarpımında",""],["İki adım uzunluğunun toplamında",""]],
+      "Örneğin 8 ve 24 adımlı kurbağalar 24'te buluşur: EKOK(8, 24) = 24; 8 · 24 = 192 değil.",()=>
+    S.soru(c,"Kurbağalar büyük adımdan daha önceki bir noktada buluşabilir mi?",
+      ["Hayır; EKOK büyük sayıdan küçük olamaz",["Evet, küçük adımda buluşabilirler",""],["Evet, adımların farkında buluşurlar",""]],
+      "Mavi kurbağa ilk zıplamada büyük adım kadar gider; daha önceki noktalara hiç konmaz. Büyük adım küçüğün katıysa ilk ortak nokta büyük adımdır.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("EKOK(26, 39) kaçtır?"),78,"EBOB(26, 39) = 13. EKOK = 26 · 39 : 13 = 78.","Önce EBOB'u bulunuz (39 − 26 = 13'e bakınız). Sonra EKOK = a · b : EBOB.",
-      ()=>S.bitir("EKOK'u hızlı bulmak için kısa yollar: EKOK <b>büyük sayıdan küçük olamaz</b>; büyük sayı küçüğün katıysa EKOK <b>büyük sayıdır</b>; EKOK = <b>a · b : EBOB</b>."),
-      v=>v===1014?"26 · 39'u hesapladınız; iki sayının ortak böleni (13) var, EBOB'a bölünüz.":v===13?"13 EBOB'dur.":null);}
+    S.sayi(m,soruKut("EKOK(26, 39) kaçtır?"),78,"EBOB(26, 39) = 13. EKOK = 26 · 39 : 13 = 78.","",
+      ()=>S.bitir("EKOK'u hızlı bulmak için kısa yollar: EKOK <b>büyük sayıdan küçük olamaz</b>; büyük sayı küçüğün katıysa EKOK <b>büyük sayıdır</b>; EKOK = <b>a · b : EBOB</b>."));}
 };
 
 /* ================= liste ================= */
 const ACT=[
  {ad:"Zıplayan Kurbağalar",amac:"Sayı doğrusunda zıplayan iki kurbağanın ortak noktalarıyla ortak kat ve EKOK kavramını keşfetmek.",adimlar:ynr("İki kurbağanın ikisinin de bastığı noktaları bulacaksınız.","Bir kurbağa çifti seçiniz; düğmelerle kurbağaları zıplatınız ve yıldızlı noktalara bakınız."),ciz:e_kurbaga},
- {ad:"Kat Boyama Tablosu",amac:"Listeleme yöntemiyle ortak katları bulmak ve ortak katların EKOK'un katları olduğunu keşfetmek.",adimlar:ynr("6'nın ve 14'ün ortak katlarını tabloda bulacaksınız.","Fırça seçiniz ve katları boyayınız; iki renge boyananları yıldızla işaretleyiniz."),ciz:e_boyama},
+ {ad:"Kat Boyama Tablosu",amac:"Listeleme yöntemiyle ortak katları bulmak ve ortak katların EKOK'un katları olduğunu keşfetmek.",adimlar:ynr("İki sayının katlarını tabloda zıplatarak boyayıp ortak katlarını bulacaksınız.","İki adım uzunluğunu sürgülerle seçiniz ve “Boyayın” düğmesine basınız; iki renge boyanan sayılar yıldız alır. Farklı çiftler deneyiniz."),ciz:e_boyama},
  {ad:"Algoritma Makinesi",amac:"Algoritma yönteminde kalan iki sayıyı sağa taşıyarak EKOK'u bulmak.",adimlar:ynr("Algoritma yöntemiyle EKOK'u bulacaksınız.","İki sayıyı ortak asallarla bölünüz, kalanları çizginin sağına taşıyınız ve sağdaki bütün sayıları çarpınız."),ciz:e_algoritma},
  {ad:"Kuvvet Kuleleri",amac:"Üslü yazımda her tabanın büyük kuvvetini seçerek EKOK'u bulmak.",adimlar:ynr("Asal çarpanların kuvvetlerini ayarlayarak en küçük ortak katı kuracaksınız.","Kuvvetleri − ve + ile değiştiriniz; iki lambayı da yakınız ve sayıyı en küçük yapınız."),ciz:e_kuvvet},
  {ad:"Kutu Kuleleri",amac:"Özdeş kutulardan eşit yükseklikte kuleler kurarak en kısa kulenin EKOK olduğunu keşfetmek.",adimlar:ynr("Özdeş kutularla eşit yükseklikte en kısa kuleleri yapacaksınız.","Kulelere kutu ekleyiniz ya da çıkarınız; yeşil çizgi kulelerin eşit olduğunu gösterir."),ciz:e_kule},
  {ad:"Dişli Çarklar",amac:"İşaretli dişlerin yeniden karşılaşması için gereken diş sayısının EKOK olduğunu keşfetmek.",adimlar:ynr("İşaretli dişlerin yeniden karşılaştığı anı bulacaksınız.","Çarkları diş diş ya da “Oynat” ile döndürünüz; işaretlerin üçgende buluşmasına bakınız."),ciz:e_disli},
  {ad:"Deniz Fenerleri",amac:"Belirli aralıklarla yanan iki fenerin birlikte yanma anlarının EKOK'un katları olduğunu keşfetmek.",adimlar:ynr("İki fenerin birlikte yandığı anları yakalayacaksınız.","Zamanı ilerletiniz; iki fener birlikte yanınca “Birlikte yandı!” düğmesine basınız."),ciz:e_fener},
- {ad:"Kalkış Çizelgesi",amac:"İki vapurun belli bir saate kadar kaç kez birlikte kalktığını EKOK ile bulmak.",adimlar:ynr("İki vapurun birlikte kalktığı saatleri çizelgede bulacaksınız.","Çizelgede hem kırmızı hem mavi noktalı kutulara dokununuz."),ciz:e_cizelge},
+ {ad:"Kalkış Çizelgesi",amac:"İki vapurun belli bir saate kadar kaç kez birlikte kalktığını EKOK ile bulmak.",adimlar:ynr("İki vapurun birlikte kalktığı saatleri çizelgede bulacaksınız.","Vapurların kalkış aralıklarını sürgülerle değiştiriniz; çizelge anında dolar. Birlikte kalkışların kaç dakikada bir geldiğine bakınız."),ciz:e_cizelge},
  {ad:"Boncuk Kolye",amac:"İki farklı parçadan oluşan birimin özdeş parça gibi düşünüldüğünü keşfetmek.",adimlar:ynr("İki kolyeyi eşit uzunlukta yapacaksınız.","Birinci kolyeye kırmızı ve beyaz boncukları sırayla, ikinciye mavi parçaları diziniz."),ciz:e_kolye},
  {ad:"Sürahi ve Varil",amac:"Sıvıyı iki farklı kapla eşit miktarda doldururken ortak katlardan şarta uyanı seçmek.",adimlar:ynr("İki varile eşit su koyup şarta uyan miktarı bulacaksınız.","Sürgülerle her varile kaç sürahi döküleceğini seçiniz."),ciz:e_varil},
  {ad:"Artan Misketler",amac:"Farklı gruplamalarda aynı sayıda artan durumlarda sayının EKOK'un katı + artan olduğunu keşfetmek.",adimlar:ynr("İki poşetlemede de aynı sayıda misket artan sayıları bulacaksınız.","Misket sayısını seçiniz; artan misketlere bakınız."),ciz:e_misket},
@@ -1762,10 +1778,10 @@ const ACT=[
  {ad:"EBOB–EKOK Terazisi",amac:"İki sayının EBOB'u ile EKOK'unun çarpımının sayıların çarpımına eşit olduğunu keşfetmek.",adimlar:ynr("Terazinin hangi durumda dengede kaldığını bulacaksınız.","İki sayı ve sağ kefeye konacak değeri seçiniz; dengeyi deftere yazınız."),ciz:e_terazi},
  {ad:"Bisiklet Pisti",amac:"Farklı sürelerde tur atan iki bisikletlinin başlangıçta buluşma süresinin EKOK olduğunu keşfetmek.",adimlar:ynr("İki bisikletlinin başlangıç çizgisinden birlikte geçtiği anları bulacaksınız.","Zamanı sürgüyle ya da “Oynat” ile ilerletiniz."),ciz:e_pist},
  {ad:"Market Alışverişi",amac:"Farklı paketlerden eşit sayıda ürün alırken en az paketin EKOK ile bulunduğunu keşfetmek.",adimlar:ynr("Eşit sayıda bardak ve kapak alacaksınız.","Sepete paket ekleyiniz ya da çıkarınız; bütçeye dikkat ediniz."),ciz:e_market},
- {ad:"Nöbet Takvimi",amac:"İki kişinin birlikte nöbet tuttuğu günlerin EKOK kadar günde bir geldiğini takvimde keşfetmek.",adimlar:ynr("İki öğrencinin birlikte nöbet tuttuğu günleri takvimde bulacaksınız.","Bir kalem seçiniz ve nöbet günlerini işaretleyiniz; ortak günlere yıldız koyunuz."),ciz:e_takvim},
+ {ad:"Nöbet Takvimi",amac:"İki kişinin birlikte nöbet tuttuğu günlerin EKOK kadar günde bir geldiğini takvimde keşfetmek.",adimlar:ynr("İki öğrencinin birlikte nöbet tuttuğu günleri takvimde bulacaksınız.","Nöbet aralıklarını sürgülerle değiştiriniz; takvim anında boyanır. Birlikte nöbetlerin kaç günde bir geldiğine bakınız."),ciz:e_takvim},
  {ad:"Gizli Sayı Dedektifi",amac:"EKOK ipuçlarını kullanarak gizli bir sayıyı bulmak.",adimlar:ynr("EKOK ipuçlarıyla gizli sayıyı bulacaksınız.","Kurallar: Bir sorgu kartı seçince kart ile gizli sayının EKOK'u yazılır; uymayan sayılar silinir. Bulduğunuzu düşündüğünüz sayıya dokununuz."),ciz:e_dedektif},
  {ad:"EKOK Labirenti",amac:"EKOK'un büyük sayıya eşit olduğu durumları bir labirent oyunuyla keşfetmek.",adimlar:ynr("Labirentte girişten çıkışa ulaşacaksınız.","Kurallar: Yalnız yan yana kutulara geçilir. İki sayının EKOK'u büyük sayıya eşitse kapı açılır."),ciz:e_labirent},
- {ad:"EKOK Düellosu",amac:"EKOK'u hızlı bulmanın kısa yollarını bilgisayara karşı bir oyunda kullanmak.",adimlar:ynr("Bilgisayara karşı EKOK düellosu yapacaksınız.","Kurallar: 5 tur oynanır; süre çubuğu dolmadan doğru EKOK'a dokunan turu alır. Yanlış cevap turu bilgisayara verir. En az 3 tur kazanan düelloyu kazanır."),ciz:e_duello}];
+ {ad:"EKOK Düellosu",amac:"EKOK'u hızlı bulmanın kısa yollarını bilgisayara karşı bir oyunda kullanmak.",adimlar:ynr("Bilgisayara karşı kurbağa yarışı yapacaksınız.","Kurallar: 5 tur oynanır. Her turda iki kurbağanın zıplama sayısını ayarlayıp onları 0'dan sonraki ilk ortak noktada buluşturunuz ve süre dolmadan “Buluştu!” düğmesine basınız. En az 3 tur kazanan yarışı kazanır."),ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"EKOK Keşif Atölyesi",kisa:"EKOK Keşif Atölyesi",kod:"M.8.1.1.2",ust:"LGS · 8. Sınıf · Çarpanlar ve Katlar · M.8.1.1.2 · Fasikül 3",
   aciklama:"Ortak katlar ve EKOK için yirmi keşfetme etkinliği: her biri farklı bir düzenek; üç aşamada deneyiniz, kuralı bulunuz ve kendinizi deneyiniz."});
 
