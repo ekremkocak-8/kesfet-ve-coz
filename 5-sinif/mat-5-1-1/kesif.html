@@ -408,6 +408,8 @@ input.ans.gen{width:150px}.tus{min-width:44px;min-height:40px;font-size:18px;fon
 .sor.sz-yeni{animation:szGel .45s ease-out}
 @keyframes szGel{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.sz-ileri,.sor.sz-yeni{animation:none}}
+/* 05.10.2026: dokunma hedefi en az 44 px (§19-11) */
+.ta-dug button,.row button,button.primary,button.ghost{min-height:44px}
 
 /* TA-SON */
 
@@ -1065,11 +1067,15 @@ function sayiGir(kap,ust,dogru,okMsg,ipucu,sonra,o={}){
   d.oto=()=>{inp.value=S(dogru);inp.oninput();kontrol();};return d;}
 
 /* Bölük kutuları: her bölük ayrı kutuya yazılır */
-function bolukGir(kap,dogru,nb,okMsg,sonra){
+function bolukGir(kap,dogru,nb,okMsg,sonra,D2){   /* 05.10.2026: D2 verilirse yazılan sayının okunuşu canlı gösterilir ve her deneme deftere yazılır */
   const d=yeniEl("div","sor bg");d.dataset.cvp=String(dogru);const G=bolukler(dogru);
   d.innerHTML=`<p class="bicim">Her bölüğün rakamlarını <b>kendi kutusuna</b> yazınız. En soldaki dolu kutu dışındaki her kutuya <b>3 rakam</b> yazılır. Sayıda olmayan bölüğün kutusunu boş bırakınız.</p><div class="bg-kutular">${[...Array(nb)].map((_,j)=>nb-1-j).map(i=>`<label class="bg-k b${i}"><small>${BOLUKAD[i]}</small><input type="text" inputmode="numeric" maxlength="3" autocomplete="off" spellcheck="false" data-i="${i}" aria-label="${BOLUKAD[i]}"></label>`).join("")}</div><div class="row"><button type="button" class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   kap.appendChild(d);const f=d.querySelector(".fb"),ins=[...d.querySelectorAll("input")];let ok=false;
-  const hata=m=>{bip(220,.12);fb(f,false,m);};
+  const cok=D2?yeniEl("div","bk-oku"):null;if(cok){d.insertBefore(cok,d.querySelector(".row"));}
+  const yazilan=()=>{const v=ins.map(x=>x.value.replace(/\s/g,""));const j=v.findIndex(x=>x!=="");if(j<0||v.some(x=>x&&!/^\d+$/.test(x)))return null;for(let t=j+1;t<v.length;t++)if(v[t].length!==3)return null;return +v.slice(j).join("");};
+  const canli=()=>{if(!cok)return;const n=yazilan();cok.innerHTML=n===null?"<small>Yazdığınız sayının okunuşu</small><i>Kutuları doldurunca burada görünür.</i>":`<small>Yazdığınız sayı: ${S(n)} · okunuşu</small>“${okunus(n)}”`;};
+  ins.forEach(x=>x.addEventListener("input",canli));canli();
+  const hata=m=>{bip(220,.12);fb(f,false,m);if(D2){const n=yazilan();D2.ekle([okunus(dogru),n===null?ins.map(x=>x.value||"—").join(" | "):S(n),n===null?"—":okunus(n),"✘"],"h"+ins.map(x=>x.value).join("|"));}};
   const kontrol=()=>{if(ok)return;const v=ins.map(x=>x.value.replace(/\s/g,""));
     if(v.some(x=>x&&!/^\d+$/.test(x)))return hata("Kutulara yalnız rakam yazınız.");
     const ilk=v.findIndex(x=>x!=="");if(ilk<0)return hata("Önce kutulara rakamları yazınız.");
@@ -1199,13 +1205,13 @@ function okyzTur(k,n,nb,D,A){
     cm.querySelectorAll(".oy-s").forEach(b=>b.onclick=()=>{if(bg)return;const i=+b.dataset.i;if(!(W[i] in BS)){bip(220,.12);fb(f,false,`“${W[i]}” bir bölük adı değil. Yeniden deneyiniz.`);return;}
       ks.add(i);f.hidden=true;bip(700,.05);ciz();if(hepsi())kutular();});}
   function kutular(){k.querySelector(".oy-y").innerHTML="1. Bölük adlarını buldunuz. Okunuş bölüklere ayrıldı (her renk bir bölük).";el(kutu,"lab2","2. Her bölüğün sayısını kendi kutusuna yazınız.");
-    bg=bolukGir(kutu,n,nb,`Doğru! ${renkli(n,true)}`,()=>{D.ekle([okunus(n),S(n)],String(n));A.tamam(`${okunus(n)} = ${S(n)}`);});}
+    bg=bolukGir(kutu,n,nb,`Doğru! ${renkli(n,true)}`,()=>{D.ekle([okunus(n),S(n),okunus(n),"✔"],String(n));A.tamam(`${okunus(n)} = ${S(n)}`);},D);kutu.appendChild(D.el);}
   A.oto=()=>{if(!hepsi()){const i=W.findIndex((w,j)=>w in BS&&!ks.has(j));cm.querySelector(`.oy-s[data-i="${i}"]`).click();return;}if(bg)bg.oto();};ciz();}
-const e_okuyaz=p=>{const D=defterY(["Okunuş","Yazılış"]);
+const e_okuyaz=p=>{const D=defterY(["Verilen okunuş","Yazdığınız","Yazdığınızın okunuşu","Sonuç"]);
   const n1=bolukten([ra(101,999),ra(101,999),ra(2,999)]),n2=bolukten([ra(1,9)*10+ra(0,1)*ra(1,9),rastgele([ra(1,9),ra(1,9)*10]),ra(101,999),ra(1,99)]);
   asamali(p,{tahmin:{soru:"“kırk beş milyon üç yüz bin” sayısı kaç basamaklıdır?",secs:[["8","8 basamaklı"],["5","5 basamaklı"],["11","11 basamaklı"]],dogru:"8",neden:"45 300 000: milyonlar bölüğünde 45, binler bölüğünde 300, birler bölüğünde 000."},
     asamalar:[
-      {ad:"Üç bölüklü sayı",yon:["Önce okunuştaki bölük adlarına dokununuz: okunuş bölüklere ayrılır.","Sonra her bölüğün sayısını kendi kutusuna yazınız ve <b>Kontrol edin</b> düğmesine basınız."],bitis:"Sayıyı doğru yazınca.",kur:(k,A)=>okyzTur(k,n1,3,D,A)},
+      {ad:"Üç bölüklü sayı",yon:["Önce okunuştaki bölük adlarına dokununuz: okunuş bölüklere ayrılır.","Sonra her bölüğün sayısını kendi kutusuna yazınız. Yazdığınız sayının okunuşu kutuların altında anında görünür; verilen okunuşla aynı olunca <b>Kontrol edin</b> düğmesine basınız. Her denemeniz deney defterine yazılır."],bitis:"Sayıyı doğru yazınca.",kur:(k,A)=>okyzTur(k,n1,3,D,A)},
       {ad:"Sıfırlı basamaklar",yon:["Bu sayıda bazı basamaklar okunmuyor.","Aynı yolla okunuşu bölünüz, sonra bölükleri kutulara yazınız."],bitis:"Sayıyı doğru yazınca.",kur:(k,A)=>okyzTur(k,n2,4,D,A)},
       kuralA(D,[["Okunuşta “milyon” sözcüğünden hemen önce söylenen sayı nereye yazılır?",["Milyonlar bölüğüne","Birler bölüğüne","Binler bölüğüne"],"Doğru! Bölük adı, önündeki sayının hangi bölüğe yazılacağını söyler.",["Birler bölüğünden sonra bölük adı söylenmez; “milyon” başka bir bölüğü gösterir.","Binler bölüğünün sayısı “bin” sözcüğünden önce söylenir."]],
         ["Okunuşu “yirmi milyon yedi bin kırk” olan sayıda binler bölüğüne ne yazılır?",["007","7","700"],"Doğru! 20 007 040: binler bölüğü 007, birler bölüğü 040.",["Binler bölüğü en soldaki bölük değil; 3 basamaklı olmalı.","700 “yedi yüz bin” diye okunurdu."]]]),
@@ -1753,29 +1759,346 @@ const e_duello=p=>{const D=defterY(["İfade","Doğru mu?","Turu alan"]);
     kural:"Çok basamaklı sayıları okuyup yazarken sayıyı <b>sağdan üçer üçer bölüklere</b> ayırırız. Her bölük sayısı ve adıyla okunur; tamamı 0 olan bölük okunmaz ama <b>000</b> yazılır. Karşılaştırmada önce basamak sayısına, sonra soldan başlayarak basamaklara bakılır."});
 };
 
+
+/* ================= Aşama 2 (05.10.2026, §4.k): düzenekli etkinlikler =================
+   C → A: 3 Sıfırlı Bölük Dedektifi, 11 Büyük mü Küçük mü?, 14 Uzay Mesafeleri, 15 Nüfus Haritası, 20 Bölük Düellosu (yap-boz yarışı)
+   B → A: 4 Okunuştan Yazılışa (canlı okunuş), 8 Basamak Değeri Ölçer (kayan rakam), 9 Çözümleme Makinesi (parça ekle),
+          13 Eski Mısır Sayıları (canlı sembol tezgâhı), 19 Örüntüyü Tamamla (çarpma makinesi) */
+(()=>{const st=document.createElement("style");st.id="k511b";st.textContent=`
+.ck-sat{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:center;margin:6px 0}
+.bk-oku{margin:8px 0;padding:8px 12px;border-radius:12px;background:var(--soft);font-weight:700;font-size:1.08rem;min-height:44px}
+.bk-oku small{display:block;font-size:12px;font-weight:800;color:var(--muted)}
+.ks-tab{border-collapse:collapse;font-variant-numeric:tabular-nums}.ks-tab td,.ks-tab th{border:1px solid var(--line);padding:4px 6px;text-align:center;font-weight:800;font-size:1.15rem;min-width:28px}
+.ks-tab th{font-size:12px;color:var(--muted);text-align:left}.ks-tab td.fark{background:color-mix(in srgb,var(--acc) 30%,var(--card))}.ks-tab td.ayni{background:color-mix(in srgb,#2b8a3e 14%,var(--card))}
+.ks-isr{font-size:1.6rem;font-weight:900;text-align:center;margin:4px 0}
+.kay-sira{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;min-width:420px}
+.kay-h{border:2px solid var(--line);border-top:4px solid var(--bc);border-radius:8px;text-align:center;padding:4px 0;background:var(--card)}
+.kay-h b{display:block;font:800 24px/1.2 Arimo,Arial,sans-serif;color:var(--muted)}.kay-h.on b{color:var(--ink)}.kay-h.on{background:color-mix(in srgb,var(--acc) 22%,var(--card));border-color:var(--acc)}
+.kay-h small{font-size:10px;line-height:1.05;display:block;min-height:22px;color:var(--muted)}
+.prc{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.prc span{display:inline-flex;align-items:center;gap:4px;background:var(--soft);border-radius:10px;padding:4px 4px 4px 10px;font-weight:700}
+.prc button{min-width:36px;min-height:36px;border-radius:8px}
+.uz-l{display:grid;gap:4px}.uz-o{display:flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:12px;padding:6px 8px;background:var(--card)}
+.uz-o i{width:18px;height:18px;border-radius:50%;flex:none}.uz-o div{flex:1;min-width:0}.uz-o small{display:block;color:var(--muted);font-weight:700}
+.uz-o.gec{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card))}
+.uz-isr{text-align:center;font-weight:900}.uz-isr.ok{color:#2b8a3e}.uz-isr.no{color:#c92a2a}
+.il-grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin:8px 0}
+.il2{border:2px solid var(--line);border-radius:10px;padding:6px 8px;background:var(--card)}.il2 b{display:block}.il2 span{font-variant-numeric:tabular-nums;font-size:.95rem}
+.il2.alt{border-color:#1c7ed6;background:color-mix(in srgb,#1c7ed6 12%,var(--card))}.il2.ust{border-color:#e8590c;background:color-mix(in srgb,#e8590c 12%,var(--card))}
+.ms-tez{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:6px}
+.ms-tez div{display:flex;align-items:center;gap:4px;border:2px solid var(--line);border-radius:10px;padding:4px}.ms-tez b{flex:1;text-align:center}
+.tus{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;max-width:360px;margin:8px auto}.tus button{min-height:48px;font-size:1.3rem;font-weight:800}
+.yr-ekran{text-align:center;font:800 30px/1.3 Arimo,Arial,sans-serif;min-height:48px;padding:6px;border:2px dashed var(--line);border-radius:12px;font-variant-numeric:tabular-nums}
+`;document.head.appendChild(st);})();
+if(typeof EKSI==="undefined")window.EKSI="−";   /* sayac() yardımcısının eksi işareti */
+/* Rakam çarkları: ▲▼ ile her basamak değişir; en soldaki basamak 0 olamaz */
+function carkSayi(kap,str,o={}){const d=String(str).split("").map(Number);const w=el(kap,"tsar"),ds=el(w,"dg-sayi");
+  const cz=()=>{const L=d.length;ds.innerHTML=d.map((v,j)=>{const i=L-1-j,ac=!o.acik||o.acik(j);return `<div class="dg-k b${Math.floor(i/3)}${i%3===0&&i?" bsep":""}"><button type="button" class="ghost dg-a" data-j="${j}" data-d="1"${ac?"":" disabled"} aria-label="${BAS[i]} basamağını artır">▲</button><b>${v}</b><button type="button" class="ghost dg-a" data-j="${j}" data-d="-1"${ac?"":" disabled"} aria-label="${BAS[i]} basamağını azalt">▼</button><small>${BAS[i]}</small></div>`;}).join("");
+    ds.querySelectorAll(".dg-a").forEach(b=>b.onclick=()=>R.degis(+b.dataset.j,+b.dataset.d));};
+  const R={get n(){return +d.join("");},get s(){return d.join("");},get L(){return d.length;},
+    degis(j,k){const v=d[j]+k;if(v<0||v>9)return false;if(j===0&&v===0&&d.length>1)return false;d[j]=v;bip(k>0?680:520,.03);cz();o.fn&&o.fn(R.n,R.s);return true;},
+    kur(s){d.splice(0,d.length,...String(s).split("").map(Number));cz();o.fn&&o.fn(R.n,R.s);},
+    ekle(){if(d.length>=12)return false;d.unshift(1);cz();o.fn&&o.fn(R.n,R.s);return true;}};
+  cz();return R;}
+/* İki sayıyı basamakları hizalı yazar; ilk farklı basamak turuncu */
+function karsTablo(a,b,adA,adB){const sa=String(a),sb=String(b),L=Math.max(sa.length,sb.length),A=sa.padStart(L," "),B=sb.padStart(L," ");let ilk=-1;
+  if(sa.length===sb.length)for(let i=0;i<L;i++)if(A[i]!==B[i]){ilk=i;break;}
+  const sat=(X,ad)=>`<tr><th>${ad}</th>${X.split("").map((c,i)=>`<td class="${sa.length!==sb.length?"":i===ilk?"fark":ilk<0||i<ilk?"ayni":""}"${(L-1-i)%3===0&&i<L-1?' style="border-right:3px solid var(--muted)"':""}>${c.trim()}</td>`).join("")}</tr>`;
+  const isr=a>b?"&gt;":a<b?"&lt;":"=";
+  return {html:`<div class="tsar"><table class="ks-tab">${sat(A,adA)}${sat(B,adB)}</table></div><p class="ks-isr">${S(a)} ${isr} ${S(b)}</p>`,ilk,L,isr};}
+
+/* 3 · SIFIRLI BÖLÜK DEDEKTİFİ (C → A): bölük kutularına yazılan sayının okunuşu canlı değişir */
+function bolukKutular(k,nb,ilk,fn){const d=el(k,"bg-kutular");d.innerHTML=[...Array(nb)].map((_,j)=>nb-1-j).map(i=>`<label class="bg-k b${i}"><small>${BOLUKAD[i]}</small><input type="text" inputmode="numeric" maxlength="3" autocomplete="off" data-i="${i}" aria-label="${BOLUKAD[i]}" value="${ilk?ilk[i]:""}"></label>`).join("");
+  const ins=[...d.querySelectorAll("input")];const oku=el(k,"bk-oku");
+  const deger=()=>{const v=ins.map(x=>x.value.replace(/\D/g,""));const j=v.findIndex(x=>x!=="");if(j<0)return null;for(let t=j+1;t<v.length;t++)if(v[t].length!==3)return null;if(v[j][0]==="0"&&v[j].length>1)return null;return +v.slice(j).join("");};
+  const g=()=>{const n=deger();oku.innerHTML=n===null?`<small>Okunuş</small><i>Bölükleri tamamlayınca okunuş burada görünür (en soldaki dışındaki her kutuda 3 rakam).</i>`:`<small>Kutulardaki sayı: ${S(n)}</small>“${okunus(n)}”`;fn&&fn(n);};
+  ins.forEach(x=>x.oninput=g);g();return {ins,deger,yaz(L){ins.forEach(x=>{const i=+x.dataset.i;x.value=L[i]==null?"":L[i];});g();}};}
+const e_sifir2=p=>{const D=defterY(["Kutulardaki sayı","Okunuş","Okunmayan bölük"]);
+  const kayit=n=>{if(n===null)return;const z=bolukler(n).map((x,i)=>x?"":BOLUKK[i]).filter(Boolean);D.ekle([S(n),okunus(n),z.join(", ")||"yok"],"d"+n);};
+  asamali(p,{tahmin:{soru:`${sy(3000450)} sayısı okunurken “bin” sözcüğü söylenir mi?`,secs:[["e","Evet, söylenir."],["h","Hayır, söylenmez."]],dogru:"h",neden:"Binler bölüğü 000 olduğu için okunmaz: üç milyon dört yüz elli."},
+    asamalar:[
+      {ad:"Bölüğü sıfırla, okunuşu izle",yon:["Kutulardaki rakamları siz değiştireceksiniz; okunuş her değişiklikte yeniden yazılır ve deney defterine geçer.","Görev listesindeki değişiklikleri sırayla yapınız ve okunuşun nasıl değiştiğini izleyiniz."],bitis:"Dört görevin hepsini yapınca.",
+        kur:(k,A)=>{const G0=[ra(101,999),ra(101,999),ra(101,999),ra(1,9)];k.appendChild(D.el);let g;
+          const B=bolukKutular(k,4,G0.map((x,i)=>i===3?String(x):pad3(x)),n=>{kayit(n);if(n!==null&&g)g.kontrol();});
+          const gb=n=>n===null?null:bolukler(n);
+          g=gorevler(k,[{m:"Binler bölüğüne <b>000</b> yazınız. Okunuşta “bin” sözcüğü kaldı mı?",ok:()=>{const x=gb(B.deger());return x&&x.length===4&&x[1]===0;},s:()=>"“bin” sözcüğü okunuştan düştü."},
+            {m:"Binler bölüğüne yüzler basamağı 0 olan bir sayı yazınız (ör. 0■■). Okunuşta 0 söylendi mi?",ok:()=>{const x=gb(B.deger());return x&&x.length===4&&x[1]>0&&x[1]<100;},s:()=>"Baştaki 0 okunmadı; bölük adı yeniden söylendi."},
+            {m:"Şimdi milyonlar bölüğüne <b>000</b> yazınız.",ok:()=>{const x=gb(B.deger());return x&&x.length===4&&x[2]===0;},s:()=>"“milyon” sözcüğü okunuştan düştü."},
+            {m:"Binler ve milyonlar bölüklerinin <b>ikisini birden</b> 000 yapınız.",ok:()=>{const x=gb(B.deger());return x&&x.length===4&&x[1]===0&&x[2]===0;},s:()=>"İki bölük de okunmadı ama yazılışta yerleri 000 ile korundu."}],
+            ()=>A.tamam("Tamamı 0 olan bölüğün okunmadığını gördünüz."));k.appendChild(D.el);
+          A.oto=()=>{const x=bolukler(B.deger());const L=[x[0],x[1],x[2],x[3]].map((v,i)=>i===3?String(v):pad3(v));
+            if(x[1]!==0&&!(x[1]>0&&x[1]<100))L[1]="000";else if(x[1]===0&&x[2]!==0&&D.n<3)L[1]="045";else if(x[2]!==0)L[2]="000";else L[1]="000";B.yaz(L);};}},
+      {ad:"Okunuşu tuttur",yon:["Üstte bir okunuş verildi. Bölük kutularına rakam yazınız; kutulardaki sayının okunuşu hemen altında görünür.","Okunuşunuz verilen okunuşla aynı olunca aşama biter. Yanlış yazarsanız kutuyu düzeltip yeniden deneyiniz."],bitis:"İki okunuşu da tutturunca.",
+        kur:(k,A)=>{const H=[sifirliSayi(4),sifirliSayi(3)];let t=0;const kt=el(k,"dkart");const f=el(k,"fb");f.hidden=true;let B=null,kap=el(k,"");k.appendChild(D.el);
+          const git=()=>{if(t>=H.length){A.tamam("Okunmayan bölüklere 000 yazdınız.");return;}const n=H[t];kt.innerHTML=`<small>Okunuş ${t+1} / ${H.length}</small><p class="buyuk">${okunus(n)}</p>`;kap.innerHTML="";A.durum(`${t} / ${H.length}`);
+            B=bolukKutular(kap,bolukler(n).length,null,v=>{kayit(v);if(v===n){const z=String(n).split("").filter(c=>c==="0").length;bip(760,.1);fb(f,true,`Okunuş tuttu: ${renkli(n,true)} Bu sayıyı yazarken <b>${z} tane 0</b> kullandınız.`);t++;setTimeout(git,1300);}});};
+          git();A.oto=()=>{const n=H[t];if(n==null)return;const G=bolukler(n);B.yaz(G.map((x,i)=>i===G.length-1?String(x):pad3(x)));};}},
+      kuralA(D,[["Tamamı 0 olan bir bölük okunuşta nasıl söylenir?",["Hiç söylenmez; bölük adı da söylenmez.","“Sıfır bin” gibi söylenir.","Yalnız bölük adı söylenir."],"Doğru! 3 000 450: üç milyon dört yüz elli.",["0 rakamı okunuşta söylenmez.","Deftere bakınız: Okunmayan bölüğün adı da okunuşta yoktu."]],
+        ["Okunuşta söylenmeyen bölük, sayı yazılırken ne olur?",["O bölüğe 000 yazılır.","O bölük hiç yazılmaz.","O bölüğe tek bir 0 yazılır."],"Doğru! Böylece diğer bölükler yerinden kaymaz.",["Bölük yazılmazsa milyonlar bölüğü binler bölüğünün yerine kayar; sayı değişir.","Her bölük 3 basamaklıdır; tek 0 yetmez."]]]),
+      kendiY((m,son)=>{const n=sifirliSayi(4);const G=bolukler(n);const z=G.findIndex((x,i)=>i>0&&!x);
+        const d1=+G.filter((x,i)=>!(i===z)).map((x,i,a)=>i===a.length-1?String(x):pad3(x)).reverse().join("");const d2=+G.map(x=>String(x)).reverse().join("");
+        soruY(m,`Okunuşu “${okunus(n)}” olan sayı hangisidir?`,benzersiz([n,d1,d2,n*10]).filter(x=>x<1e12).map(sy),`Doğru! ${renkli(n,true)}`,"",son);})],
+    kural:"Tamamı 0 olan bölük okunmaz, adı da söylenmez: 3 000 450 → üç milyon dört yüz elli. Ama sayı yazılırken okunmayan bölüğün yerine <b>000</b> yazılır; böylece bölükler ve basamaklar kaymaz."});
+};
+
+/* 8 · BASAMAK DEĞERİ ÖLÇER (B → A): rakam kartı basamaklar arasında kaydırılır, ölçer basamak değerini canlı gösterir */
+function kayanRakam(k,D,A){const d=ra(2,9);let i=2;const kul=new Set();
+  k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>Kayan kart</small><p>Kartta <b>${d}</b> rakamı var. Kartı ◀ ve ▶ düğmeleriyle basamaklar arasında kaydırınız.</p></div><div class="tsar"><div class="kay-sira"></div></div><div class="row"><button type="button" class="ghost ksol">◀ Bir basamak sola</button><button type="button" class="ghost ksag">Bir basamak sağa ▶</button></div><div class="bk-oku kay-ol"></div>`);
+  const sr=k.querySelector(".kay-sira"),ol=k.querySelector(".kay-ol");k.appendChild(D.el);let g;
+  const cz=()=>{sr.innerHTML=[...Array(10)].map((_,j)=>{const t=9-j;return `<div class="kay-h b${Math.floor(t/3)}${t===i?" on":""}"><b>${t===i?d:t<i?"0":""}</b><small>${BAS[t]}</small></div>`;}).join("");
+    const v=d*10**i;ol.innerHTML=`<small>Ölçer</small>${Bb(BAS[i])} basamağındaki ${d}: <b>${d} x ${S(10**i)} = ${S(v)}</b>`;kul.add(i);D.ekle([String(d),BAS[i],S(v),i?`${S(d*10**(i-1))} x 10`:"—"],"k"+d+"-"+i);if(g)g.kontrol();A.durum(`${kul.size} basamak`);};
+  k.querySelector(".ksol").onclick=()=>{if(i<9){i++;bip(680,.04);cz();}};k.querySelector(".ksag").onclick=()=>{if(i>0){i--;bip(520,.04);cz();}};
+  cz();g=gorevler(k,[{m:"Kartı en az beş farklı basamağa götürünüz ve ölçeri izleyiniz.",ok:()=>kul.size>=5,s:()=>"Her basamakta değer farklı çıktı."},
+    {m:`Basamak değeri <b>${S(d*10000)}</b> olacak yere kaydırınız.`,ok:()=>i===4,s:()=>"On binler basamağı."},
+    {m:`Basamak değeri <b>${S(d*1e8)}</b> olacak yere kaydırınız.`,ok:()=>i===8,s:()=>"Yüz milyonlar basamağı."}],()=>A.tamam("Bir basamak sola geçince değerin 10 ile çarpıldığını gördünüz."));k.appendChild(D.el);
+  A.oto=()=>{if(kul.size<5){(i<9?k.querySelector(".ksol"):k.querySelector(".ksag")).click();return;}if(i!==4&&!k.querySelectorAll(".gorevler li.tamam")[1]){(i<4?k.querySelector(".ksol"):k.querySelector(".ksag")).click();return;}(i<8?k.querySelector(".ksol"):k.querySelector(".ksag")).click();};}
+const e_olcer2=p=>{const D=defterY(["Rakam","Basamak","Basamak değeri","Bir sağdakinin değeri x 10"]);
+  let d2;do{d2=ra(2,9);}while(false);const a2=ra(3,7),n2=olcSayi(10,d2,[a2,a2+1]);
+  asamali(p,{tahmin:{soru:"444 sayısındaki üç tane 4 rakamının basamak değerleri aynı mıdır?",secs:[["e","Evet, üçü de 4'tür."],["h","Hayır, farklıdır."]],dogru:"h",neden:"400, 40 ve 4: Rakam aynı, basamak değerleri farklı."},
+    asamalar:[
+      {ad:"Kayan rakam",yon:["Rakam kartını ◀ ve ▶ düğmeleriyle basamaklar arasında kaydırınız. Ölçer kartın basamak değerini anında gösterir; her konum deney defterine yazılır.","Görev listesindeki görevleri yapınız."],bitis:"Üç görevi de yapınca.",kur:(k,A)=>kayanRakam(k,D,A)},
+      {ad:"Yan yana iki "+d2,yon:["Bu sayıda aynı rakam yan yana iki kez geçiyor.","İkisini de ölçünüz, sonra sorulan soruyu cevaplayınız."],bitis:"İki rakamı ölçüp soruyu cevaplayınca.",kur:(k,A)=>olcerTur(k,n2,d2,[a2,a2+1],true,defterY(["Sayı","Rakam","Basamak","Basamak değeri"]),A)},
+      kuralA(D,[["Kart bir basamak sola kayınca basamak değeri nasıl değişti?",["10 ile çarpılmış oldu.","1 arttı.","10 azaldı."],"Doğru! 5 → 50 → 500 → 5000 …",["Deftere bakınız: Değer 1 artmadı.","Sola geçince değer büyüdü."]],
+        ["Aynı rakam farklı basamaklarda olunca ne değişir?",["Basamak değeri değişir; rakam aynı kalır.","Rakam değişir.","Hiçbir şey değişmez."],"Doğru! Basamak değeri, rakamın bulunduğu basamağa bağlıdır.",["Rakam aynı kaldı; deftere bakınız.","Deftere bakınız: Basamak değerleri farklı."]]]),
+      kendiY((m,son)=>{const L=ra(8,10),i=ra(3,L-1),d=ra(1,9);let n=rs(L);n=n-rk(n,i)*10**i+d*10**i;const j=L-1-i;
+        soruY(m,`${sy(n)} sayısında <b>soldan ${j+1}.</b> rakamın (${d}) basamak değeri kaçtır?`,benzersiz([d*10**i,d*10**(i+1),d*10**(i-1),d]).map(sy),`Doğru! ${d}, ${BAS[i]} basamağında: ${S(d*10**i)}.`,"",son);})],
+    kural:"Bir rakamın <b>basamak değeri</b>, rakamın bulunduğu basamağa göre değişir. Bir basamak sola gidildikçe basamak değeri <b>10 ile çarpılmış</b> olur: 7 → 70 → 700 → 7000 …; aynı rakam farklı basamaklarda farklı değerler alır."});
+};
+
+/* 9 · ÇÖZÜMLEME MAKİNESİ (B → A): öğrenci rakam x basamak değeri parçalarını ekleyip çıkarır; toplam canlı göstergede */
+function parcaTur(k,n,D,A,sonra){const L=uzun(n);const P=[];
+  k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>Hedef sayı</small><p class="buyuk">${renkli(n,true)}</p></div><p class="lab2">Parça hazırlayınız</p><div class="ck-sat pr-den"></div><div class="row"><button type="button" class="primary pr-ekle">Parçayı ekleyin +</button></div><p class="lab2">Makinedeki parçalar</p><div class="prc"></div><div class="dg-bilgi"><div><small>Parçaların toplamı</small><b class="pr-top">0</b></div><div><small>Hedef sayı</small><b>${S(n)}</b></div><div><small>Durum</small><b class="pr-dur"></b></div></div><div class="fb" hidden></div>`);
+  const r=sayac("Rakam:",1,9,1),b=sayac("Basamak:",0,L-1,0,v=>{bE.textContent=Bb(BAS[v]);});const bE=yeniEl("b","",Bb(BAS[0]));k.querySelector(".pr-den").append(r.el,b.el,bE);
+  const prc=k.querySelector(".prc"),f=k.querySelector(".fb");let bitti=false;k.appendChild(D.el);
+  const top=()=>P.reduce((t,x)=>t+x.d*10**x.i,0);
+  function cz(){prc.innerHTML=P.length?P.map((x,j)=>`<span>(${x.d} x ${S(10**x.i)})<button type="button" class="ghost" data-j="${j}" aria-label="Parçayı çıkar">×</button></span>`).join(""):"<i>Henüz parça yok.</i>";
+    prc.querySelectorAll("button").forEach(bt=>bt.onclick=()=>{if(bitti)return;P.splice(+bt.dataset.j,1);cz();});
+    const t=top();k.querySelector(".pr-top").textContent=S(t);k.querySelector(".pr-dur").textContent=t===n?"eşit ✓":t<n?`${S(n-t)} eksik`:`${S(t-n)} fazla`;A.durum(`${P.length} parça`);
+    if(P.length)D.ekle([P.map(x=>`(${x.d} x ${S(10**x.i)})`).join(" + "),S(t),t===n?"hedefe eşit":t<n?"eksik":"fazla"],"p"+n+P.map(x=>x.d+"."+x.i).join(","));
+    if(t===n&&!bitti){if(new Set(P.map(x=>x.i)).size!==P.length){fb(f,false,"Toplam tuttu ama aynı basamağa iki parça koydunuz. Çözümlemede her basamak bir kez yazılır; parçaları birleştiriniz.");return;}
+      bitti=true;bip(760,.1);fb(f,true,`Doğru! ${S(n)} = ${cozC(n)}. 0 olan basamaklar için parça gerekmedi.`);setTimeout(sonra,700);}}
+  k.querySelector(".pr-ekle").onclick=()=>{if(bitti)return;P.push({d:r.v,i:b.v});P.sort((x,y)=>y.i-x.i);f.hidden=true;bip(680,.05);cz();};
+  A.oto=()=>{if(bitti)return;const i=[...Array(L).keys()].reverse().find(t=>rk(n,t)&&!P.some(x=>x.i===t));if(i==null)return;P.push({d:rk(n,i),i});P.sort((x,y)=>y.i-x.i);cz();};cz();}
+const e_cozum2=p=>{const D=defterY(["Parçalar","Toplam","Hedefe göre"]);
+  asamali(p,{tahmin:{soru:`${sy(3040000)} sayısının çözümlemesinde kaç parça (toplanan) vardır?`,secs:[["2","2"],["7","7"],["3","3"]],dogru:"2",neden:"3 040 000 = (3 x 1 000 000) + (4 x 10 000); 0'lar için parça yazılmaz."},
+    asamalar:[
+      {ad:"Parçalarla kur",yon:["Rakam ve basamak sayaçlarıyla bir parça hazırlayıp <b>Parçayı ekleyin</b> düğmesine basınız. Yanlış parçayı × ile çıkarabilirsiniz.","Parçaların toplamı anında hesaplanır. Toplamı hedef sayıya eşitleyiniz."],bitis:"İki hedef sayıda da toplam hedefe eşit olunca.",
+        kur:(k,A)=>{const H=[sifirliRakam(8,.35),sifirliRakam(9,.45)];let t=0;const kap=el(k,"");const git=()=>{if(t>=H.length){A.tamam("Sayıları parçalarına ayırdınız.");return;}kap.innerHTML="";const n=H[t++];parcaTur(kap,n,D,A,git);};git();}},
+      {ad:"Eksik parça",yon:["Çözümlemede bir parça ■ ile gizlendi.","■ yerine gelmesi gereken sayıyı rakamlarla yazınız ve <b>Kontrol edin</b> düğmesine basınız."],bitis:"İki çözümlemede de eksik parçayı bulunca.",
+        kur:(k,A)=>{const L=[sifirliRakam(9,.4),bolukten([ra(1,9)*100+ra(1,9),0,ra(1,9)*10,ra(1,9)])];let t=0;const git=()=>{if(t>=L.length){A.tamam("Eksik parçaları buldunuz.");return;}const n=L[t++];A.durum(`${t-1} / 2`);
+          const P=cozT(n).split(" + ");const g=ra(0,P.length-1);const gz=okuS(P[g]);const met=P.map((x,i)=>i===g?"■":x).join(" + ");
+          const q=sayiGir(k,`<div class="dkart"><small>Çözümleme ${t} / 2</small><p class="buyuk">${S(n)} = ${met}</p></div>${soruKut("■ yerine hangi sayı gelmelidir?")}`,gz,`Doğru! ■ = ${S(gz)}`,"",null,{ph:"ör. 200 000"});
+          q.addEventListener("dogru",()=>{D.ekle([cozT(n),S(n),"eksik parça bulundu"],"t"+n);setTimeout(git,600);});};git();A.oto=()=>otoSor(k);}},
+      kuralA(D,[["Çözümlemede her parça nasıl yazıldı?",["Rakam x basamağın değeri (ör. 3 x 1 000 000)","Rakam + basamak değeri","Yalnız rakam"],"Doğru! Her parça, rakamın basamak değerini gösterir.",["Rakam ile basamak değeri toplanmaz, çarpılır.","Yalnız rakam yazarsak basamağı belli olmaz."]],
+        ["0 rakamları için makineye parça eklemeniz gerekti mi?",["Hayır; (0 x 10 000) gibi bir parça toplamı değiştirmez.","Evet, her 0 için 1 eklendi.","0 rakamı olan sayı çözümlenemez."],"Doğru! 0 x 10 000 = 0 olduğu için bu parça yazılmaz.",["0'ın basamak değeri 0'dır; 1 eklenmez.","Deftere bakınız: 0'lı sayıları da çözümlediniz."]]]),
+      kendiY((m,son)=>{const n=sifirliRakam(ra(8,10),.35),s=String(n),L=s.length;const P=s.split("").map((c,j)=>({d:+c,i:L-1-j})).filter(x=>x.d);
+        const kay=P.map(x=>`(${x.d} x ${S(10**(x.i+1))})`).join(" + "),yan=P.map(x=>`(${x.d} + ${S(10**x.i)})`).join(" + ");
+        soruY(m,`${sy(n)} sayısının çözümlenmiş hâli hangisidir?`,[cozC(n),kay,yan].map(x=>`<span class="cz-sec">${x}</span>`),`Doğru! ${S(n)} = ${cozC(n)}`,"",son);})],
+    kural:"Bir sayıyı <b>çözümlerken</b> 0 olmayan her rakamı basamak değeriyle yazar ve toplarız: 40 230 005 = (4 x 10 000 000) + (2 x 100 000) + (3 x 10 000) + (5 x 1) ya da 40 000 000 + 200 000 + 30 000 + 5. 0 rakamları için parça yazılmaz."});
+};
+
+/* 11 · BÜYÜK MÜ KÜÇÜK MÜ? (C → A): rakam çarklarıyla sayı değiştirilir, sembol ve karar veren basamak canlı görünür */
+function karsDuzenek(k,a0,b,D,A,gorevF){const kt=el(k,"");let C=null,g=null,son="";
+  const cz=()=>{const T=karsTablo(C.n,b,"Üstteki","Alttaki");kt.innerHTML=T.html+`<p class="bicim">${uzun(C.n)!==uzun(b)?`Basamak sayıları farklı: <b>${uzun(C.n)}</b> ve <b>${uzun(b)}</b>. Basamak sayısı fazla olan büyüktür.`:T.ilk<0?"İki sayı eşit.":`Basamak sayıları eşit. Karar veren basamak (turuncu): <b>${BAS[T.L-1-T.ilk]}</b>.`}</p>`;
+    const r=`${S(C.n)} ${T.isr} ${S(b)}`;if(r!==son){son=r;D.ekle([r,uzun(C.n)!==uzun(b)?"basamak sayısı":T.ilk<0?"eşit":BAS[T.L-1-T.ilk]],r);}if(g)g.kontrol();};
+  k.appendChild(yeniEl("p","lab2","Üstteki sayı (çarklarla değiştirilebilir)"));C=carkSayi(k,a0,{fn:cz});k.appendChild(kt);k.appendChild(D.el);
+  const R={get c(){return C;},b,kt};g=gorevF(R,cz);k.appendChild(D.el);cz();return R;}
+const e_kars2=p=>{const D=defterY(["Karşılaştırma","Karar veren"]);
+  asamali(p,{tahmin:{soru:`${sy(99999999)} ile ${sy(100000000)} sayılarından hangisi büyüktür?`,secs:[["b",S(100000000)],["a",S(99999999)],["e","Eşittirler"]],dogru:"b",neden:"100 000 000 dokuz basamaklı, 99 999 999 sekiz basamaklıdır."},
+    asamalar:[
+      {ad:"Basamak sayısı farklı",yon:["Üstteki sekiz basamaklı sayıyı ▲ ve ▼ ile değiştirebilirsiniz; alttaki sayı sabit. Sembol ve karar veren bilgi her değişiklikte yenilenir.","Görevleri sırayla yapınız."],bitis:"Üç görevi de yapınca.",
+        kur:(k,A)=>{const b=+("10"+String(rs(7)));const a0=+(String(ra(1,8))+String(rs(7)));let R;const bE=yeniEl("button","ghost","Üstteki sayıya basamak ekleyin");bE.type="button";
+          R=karsDuzenek(k,a0,b,D,A,(R,cz)=>gorevler(k,[{m:"Üstteki sayının <b>bütün rakamlarını 9</b> yapınız. Üstteki sayı büyük oldu mu?",ok:()=>R.c.n===99999999,s:()=>"Bütün rakamlar 9 olsa da sekiz basamaklı sayı küçük kaldı."},
+            {m:"Alttaki <b>Üstteki sayıya basamak ekleyin</b> düğmesine basınız.",ok:()=>R.c.L===9,s:()=>"İki sayı da dokuz basamaklı oldu."},
+            {m:"Şimdi üstteki sayıyı alttakinden <b>büyük</b> yapınız.",ok:()=>R.c.n>b,s:()=>"Basamak sayıları eşitken soldaki basamaklar karar verdi."}],()=>A.tamam("Basamak sayısının önce bakılan ölçü olduğunu gördünüz.")));
+          const r=yeniEl("div","row");k.insertBefore(r,R.kt);r.appendChild(bE);bE.onclick=()=>{if(R.c.L<9)R.c.ekle();};
+          A.oto=()=>{const c=R.c;if(c.L===8&&c.n!==99999999){const j=c.s.split("").findIndex(x=>x!=="9");c.degis(j,1);return;}if(c.L===8){bE.click();return;}c.degis(1,1);};}},
+      {ad:"Basamak sayıları eşit",yon:["İki sayı da dokuz basamaklı ve soldaki rakamları aynı. Yalnız üstteki sayıyı değiştirebilirsiniz.","Görevleri sırayla yapınız; turuncu sütun karar veren basamağı gösterir."],bitis:"Üç görevi de yapınca.",
+        kur:(k,A)=>{const s=String(rs(9)),p=ra(3,5);let x=+s[p];if(x>7)x=ra(1,6);const b=+(s.slice(0,p)+(x+2)+String(rs(9)).slice(p+1)),a0=+(s.slice(0,p)+x+String(rs(9)).slice(p+1));const a0s=String(a0);
+          const tek=n=>String(n).split("").filter((c,i)=>c!==a0s[i]).length;const ilkF=n=>{const A2=String(n),B2=String(b);for(let i=0;i<9;i++)if(A2[i]!==B2[i])return i;return -1;};
+          const R=karsDuzenek(k,a0,b,D,A,(R)=>gorevler(k,[{m:"<b>Yalnız bir rakamı</b> değiştirerek üstteki sayıyı alttakinden büyük yapınız.",ok:()=>R.c.n>b&&tek(R.c.n)===1,s:()=>"Karar veren basamaktaki rakamı büyüttünüz."},
+            {m:"Üstteki sayının, karar veren (turuncu) basamağın <b>sağındaki bütün rakamlarını 0</b> yapınız. Sıra değişti mi?",ok:()=>{const i=ilkF(R.c.n);return R.c.n>b&&i>=0&&/^0*$/.test(String(R.c.n).slice(i+1));},s:()=>"Sağdaki rakamlar 0 olsa da üstteki sayı büyük kaldı."},
+            {m:"Şimdi üstteki sayıyı yeniden alttakinden <b>küçük</b> yapınız.",ok:()=>R.c.n<b,s:()=>"Karar veren basamağı küçültmek yetti."}],()=>A.tamam("Basamak sayıları eşitken soldan ilk farklı basamağın karar verdiğini gördünüz.")));
+          A.oto=()=>{const c=R.c,i=ilkF(c.n);if(c.n<b&&tek(c.n)<=1&&!k.querySelectorAll(".gorevler li.tamam").length){c.degis(p,1);return;}
+            if(c.n>b){const t=String(c.n).split("").findIndex((ch,j)=>j>i&&ch!=="0");if(t>=0){c.degis(t,-1);return;}c.degis(p,-1);c.degis(p,-1);return;}c.degis(p,-1);};}},
+      kuralA(D,[["Basamak sayıları farklı iki doğal sayıdan hangisi büyüktür?",["Basamak sayısı fazla olan","İlk rakamı büyük olan","Son rakamı büyük olan"],"Doğru! 100 000 000 &gt; 99 999 999",["Deftere bakınız: Bütün rakamları 9 olan sayı bile küçük kaldı.","Son rakam karşılaştırmada en az etkili basamaktır."]],
+        ["Basamak sayıları eşitse hangi basamak karar verir?",["Soldan başlayınca rakamları farklı olan ilk basamak","En sağdaki basamak","Rakamları en büyük olan basamak"],"Doğru! Sağındaki rakamlar ne olursa olsun karar değişmez.",["Deftere bakınız: Sağdaki rakamları 0 yaptığınızda sıra değişmedi.","Karar soldan ilk farklı basamakta verilir."]]]),
+      kendiY((m,son)=>{const [a,b]=esitCift(),[c,d]=farkliCift();const dog=(x,y)=>`${S(x)} ${x<y?"&lt;":"&gt;"} ${S(y)}`,yan=(x,y)=>`${S(x)} ${x<y?"&gt;":"&lt;"} ${S(y)}`;const t=Math.random()<.5;
+        soruY(m,"Aşağıdakilerden hangisi <b>doğrudur</b>?",t?[dog(a,b),yan(c,d),yan(a,b)]:[dog(c,d),yan(a,b),yan(c,d)],"Doğru!","",son);})],
+    kural:"İki doğal sayıyı karşılaştırırken önce <b>basamak sayılarına</b> bakarız: Basamak sayısı fazla olan sayı büyüktür. Basamak sayıları eşitse <b>en soldan</b> başlayıp basamakları sırayla karşılaştırırız; ilk farklı rakamı büyük olan sayı büyüktür, sağındaki rakamlar kararı değiştirmez."});
+};
+
+/* 13 · ESKİ MISIR SAYILARI (B → A): sembol ekle/çıkar, değer sayacı canlı */
+function msTezgah(k,hedefler,D,A){let t=0;const c=[0,0,0,0,0,0,0];
+  k.insertAdjacentHTML("beforeend",`<div class="dkart ms-h"></div><div class="ms-tez"></div><div class="dg-bilgi"><div><small>Sembollerin toplam değeri</small><b class="ms-top">0</b></div><div><small>Kullanılan sembol</small><b class="ms-say">0</b></div><div><small>Hedef</small><b class="ms-hd"></b></div></div><p class="lab2">Tablet</p><div class="ms-yaz"></div><div class="fb" hidden></div>`);
+  const tz=k.querySelector(".ms-tez"),f=k.querySelector(".fb");k.appendChild(D.el);
+  tz.innerHTML=MS.map((m,i)=>`<div>${msSvg(i,28)}<button type="button" class="ghost ms-a" data-i="${i}" data-d="-1" aria-label="${m.ad} çıkar">−</button><b class="ms-c${i}">0</b><button type="button" class="ghost ms-a" data-i="${i}" data-d="1" aria-label="${m.ad} ekle">+</button></div>`).reverse().join("");
+  const deger=()=>c.reduce((s,x,i)=>s+x*MS[i].d,0);
+  function cz(){const n=deger(),h=hedefler[t];c.forEach((x,i)=>k.querySelector(".ms-c"+i).textContent=x);k.querySelector(".ms-top").textContent=S(n);k.querySelector(".ms-say").textContent=c.reduce((a,b)=>a+b,0);
+    k.querySelector(".ms-hd").textContent=S(h);k.querySelector(".ms-h").innerHTML=`<small>Hedef ${t+1} / ${hedefler.length}</small><p>Tablete <b>${sy(h)}</b> sayısını sembollerle yazınız.</p>`;
+    k.querySelector(".ms-yaz").innerHTML=n?msSayi(n,false):"<i>Tablet boş.</i>";A.durum(`${t} / ${hedefler.length}`);}
+  tz.querySelectorAll(".ms-a").forEach(b=>b.onclick=()=>{const i=+b.dataset.i,dd=+b.dataset.d;if(c[i]+dd<0)return;if(c[i]+dd>9){fb(f,false,"Aynı sembolden 10 tane yerine bir büyük sembol kullanılır; en fazla 9 tane koyunuz.");return;}c[i]+=dd;f.hidden=true;bip(dd>0?680:520,.04);cz();
+    const n=deger(),h=hedefler[t];if(n===h){const say=c.reduce((a,b)=>a+b,0);D.ekle([S(h),msSayi(h,false),String(say),String(h).split("").filter(x=>x==="0").length+" tane 0 → sembol yok"],"y"+h);bip(760,.1);
+      fb(f,true,`Tablette ${S(h)} yazıyor: ${say} sembol kullandınız. 0 olan basamaklar için hiç sembol koymadınız.`);t++;if(t>=hedefler.length){A.tamam("Sayıları sembollerle yazdınız.");return;}setTimeout(()=>{c.fill(0);f.hidden=true;cz();},1400);}});
+  A.oto=()=>{const h=hedefler[t];if(h==null)return;const i=[0,1,2,3,4,5,6].find(j=>c[j]!==rk(h,j));if(i==null)return;k.querySelector(`.ms-a[data-i="${i}"][data-d="${c[i]<rk(h,i)?1:-1}"]`).click();};cz();}
+const e_misir2=p=>{const D=defterY(["Sayı","Mısır sembolleriyle","Sembol sayısı","Sıfırlar"]);
+  const ms7=z=>{let s=String(ra(1,2));for(let i=1;i<7;i++)s+=Math.random()<z?"0":ra(1,4);return +s;};
+  asamali(p,{tahmin:{soru:"Eski Mısırlılar 0 için bir sembol kullanmış mıdır?",secs:[["h","Hayır, kullanmamışlardır."],["e","Evet, kullanmışlardır."]],dogru:"h",neden:"Mısır sayılarında her sembolün değeri sabittir; boş basamak için sembole gerek yoktur."},
+    asamalar:[
+      {ad:"Sembolleri oku",yon:["Yaklaşık 5000 yıl önce Eski Mısır'da sayılar sembollerle yazılırdı. Sembollerin değerleri tabloda.","Sembollerle yazılmış sayıyı rakamlarla yazınız ve <b>Kontrol edin</b> düğmesine basınız."],bitis:"İki sayıyı da doğru okuyunca.",
+        kur:(k,A)=>{k.insertAdjacentHTML("beforeend",msAnahtar());const L=[ms7(.2),ms7(.4)];let t=0;const git=()=>{if(t>=L.length){A.tamam("Mısır sayılarını okudunuz.");return;}const n=L[t],kar=t===1;t++;A.durum(`${t-1} / 2`);
+          const q=sayiGir(k,`<div class="dkart"><small>Sayı ${t} / 2${kar?" (semboller karışık sırada)":""}</small>${msSayi(n,kar)}</div>`,n,`Doğru! ${sy(n)}. ${kar?"Sembollerin sırası karışık olsa da sayı değişmedi.":""}`,"",null,{uzunluk:true});
+          q.addEventListener("dogru",()=>{D.ekle([S(n),msSayi(n,false),String(String(n).split("").reduce((x,c)=>x+ +c,0)),"okundu"],"o"+n);setTimeout(git,600);});};git();A.oto=()=>otoSor(k);}},
+      {ad:"Sembol tezgâhı",yon:["Her sembolün + ve − düğmeleri var. Sembol ekledikçe ya da çıkardıkça toplam değer anında değişir.","Hedef sayıyı tablete sembollerle yazınız. Toplam hedefe eşit olunca sıradaki hedef gelir."],bitis:"Üç hedef sayının üçünü de yazınca.",kur:(k,A)=>msTezgah(k,[ms7(.3),ms7(.55),+("1"+"0".repeat(6))+ra(1,9)],D,A)},
+      kuralA(D,[["Eski Mısır sayılarında 0 olan basamaklar için ne yapıldı?",["Hiç sembol yazılmadı.","0 sembolü çizildi.","Boşluk bırakıldı; boşluk olmadan okunamazdı."],"Doğru! Mısır sayılarında her sembolün değeri sabit olduğu için boş basamağı göstermeye gerek yoktur.",["Mısırlıların 0 sembolü yoktu.","Semboller karışık sırada da okunabiliyordu; boşluğa gerek yoktu."]],
+        ["Bizim sayı sistemimizde 0 neden gereklidir?",["Rakamın değeri bulunduğu basamağa bağlı olduğundan boş basamağı 0 gösterir.","Sayılar daha uzun görünsün diye","0 olmadan toplama yapılamadığı için"],"Doğru! 3 000 040 sayısından 0'ları silersek 34 olur; rakamlar yer değiştirir.",["0'ın görevi sayıyı uzatmak değil, boş basamağın yerini tutmaktır.","Asıl sebep basamak değeridir."]],
+        ["1 000 009 sayısını Mısır sembolleriyle yazmak için kaç sembol gerekir?",["10","2","7"],"Doğru! 1 kollarını kaldırmış adam ve 9 çubuk: 10 sembol. Bizim sistemimizde ise 7 rakam yazılır.",["Deftere bakınız: Her çubuk ayrı bir semboldür.","7 bizim yazımımızdaki rakam sayısıdır."]]]),
+      kendiY((m,son)=>{const n=ms7(.45);m.insertAdjacentHTML("beforeend",msAnahtar()+`<div class="dkart">${msSayi(n,true)}</div>`);
+        soruY(m,"Sembollerle yazılmış sayı hangisidir?",benzersiz([n,+String(n).replace(/0/g,""),String(n).split("").reduce((x,c)=>x+ +c,0),n*10]).map(sy),`Doğru! ${sy(n)}`,"",son);})],
+    kural:"Eski Mısır sayılarında her sembolün değeri <b>sabittir</b> (1, 10, 100, …, 1 000 000); semboller tekrar edilir ve değerleri toplanır. Sıra değişse de sayı değişmez ve 0 için sembol yoktur. Bizim sistemimizde ise bir rakamın değeri <b>bulunduğu basamağa</b> göre değişir; boş basamağı <b>0</b> gösterir."});
+};
+
+/* 14 · UZAY MESAFELERİ (C → A): gezegenleri ▲▼ ile sıralama ve "milyar çizgisi" eşiği */
+function gezSirala(k,D,A){let sira=karistir(GEZ.map((_,i)=>i));if(sira.every((x,i)=>x===i))sira.reverse();const L=el(k,"uz-l");k.appendChild(D.el);
+  function cz(){let iyi=0;L.innerHTML="";sira.forEach((j,t)=>{if(t){const ok=GEZ[sira[t-1]][1]<GEZ[j][1];if(ok)iyi++;L.appendChild(yeniEl("div","uz-isr "+(ok?"ok":"no"),ok?"&lt; ✓":"&gt; ✗"));}
+      const g=GEZ[j],r=yeniEl("div","uz-o");r.innerHTML=`<i style="background:${g[2]}"></i><div><b>${g[0]}</b><small>${S(g[1])} km · ${uzun(g[1])} basamak</small></div><button type="button" class="ghost" aria-label="${g[0]} yukarı"${t?"":" disabled"}>▲</button><button type="button" class="ghost" aria-label="${g[0]} aşağı"${t<sira.length-1?"":" disabled"}>▼</button>`;
+      const [u,a]=r.querySelectorAll("button");u.onclick=()=>{[sira[t-1],sira[t]]=[sira[t],sira[t-1]];bip(640,.03);cz();};a.onclick=()=>{[sira[t+1],sira[t]]=[sira[t],sira[t+1]];bip(640,.03);cz();};L.appendChild(r);});
+    A.durum(`${iyi} / 7 komşu sıralı`);const ad=sira.map(j=>GEZ[j][0]).join(" → ");D.ekle([ad,iyi===7?"sıralı ✓":"sıralı değil",`${iyi} / 7 komşu doğru`,""],"s"+sira.join(""));
+    if(iyi===7){bip(760,.1);A.tamam("Gezegenleri Güneş'e yakından uzağa sıraladınız: önce basamak sayısına, sonra soldaki basamaklara baktınız.");}}
+  A.oto=()=>{const t=sira.findIndex((j,i)=>i&&GEZ[sira[i-1]][1]>GEZ[j][1]);if(t>0){[sira[t-1],sira[t]]=[sira[t],sira[t-1]];cz();}};cz();}
+function milyarCizgisi(k,D,A){const E=[1e7,1e8,1e9,1e10];let e=null,g=null;const gor=new Set();
+  k.insertAdjacentHTML("beforeend",`<p class="lab2">Eşik uzaklığını seçiniz (km)</p>`);const sg=segment(k,E.map(x=>[x,S(x)]),"",v=>{e=+v;cz();});
+  const L=el(k,"uz-l");k.appendChild(D.el);
+  function cz(){L.innerHTML=GEZ.map(g2=>`<div class="uz-o${e!==null&&g2[1]>=e?" gec":""}"><i style="background:${g2[2]}"></i><div><b>${g2[0]}</b><small>${S(g2[1])} km · ${uzun(g2[1])} basamak</small></div>${e!==null?`<b>${g2[1]>=e?"eşiği geçti":"geçmedi"}</b>`:""}</div>`).join("");
+    if(e!==null){gor.add(e);const G=GEZ.filter(x=>x[1]>=e);D.ekle([S(e)+" km",`${S(e)} → ${uzun(e)} basamak`,G.map(x=>x[0]).join(", ")||"hiçbiri",String(G.length)],"e"+e);if(g)g.kontrol();}A.durum(`${gor.size} eşik`);}
+  cz();g=gorevler(k,[{m:"Eşiği <b>1 000 000 000</b> (bir milyar) yapınız. Eşiği geçen gezegenlerin uzaklıkları kaç basamaklı?",ok:()=>e===1e9,s:()=>"Satürn, Uranüs, Neptün: 10 basamaklı uzaklıklar."},
+    {m:"Bütün gezegenlerin geçtiği bir eşik bulunuz.",ok:()=>e===1e7,s:()=>"10 000 000 km: en yakın Merkür bile 8 basamaklı uzaklıkta."},
+    {m:"Hiçbir gezegenin geçemediği bir eşik bulunuz.",ok:()=>e===1e10,s:()=>"10 000 000 000 km on bir basamaklı; Neptün bile on basamaklı uzaklıkta."}],()=>A.tamam("Basamak sayısı arttıkça uzaklığın büyüdüğünü gördünüz."));k.appendChild(D.el);
+  A.oto=()=>{const h=!gor.has(1e9)?1e9:!gor.has(1e7)?1e7:1e10;sg.querySelector(`button[data-v="${h}"]`).click();};}
+const e_uzay2=p=>{const D=defterY(["Deneme","Sonuç","Gezegenler","Sayı"]);
+  asamali(p,{tahmin:{soru:"Neptün'ün Güneş'e uzaklığı hangisine daha yakındır?",secs:[["a","Birkaç milyar kilometre"],["b","Birkaç milyon kilometre"],["c","Birkaç bin kilometre"]],dogru:"a",neden:"Neptün yaklaşık 4 milyar 498 milyon kilometre uzaktadır."},
+    asamalar:[
+      {ad:"Gezegen sırası",yon:["Gezegen kartları karışık dizildi. Kartları ▲ ve ▼ ile yer değiştirerek Güneş'e <b>en yakından en uzağa</b> sıralayınız.","Kartların arasındaki işaret anında değişir: yeşil “&lt; ✓” doğru, kırmızı “&gt; ✗” yanlış komşuluk demektir."],bitis:"Bütün işaretler yeşil olunca.",kur:(k,A)=>gezSirala(k,D,A)},
+      {ad:"Milyar çizgisi",yon:["Bir eşik uzaklığı seçiniz: Eşiği geçen gezegenler renklenir ve deney defterine yazılır.","Görev listesindeki eşikleri bulunuz."],bitis:"Üç görevi de yapınca.",kur:(k,A)=>milyarCizgisi(k,D,A)},
+      kuralA(D,[["Gezegenleri sıralarken en hızlı karar hangi bilgiyle verildi?",["Uzaklığın basamak sayısıyla","Uzaklığın son rakamıyla","Gezegenin adıyla"],"Doğru! Basamak sayısı fazla olan uzaklık daha büyüktür; eşitse soldan ilk farklı basamağa bakılır.",["Son rakam en az etkili basamaktır.","Ad sıralamayla ilgili değildir."]],
+        ["Uzaklığı 10 basamaklı bir sayı olan gezegenin uzaklığı okunurken ilk söylenen bölük adı hangisidir?",["milyar","milyon","bin"],"Doğru! 10, 11 ve 12 basamaklı sayılarda en soldaki bölük milyarlar bölüğüdür.",["Milyonlar bölüğü 7, 8 ve 9 basamaklı sayılarda en soldaki bölüktür.","Binler bölüğü en soldaki bölük olamaz; sayı çok uzun."]]]),
+      kendiY((m,son)=>{const n=bolukten([ra(1,999),ra(0,999),ra(100,999),ra(1,9)]);
+        sayiGir(m,`<div class="dkart"><small>Uzay aracının mesajı</small><p>“Bu yolculukta <b>${okunus(n)}</b> kilometre yol aldım.”</p></div>${soruKut("Uzay aracının aldığı yolu rakamlarla yazınız. (Birimi yazmayınız.)")}`,n,`Doğru! ${renkli(n,true)} km`,"",son,{uzunluk:true});})],
+    kural:"Çok büyük uzaklıkları karşılaştırırken önce <b>basamak sayısına</b> bakarız: 1 000 000 000 (bir milyar) on basamaklı en küçük sayıdır; uzaklığı bir milyar kilometre ya da daha fazla olan gezegenlerin uzaklıkları en az on basamaklıdır ve okunuşları “milyar” ile başlar."});
+};
+
+/* 15 · NÜFUS HARİTASI (C → A): eşik sayısı çarklarla kurulur; iller eşiğin altında/üstünde canlı boyanır */
+function esikTur(k,D,A){k.insertAdjacentHTML("beforeend",`<p class="lab2">Eşik sayısı</p>`);let g=null;const gr=el(k,"il-grid2");const oz=el(k,"bk-oku");
+  const C=carkSayi(k,5000000,{fn:()=>cz()});k.insertBefore(C&&k.lastChild,gr);
+  const r=el(k,"row");r.innerHTML=`<button type="button" class="primary ek">Eşiği deftere yazın</button>`;k.appendChild(D.el);
+  const say=()=>{const e=C.n;return {alt:ILLER.filter(x=>x[1]<e),ust:ILLER.filter(x=>x[1]>=e)};};
+  function cz(){const e=C.n,s=say();gr.innerHTML=ILLER.map(c=>`<div class="il2 ${c[1]<e?"alt":"ust"}"><b>${c[0]}</b><span>${S(c[1])}</span></div>`).join("");
+    oz.innerHTML=`<small>Eşik: ${S(e)} (“${okunus(e)}”)</small>Eşiğin altında <b>${s.alt.length}</b> il (mavi), üstünde ya da eşit <b>${s.ust.length}</b> il (turuncu).`;if(g)g.kontrol();}
+  r.querySelector(".ek").onclick=()=>{const s=say();D.ekle([S(C.n),s.alt.map(x=>x[0]).join(", ")||"yok",s.ust.map(x=>x[0]).join(", ")||"yok"],"e"+C.n);bip(700,.05);if(g)g.kontrol();};
+  cz();g=gorevler(k,[{m:"Eşiği <b>1 000 000</b> yapıp deftere yazınız. Eşiğin altındaki illerin nüfusu kaç basamaklı?",ok:()=>D.satirlar.some(x=>x.key==="e1000000"),s:()=>"Altında kalanların nüfusu en fazla 6 basamaklı."},
+    {m:"Eşiğin <b>üstünde tam 5 il</b> kalacak bir eşik kurup deftere yazınız.",ok:()=>D.satirlar.some(x=>x.r[2].split(", ").length===5&&x.r[2]!=="yok"),s:()=>"İstanbul, Ankara, İzmir, Bursa ve Antalya."},
+    {m:"Eşiğin <b>altında tam 4 il</b> kalacak bir eşik kurup deftere yazınız.",ok:()=>D.satirlar.some(x=>x.r[1]!=="yok"&&x.r[1].split(", ").length===4),s:()=>"Bayburt, Rize, Erzurum, Trabzon."}],()=>A.tamam("Eşik sayısıyla illerin nüfuslarını karşılaştırdınız."));k.appendChild(D.el);
+  A.oto=()=>{const H=[1000000,2500000,1200000],t=k.querySelectorAll(".gorevler li.tamam").length;C.kur(String(H[t]));r.querySelector(".ek").click();};}
+const e_nufus2=p=>{const D=defterY(["Eşik","Eşiğin altındaki iller","Eşiğin üstündeki iller"]);
+  asamali(p,{tahmin:{soru:`İstanbul'un nüfusu (${S(15701602)}) okunurken ilk söylenen bölük adı hangisidir?`,secs:[["m","milyon"],["y","milyar"],["b","bin"]],dogru:"m",neden:"15 701 602 sayısının en soldaki bölüğü milyonlar bölüğüdür: on beş milyon …"},
+    asamalar:[
+      {ad:"Eşik sayısı",yon:["Eşik sayısını rakam çarklarıyla değiştiriniz. Nüfusu eşikten az olan iller mavi, eşit ya da fazla olanlar turuncu boyanır.","Her eşiği <b>Eşiği deftere yazın</b> düğmesiyle deftere yazınız ve görevleri yapınız."],bitis:"Üç görevi de yapınca.",kur:(k,A)=>esikTur(k,D,A)},
+      {ad:"İpucuna uyan il",yon:["Kutudaki ipucunu okuyunuz.","İpucuna uyan ilin kartına dokununuz. Her ipucuna yalnız bir il uyar."],bitis:"Üç ipucunun ilini de bulunca.",kur:(k,A)=>nufusTur(k,defterY(["İpucu","İl","Nüfus"]),A)},
+      kuralA(D,[["Nüfusu 1 000 000'dan az olan bir ilin nüfusu <b>en fazla</b> kaç basamaklıdır?",["6","7","5"],`Doğru! En büyük 6 basamaklı sayı ${S(999999)}; bir fazlası ${S(1000000)}.`,["1 000 000 yedi basamaklıdır; ondan küçük sayılar en fazla kaç basamaklı olur?","Rize ve Trabzon'un nüfuslarının basamaklarını sayınız."]],
+        ["Nüfusu 7 basamaklı olan bir il için hangisi <b>kesinlikle</b> doğrudur?",["Nüfusu en az 1 000 000'dur.","Nüfusu 10 000 000'dan fazladır.","Nüfusu 1 000 000'dan azdır."],"Doğru! En küçük 7 basamaklı sayı 1 000 000'dur.",["7 basamaklı en büyük sayı 9 999 999'dur; 10 000 000'dan küçüktür.","1 000 000'dan az olan sayılar en fazla 6 basamaklıdır."]]]),
+      kendiY((m,son)=>{const c=rastgele(ILLER.filter(x=>x[1]>1e6)),n=c[1],T=okunus(n);const y1=T.replace(" milyon",""),y2=T.replace(/ bin /," ");
+        soruY(m,`${c[0]} ilinin yaklaşık nüfusu ${sy(n)} kişidir. Bu sayının okunuşu hangisidir?`,benzersiz([T,y1,y2,T+" birler"]),`Doğru! ${renkli(n,true)}`,"",son);})],
+    kural:"Büyük sayıları karşılaştırırken önce basamak sayısına bakarız: 7 basamaklı her sayı en az 1 000 000'dur, 6 basamaklı sayılar 1 000 000'dan küçüktür. Bir bölüğü bulmak için sayıyı <b>sağdan</b> üçer üçer ayırırız: 15 701 602 sayısının milyonlar bölüğünde 15 vardır."});
+};
+
+/* 19 · ÖRÜNTÜYÜ TAMAMLA (B → A): başlangıç sayısı ve çarpan öğrencinin seçimi; sayı uzadıkça bölükler canlı belirir */
+function carpmaMakinesi(k,D,A){let bas=25,cur=25,ks=10,g=null;const yol=[];
+  k.insertAdjacentHTML("beforeend",`<p class="lab2">Başlangıç sayısı</p>`);const s1=segment(k,[[7,"7"],[25,"25"],[340,"340"]],25,v=>{bas=+v;cur=bas;yol.length=0;cz();});
+  k.insertAdjacentHTML("beforeend",`<p class="lab2">Çarpan</p>`);const s2=segment(k,[[10,"x 10"],[100,"x 100"],[1000,"x 1000"]],10,v=>{ks=+v;});
+  const r=el(k,"row");r.innerHTML=`<button type="button" class="primary cp">Çarpın ▶</button><button type="button" class="ghost bs">Baştan</button>`;
+  const ek=el(k,"dkart");const f=el(k,"fb");f.hidden=true;k.appendChild(D.el);
+  function cz(){ek.innerHTML=`<small>${yol.length?`${S(bas)} ${yol.map(x=>"x "+S(x)).join(" ")}`:"Başlangıç"}</small><p class="buyuk">${renkli(cur,true)}</p><p>Okunuşu: <b>${okunus(cur)}</b> · ${uzun(cur)} basamak, ${bolukler(cur).length} bölük</p>`;A.durum(`${uzun(cur)} basamak`);if(g)g.kontrol();}
+  r.querySelector(".cp").onclick=()=>{if(cur*ks>=1e12){bip(220,.12);fb(f,false,"Bu çarpımla sayı 12 basamağı geçer. Baştan başlayınız ya da daha küçük bir çarpan seçiniz.");return;}f.hidden=true;cur*=ks;yol.push(ks);bip(640,.05);
+    D.ekle([`${S(bas)} ${yol.map(x=>"x "+S(x)).join(" ")}`,S(cur),String(uzun(cur)),okunus(cur)],bas+":"+yol.join(","));cz();};
+  r.querySelector(".bs").onclick=()=>{cur=bas;yol.length=0;f.hidden=true;cz();};
+  cz();g=gorevler(k,[{m:"25'ten başlayıp <b>x 1000</b> ile çarparak “yirmi beş milyon” sayısına ulaşınız.",ok:()=>bas===25&&cur===25e6,s:()=>"Her x 1000 bir bölük ekledi: yirmi beş bin, yirmi beş milyon."},
+    {m:"7'den başlayıp <b>yalnız x 10</b> kullanarak “yedi yüz milyon” sayısına ulaşınız.",ok:()=>bas===7&&cur===7e8&&yol.every(x=>x===10),s:()=>"Yedi, yetmiş, yedi yüz, yedi bin … yedi yüz milyon: bir–on–yüz her bölükte tekrar etti."},
+    {m:"340'tan başlayarak okunuşunda “milyar” geçen bir sayıya ulaşınız.",ok:()=>bas===340&&cur>=1e9,s:()=>"Milyarlar bölüğü 10. basamakla başladı."}],()=>A.tamam("Çarpma makinesiyle bölüklerin nasıl uzadığını gördünüz."));k.appendChild(D.el);
+  A.oto=()=>{const t=k.querySelectorAll(".gorevler li.tamam").length;const P=[[25,1000],[7,10],[340,1000]][t];if(!P)return;if(bas!==P[0]){s1.querySelector(`button[data-v="${P[0]}"]`).click();}s2.querySelector(`button[data-v="${P[1]}"]`).click();ks=P[1];r.querySelector(".cp").click();};}
+const e_oruntu2=p=>{const D=defterY(["İşlem","Sayı","Basamak","Okunuş"]);
+  asamali(p,{tahmin:{soru:`${sy(1000000)} sayısı 10 ile çarpılınca sonuç nasıl okunur?`,secs:[["a","on milyon"],["b","bin milyon"],["c","bir milyar"]],dogru:"a",neden:"1 000 000 x 10 = 10 000 000: on milyon."},
+    asamalar:[
+      {ad:"Çarpma makinesi",yon:["Bir başlangıç sayısı ve bir çarpan seçip <b>Çarpın</b> düğmesine basınız. Sayı uzar, bölükleri renklenir ve okunuşu yazılır.","Her çarpım deney defterine geçer. Görev listesindeki sayılara ulaşınız; gerekirse <b>Baştan</b> düğmesiyle yeniden başlayınız."],bitis:"Üç görevi de yapınca.",kur:(k,A)=>carpmaMakinesi(k,D,A)},
+      {ad:"Eksik terimler",yon:["Sayı örüntüsünde her terim bir öncekinden aynı miktarda büyük.","■ ve ▲ yerine gelecek sayıları sırayla rakamlarla yazınız."],bitis:"İki eksik terimi de bulunca.",
+        kur:(k,A)=>{const Z=diziUret();k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>Örüntü</small><p class="buyuk dz">${Z.T.map((x,j)=>j===2?"■":j===4?"▲":S(x)).join(" → ")}</p></div>`);
+          sayiGir(k,soruKut("■ yerine hangi sayı gelmelidir?"),Z.T[2],`Doğru! ■ = ${S(Z.T[2])}. ${renkli(Z.T[2],true)}`,"",()=>{
+            sayiGir(k,soruKut("▲ yerine hangi sayı gelmelidir?"),Z.T[4],`Doğru! ▲ = ${S(Z.T[4])}`,"",()=>{D.ekle([`Her adımda + ${S(Z.s)}`,Z.T.map(S).join(" → "),"",""],"z");A.tamam("");},{uzunluk:true});},{uzunluk:true});A.oto=()=>otoSor(k);}},
+      kuralA(D,[["Okunuşlarda hangi örüntü tekrar etti?",["“bir, on, yüz” örüntüsü her bölükte bölük adıyla tekrar etti.","Her adımda okunuşun sonuna “sıfır” eklendi.","Okunuşlarda örüntü yoktu."],"Doğru! yedi, yetmiş, yedi yüz; yedi bin, yetmiş bin, yedi yüz bin; yedi milyon …",["0'lar okunuşta söylenmez.","Deftere bakınız: Okunuşlar düzenli bir sırayla tekrar ediyor."]],
+        ["Bir sayı 1000 ile çarpılınca ne olur?",["Sayıya üç basamak (yeni bir bölük) eklenir.","Sayıya bir basamak eklenir.","Sayının basamak sayısı değişmez."],"Doğru! 25 → 25 000 → 25 000 000: her seferinde bir bölük.",["x 10 bir basamak ekler; deftere bakınız.","Deftere bakınız: Sayı uzadı."]]]),
+      kendiY((m,son)=>{const Z=diziUret(),g=ra(1,4);
+        sayiGir(m,`<div class="dkart"><small>Örüntü</small><p class="buyuk dz">${Z.T.map((x,j)=>j===g?"■":S(x)).join(" → ")}</p></div>${soruKut("■ yerine hangi sayı gelmelidir?")}`,Z.T[g],`Doğru! ■ = ${S(Z.T[g])}`,"",son,{uzunluk:true});})],
+    kural:"Sayıların okunuşunda bir örüntü vardır: Her bölükte <b>bir, on, yüz</b> sırası bölüğün adıyla tekrar eder. Bir sayı 10 ile çarpılınca bir basamak, 1000 ile çarpılınca üç basamak, yani <b>yeni bir bölük</b> eklenir."});
+};
+
+/* 20 · BÖLÜK DÜELLOSU → bölük yap-boz yarışı (C → A): okunuşu verilen sayı tuş takımıyla kurulur, yazılanın okunuşu canlı görünür */
+function tusTakimi(k,fn){const ekr=el(k,"yr-ekran"),ok=el(k,"bk-oku"),t=el(k,"tus");let s="";
+  t.innerHTML=[1,2,3,4,5,6,7,8,9,0].map(x=>`<button type="button" class="ghost" data-v="${x}">${x}</button>`).join("")+`<button type="button" class="ghost" data-v="sil" style="grid-column:span 2">⌫ Sil</button><button type="button" class="ghost" data-v="tem" style="grid-column:span 3">Temizle</button>`;
+  const cz=()=>{ekr.innerHTML=s?renkli(+s,false):"&nbsp;";ok.innerHTML=s?`<small>Yazdığınızın okunuşu</small>“${okunus(+s)}”`:"<small>Yazdığınızın okunuşu</small><i>Henüz rakam yazmadınız.</i>";fn&&fn(s);};
+  t.querySelectorAll("button").forEach(b=>b.onclick=()=>{const v=b.dataset.v;if(v==="sil")s=s.slice(0,-1);else if(v==="tem")s="";else{if(s.length>=12||(s===""&&v==="0"))return;s+=v;}bip(600,.02);cz();});
+  cz();return {get s(){return s;},yaz(x){s=String(x);cz();},kilit(b){t.querySelectorAll("button").forEach(x=>x.disabled=b);}};}
+const YARIS5=()=>rastgele([()=>sifirliSayi(3),()=>sifirliSayi(4),()=>bolukten([ra(1,99),ra(1,9)*10,ra(1,9)*100+ra(1,9)]),()=>bolukten([ra(1,9),0,ra(10,99),ra(1,9)*100])])();
+function yarisKur(k,D,A){const TUR=6;let tur=0,puan=0,dogruS=0,hedef=0,zam=null,t0=0,acik=false;const SURE=30000;
+  k.insertAdjacentHTML("beforeend",`<div class="skorlar"><div><small>Tur</small><b class="y-tur">0 / ${TUR}</b></div><div><small>Doğru</small><b class="y-dog">0</b></div><div><small>Puan</small><b class="y-pu">0</b></div><div><small>Kalan süre</small><b class="y-su">30 sn</b></div></div><div class="dkart y-ok"><small>Okunuş</small><p>Hazır olunca <b>Yarışı başlatın</b> düğmesine basınız.</p></div><div class="yaris" aria-label="Süre çubuğu"><i></i></div>`);
+  const T=tusTakimi(k);const r=el(k,"row");r.innerHTML=`<button type="button" class="primary y-bas">Yarışı başlatın</button><button type="button" class="primary y-tes" hidden>Teslim edin ✓</button>`;const f=el(k,"fb");f.hidden=true;k.appendChild(D.el);
+  const bar=k.querySelector(".yaris i"),tb=r.querySelector(".y-tes"),bb=r.querySelector(".y-bas");T.kilit(true);
+  const skor=()=>{k.querySelector(".y-tur").textContent=`${tur} / ${TUR}`;k.querySelector(".y-dog").textContent=dogruS;k.querySelector(".y-pu").textContent=puan;A.durum(`Tur ${tur} / ${TUR}`);};
+  function yeni(){if(tur>=TUR){acik=false;tb.hidden=true;T.kilit(true);fb(f,true,`Yarış bitti! ${TUR} turda ${dogruS} doğru, ${puan} puan.`);A.tamam(`Yap-boz yarışı: ${dogruS} / ${TUR} doğru, ${puan} puan.`);return;}
+    tur++;skor();hedef=YARIS5();T.yaz("");T.kilit(false);acik=true;tb.hidden=false;f.hidden=true;k.querySelector(".y-ok").innerHTML=`<small>Tur ${tur} · Okunuş</small><p class="buyuk">${okunus(hedef)}</p>`;
+    t0=Date.now();clearInterval(zam);zam=setInterval(()=>{if(!k.isConnected){clearInterval(zam);return;}const o=(Date.now()-t0)/SURE;bar.style.width=Math.min(100,o*100)+"%";k.querySelector(".y-su").textContent=Math.max(0,Math.ceil((SURE-(Date.now()-t0))/1000))+" sn";if(o>=1&&acik)bitir(false,true);},100);}
+  function bitir(ok,sure){acik=false;clearInterval(zam);T.kilit(true);tb.hidden=true;const hiz=Date.now()-t0<SURE/2;if(ok){dogruS++;puan+=hiz?15:10;}
+    D.ekle([okunus(hedef),T.s?S(+T.s):"—",ok?"doğru ✓":sure?"süre bitti":"yanlış",ok?(hiz?"15":"10"):"0"],"t"+tur+"-"+hedef);skor();
+    ok?fb(f,true,`Doğru! ${renkli(hedef,true)} ${hiz?"Hızlı: 15 puan.":"10 puan."}`):fb(f,false,`${sure?"Süre bitti.":"Bu tur olmadı."} Doğru yazılış: ${renkli(hedef,true)}`);bip(ok?760:220,.12);setTimeout(()=>{if(k.isConnected)yeni();},1700);}
+  tb.onclick=()=>{if(!acik)return;if(!T.s){fb(f,false,"Önce sayıyı tuşlarla yazınız.");return;}bitir(+T.s===hedef,false);};
+  bb.onclick=()=>{bb.hidden=true;yeni();};
+  A.oto=()=>{if(!bb.hidden){bb.click();return;}if(acik){T.yaz(hedef);tb.click();}};skor();}
+const e_yaris=p=>{const D=defterY(["Okunuş","Yazdığınız","Sonuç","Puan"]);
+  asamali(p,{tahmin:{giris:"Okunuşu verilen sayıları tuş takımıyla süre bitmeden kuracağınız bir yarış yapacaksınız. Önce bir tahminle ısınınız.",soru:"“dört milyon yirmi bin” sayısı kaç basamaklıdır?",secs:[["7","7"],["6","6"],["9","9"]],dogru:"7",neden:"4 020 000: milyonlar bölüğü 4, binler bölüğü 020, birler bölüğü 000."},
+    asamalar:[
+      {ad:"Kuralları öğren",yon:["Yarış kurallarını madde madde okuyunuz.","Isınma turunda okunuşu verilen sayıyı tuş takımıyla yazınız; yazdığınız sayının okunuşu hemen altında görünür."],bitis:"Isınma sayısını doğru yazınca.",
+        kur:(k,A)=>{k.insertAdjacentHTML("beforeend",`<div class="kurallar"><h4>Yarış kuralları</h4><ul><li><b>Tur:</b> Yarış 6 turdur. Her turda bir sayının okunuşu gelir.<span class="orn">Örnek: “dört milyon yirmi bin”</span></li><li><b>Yazma:</b> Sayıyı tuş takımıyla soldan sağa yazınız. Bölük boşluklarını ekran kendisi koyar; yazdığınızın okunuşu altta görünür, karşılaştırıp düzeltebilirsiniz.</li><li><b>Süre:</b> Her tur 30 saniyedir. Süre bitmeden <b>Teslim edin</b> düğmesine basınız.</li><li><b>Puan:</b> Doğru sayı 10 puandır; sürenin yarısı dolmadan teslim edilen doğru sayı 15 puandır.<span class="orn">Örnek: 2 hızlı ve 3 yavaş doğru: 2 x 15 + 3 x 10 = 60 puan.</span></li><li><b>Bitiş:</b> 6 tur bitince yarış biter; yanlış turda doğru yazılış gösterilir.</li></ul></div><div class="dkart"><small>Isınma (süre yok)</small><p class="buyuk">dört milyon yirmi bin</p></div>`);
+          const f=el(k,"fb");f.hidden=true;const T=tusTakimi(k,s=>{if(+s===4020000){T.kilit(true);D.ekle(["dört milyon yirmi bin",S(4020000),"ısınma ✓","—"],"isinma");fb(f,true,"Doğru! 4 020 000: binler bölüğüne 020 yazdınız. Artık yarışa hazırsınız.");A.tamam("Kuralları öğrendiniz.");}});
+          A.oto=()=>T.yaz(4020000);}},
+      {ad:"Yap-boz yarışı",yon:["<b>Yarışı başlatın</b> düğmesine basınız.","Her turda okunuşu verilen sayıyı yazıp süre bitmeden <b>Teslim edin</b> düğmesine basınız."],bitis:"6 tur bitince (doğru sayınız ne olursa olsun).",kur:(k,A)=>yarisKur(k,D,A)},
+      kuralA(D,[["Okunuşta söylenmeyen bir bölüğü yazarken ne yaptınız?",["Yerine 000 yazdım.","Hiç yazmadım.","Yerine tek 0 yazdım."],"Doğru! Okunmayan bölük 000 olarak yazılır; bölükler kaymaz.",["Bölük yazılmazsa sayı küçülür; deftere bakınız.","Her bölük 3 basamaklıdır."]],
+        ["“yirmi bin” binler bölüğüne nasıl yazılır?",["020","20","200"],"Doğru! En soldaki dışındaki her bölük 3 basamaklıdır.",["En soldaki bölük değilse 3 basamak gerekir.","200, “iki yüz bin” demektir."]]]),
+      kendiY((m,son)=>{const y=rastgele([`${S(3040000)} sayısı “üç milyon dört yüz bin” diye okunur.`,`${S(9999999)} sayısı 8 basamaklıdır.`,`“beş milyar yirmi” sayısı ${S(5000020)} diye yazılır.`,`${S(70500000)} sayısının binler bölüğünde 5 vardır.`]);
+        const dg=karistir([`${S(3040000)} sayısı “üç milyon kırk bin” diye okunur.`,`${S(100000000)} &gt; ${S(99999999)}`,`${S(2600000)} sayısında 6 rakamının basamak değeri ${ekS(600000,"dir")}.`,`“yedi milyon bin” sayısı ${S(7001000)} diye yazılır.`]).slice(0,3);
+        soruY(m,"Aşağıdaki ifadelerden hangisi <b>yanlıştır</b>?",[y,...dg],"Doğru! Bu ifade yanlış; diğerlerinin hepsi doğru.","",son);})],
+    kural:"Okunuşu verilen sayıyı yazarken okunuşu bölük adlarından ayırırız ve her bölüğü yerine yazarız. En soldaki dışındaki her bölük <b>3 basamaklıdır</b>; söylenmeyen basamaklara 0, okunmayan bölüğe <b>000</b> yazılır."});
+};
+
 /* ================= liste ================= */
 const SON="Sonra <b>Kuralı bulun</b> ve <b>Kendinizi deneyin</b> aşamalarını yapınız. Son soruyu doğru cevaplayınca etkinlik biter.";
 const ACT=[
  {ad:"Bölük Avcısı",amac:"Çok basamaklı sayıları sağdan başlayarak üçer basamaklı bölüklere ayırmak ve bölük sayısını keşfetmek.",adimlar:["<b>Aşama 1–2:</b> Rakamların arasına dokunarak bölük ayırıcıları koyunuz ve <b>Bölükleri onaylayın</b> düğmesine basınız.",SON],sure:5,ciz:e_avci},
  {ad:"Basamak Tablosu Kurucu",amac:"Basamak tablosunu milyonlar ve milyarlar bölükleriyle genişletmek; her bölükte tekrar eden birler–onlar–yüzler örüntüsünü keşfetmek.",adimlar:["<b>Aşama 1–2:</b> Önce bir karta, sonra tabloda o kartın gideceği boş hücreye dokununuz.",SON],sure:6,ciz:e_tablo},
- {ad:"Sıfırlı Bölük Dedektifi",amac:"Tamamı 0 olan bölüklerin okunmadığını ama yazılışta 000 olarak yer aldığını keşfetmek.",adimlar:["<b>Aşama 1:</b> Her bölük için <b>Okunur</b> ya da <b>Okunmaz</b> seçiniz ve kontrol ediniz.","<b>Aşama 2:</b> Okunuşu verilen sayı yazılınca kaç tane 0 kullanılacağını bulunuz.",SON],sure:6,ciz:e_sifir},
- {ad:"Okunuştan Yazılışa",amac:"Okunuşu verilen sayıyı bölük adlarından ayırarak bölük bölük yazmak.",adimlar:["<b>Aşama 1–2:</b> Okunuştaki bölük adlarına (milyar, milyon, bin) dokununuz, sonra her bölüğün rakamlarını kendi kutusuna yazınız.",SON],sure:6,ciz:e_okuyaz},
+ {ad:"Sıfırlı Bölük Dedektifi",amac:"Tamamı 0 olan bölüklerin okunmadığını ama yazılışta 000 olarak yer aldığını keşfetmek.",adimlar:["<b>Aşama 1:</b> Bölük kutularındaki rakamları değiştiriniz; okunuş her değişiklikte yeniden yazılır. Görevlerdeki bölükleri 000 yapınız.","<b>Aşama 2:</b> Verilen okunuşu, kutulara rakam yazarak tutturunuz.",SON],sure:6,ciz:e_sifir2},
+ {ad:"Okunuştan Yazılışa",amac:"Okunuşu verilen sayıyı bölük adlarından ayırarak bölük bölük yazmak.",adimlar:["<b>Aşama 1–2:</b> Okunuştaki bölük adlarına (milyar, milyon, bin) dokununuz, sonra her bölüğün rakamlarını kendi kutusuna yazınız. Yazdığınız sayının okunuşu anında görünür; verilen okunuşla karşılaştırıp düzeltiniz.",SON],sure:6,ciz:e_okuyaz},
  {ad:"Yazılıştan Okunuşa",amac:"Rakamlarla yazılmış sayının okunuşunu sözcük kartlarıyla kurmak; bölük adlarının ve 0'ların okunuştaki yerini keşfetmek.",adimlar:["<b>Aşama 1–2:</b> Sözcük kartlarına sırayla dokunarak okunuşu kurunuz ve <b>Kontrol edin</b> düğmesine basınız. Gereksiz kartlar da var!",SON],sure:6,ciz:e_yazoku},
  {ad:"Abaküs Ustası",amac:"Abaküste çok basamaklı sayılar oluşturmak; boş çubuğun 0 anlamına geldiğini ve bir çubukta en fazla 9 boncuk olduğunu keşfetmek.",adimlar:["<b>Aşama 1:</b> + ve − düğmeleriyle çubuklara boncuk ekleyip okunuşu verilen sayıyı oluşturunuz.","<b>Aşama 2:</b> Abaküsteki sayıyı hedef sayıya dönüştürünüz ve kaç boncuk eklediğinizi bulunuz.",SON],sure:7,ciz:e_abakus},
  {ad:"Sayı Kartı Mühendisi",amac:"Rakam kartlarıyla en büyük ve en küçük sayıları kurmak; 0'ın en sola yazılamadığını keşfetmek.",adimlar:["<b>Aşama 1–2:</b> Kartlara dokunarak kutuları soldan sağa doldurunuz ve <b>Kontrol edin</b> düğmesine basınız; sonra kurduğunuz sayıyla ilgili soruyu cevaplayınız.",SON],sure:6,ciz:e_kart},
- {ad:"Basamak Değeri Ölçer",amac:"Aynı rakamın farklı basamaklarda farklı basamak değerleri aldığını ölçerek keşfetmek.",adimlar:["<b>Aşama 1–2:</b> Renkli çerçeveli rakamlara tek tek dokununuz ve her birinin basamak değerini yazınız.",SON],sure:6,ciz:e_olcer},
- {ad:"Çözümleme Makinesi",amac:"Sayıları basamak değerlerine göre çarpma ve toplama biçiminde çözümlemek.",adimlar:["<b>Aşama 1:</b> Makinede sırası gelen rakam için doğru çarpanı (basamak değerini) seçiniz.","<b>Aşama 2:</b> Çözümlemede ■ ile gizlenen parçayı bulunuz.",SON],sure:6,ciz:e_cozum},
+ {ad:"Basamak Değeri Ölçer",amac:"Aynı rakamın farklı basamaklarda farklı basamak değerleri aldığını ölçerek keşfetmek.",adimlar:["<b>Aşama 1:</b> Rakam kartını ◀ ve ▶ ile basamaklar arasında kaydırınız; ölçer basamak değerini anında gösterir.","<b>Aşama 2:</b> Yan yana iki aynı rakamın basamak değerlerini ölçünüz.",SON],sure:6,ciz:e_olcer2},
+ {ad:"Çözümleme Makinesi",amac:"Sayıları basamak değerlerine göre çarpma ve toplama biçiminde çözümlemek.",adimlar:["<b>Aşama 1:</b> Rakam ve basamak seçip parçalar ekleyiniz; parçaların toplamını hedef sayıya eşitleyiniz.","<b>Aşama 2:</b> Çözümlemede ■ ile gizlenen parçayı bulunuz.",SON],sure:6,ciz:e_cozum2},
  {ad:"Geri Birleştir",amac:"Çözümlenmiş parçaları basamak tablosuna yerleştirip sayıyı yeniden yazmak; boş basamaklara 0 yazıldığını keşfetmek.",adimlar:["<b>Aşama 1–2:</b> Bir parçaya, sonra tabloda o parçanın rakamının gideceği sütuna dokununuz. Parçalar bitince sayıyı rakamlarla yazınız.",SON],sure:6,ciz:e_birlestir},
- {ad:"Büyük mü Küçük mü?",amac:"Çok basamaklı iki doğal sayıyı önce basamak sayısına, sonra soldan başlayarak basamaklarına bakarak karşılaştırmak.",adimlar:["<b>Aşama 1–2:</b> Önce basamak sayılarını karşılaştırınız, gerekirse ilk farklı sütuna dokununuz, sonra doğru sembolü (&lt; ya da &gt;) seçiniz.",SON],sure:6,ciz:e_kars},
+ {ad:"Büyük mü Küçük mü?",amac:"Çok basamaklı iki doğal sayıyı önce basamak sayısına, sonra soldan başlayarak basamaklarına bakarak karşılaştırmak.",adimlar:["<b>Aşama 1–2:</b> Üstteki sayının rakamlarını ▲ ve ▼ ile değiştiriniz; sembol ve karar veren basamak anında görünür. Görevleri sırayla yapınız.",SON],sure:6,ciz:e_kars2},
  {ad:"Sıralama Treni",amac:"Çok basamaklı sayıları vagonlara yerleştirerek küçükten büyüğe ve büyükten küçüğe sıralamak.",adimlar:["<b>Aşama 1–2:</b> Sayı kartlarına sırayla dokunarak vagonları doldurunuz ve <b>Kontrol edin</b> düğmesine basınız.",SON],sure:5,ciz:e_tren},
- {ad:"Eski Mısır Sayıları",amac:"Eski Mısır sayı sembolleriyle sayılar okuyup yazmak; bizim sayı sistemimizde basamak değerinin ve 0'ın önemini keşfetmek.",adimlar:["<b>Aşama 1:</b> Sembollerle yazılmış sayıları rakamlarla yazınız.","<b>Aşama 2:</b> Sembol düğmelerine dokunarak verilen sayıyı Mısır sembolleriyle yazınız.",SON],sure:7,ciz:e_misir},
- {ad:"Uzay Mesafeleri",amac:"Gezegenlerin Güneş'e uzaklıklarını okuyarak milyonlar ve milyarlar bölüklerini gerçek verilerle kullanmak.",adimlar:["<b>Aşama 1:</b> Uzay radyosunun okuduğu uzaklığın hangi gezegene ait olduğunu bulunuz.","<b>Aşama 2:</b> Güneş'e uzaklığı 1 milyar kilometre ya da daha fazla olan gezegenlerin hepsini seçiniz.",SON],sure:6,ciz:e_uzay},
- {ad:"Nüfus Haritası",amac:"İllerin nüfuslarında bölükleri ve basamakları kullanarak ipucuna uyan illeri bulmak.",adimlar:["<b>Aşama 1:</b> İpucunu okuyunuz ve ona uyan ilin kartına dokununuz.","<b>Aşama 2:</b> Nüfusu 1 000 000'dan az olan illerin hepsini seçiniz.",SON],sure:6,ciz:e_nufus},
+ {ad:"Eski Mısır Sayıları",amac:"Eski Mısır sayı sembolleriyle sayılar okuyup yazmak; bizim sayı sistemimizde basamak değerinin ve 0'ın önemini keşfetmek.",adimlar:["<b>Aşama 1:</b> Sembollerle yazılmış sayıları rakamlarla yazınız.","<b>Aşama 2:</b> Sembol tezgâhında + ve − ile sembol ekleyip çıkararak hedef sayıları yazınız; toplam değer anında görünür.",SON],sure:7,ciz:e_misir2},
+ {ad:"Uzay Mesafeleri",amac:"Gezegenlerin Güneş'e uzaklıklarını sıralayarak ve bir eşikle karşılaştırarak milyonlar ve milyarlar bölüklerini gerçek verilerle kullanmak.",adimlar:["<b>Aşama 1:</b> Gezegen kartlarını ▲ ve ▼ ile Güneş'e yakından uzağa sıralayınız.","<b>Aşama 2:</b> Eşik uzaklığını değiştirerek eşiği geçen gezegenleri inceleyiniz.",SON],sure:6,ciz:e_uzay2},
+ {ad:"Nüfus Haritası",amac:"İllerin nüfuslarını bir eşik sayısıyla karşılaştırarak ve ipuçlarını kullanarak bölük ve basamakları gerçek verilerle uygulamak.",adimlar:["<b>Aşama 1:</b> Eşik sayısını rakam çarklarıyla kurunuz; iller eşiğin altında ya da üstünde boyanır.","<b>Aşama 2:</b> İpucunu okuyunuz ve ona uyan ilin kartına dokununuz.",SON],sure:6,ciz:e_nufus2},
  {ad:"Rakam Değiştir Sayıyı Gör",amac:"Bir basamaktaki rakam değişince sayının o basamağın basamak değeri kadar değiştiğini keşfetmek.",adimlar:["<b>Aşama 1–2:</b> Rakamların üstündeki ▲ ve altındaki ▼ düğmeleriyle rakamları değiştirerek görevdeki değişimi yapınız.",SON],sure:6,ciz:e_degistir},
  {ad:"Koşullu En Büyük Sayı",amac:"Koşulları sağlayan en büyük ve en küçük çok basamaklı sayıları kurmak.",adimlar:["<b>Aşama 1–2:</b> Bir kutuya, sonra bir rakama dokunarak sayıyı kurunuz; bütün lambalar yeşil olunca <b>Kontrol edin</b> düğmesine basınız.",SON],sure:7,ciz:e_kosul},
  {ad:"Şifreli Kasa",amac:"Bölük, basamak değeri, okunuş ve çözümleme ipuçlarından kasanın şifresini bulmak.",adimlar:["<b>Aşama 1–2:</b> Çarklardaki ▲ ve ▼ düğmeleriyle rakamları ayarlayınız; bütün ipucu lambaları yeşil olunca <b>Kasayı açın</b> düğmesine basınız.",SON],sure:6,ciz:e_kasa},
- {ad:"Örüntüyü Tamamla",amac:"Sayıların okunuşundaki bir–on–yüz örüntüsünün her bölükte tekrar ettiğini keşfetmek ve sayı örüntülerini tamamlamak.",adimlar:["<b>Aşama 1:</b> <b>10 ile çarpın</b> düğmesine basınız ve yeni sayının okunuşunu seçiniz.","<b>Aşama 2:</b> Örüntüdeki eksik sayıları bulunuz.",SON],sure:6,ciz:e_oruntu},
- {ad:"Bölük Düellosu",amac:"Okuma, yazma, bölük, basamak değeri ve karşılaştırma bilgilerini süreli bir doğru–yanlış düellosunda kullanmak.",adimlar:["<b>Aşama 1:</b> Düello kurallarını okuyunuz ve ısınma sorusunu cevaplayınız.","<b>Aşama 2:</b> 8 turluk düelloyu oynayınız: Süre dolmadan Doğru ya da Yanlış düğmesine basınız.",SON],sure:7,ciz:e_duello}];
+ {ad:"Örüntüyü Tamamla",amac:"Sayıların okunuşundaki bir–on–yüz örüntüsünün her bölükte tekrar ettiğini keşfetmek ve sayı örüntülerini tamamlamak.",adimlar:["<b>Aşama 1:</b> Başlangıç sayısı ve çarpan seçip çarpınız; sayı uzadıkça bölükleri ve okunuşu izleyiniz.","<b>Aşama 2:</b> Örüntüdeki eksik sayıları bulunuz.",SON],sure:6,ciz:e_oruntu2},
+ {ad:"Bölük Düellosu",amac:"Okunuşu verilen çok basamaklı sayıları süre bitmeden bölük bölük kurmak; okunmayan bölüklerin 000 yazıldığını yarışarak pekiştirmek.",adimlar:["<b>Aşama 1:</b> Yarış kurallarını okuyunuz ve ısınma sayısını tuş takımıyla yazınız.","<b>Aşama 2:</b> 6 turluk yarışta okunuşu verilen sayıyı süre bitmeden yazıp teslim ediniz.",SON],sure:7,ciz:e_yaris}];
 kesifBaslat(ACT,{baslik:"Basamak Keşif Atölyesi",kisa:"Basamak Keşif Atölyesi",kod:"MAT.5.1.1",ust:"5. Sınıf · Sayılar · MAT.5.1.1",
   aciklama:"Çok basamaklı doğal sayıları okuma ve yazma için yirmi keşfetme etkinliği. Her etkinlik aşama aşama ilerler: sayıları bölüklere ayırınız, basamak tablosunu milyarlara kadar genişletiniz, okuyunuz, yazınız, çözümleyiniz, karşılaştırınız ve kuralı kendiniz bulunuz."});
 
