@@ -650,10 +650,10 @@ const V={"baslik": "Çarpanlar ve Katlar", "kod": "6. SINIF · MAT.6.1.1", "ses"
 const $=s=>document.querySelector(s);$("#kod").textContent=V.kod;$("#bas").textContent=V.baslik+" · Çözümler";
 const q=new URLSearchParams(location.search);const tek=["s","k","b"].find(x=>q.has(x));
 const esc=s=>String(s);
-function sesKutu(ad){const d=document.createElement("div");d.className="ses gizli";d.innerHTML=`<button type="button" aria-label="Sesli anlatımı dinle">▶</button><span>Sesli anlatım · öğretmen bu soruyu adım adım anlatıyor</span>`;
-  const a=new Audio();a.preload="none";a.src=`${V.ses}/${ad}.mp3`;const b=d.querySelector("button");
-  fetch(a.src,{method:"HEAD"}).then(r=>{if(r.ok)d.classList.remove("gizli");}).catch(()=>{});
-  b.onclick=()=>{if(a.paused){a.play();b.textContent="❚❚";}else{a.pause();b.textContent="▶";}};a.onended=()=>{b.textContent="▶";};return d;}
+function sesKutu(ad){const d=document.createElement("div");d.className="ses";d.innerHTML=`<button type="button" aria-label="Sesli anlatımı dinle">▶</button><span>Sesli anlatım · öğretmen bu soruyu adım adım anlatıyor</span>`;
+  const a=new Audio();a.preload="none";a.src=`${V.ses}/${ad}.mp3`;const b=d.querySelector("button"),y=d.querySelector("span");
+  const hata=()=>{b.textContent="▶";y.textContent="Bu sorunun sesli anlatımı henüz yüklenmedi.";};
+  a.onerror=hata;b.onclick=()=>{if(a.paused){const p=a.play();b.textContent="❚❚";if(p&&p.catch)p.catch(hata);}else{a.pause();b.textContent="▶";}};a.onended=()=>{b.textContent="▶";};return d;}
 function adimAdim(kap,list,son){let i=0;const dd=document.createElement("div");dd.className="dug";
   const n=document.createElement("button");n.className="btn";n.type="button";const t=document.createElement("button");t.className="btn ghost";t.type="button";t.textContent="Bütün adımları göster";
   const ciz=()=>{n.textContent=i<list.length?`${i+1}. adımı göster (${list.length} adım)`:"Çözüm tamamlandı";n.disabled=i>=list.length;t.hidden=i>=list.length;};
@@ -672,9 +672,9 @@ function kartB(s){const k=document.createElement("section");k.className="kart";k
   if(window.CANL&&CANL[s.no]){const sek=document.createElement("div");sek.className="sek";sek.setAttribute("role","tablist");
     sek.innerHTML=`<button type="button" role="tab" aria-selected="true">▶ Canlandır ve dene<span class="yeni">YENİ</span></button><button type="button" role="tab" aria-selected="false">Adım adım çözüm</button>`;
     const p1=document.createElement("div");p1.className="cn";p1.setAttribute("role","tabpanel");const p2=document.createElement("div");p2.setAttribute("role","tabpanel");p2.hidden=true;
-    k.append(sek,p1,p2);let kur=false;const ac=i=>{sek.querySelectorAll("button").forEach((b,j)=>b.setAttribute("aria-selected",i===j));p1.hidden=i!==0;p2.hidden=i!==1;if(i===0&&!kur){kur=true;CANL[s.no](p1);}};
+    k.append(sesKutu(s.ses),sek,p1,p2);let kur=false;const ac=i=>{sek.querySelectorAll("button").forEach((b,j)=>b.setAttribute("aria-selected",i===j));p1.hidden=i!==0;p2.hidden=i!==1;if(i===0&&!kur){kur=true;CANL[s.no](p1);}};
     sek.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>ac(i));ac(q.get("g")==="cozum"?1:0);cozKap=p2;}
-  cozKap.appendChild(sesKutu(s.ses));const w=document.createElement("div");cozKap.appendChild(w);
+  if(cozKap===k)k.appendChild(sesKutu(s.ses));const w=document.createElement("div");cozKap.appendChild(w);
   adimAdim(w,s.a,()=>{const c=document.createElement("p");c.className="cevap";c.textContent=`Doğru cevap: ${s.c}`;w.appendChild(c);
     k.querySelectorAll("ol.sec li").forEach(li=>{if(li.dataset.h===s.c)li.classList.add("dogru");});
     if(s.t){const t=document.createElement("p");t.className="tuzak";t.innerHTML="<b>Diğer seçenekler neden yanlış?</b> "+s.t;w.appendChild(t);}});
