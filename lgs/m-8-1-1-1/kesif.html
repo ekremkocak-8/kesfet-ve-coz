@@ -838,28 +838,83 @@ function asamaliTek(p,o){document.body.classList.add("ta-mod");
 /* ================= M.8.1.1.1 · 20 Keşfetme Etkinliği (her biri farklı düzenek) =================
    29.09.2026 revizyonu: aşamalı düzen (kesif_8_asama.js), açık yönerge, içeriği gizlemeyen tahmin, etiketli sürgü,
    yönlendirici geri bildirim, madde madde oyun kuralları. */
-/* §5.ip İpucu verilmez (02.10.2026): ortak motordaki "İpucu" metni bu atölyede kullanılmaz. Yanlış seçenekte ve yanlış
-   sayıda yalnız nötr "Yeniden deneyiniz." yazılır; sayı cevaplı soruda 3. yanlıştan sonra yalnız doğru cevap gösterilir. */
+/* (kesif_813.js ile aynı yardımcılar; yalnız bu dosyada) 07.10.2026 (§4-5, §4-9; keşif denetimi E7, Ekrem KOÇAK: "Yanlış cevapta tabii ki ipucu verilecek"): yanlış cevaptan sonra
+   HATANIN TÜRÜNÜ söyleyen ipucu verilir; seçmeli sorularda her yanlış seçeneğin kendi ipucu, sayı cevaplı soruda yaygın hatalar için
+   ayrı ipucu (ozel), yoksa genel ipucu. İpucu cevabı söylemez; 3. yanlıştan sonra doğru cevap da gösterilir. Soru metnine ipucu yazılmaz (§5.ip). */
 const YD="Yeniden deneyiniz.";
-const notr=S=>{const so=S.soru,sa=S.sayi;
-  S.soru=(kap,soru,secs,ok,sonra)=>so(kap,soru,secs.map((s,i)=>i===0?s:[Array.isArray(s)?s[0]:s,YD]),ok,sonra);
-  S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
+window.__ipEksik=window.__ipEksik||[];
+const ipNrm=h=>{const t=document.createElement("div");t.innerHTML=h;return t.innerHTML;};
+const notr=S=>{const so=S.soru,sa=S.sayi,ku=S.kural;let kN=0,kI=0;
+  /* 05.10.2026 (§4.k-5): "Kuralı bulun" adımında birden çok soru varsa her soru ekranında "Soru i / n" şeridi; doğru cevaptan sonra
+     ekranda ve alttaki şeritte "Sıradaki soru (i+1 / n) →" düğmesi görünür (ortak kabuğa dokunmadan, yalnız bu atölyede). */
+  S.kural=(k,o)=>{kN=k||1;kI=0;const r=ku(k,o);return r;};
+  S.soru=(kap,soru,secs,ok,sonra)=>{const km=!!(kap&&kap.kural===true);if(km)kI++;const i=kI,n=kN;let d=null;
+    const sonra2=km&&n>1&&i<n?()=>{sonra&&sonra();szIleri(d,i,n);}:sonra;
+    const IP=secs.slice(1).map(x=>[ipNrm(Array.isArray(x)?x[0]:x),Array.isArray(x)?x[1]:""]);
+    IP.forEach(([t,ip])=>{if(!ip)window.__ipEksik.push("soru: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50)+" → "+t.replace(/<[^>]+>/g,""));});
+    d=so(kap,soru,secs,ok,sonra2);
+    if(d&&d.querySelectorAll)d.querySelectorAll(".sec").forEach(b=>{const m=IP.find(([t])=>t===b.innerHTML);if(!m)return;b._ip=m[1];
+      b.addEventListener("click",()=>{if(!b.classList.contains("yanlis"))return;const sr=b.closest(".sor")||d,f=sr.querySelector(".fb");
+        if(f&&b._ip)fb(f,false,`<b>Bu seçenek doğru değil.</b> ${b._ip} ${YD}`);});});
+    if(d&&d.querySelectorAll&&[...d.querySelectorAll(".sec")].filter(b=>b._ip!==undefined).length<IP.length)window.__ipEksik.push("eşleşmedi: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50));
+    if(km&&n>1&&d&&d.querySelector)szSerit(d,i,n);return d;};
+  S.sayi=(kap,ust,dogru,ok,ip,sonra,ozel)=>{if(!ip&&!ozel)window.__ipEksik.push("sayi: "+String(ust).replace(/<[^>]+>/g,"").slice(0,60));
+    const ipG=Array.isArray(ip)?ip[0]:ip,ipO=Array.isArray(ip)?ip[1]:null;
+    const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
     const kontrol=()=>{const h=inp.value.replace(/[\s.]/g,"");if(!h||+h===dogru||inp.disabled)return asil();yn++;
-      fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
+      const v=+h.replace(",","."),oz=(ozel&&ozel(v))||(ipO&&ipO(v));
+      fb(f,false,`<b>${h} doğru değil.</b> ${oz||ipG||""} ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
-  return sirali(S);};
-/* §4.k-5 (05.10.2026, Aşama 2): "Kuralı bulun" adımında birden çok soru varsa her sorunun üstünde "Soru i / n" şeridi,
-   doğru cevaptan sonra sorunun altında belirgin "Sıradaki soru (i+1 / n) →" düğmesi (kesif_611.js soruZincir kalıbı; ortak dosyalara dokunmadan). */
-function sirali(S){let top=1,no=0;const k0=S.kural,so=S.soru;
-  S.kural=(k,o)=>{top=k||1;no=0;return k0(k,o);};
-  S.soru=(kap,soru,secs,ok,sonra)=>{if(!(kap&&kap.kural)||top<2)return so(kap,soru,secs,ok,sonra);
-    const i=++no,n=top;let el=null;
-    const ser=`<div class="sz-ust"><span class="sz-et">Soru ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span></div>`;
-    el=so(kap,soru,secs,ok,()=>{sonra&&sonra();if(i<n&&el){const b=document.createElement("button");b.type="button";b.className="primary sz-ileri";b.textContent=`Sıradaki soru (${i+1} / ${n}) →`;
-      const q=el.querySelector(".a8-soru")||el;q.appendChild(b);setTimeout(()=>{if(b.isConnected)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},60);
-      b.onclick=()=>{const il=document.querySelector(".ta-ileri");if(il&&!il.disabled)il.click();};}});
-    const q=el&&(el.querySelector(".a8-soru")||el);if(q)q.insertAdjacentHTML("afterbegin",ser);return el;};
-  return S;}
+  return S;};
+function szSerit(d,i,n){const ic=d.querySelector(".ta-ic")||d;const u=document.createElement("div");u.className="sz-ust";
+  u.innerHTML=`<span class="sz-et">Soru ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span>`;ic.prepend(u);d.dataset.szI=i;d.dataset.szN=n;}
+function szIleri(d,i,n){if(!d||!d.querySelector)return;const ic=d.querySelector(".ta-ic")||d;d.dataset.szBitti="1";
+  const b=document.createElement("button");b.type="button";b.className="primary sz-ileri";b.textContent=`Sıradaki soru (${i+1} / ${n}) →`;
+  b.onclick=()=>{const t=document.querySelector(".ta-ileri");if(t&&!t.disabled)t.click();};ic.appendChild(b);
+  setTimeout(()=>{if(b.isConnected&&b.offsetParent)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},60);szAlt();}
+/* alttaki şeritteki ileri düğmesi: açık ekran çözülmüş bir kural sorusuysa "Sıradaki soru" yazar */
+function szAlt(){const t=document.querySelector(".ta-ileri");if(!t)return;
+  if(!t.dataset.szGoz){t.dataset.szGoz="1";new MutationObserver(()=>szAlt()).observe(t,{childList:true,characterData:true,subtree:true});}
+  const e=[...document.querySelectorAll(".ta-ekran")].find(x=>!x.hidden);
+  if(e&&e.dataset.szBitti&&+e.dataset.szI<+e.dataset.szN&&!t.disabled){const y=`Sıradaki soru (${+e.dataset.szI+1} / ${e.dataset.szN}) →`;if(t.textContent!==y)t.textContent=y;}}
+/* 06.10.2026 (§4.k-5 · keşif denetimi E2): deney düzeneğinde sırayla gelen kartlar/trenler/turlar/kasalar için
+   "Kart i / n" ilerleme şeridi, her tur bitince "Sıradaki kart (i+1 / n) →" düğmesi; öğrenci düğmeye basmadan yeni tur açılmaz.
+   Çözülen tur kısa bir satırla özetlenir; yeni tur vurgulanır ve ekrana kaydırılır; son turdan sonra adımın bittiği yazılır.
+   (soruZincir ile aynı görünüm: .sz-ust şeridi, .sz-ileri düğmesi; ortak dosyalara dokunmadan yalnız bu atölyede.) */
+(function(){const st=document.createElement("style");st.textContent=`
+.tz-ust{scroll-margin-top:96px}
+.tz-ozet{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px}
+.tz-ozet:empty{display:none}
+.tz-ozet li{font-size:14.5px;line-height:1.45;color:var(--muted);padding:4px 10px;border-left:4px solid #2b8a3e;background:color-mix(in srgb,#2b8a3e 7%,var(--card));border-radius:6px}
+.tz-ozet li::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.tz-yeni{animation:tzGel .9s ease-out}
+@keyframes tzGel{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc,#1c5fbf) 60%,transparent);background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+.tz-son{font-weight:700;color:#2b8a3e;margin:10px 0 4px;line-height:1.45}
+.tz-dug{scroll-margin-bottom:120px}
+.r-tusl[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.tz-yeni{animation:none}}`;document.head.appendChild(st);})();
+/* once: şeridin önüne konacağı öğe · o: {n (0 = sınırsız), ad:"Kart", tamlayan:"kartın", kur:i=>…(i. turu kurar; 0'dan),
+   vurgu:()=>öğe (yeni turda vurgulanacak alan), dugme: öğe (düğmenin ekleneceği yer), son:"son turdan sonraki cümle"} */
+function turZincir(once,o){const n=o.n||0,ad=o.ad,kucuk=ad.toLocaleLowerCase("tr");let i=0,bitti=false,btn=null,sonP=null;
+  const ust=document.createElement("div");ust.className="sz-ust tz-ust";ust.setAttribute("aria-live","polite");once.before(ust);
+  const oz=document.createElement("ol");oz.className="tz-ozet";oz.setAttribute("aria-label","Biten turlar");ust.after(oz);
+  const ciz=()=>{const hepsi=n&&bitti&&i===n-1;
+    ust.innerHTML=`<span class="sz-et">${hepsi?`${n} ${o.tamlayan} hepsi tamamlandı ✓`:n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}</span>`+(n?`<span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i||(bitti&&j===i)?"ok":j===i?"su":""}"></i>`).join("")}</span>`:"");};
+  const kaydir=(el,b)=>setTimeout(()=>{if(!(el&&el.isConnected&&el.offsetParent))return;const sm=azHareket()?"auto":"smooth";
+    if(b!=="start"){el.scrollIntoView({behavior:sm,block:b});return;}
+    const u=document.querySelector(".etk-ust"),ofs=(u&&getComputedStyle(u).position.includes("sticky")?u.getBoundingClientRect().height:0)+12;
+    window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-ofs),behavior:sm});},80);
+  const yer=()=>o.dugme||once.parentNode;
+  const T={get i(){return i;},get bitti(){return bitti;},
+    tamam(ozet){if(bitti)return;bitti=true;ciz();
+      if(ozet){const li=document.createElement("li");li.innerHTML=`${n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}: ${ozet}`;oz.appendChild(li);}
+      if(!n||i<n-1){btn=document.createElement("button");btn.type="button";btn.className="primary sz-ileri tz-dug";
+        btn.textContent=n?`Sıradaki ${kucuk} (${i+2} / ${n}) →`:`Sıradaki ${kucuk} (${i+2}. ${kucuk}) →`;yer().appendChild(btn);kaydir(btn,"center");
+        btn.onclick=()=>{btn.remove();btn=null;i++;bitti=false;ciz();o.kur(i);const v=o.vurgu?o.vurgu():once.parentNode;
+          if(v){v.classList.remove("tz-yeni");void v.offsetWidth;v.classList.add("tz-yeni");}bip(660,.08);kaydir(ust,"start");};}
+      else{sonP=document.createElement("p");sonP.className="tz-son";sonP.innerHTML=o.son||`${n} ${o.tamlayan} hepsi bitti. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız.`;yer().appendChild(sonP);kaydir(sonP,"center");}},
+    sifirla(){i=0;bitti=false;oz.innerHTML="";if(btn){btn.remove();btn=null;}if(sonP){sonP.remove();sonP=null;}ciz();}};
+  ciz();return T;}
 /* Aşama 2 düzenekleri için ek biçimler (05.10.2026) */
 (()=>{if(document.getElementById("k8111-css"))return;const st=document.createElement("style");st.id="k8111-css";st.textContent=`
 .k8-kal{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.k8-kal button{min-width:52px;min-height:44px}
@@ -875,6 +930,7 @@ function sirali(S){let top=1,no=0;const k0=S.kural,so=S.soru;
 .k8-s .yer.dolu{border-style:solid;border-color:#2b8a3e;background:#d3f9d8}.k8-s .yer.tas{border-style:solid;border-color:#c92a2a;background:#ffc9c9;color:#c92a2a}
 .k8-iz{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;margin-top:6px}.k8-iz span{text-align:center;padding:6px 0;border-radius:6px;background:#e7f5ff;font-weight:800;font-size:14px;transition:opacity .3s}
 .k8-iz span.el{opacity:.18;text-decoration:line-through;background:var(--line)}
+.izgara10 button.hz,.izgara button.hz,.chips.den .chip{min-height:44px}
 @media(max-width:480px){.k8-iz{grid-template-columns:repeat(6,minmax(0,1fr))}.k8-bar>div{grid-template-columns:96px 1fr 30px;font-size:13px}}`;document.head.appendChild(st);})();
 
 /* 1 · KARO DİKDÖRTGENLERİ */
@@ -921,12 +977,12 @@ const e_gokkusagi=p=>{const S=notr(asamali(p));
     biter:bitG(3)});
   S.tahmin(k,"36'nın bütün çarpanlarını bulmak için hangi sayıya kadar denemek yeterlidir?",[[36,"36'ya kadar"],[18,"18'e kadar"],[6,"6'ya kadar"]],6,"6'ya kadar denemek yeter: 6 · 6 = 36 ve 6'dan büyük her çarpanın eşi 6'dan küçüktür.");
   k.insertAdjacentHTML("beforeend",`<div class="a8-et">Denenecek sayılar</div><div class="chips den"></div><div class="stage"></div><p class="durum"></p><div class="fb" hidden></div>`);
-  const dn=k.querySelector(".den"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");const n=36;const bul=new Set(),dene=new Set();
+  const dn=k.querySelector(".den"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");const n=36;const bul=new Set(),dene=new Set();const D=defter(k,["Denenen sayı","36 : sayı","Sonuç"]);
   const G=gorevler(k,[{m:"<b>4</b> sayısına dokununuz.",ok:()=>dene.has(4),s:()=>"4 · 9 = 36: 4 ve 9 birlikte bulundu."},
     {m:"<b>5</b> sayısına dokununuz.",ok:()=>dene.has(5),s:()=>"36 : 5 = 7, kalan 1: 5 çarpan değil."},
     {m:"36'nın <b>bütün</b> çarpanlarını (9 tane) bulunuz.",ok:()=>bul.size===9,s:()=>{const b=Math.max(...[...dene]);return `${[...bul].sort((a,b)=>a-b).join(", ")}. Denediğiniz en büyük sayı ${b}; aslında 6'ya kadar denemek yeterdi.`;}}],acikla);
   function ciz(){dn.innerHTML=Array.from({length:18},(_,i)=>i+1).map(x=>`<button class="chip ${dene.has(x)?(n%x?"no":"ok"):""}" data-x="${x}">${x}</button>`).join("");
-    dn.querySelectorAll("button").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;dene.add(x);
+    dn.querySelectorAll("button").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;dene.add(x);D.ekle([x,n%x?`${Math.floor(n/x)}, kalan ${n%x}`:String(n/x),n%x?"çarpan değil":`çarpan; eşi ${n/x}`],String(x));
       if(n%x===0){const yeni=!bul.has(x);bul.add(x);bul.add(n/x);fb(f,true,yeni?`36 : ${x} = ${n/x}. <b>${x}</b> ile <b>${n/x}</b> bir çarpan çiftidir; ikisi birlikte bulundu.`:`${x} zaten bulunmuştu: eşi ${n/x} ile birlikte yerleşmişti.`);bip(620,.12);}
       else fb(f,false,`36 : ${x} = ${Math.floor(n/x)}, kalan ${n%x}. ${x}, 36'nın çarpanı değil.`);ciz();G.kontrol();});
     const L=[...bul].sort((a,b)=>a-b),W=620,sx=W/(L.length+1);const sv=svgEl(W,170);let h=`<line x1="10" y1="140" x2="${W-10}" y2="140" stroke="${css('--line')}" stroke-width="2"/>`;
@@ -941,7 +997,7 @@ const e_gokkusagi=p=>{const S=notr(asamali(p));
       ["6'dan büyük bir çarpanın eşi 6'dan küçüktür; onu zaten bulmuşuzdur",["36 çift sayı olduğu için","Çift olmak durma yerini belirlemez. Yaylara bakınız: her yayın bir ucu 6'dan küçük, diğer ucu 6'dan büyük."],["6 asal sayı olduğu için","6 asal değildir (6 = 2 · 3). Durma yerini 6 · 6 = 36 eşitliği belirler."]],
       "Küçük çarpanı bulunca büyük eşi de bulunur. 6 · 6 = 36 olduğu için 6'da durulur.",meydan);}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Bir sayının çarpan çiftlerinden biri <b>4</b> ile <b>18</b>'dir."])+soruKut("Bu sayının 3 ile eşleşen çarpanı kaçtır?"),24,"Sayı 4 · 18 = 72'dir. 72 : 3 = 24; 3 ile 24 bir çarpan çiftidir.","Önce sayıyı bulunuz: 4 · 18. Sonra bu sayıyı 3'e bölünüz.",
+    S.sayi(m,yaz(["Bir sayının çarpan çiftlerinden biri <b>4</b> ile <b>18</b>'dir."])+soruKut("Bu sayının 3 ile eşleşen çarpanı kaçtır?"),24,"Sayı 4 · 18 = 72'dir. 72 : 3 = 24; 3 ile 24 bir çarpan çiftidir.","Bir çarpan çiftindeki iki sayının çarpımı sayının kendisidir. Önce sayıyı bulunuz, sonra 3 ile eşleşen çarpanı arayınız.",
       ()=>S.bitir("Çarpanları küçükten başlayarak ararız. Her küçük çarpanın bir <b>eşi</b> vardır (çarpımları sayıyı verir). Eşler birbirine ulaşınca durabiliriz."),
       v=>v===72?"72 sayının kendisi. Soru, 3 ile çarpılınca 72'yi veren sayıyı istiyor.":v===6?"6, 18'in 3 ile eşidir; sayı ise 72.":null);}
 };
@@ -989,7 +1045,7 @@ const e_rekor=p=>{const S=notr(asamali(p));const N=60;const say=n=>divs(n).lengt
     biter:bitG(3)});
   S.tahmin(k,"1 ile 60 arasında en çok çarpanı olan sayı hangisi olabilir?",[[59,"59"],[48,"48"],[60,"60"],[36,"36"]],60,"60'ın 12 çarpanı var: 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60. 48'in 10, 36'nın 9, 59'un 2 çarpanı var.");
   k.insertAdjacentHTML("beforeend",`<div class="stage"></div><div class="izgara10 sy" style="margin-top:8px"></div><p class="durum">Bir sayıya dokununuz.</p><div class="row"><button class="ghost hep">Bütün sütunları açın</button></div>`);
-  const st=k.querySelector(".stage"),sy=k.querySelector(".sy"),du=k.querySelector(".durum");const acik=new Set();let rekor=false;
+  const st=k.querySelector(".stage"),sy=k.querySelector(".sy"),du=k.querySelector(".durum");const acik=new Set();let rekor=false;const D=defter(k,["Sayı","Çarpanları","Çarpan sayısı"]);
   const G=gorevler(k,[{m:"<b>10 farklı</b> sayıyı açınız.",ok:()=>acik.size>=10},
     {m:"Çarpan sayısı <b>2</b> olan bir sayı bulunuz.",ok:()=>[...acik].some(n=>say(n)===2),s:()=>"Çarpan sayısı 2 olanlar asal sayılardır."},
     {m:"<b>Rekortmeni</b> bulunuz ve tabloda ona dokununuz: en çok çarpanı olan sayı.",ok:()=>rekor,s:()=>"60: 12 çarpan (48'in 10 çarpanı var)."}],acikla);
@@ -1001,7 +1057,7 @@ const e_rekor=p=>{const S=notr(asamali(p));const N=60;const say=n=>divs(n).lengt
     h+=`<text x="${W}" y="224" text-anchor="end" font-size="11" fill="${css('--muted')}">Sayı</text>`;
     sv.innerHTML=h;st.replaceChildren(sv);
     sy.innerHTML=Array.from({length:N},(_,i)=>i+1).map(n=>`<button class="hz" data-n="${n}" style="${acik.has(n)?`background:${say(n)===2?"#d3f9d8":say(n)>=10?"#ffe8cc":"#d0ebff"};color:#111`:""}">${n}</button>`).join("");
-    sy.querySelectorAll(".hz").forEach(b=>b.onclick=()=>{const n=+b.dataset.n;acik.add(n);if(say(n)===12)rekor=true;bip(300+say(n)*50,.08);
+    sy.querySelectorAll(".hz").forEach(b=>b.onclick=()=>{const n=+b.dataset.n;acik.add(n);D.ekle([n,divs(n).join(", "),say(n)],String(n));if(say(n)===12)rekor=true;bip(300+say(n)*50,.08);
       du.innerHTML=dz(`<b>${n}</b> sayısının ${say(n)} çarpanı var: ${divs(n).join(", ")}`)+(say(n)===12?dz("<b>Rekortmen!</b>"):"");ciz();G.kontrol();});}
   k.querySelector(".hep").onclick=()=>{for(let n=1;n<=N;n++)acik.add(n);du.innerHTML="Bütün sütunlar açıldı. En uzun sütunun sayısını bulunuz ve tabloda o sayıya dokununuz.";ciz();G.kontrol();};
   ciz();
@@ -1025,16 +1081,16 @@ const e_elek=p=>{const S=notr(asamali(p));
     biter:bitG(5)});
   S.tahmin(k,"1 ile 100 arasında kaç asal sayı vardır?",[[15,"15"],[20,"20"],[25,"25"],[30,"30"]],25,"1 ile 100 arasında 25 asal sayı vardır.");
   k.insertAdjacentHTML("beforeend",`<div class="row eb"></div><div class="stage elek" style="margin-top:8px"></div><p class="durum"></p><div class="fb" hidden></div>`);
-  const eb=k.querySelector(".eb"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");const elen=new Map();const basilan=new Set();
+  const eb=k.querySelector(".eb"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");const elen=new Map();const basilan=new Set();const D=defter(k,["Elenen","Yeni elenen sayı","Elenmeyen (1 hariç)"]);
   const G=gorevler(k,[{m:"<b>2'nin katlarını</b> eleyiniz.",ok:()=>basilan.has(2)},{m:"<b>3'ün katlarını</b> eleyiniz.",ok:()=>basilan.has(3)},
     {m:"<b>5'in ve 7'nin</b> katlarını eleyiniz.",ok:()=>basilan.has(5)&&basilan.has(7)},{m:"Tabloda <b>1</b> sayısına dokununuz (1 asal mı?).",ok:()=>elen.has(1)},
     {m:"<b>11'in katlarını</b> eleyiniz. Yeni sayı elendi mi?",ok:()=>basilan.has(11),s:()=>"Hiçbir yeni sayı elenmedi!"}],acikla);
   [2,3,5,7,11].forEach(q=>{const b=document.createElement("button");b.className="primary";b.textContent=`${ek(q,"in")} katları`;eb.appendChild(b);
     b.onclick=()=>{if(basilan.has(q))return;basilan.add(q);let yeni=0;for(let x=2*q;x<=100;x+=q)if(!elen.has(x)){elen.set(x,q);yeni++;}
-      fb(f,yeni>0,yeni?`${ek(q,"in")} katlarından <b>${yeni}</b> yeni sayı elendi. ${q} asal olduğu için elenmedi.`:`Hiç yeni sayı elenmedi: ${ek(q,"in")} 100'den küçük katları (22, 33, 44 …) daha önce başka bir asalın katı olarak elenmişti.`);bip(yeni?520:220,.12);b.disabled=true;ciz();G.kontrol();};});
+      fb(f,yeni>0,yeni?`${ek(q,"in")} katlarından <b>${yeni}</b> yeni sayı elendi. ${q} asal olduğu için elenmedi.`:`Hiç yeni sayı elenmedi: ${ek(q,"in")} 100'den küçük katları (22, 33, 44 …) daha önce başka bir asalın katı olarak elenmişti.`);bip(yeni?520:220,.12);b.disabled=true;D.ekle([`${ek(q,"in")} katları`,yeni,99-[...elen.keys()].filter(x=>x>1).length],String(q));ciz();G.kontrol();};});
   const RENK={2:"#ffc9c9",3:"#ffe8cc",5:"#d3f9d8",7:"#d0ebff",11:"#e5dbff",1:"#dee2e6"};
   function ciz(){st.innerHTML=`<div class="izgara10">${Array.from({length:100},(_,i)=>i+1).map(x=>`<button class="hz ${elen.has(x)?"el":asal(x)&&basilan.size>=4?"as":""}" data-x="${x}" style="${elen.has(x)?`background:${RENK[elen.get(x)]}`:""}">${x}</button>`).join("")}</div>`;
-    st.querySelectorAll(".hz").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;if(x===1){elen.set(1,1);fb(f,true,"1 asal değildir: yalnız bir çarpanı (kendisi) vardır. Asal sayıların tam iki çarpanı olur.");ciz();G.kontrol();}
+    st.querySelectorAll(".hz").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;if(x===1){elen.set(1,1);D.ekle(["1 sayısı","—","1 asal değil"],"1");fb(f,true,"1 asal değildir: yalnız bir çarpanı (kendisi) vardır. Asal sayıların tam iki çarpanı olur.");ciz();G.kontrol();}
       else fb(f,false,"Sayıları elemek için tablonun üstündeki “… katları” düğmelerini kullanınız. Tabloda yalnız 1'e dokunmanız gerekiyor.");});
     du.innerHTML=dz(`Elenmeyen sayı (1 hariç): <b>${99-[...elen.keys()].filter(x=>x>1).length}</b>`)+(basilan.size>=4?dz("Sarı sayılar asaldır."):"");}
   ciz();
@@ -1043,7 +1099,7 @@ const e_elek=p=>{const S=notr(asamali(p));
       ["11'in 100'den küçük katları daha küçük bir asalın katı olarak zaten elenmişti; 11 · 11 = 121 ise 100'ü geçer",["11 asal değildir","11'in çarpanları yalnız 1 ve 11'dir; 11 asaldır. Nedeni katlarında: 22 = 2 · 11, 33 = 3 · 11 …"],["11'in hiç katı yoktur","11'in katları 22, 33, 44 … sonsuza kadar sürer. Bu katların 100'den küçük olanlarına bakınız: hangileri daha önce elenmişti?"]],
       "Bu yüzden 1–100 için 2, 3, 5 ve 7 ile elemek yeter. Kalan 25 sayı asaldır.",meydan);}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("1'den 150'ye kadar olan sayılardaki asal sayıları bulmak için katlarını elemek gereken <b>en büyük</b> asal sayı kaçtır?"),11,"11 · 11 = 121 < 150, ama 13 · 13 = 169 > 150.","Hangi asal sayının kendisiyle çarpımı 150'yi geçiyor? 11 · 11 ve 13 · 13'ü hesaplayınız.",
+    S.sayi(m,soruKut("1'den 150'ye kadar olan sayılardaki asal sayıları bulmak için katlarını elemek gereken <b>en büyük</b> asal sayı kaçtır?"),11,"11 · 11 = 121 < 150, ama 13 · 13 = 169 > 150.","Elemeyi, kendisiyle çarpımı sınırı geçen asala gelince bitirdik. Asalları kendileriyle çarpıp 150 ile karşılaştırınız.",
       ()=>S.bitir("1'den büyük olup yalnız 1'e ve kendisine bölünen sayılar <b>asal</b>dır. Asalları bulmak için küçük asalların katlarını eleriz; kendisiyle çarpımı sınırı geçen asala gelince dururuz. 1 asal değildir."),
       v=>v===13?"13 · 13 = 169 > 150. 13'ün 150'den küçük katları daha önce elenmiş olur.":v===7?"7'den sonra 11 · 11 = 121 < 150 olduğu için 11'in katlarını da elemek gerekir.":null);}
 };
@@ -1082,12 +1138,12 @@ const e_deneme=p=>{const S=notr(asamali(p));const P=[2,3,5,7,11,13,17];
 
 /* 7 · ALTILI SÜTUNLAR */
 const e_altili=p=>{const S=notr(asamali(p));
-  const k=S.ac(1,{ne:"1–60 arasındaki sayıları 6 sütunlu tabloda inceleyip 2 ve 3 dışındaki asal sayıların hangi sütunlarda toplandığını bulacaksınız.",
+  const k=S.ac(1,{durum:`1'den 60'a kadar sayılar 6 sütunlu bir tabloya satır satır yazılıyor: 1. satırda 1–6, 2. satırda 7–12, 3. satırda 13–18 … Böylece 1. sütunda 1, 7, 13, 19 …; 2. sütunda 2, 8, 14, 20 … sayıları alt alta gelir.<table class="t" style="margin-top:8px;max-width:330px"><thead><tr>${[1,2,3,4,5,6].map(i=>`<th>${i}. sütun</th>`).join("")}</tr></thead><tbody>${[0,1,2].map(r=>`<tr>${[1,2,3,4,5,6].map(i=>`<td>${r*6+i}</td>`).join("")}</tr>`).join("")}<tr>${"<td>…</td>".repeat(6)}</tr></tbody></table>`,ne:"1–60 arasındaki sayıları 6 sütunlu tabloda inceleyip 2 ve 3 dışındaki asal sayıların hangi sütunlarda toplandığını bulacaksınız.",
     nasil:["Tablodaki bir sayıya dokununuz. Asalsa sarı olur; değilse neden asal olmadığı yazılır.","8 asal bulunca “Bütün asalları gösterin” düğmesine basınız ve sütunlara bakınız.","Sütun sayısını 7 yapınız, sonra yeniden 6 yapınız ve iki tabloyu karşılaştırınız."],
     biter:bitG(4)});
   S.tahmin(k,"6 sütunlu tabloda 2 ve 3 dışındaki asal sayılar hangi sütunlarda bulunur?",[["her","Her sütunda"],["15","Yalnız 1. ve 5. sütunda"],["tek","Yalnız 1., 3. ve 5. sütunda"]],"15","2 ve 3 dışındaki asallar yalnız 1. ve 5. sütunda bulunur.");
   k.insertAdjacentHTML("beforeend",`<div class="row ay"></div><div class="stage" style="margin-top:8px"></div><p class="durum"></p><div class="fb" hidden></div>`);
-  const ay=k.querySelector(".ay"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let s=6;const isr=new Set();let goster=false,yedi=false;
+  const ay=k.querySelector(".ay"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let s=6;const isr=new Set();let goster=false,yedi=false;const D=defter(k,["Sayı","Sütun","Sonuç"]);
   const G=gorevler(k,[{m:"<b>8 asal sayı</b> işaretleyiniz.",ok:()=>isr.size>=8},{m:"“Bütün asalları gösterin” düğmesine basınız ve sütunlara bakınız.",ok:()=>goster},
     {m:"Tabloyu <b>7 sütunlu</b> yapınız. Asallar yine birkaç sütunda mı toplanıyor?",ok:()=>yedi,s:()=>"7 sütunda asallar sütunlara dağıldı."},
     {m:"Tabloyu yeniden <b>6 sütunlu</b> yapınız.",ok:()=>yedi&&s===6}],acikla);
@@ -1095,7 +1151,7 @@ const e_altili=p=>{const S=notr(asamali(p));
   const gb=document.createElement("button");gb.className="ghost";gb.textContent="Bütün asalları gösterin";ay.appendChild(gb);gb.onclick=()=>{goster=true;ciz();G.kontrol();};
   function ciz(){const bas=Array.from({length:s},(_,i)=>`<span class="hk bas" style="font-size:12px">${i+1}. sütun</span>`).join("");
     st.innerHTML=`<div class="izgara" style="grid-template-columns:repeat(${s},minmax(0,1fr))">${bas}${Array.from({length:60},(_,i)=>i+1).map(x=>`<button class="hz ${(goster||isr.has(x))&&asal(x)?"as":""}" data-x="${x}">${x}</button>`).join("")}</div>`;
-    st.querySelectorAll(".hz").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;if(asal(x)){isr.add(x);fb(f,true,`${x} asaldır: yalnız 1'e ve kendisine bölünür.`);bip(660,.08);}
+    st.querySelectorAll(".hz").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;D.ekle([x,`${(x-1)%s+1}. sütun (${s} sütunlu tablo)`,asal(x)?"asal":x===1?"asal değil":`asal değil: ${fac(x).join(" · ")}`],s+"-"+x);if(asal(x)){isr.add(x);fb(f,true,`${x} asaldır: yalnız 1'e ve kendisine bölünür.`);bip(660,.08);}
       else fb(f,false,x===1?"1 asal değildir: tek bir çarpanı var.":`${x} asal değildir: ${x} = ${fac(x).join(" · ")}.`);ciz();G.kontrol();});
     du.innerHTML=dz(`İşaretlenen asal: <b>${isr.size}</b>`);}
   ciz();
@@ -1107,7 +1163,7 @@ const e_altili=p=>{const S=notr(asamali(p));
       ["Bu sütundaki sayılar 3'ün katıdır: 3, 9, 15, 21 …",["Hepsi çift sayı olduğu için","3, 9, 15 tek sayıdır. Bu sayıları 3'e bölmeyi deneyiniz."],["Hepsi 5'e bölündüğü için","9 ve 21 5'e bölünmez. Sütundaki sayılar 3'er değil 6'şar artıyor ve hepsi 3'ün katı."]],
       "Asallar yalnız 1. ve 5. sütunda kalır. Ama bu sütunlardaki her sayı asal değildir: 25 ve 35'e bakınız.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("6 sütunlu tablo 100'e kadar uzatılırsa 97 kaçıncı sütunda olur?"),1,"97 = 6 · 16 + 1; kalan 1 olduğu için 1. sütundadır.","97'yi 6'ya bölünüz ve kalana bakınız: kalan, sütun numarasını verir.",
+    S.sayi(m,soruKut("6 sütunlu tablo 100'e kadar uzatılırsa 97 kaçıncı sütunda olur?"),1,"97 = 6 · 16 + 1; kalan 1 olduğu için 1. sütundadır.","Bir sayının sütunu, sayı 6'ya bölününce kalanla ilgilidir: 13 hangi sütunda, 13'ü 6'ya bölünce kalan kaç?",
       ()=>S.bitir("2 ve 3'ten büyük asal sayılar 6 sütunlu tabloda yalnız <b>1. ve 5. sütunda</b> bulunur: 6'nın bir katının 1 fazlası ya da 1 eksiğidir. Ama bu sütunlardaki her sayı asal değildir (25 = 5 · 5)."),
       v=>v===5?"5. sütundaki sayılar 6'ya bölününce 5 kalanını verir. 97'yi 6'ya böldüğünde kalan kaç?":v===16?"16, bölümdür; sütunu kalan gösterir.":null);}
 };
@@ -1116,7 +1172,7 @@ const e_altili=p=>{const S=notr(asamali(p));
 const e_kova=p=>{const S=notr(asamali(p));const KAL=[2,3,5,7,11,13,17,19,23,29];
   const KOV=[["asal","Asal sayı"],["kuvvet","Tek bir asalın tekrarı"],["iki","İki farklı asal çarpan"],["uc","Üç farklı asal çarpan"]];
   const tur=sp=>{const f=new Set(sp);if(f.size===1)return sp.length===1?"asal":"kuvvet";return f.size===2?"iki":"uc";};
-  const k=S.ac(1,{ne:"2'den 30'a kadar sayıları asal kalıplarla parçalayacaksınız; her kart, parçalarına bakılarak kendi kovasına kendiliğinden düşecek.",
+  const k=S.ac(1,{durum:"2'den 30'a kadar 29 sayı kartı var. Bir kart, asal kalıplarla 1 olana kadar bölünür; bölen asallar sepete düşer. Kart, sepetindeki <b>farklı asal</b> sayısına göre dört kovadan birine düşer: <b>Asal sayı</b> (ör. 7), <b>Tek bir asalın tekrarı</b> (ör. 8 = 2 · 2 · 2), <b>İki farklı asal çarpan</b> (ör. 12 = 2 · 2 · 3) ve <b>Üç farklı asal çarpan</b>.",ne:"2'den 30'a kadar sayıları asal kalıplarla parçalayacaksınız; her kart, parçalarına bakılarak kendi kovasına kendiliğinden düşecek.",
     nasil:["Kart masasından bir sayıya dokununuz; sayı tezgâha gelir.","Asal kalıplara dokununuz. Kalıp sayıyı kalansız bölerse parça sepete düşer ve sayı bölüme dönüşür; bölmezse sayı değişmez.","Sayı 1 olunca kart, sepetteki <b>farklı asal</b> sayısına göre kovasına düşer ve çubuk grafik büyür. 10 kartı kendiniz parçaladıktan sonra kalanları makineye de parçalatabilirsiniz."],
     biter:bitG(3)});
   S.tahmin(k,"2'den 30'a kadar sayılarla hangi kova en çok dolar?",[["asal","Asal sayılar"],["kuvvet","Tek bir asalın tekrarı"],["iki","İki farklı asal çarpan"],["uc","Üç farklı asal çarpan"]],"iki","“İki farklı asal çarpan” kovasına 12 kart düşer; asal sayılar kovasına 10, tekrar kovasına 6, üç farklı asal çarpan kovasına 1 kart.");
@@ -1143,16 +1199,17 @@ const e_kova=p=>{const S=notr(asamali(p));const KAL=[2,3,5,7,11,13,17,19,23,29];
   ciz();
   function acikla(){const c=S.kural(1);
     S.soru(c,"“Üç farklı asal çarpan” kovasına 30'a kadar yalnız bir kart düştü: 30. Neden?",
-      ["Üç farklı asalın en küçük çarpımı 2 · 3 · 5 = 30'dur",["30 çift sayı olduğu için",""],["30 asal sayı olduğu için",""]],
+      ["Üç farklı asalın en küçük çarpımı 2 · 3 · 5 = 30'dur",["30 çift sayı olduğu için","Çift olmak yalnız 2'yi gösterir: 28 de çift ama “İki farklı asal çarpan” kovasına düştü. 30'un sepetinde kaç farklı asal vardı?"],["30 asal sayı olduğu için","30 asal değildir; tezgâhta 2, 3 ve 5 kalıplarıyla parçalandı. Kovayı sepetteki farklı asal sayısı belirler."]],
       "Bir sonraki 2 · 3 · 7 = 42'dir; 30'dan büyüktür.",meydan);}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("50'den küçük sayılardan kaç tanesinin tam olarak üç farklı asal çarpanı vardır?"),2,"30 = 2 · 3 · 5 ve 42 = 2 · 3 · 7. Bir sonraki 2 · 5 · 7 = 70, 50'yi geçer.","",
-      ()=>S.bitir("Her sayı asal çarpanlarına göre sınıflandırılabilir: asal sayılar, tek bir asalın tekrarı (8 = 2 · 2 · 2), iki ya da daha çok farklı asal çarpanı olanlar."));}
+    S.sayi(m,soruKut("50'den küçük sayılardan kaç tanesinin tam olarak üç farklı asal çarpanı vardır?"),2,"30 = 2 · 3 · 5 ve 42 = 2 · 3 · 7. Bir sonraki 2 · 5 · 7 = 70, 50'yi geçer.","Üç farklı asalın çarpımlarını küçükten başlayarak yazınız ve 50'den küçük olanları sayınız.",
+      ()=>S.bitir("Her sayı asal çarpanlarına göre sınıflandırılabilir: asal sayılar, tek bir asalın tekrarı (8 = 2 · 2 · 2), iki ya da daha çok farklı asal çarpanı olanlar."),
+      v=>v===1?"30'u buldunuz; 2 ve 3 ile başka bir asalın çarpımı da 50'den küçük olabilir.":v>=3?"Saydığınız çarpımlardan bazıları 50'yi geçiyor ya da üç farklı asal içermiyor: 2 · 5 · 7 = 70.":null);}
 };
 
 /* 9 · ASAL ÇARPAN FABRİKASI */
 const e_fabrika=p=>{const S=notr(asamali(p));const K=[2,3,5,7,11,13];
-  const k=S.ac(1,{ne:"Bir sayıyı asal kalıplardan geçirerek asal çarpanlarına ayıracak ve bölme sırasının sonucu değiştirip değiştirmediğini göreceksiniz.",
+  const k=S.ac(1,{durum:"Fabrikada bir sayı 2, 3, 5, 7, 11 ve 13 kalıplarından geçirilir. Kalıp sayıyı kalansız bölerse o asal sepete düşer ve yoldaki sayı bölüme dönüşür. Örneğin 360, 2 kalıbından geçince sepete 2 düşer ve yoldaki sayı 180 olur. Yoldaki sayı 1 olunca parçalama biter.",ne:"Bir sayıyı asal kalıplardan geçirerek asal çarpanlarına ayıracak ve bölme sırasının sonucu değiştirip değiştirmediğini göreceksiniz.",
     nasil:["Üstten parçalanacak sayıyı seçiniz.","Kalıp düğmelerinden birine dokununuz. Kalıp sayıyı kalansız bölerse asal parça sepete düşer ve yoldaki sayı bölüme dönüşür; bölme tablosuna bir satır eklenir.","Yoldaki sayı 1 olunca parçalama biter; sonuç üslü ifadeyle yazılır ve deftere eklenir. Aynı sayıyı yeniden parçalamak için “Baştan başlayın” düğmesine basınız."],
     biter:bitG(3)});
   S.tahmin(k,"360'ı kalıplardan farklı sırayla geçirirseniz sepetteki asallar değişir mi?",[["e","Evet, değişir"],["h","Hayır, hep aynı olur"],["b","Bazen değişir"]],"h","Sepetteki asallar değişmez: 360 = 2 · 2 · 2 · 3 · 3 · 5, hangi sırayla bölerseniz bölün.");
@@ -1186,7 +1243,7 @@ const e_fabrika=p=>{const S=notr(asamali(p));const K=[2,3,5,7,11,13];
       ["Hayır; bir sayının asal çarpanları bölme sırasına göre değişmez",["Evet, her seferinde değişti","Deney defterindeki iki 360 satırına bakınız: sepet ikisinde de 2, 2, 2, 3, 3, 5."],["Yalnız 5 ile başlayınca değişti","5 ile başladığında da sepet 2, 2, 2, 3, 3, 5 oldu; yalnız sıra değişti."]],
       "Her sayı (1 hariç) asal çarpanların çarpımı olarak tek bir biçimde yazılır.",meydan);}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Fabrikadan geçen bir sayının sepetinde şu asallar birikmiştir: 2, 2, 3, 3, 3, 5."])+soruKut("Bu sayı kaçtır?"),540,"2<sup>2</sup> · 3<sup>3</sup> · 5 = 4 · 27 · 5 = 540.","Sepetteki bütün sayıları çarpınız: 2 · 2 · 3 · 3 · 3 · 5.",
+    S.sayi(m,yaz(["Fabrikadan geçen bir sayının sepetinde şu asallar birikmiştir: 2, 2, 3, 3, 3, 5."])+soruKut("Bu sayı kaçtır?"),540,"2<sup>2</sup> · 3<sup>3</sup> · 5 = 4 · 27 · 5 = 540.","Fabrikada sayı, sepetteki asallara bölüne bölüne 1'e indi. Geriye doğru düşününüz: sepetteki asallarla hangi işlem yapılırsa sayı geri gelir?",
       ()=>S.bitir("Bir sayıyı <b>bölme (algoritma) yöntemiyle</b> asal sayılara bölerek asal çarpanlarına ayırırız. Hangi sırayla bölersek bölelim sonuç aynıdır. Tekrar eden çarpanları üslü yazarız: 360 = 2<sup>3</sup> · 3<sup>2</sup> · 5."),
       v=>v===18?"Sayıları topladınız; sepetteki asalların çarpımı gerekiyor.":null);}
 };
@@ -1195,16 +1252,18 @@ const e_fabrika=p=>{const S=notr(asamali(p));const K=[2,3,5,7,11,13];
 const e_sifre=p=>{const S=notr(asamali(p));
   const HARF={2:"A",3:"B",5:"E",7:"K",11:"L",13:"M",17:"N",19:"R",23:"S",29:"T",31:"İ",37:"Y",41:"Ç",43:"Ö",47:"U",53:"Z"};const KAL=Object.keys(HARF).map(Number);
   const KEL=[["ASAL",[8,46,32,55]],["KATMAN",[35,16,58,39,4,51]],["ÇÖZ",[82,86,106]]];
-  const k=S.ac(1,{ne:"Sayıları asal kalıplarla kendiniz parçalayıp en büyük asal çarpanlarını bularak gizli üç kelimeyi çözeceksiniz.",
-    nasil:["Kelimedeki bir sayı kutusuna dokununuz; sayı tezgâha gelir.","Asal kalıplara dokununuz. Kalıp sayıyı kalansız bölerse parça sepete düşer ve sayı bölüme dönüşür; bölmezse sayı değişmez.","Sayı 1 olunca sepetteki <b>en büyük asal</b> şifre tablosunda hangi harfse kutuda o harf açılır. Kelimenin bütün harfleri açılınca sonraki kelimeye geçilir."],
+  const k=S.ac(1,{durum:"Şifre tablosunda her asal sayı bir harfi gösterir: 2 → A, 3 → B, 5 → E, 7 → K, 13 → M … Bir sayının gösterdiği harf, o sayının <b>en büyük asal çarpanının</b> harfidir.",ne:"Sayıları asal kalıplarla kendiniz parçalayıp en büyük asal çarpanlarını bularak gizli üç kelimeyi çözeceksiniz.",
+    nasil:["Kelimedeki bir sayı kutusuna dokununuz; sayı tezgâha gelir.","Asal kalıplara dokununuz. Kalıp sayıyı kalansız bölerse parça sepete düşer ve sayı bölüme dönüşür; bölmezse sayı değişmez.","Sayı 1 olunca sepetteki <b>en büyük asal</b> şifre tablosunda hangi harfse kutuda o harf açılır. Bir kelimenin bütün harfleri açılınca “Sıradaki kelime (2 / 3) →” düğmesine basınız; yeni kelime ancak bu düğmeyle gelir. <b>3 kelime</b> vardır; üstteki “Kelime 1 / 3” şeridi kaçıncı kelimede olduğunuzu gösterir."],
     biter:bitG(3)});
-  S.tahmin(k,"26 sayısı hangi harfi gösterir? (Tabloda 2 → A, 13 → M)",[["A","A"],["M","M"],["B","B"]],"M","26 = 2 · 13; en büyük asal çarpan 13, yani M.");
-  k.insertAdjacentHTML("beforeend",`<div class="sifrtab"></div><div class="kelime" style="margin-top:8px"></div><div class="k8-masa"><span>Tezgâhtaki sayı:</span><span class="k8-n">—</span><span>Sepet:</span><span class="k8-sepet"></span></div><div class="a8-et">Asal kalıplar</div><div class="k8-kal"></div><div class="fb" hidden></div>`);
-  const tb=k.querySelector(".sifrtab"),kl=k.querySelector(".kelime"),kn=k.querySelector(".k8-n"),sp=k.querySelector(".k8-sepet"),kk=k.querySelector(".k8-kal"),f=k.querySelector(".fb");let w=0,acik=new Set(),sec=null,n=0,sepet=[];
+  S.tahmin(k,"26 sayısı hangi harfi gösterir?",[["A","A"],["M","M"],["B","B"]],"M","26 = 2 · 13; en büyük asal çarpan 13, yani M.");
+  k.insertAdjacentHTML("beforeend",`<div class="sifrtab"></div><div class="kelime" style="margin-top:8px"></div><div class="r-tzd"></div><div class="k8-masa"><span>Tezgâhtaki sayı:</span><span class="k8-n">—</span><span>Sepet:</span><span class="k8-sepet"></span></div><div class="a8-et">Asal kalıplar</div><div class="k8-kal"></div><div class="fb" hidden></div>`);
+  const tb=k.querySelector(".sifrtab"),kl=k.querySelector(".kelime"),kn=k.querySelector(".k8-n"),sp=k.querySelector(".k8-sepet"),kk=k.querySelector(".k8-kal"),f=k.querySelector(".fb");let w=0,coz=0,acik=new Set(),sec=null,n=0,sepet=[];
   tb.innerHTML=`<div class="a8-et">Şifre tablosu (asal sayı → harf)</div><div class="chips">${Object.entries(HARF).map(([p2,h])=>`<span class="chip">${p2} → ${h}</span>`).join("")}</div>`;
   const D=defter(k,["Sayı","Parçalar","En büyük asal","Harf"]);
-  const G=gorevler(k,[{m:"İlk kelimenin <b>bir harfini</b> açınız.",ok:()=>w>0||[...acik].some(x=>x.startsWith("0-"))},{m:"İlk kelimeyi tamamen açınız.",ok:()=>w>0,s:()=>"ASAL"},{m:"Diğer iki kelimeyi de açınız.",ok:()=>w>=3,s:()=>"KATMAN ve ÇÖZ"}],acikla);
-  function ciz(){if(w>=3){kl.innerHTML=`<div class="a8-et">Çözülen kelimeler</div>`+KEL.map(x=>`<span class="kbitti">${x[0]}</span>`).join(" ");}
+  const G=gorevler(k,[{m:"İlk kelimenin <b>bir harfini</b> açınız.",ok:()=>coz>0||[...acik].some(x=>x.startsWith("0-"))},{m:"İlk kelimeyi tamamen açınız.",ok:()=>coz>0,s:()=>"ASAL"},{m:"Diğer iki kelimeyi de açınız.",ok:()=>coz>=3,s:()=>"KATMAN ve ÇÖZ"}],acikla);
+  const TZ=turZincir(kl,{n:3,ad:"Kelime",tamlayan:"kelimenin",dugme:k.querySelector(".r-tzd"),vurgu:()=>kl,kur:i=>{w=i;sec=null;sepet=[];f.hidden=true;ciz();},
+    son:"3 kelimenin hepsi çözüldü. Görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
+  function ciz(){if(coz>=3){kl.innerHTML=`<div class="a8-et">Çözülen kelimeler</div>`+KEL.map(x=>`<span class="kbitti">${x[0]}</span>`).join(" ");}
     else{const sayi=KEL[w][1];kl.innerHTML=`<div class="a8-et">${w+1}. kelime (${sayi.length} harf)</div><div class="sifre">${sayi.map((x,i)=>`<button type="button" class="skut ${acik.has(w+"-"+i)?"ac":""} ${sec===i?"sec":""}" data-i="${i}"><b>${x}</b><span>${acik.has(w+"-"+i)?HARF[Math.max(...fac(x))]:"?"}</span></button>`).join("")}</div>`;
       kl.querySelectorAll(".skut").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(acik.has(w+"-"+i))return;sec=i;n=sayi[i];sepet=[];f.hidden=true;ciz();});}
     kn.textContent=sec===null?"—":n;sp.innerHTML=sepet.map(q=>`<i>${q}</i>`).join("")||'<span class="bosk">boş</span>';
@@ -1214,16 +1273,17 @@ const e_sifre=p=>{const S=notr(asamali(p));
       n/=q;sepet.push(q);bip(520+sepet.length*40,.08);
       if(n===1){const x=KEL[w][1][sec],eb=Math.max(...sepet);acik.add(w+"-"+sec);D.ekle([x,[...sepet].sort((a,b)=>a-b).join(" · "),eb,HARF[eb]],String(x));
         fb(f,true,`${x} = ${[...sepet].sort((a,b)=>a-b).join(" · ")}. Sepetteki en büyük asal ${eb}: harf <b>${HARF[eb]}</b>.`);bip(700,.1);sec=null;sepet=[];
-        if(KEL[w][1].every((_,i)=>acik.has(w+"-"+i))){bip(880,.3,"triangle");setTimeout(()=>{w++;ciz();G.kontrol();},700);}}
+        if(KEL[w][1].every((_,i)=>acik.has(w+"-"+i))){bip(880,.3,"triangle");coz++;TZ.tamam(`<b>${KEL[w][0]}</b> çözüldü`);}}
       else f.hidden=true;ciz();G.kontrol();});}
   ciz();
   function acikla(){const c=S.kural(1);
     S.soru(c,"Bu şifreyi çözmek için hangi beceriyi kullandınız?",
-      ["Sayıyı asal çarpanlarına ayırmayı",["Sayının rakamlarını toplamayı",""],["Sayıları küçükten büyüğe sıralamayı",""]],
+      ["Sayıyı asal çarpanlarına ayırmayı",["Sayının rakamlarını toplamayı","Rakam toplamı harfi belirlemedi: 46'nın rakamları toplamı 10, ama harfi S (23) oldu. Sayıyı parçalayınca sepete ne düşüyordu?"],["Sayıları küçükten büyüğe sıralamayı","Sayıların sırası harfi değiştirmedi. Her harf, sayı parçalanınca sepete düşen en büyük asaldan geldi."]],
       "İnternetteki gerçek şifrelerde çok büyük iki asalın çarpımı kullanılır; bu çarpımı asal çarpanlarına ayırmak bilgisayarlar için bile çok zordur.",meydan);}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("391 sayısının en büyük asal çarpanı kaçtır?"),23,"391 = 17 · 23.","",
-      ()=>S.bitir("Her sayı asal çarpanlarına ayrılabilir ve bu ayrılış sayının <b>kimliği</b> gibidir. Küçük sayılarda kolay, çok büyük sayılarda çok zordur; şifreleme bu zorluktan yararlanır."));}
+    S.sayi(m,soruKut("391 sayısının en büyük asal çarpanı kaçtır?"),23,"391 = 17 · 23.","391'i 2, 3, 5, 7, 11, 13 … asallarına sırayla bölmeyi deneyiniz; bölen bir asal bulunca bölümü de inceleyiniz.",
+      ()=>S.bitir("Her sayı asal çarpanlarına ayrılabilir ve bu ayrılış sayının <b>kimliği</b> gibidir. Küçük sayılarda kolay, çok büyük sayılarda çok zordur; şifreleme bu zorluktan yararlanır."),
+      v=>v===17?"17, 391'in bir asal çarpanı ama en büyüğü değil: 391 : 17 işleminin sonucuna bakınız.":v===391?"391 asal değildir; onu kalansız bölen bir asal var.":null);}
 };
 
 /* 11 · KÂĞIT KATLAMA */
@@ -1321,11 +1381,12 @@ const e_radar=p=>{const S=notr(asamali(p));const N={2:4,3:2,5:1,7:0};const n=720
   ciz();
   function acikla(){const c=S.kural(1);
     S.soru(c,"Bir sayının gizli sayının çarpanı olması için ne gerekir?",
-      ["Asal çarpanları gizli sayıda da olmalı ve her birinin üssü gizli sayıdakinden büyük olmamalı",["Gizli sayıdan küçük olmalı",""],["Çift sayı olmalı",""]],
+      ["Asal çarpanları gizli sayıda da olmalı ve her birinin üssü gizli sayıdakinden büyük olmamalı",["Gizli sayıdan küçük olmalı","27 de gizli sayıdan küçük ama üçüncü 3 bloğu sütuna sığmadı; küçük olmak yetmez."],["Çift sayı olmalı","15 ve 45 tek sayı ama çarpan çıktı; 14 çift ama 7 bloğu için sütun yoktu. Bloklara bakınız."]],
       "27 = 3<sup>3</sup>, ama gizli sayıda 3<sup>2</sup> var; 27 çarpan değildir. 14 = 2 · 7; gizli sayıda 7 yok.",meydan);}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("2<sup>4</sup> · 3<sup>2</sup> sayısının tek sayı olan pozitif çarpanlarının toplamı kaçtır?"),13,"Tek çarpanlarda 2 bulunmaz: 1, 3 ve 9. Toplamları 13.","",
-      ()=>S.bitir("Bir sayının çarpanları, onun asal çarpanlarından yapılır. Bir sayı çarpan ise asal çarpanlarının <b>üsleri</b> büyük sayıdakinden fazla olamaz."));}
+    S.sayi(m,soruKut("2<sup>4</sup> · 3<sup>2</sup> sayısının tek sayı olan pozitif çarpanlarının toplamı kaçtır?"),13,"Tek çarpanlarda 2 bulunmaz: 1, 3 ve 9. Toplamları 13.","Tek bir çarpanda 2 bloğu bulunamaz; yalnız 3 bloklarından (hiç blok yoksa 1) yapılabilen çarpanları yazıp toplayınız.",
+      ()=>S.bitir("Bir sayının çarpanları, onun asal çarpanlarından yapılır. Bir sayı çarpan ise asal çarpanlarının <b>üsleri</b> büyük sayıdakinden fazla olamaz."),
+      v=>v===12?"1'i unuttunuz; 1 de tek bir çarpandır.":v===3?"Tek çarpanların kaç tane olduğunu buldunuz; soru toplamlarını istiyor.":v===39?"27 çarpan değildir: sayıda yalnız iki tane 3 var.":null);}
 };
 
 /* 14 · ÇARPAN IZGARASI */
@@ -1348,7 +1409,7 @@ const e_izgara=p=>{const S=notr(asamali(p));
       if(s.size===(a+1)*(b+1)){const n=2**a*3**b;D.ekle([n,a,b,s.size],String(n));bip(880,.25,"triangle");}ciz();G.kontrol();});
     du.innerHTML=dz(`Bulunan çarpan: <b>${s.size}</b> / ${(a+1)*(b+1)}`,`Izgara: ${a+1} sütun, ${b+1} satır`);}
   ciz();
-  function acikla(){const c=S.kural(1,{nasil:["Deney defterine bakınız: 2'nin üssü, 3'ün üssü ve çarpan sayısı arasında nasıl bir ilişki var?","Bir seçeneğe dokununuz. Yanlış seçerseniz “Yeniden deneyiniz.” yazısı çıkar."]});
+  function acikla(){const c=S.kural(1,{nasil:["Deney defterine bakınız: 2'nin üssü, 3'ün üssü ve çarpan sayısı arasında nasıl bir ilişki var?","Bir seçeneğe dokununuz. Yanlış seçerseniz hatanızı gösteren bir ipucu çıkar; başka bir seçenek deneyiniz."]});
     S.soru(c,"2<sup>a</sup> · 3<sup>b</sup> biçimindeki bir sayının çarpan sayısı nasıl bulunur?",
       ["(a + 1) · (b + 1)",["a · b","72 için a · b = 3 · 2 = 6 olur ama 12 çarpan buldunuz. Izgarada 2'nin üssü 0'dan başlar: kaç sütun var?"],["a + b","72 için a + b = 5 olur ama 12 çarpan buldunuz. Sütun sayısı ile satır sayısını çarpınız."]],
       "2'nin üssü 0'dan a'ya kadar a + 1 değer, 3'ün üssü 0'dan b'ye kadar b + 1 değer alır.",meydan);}
@@ -1360,10 +1421,10 @@ const e_izgara=p=>{const S=notr(asamali(p));
 
 /* 15 · ÇARPAN AĞI */
 const e_ag=p=>{const S=notr(asamali(p));
-  const k=S.ac(1,{ne:"1'den başlayıp yalnız ×2 ve ×3 adımlarıyla 36'ya giden bütün yolları bulacaksınız.",
+  const k=S.ac(1,{durum:'Ağda 9 sayı, 3 satır ve 3 sütun hâlinde dizilmiştir. 1\'den başlanır; her adımda ya <b>sağa</b> gidilir (sayı 2 ile çarpılır) ya da <b>yukarı</b> gidilir (sayı 3 ile çarpılır). Hedef sağ üstteki 36\'dır.<div style="display:inline-grid;grid-template-columns:repeat(3,46px);gap:6px;margin-top:8px;text-align:center;font-weight:800"><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">9</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">18</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">36</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">3</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">6</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">12</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">1</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">2</span><span style="border:2px solid currentColor;border-radius:50%;line-height:40px">4</span></div>',ne:"1'den başlayıp yalnız ×2 ve ×3 adımlarıyla 36'ya giden bütün yolları bulacaksınız.",
     nasil:["Turuncu daire bulunduğunuz sayıdır. Sarı dolgulu daireler gidebileceğiniz sayılardır: sağa giderseniz ×2, yukarı giderseniz ×3 yapılır.","Sarı dairelerden birine dokunarak ilerleyiniz.","Hedefe ulaşınca yol deftere yazılır ve 1'e dönersiniz. Aynı yolu ikinci kez bulursanız sayılmaz."],
     biter:bitG(4)});
-  S.tahmin(k,"Bu ağda 1'den 36'ya kaç farklı yoldan gidilir?",[[4,"4"],[6,"6"],[9,"9"],[12,"12"]],6,"36'ya 6 farklı yol var; her yolda iki kez ×2, iki kez ×3 yapılır.");
+  S.tahmin(k,"1'den 36'ya yalnız sağa (×2) ve yukarı (×3) giderek kaç farklı yoldan gidilir?",[[4,"4"],[6,"6"],[9,"9"],[12,"12"]],6,"36'ya 6 farklı yol var; her yolda iki kez ×2, iki kez ×3 yapılır.");
   k.insertAdjacentHTML("beforeend",`<div class="row sy"></div><div class="stage"></div><p class="durum"></p><div class="row"><button class="ghost bas">1'e dönün</button></div><div class="fb" hidden></div>`);
   const sy=k.querySelector(".sy"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let a=2,b=2,yol=[[0,0]];const yollar={};
   const D=defter(k,["Hedef","Yol","Adım"]);
@@ -1392,7 +1453,7 @@ const e_ag=p=>{const S=notr(asamali(p));
       ["4 adım; çünkü 36 = 2<sup>2</sup> · 3<sup>2</sup> ve üslerin toplamı 4",["6 adım; çünkü 6 · 6 = 36","Deney defterindeki “Adım” sütununa bakınız: 36'ya giden yollar 4 adım sürdü."],["Her yol farklı sayıda adım sürer","Defterdeki bütün 36 yolları aynı sayıda adım sürdü. Her yolda kaç kez ×2 ve kaç kez ×3 yaptınız?"]],
       "Her yolda iki kez ×2, iki kez ×3 yapılır; yalnız sırası değişir.",meydan);}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("Bu ağda 1'den 2<sup>3</sup> · 3<sup>4</sup> sayısına giden her yol kaç adımdır?"),7,"Üç kez ×2, dört kez ×3: 7 adım.","Üsleri toplayınız: 2'nin üssü kaç kez ×2, 3'ün üssü kaç kez ×3 yapılacağını söyler.",
+    S.sayi(m,soruKut("Bu ağda 1'den 2<sup>3</sup> · 3<sup>4</sup> sayısına giden her yol kaç adımdır?"),7,"Üç kez ×2, dört kez ×3: 7 adım.","Her ×2 ve her ×3 bir adımdır. Bu sayıya ulaşmak için kaç kez ×2 ve kaç kez ×3 yapmak gerekir?",
       ()=>S.bitir("Bir sayının çarpanları, asal çarpanlarla adım adım çarparak birbirine bağlanır. 1'den sayıya giden her yolda <b>üslerin toplamı</b> kadar adım vardır; yalnız sıra değişir."),
       v=>v===12?"Üsleri çarptınız; her ×2 ve her ×3 bir adımdır, üsleri toplayınız.":null);}
 };
@@ -1432,16 +1493,16 @@ const e_kare=p=>{const S=notr(asamali(p));
 
 /* 17 · KİLİTLİ DOLAPLAR */
 const e_dolap=p=>{const S=notr(asamali(p));const N=30;
-  const k=S.ac(1,{ne:"30 dolabın kapısıyla oynanan bir tur oyununda sonunda hangi kapıların açık kaldığını ve nedenini bulacaksınız.",
+  const k=S.ac(1,{durum:"30 dolap var ve başta bütün kapılar kapalı. 1. turda bütün kapılar açılır. 2. turda numarası 2'nin katı olan kapıların, 3. turda numarası 3'ün katı olan kapıların durumu değişir: açık kapı kapanır, kapalı kapı açılır. Bu, 30. tura kadar böyle sürer.",ne:"30 dolabın kapısıyla oynanan bir tur oyununda sonunda hangi kapıların açık kaldığını ve nedenini bulacaksınız.",
     nasil:["Başta bütün kapılar kapalıdır. 1. turda bütün kapılar açılır. 2. turda numarası 2'nin katı olan kapıların, 3. turda 3'ün katı olanların durumu değişir (açık kapı kapanır, kapalı kapı açılır). Bu, 30. tura kadar sürer.","“Sonraki tur” ile turları tek tek, “Sona kadar oynatın” ile hepsini birden oynatınız.","Bir dolaba dokunursanız o dolabın kaç kez ve hangi turlarda değiştiği yazılır."],
     biter:bitG(3)});
   S.tahmin(k,"30. turun sonunda kaç kapı açık kalır?",[[5,"5"],[10,"10"],[15,"15"],[20,"20"]],5,"Açık kalan kapılar 1, 4, 9, 16 ve 25: 5 kapı.");
   k.insertAdjacentHTML("beforeend",`<div class="row"><button class="primary tur">Sonraki tur</button><button class="ghost son">Sona kadar oynatın</button><button class="ghost bas">Baştan</button></div><div class="dolaplar"></div><p class="durum"></p><div class="fb" hidden></div>`);
-  const dl=k.querySelector(".dolaplar"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let tur=0;let acik=Array(N+1).fill(false),deg=Array(N+1).fill(0);let bakilan=new Set();
+  const dl=k.querySelector(".dolaplar"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let tur=0;let acik=Array(N+1).fill(false),deg=Array(N+1).fill(0);let bakilan=new Set();const D=defter(k,["Dolap","Değiştiği turlar","Değişme sayısı","Durum"]);
   const G=gorevler(k,[{m:"<b>3 tur</b> oynatınız.",ok:()=>tur>=3},{m:"Oyunu sona kadar (30. tur) oynatınız.",ok:()=>tur>=N,s:()=>"Açık kalanlar: 1, 4, 9, 16, 25"},{m:"Oyun bitince açık kalan bir dolaba ve kapalı kalan bir dolaba dokununuz.",ok:()=>tur>=N&&[...bakilan].some(x=>acik[x])&&[...bakilan].some(x=>!acik[x])}],acikla);
   function birTur(){if(tur>=N)return;tur++;for(let x=tur;x<=N;x+=tur){acik[x]=!acik[x];deg[x]++;}bip(300+tur*15,.05);}
   function ciz(){dl.innerHTML=Array.from({length:N},(_,i)=>i+1).map(x=>`<button class="dol ${acik[x]?"ac":""}" data-x="${x}"><b>${x}</b><span>${acik[x]?"açık":"kapalı"}</span></button>`).join("");
-    dl.querySelectorAll(".dol").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;if(tur>=N)bakilan.add(x);const t=divs(x).filter(d=>d<=tur);
+    dl.querySelectorAll(".dol").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;if(tur>=N)bakilan.add(x);const t=divs(x).filter(d=>d<=tur);D.ekle([x,t.join(", ")||"—",deg[x],acik[x]?"açık":"kapalı"],x+"-"+tur);
       fb(f,acik[x],`${x} numaralı dolap şimdiye kadar ${deg[x]} kez değişti; değiştiği turlar: ${t.join(", ")||"henüz yok"}. Bu turlar ${ek(x,"in")} çarpanlarıdır. ${deg[x]%2?"Tek sayıda değiştiği için açık.":"Çift sayıda değiştiği için kapalı."}${tur<N?" (Oyun henüz bitmedi.)":""}`);G.kontrol();});
     du.innerHTML=dz(`Tur: <b>${tur}</b> / ${N}`,`Açık kapı: <b>${acik.filter(Boolean).length}</b>`);}
   k.querySelector(".tur").onclick=()=>{birTur();ciz();G.kontrol();};
@@ -1455,21 +1516,22 @@ const e_dolap=p=>{const S=notr(asamali(p));const N=30;
       ["Hepsi bir doğal sayının karesidir; çarpan sayıları tektir",["Hepsi asal sayıdır","4, 9, 16 ve 25 asal değildir. Bu sayılar 1 · 1, 2 · 2, 3 · 3 … biçiminde yazılabilir."],["Hepsi çift sayıdır","1, 9 ve 25 tek sayıdır. Çarpan sayılarının tek mi çift mi olduğuna bakınız."]],
       "Çarpanlar çift çift eşleşir; 16'da 4 kendisiyle eşleşir ve çarpan sayısı 5 olur.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("Dolap sayısı 100 olsaydı oyunun sonunda kaç kapı açık kalırdı?"),10,"1, 4, 9, …, 100: 10 kapı.","100'e kadar kaç tane doğal sayının karesi var? 1 · 1, 2 · 2, … 10 · 10.",
+    S.sayi(m,soruKut("Dolap sayısı 100 olsaydı oyunun sonunda kaç kapı açık kalırdı?"),10,"1, 4, 9, …, 100: 10 kapı.","Oyunun sonunda hangi numaralı dolaplar açık kalmıştı? 100'e kadar bu türden kaç sayı olduğunu sayınız.",
       ()=>S.bitir("Çoğu sayının çarpan sayısı çifttir, çünkü çarpanlar çift çift eşleşir. <b>Bir doğal sayının karesi olan sayılarda</b> ortadaki çarpan kendisiyle eşleşir ve çarpan sayısı tek olur."),
       v=>v===9?"100 = 10 · 10 de bir karedir; 100 numaralı dolap da açık kalır.":v===25?"25, 100'e kadar olan asal sayıların sayısıdır; açık kalanlar kare sayılardır.":null);}
 };
 
 /* 18 · SAYI DEDEKTİFİ (05.10.2026, B → A: öğrenci sorgu sayısını kendisi seçer; bölünebilme cevabıyla olası sayılar ızgarası daralır) */
 const e_dedektif=p=>{const S=notr(asamali(p));
-  const k=S.ac(1,{ne:"Kendi seçtiğiniz sayılarla sorgu yaparak 2 ile 60 arasındaki gizli sayıyı bulacaksınız.",
-    nasil:["Sorgu kutusuna 2 ile 60 arasında bir sayı yazınız (ya da − / + ile seçiniz).","“Kalansız bölünür mü?” ya da “Çarpanı mı?” düğmesine basınız. Cevap sorgu listesine yazılır; cevaba uymayan sayılar ızgarada sönükleşir.","Gizli sayıyı bulduğunuzu düşününce cevap kutusuna yazıp “Tahmin edin” düğmesine basınız. Yeni oyun için “Yeni gizli sayı” düğmesine basınız."],
+  const k=S.ac(1,{durum:"Bilgisayar 2 ile 60 arasında bir gizli sayı tutuyor. Siz bir sorgu sayısı seçip iki türlü soru sorabilirsiniz: “Gizli sayı bu sayıya kalansız bölünür mü?” ya da “Gizli sayı bu sayının çarpanı mı?” Cevap “Evet” ya da “Hayır” olur; cevaba uymayan sayılar elenir.",ne:"Kendi seçtiğiniz sayılarla sorgu yaparak 2 ile 60 arasındaki gizli sayıyı bulacaksınız.",
+    nasil:["Sorgu kutusuna 2 ile 60 arasında bir sayı yazınız (ya da − / + ile seçiniz).","“Kalansız bölünür mü?” ya da “Çarpanı mı?” düğmesine basınız. Cevap sorgu listesine yazılır; cevaba uymayan sayılar ızgarada sönükleşir.","Gizli sayıyı bulduğunuzu düşününce cevap kutusuna yazıp “Tahmin edin” düğmesine basınız.","Gizli sayıyı bulunca “Sıradaki oyun →” düğmesine basınız; yeni gizli sayı ancak bu düğmeyle gelir. Üstteki şerit kaçıncı oyunda olduğunuzu gösterir; görevler için en az 3 oyun oynayacaksınız."],
     biter:bitG(3)});
   S.tahmin(k,"Olası sayıları en hızlı hangi sorgular azaltır?",[["a","Küçük asal sayılarla (2, 3, 5, 7) yapılan sorgular"],["b","Büyük sayılarla (50, 55, 60) yapılan sorgular"],["c","Hangi sayıyla sorulduğu fark etmez"]],"a","Küçük asallar sayıları kabaca ikiye, üçe ayırır; büyük sayılarla yapılan sorguların cevabı çoğu zaman “Hayır” olur ve az sayı eler.");
-  k.insertAdjacentHTML("beforeend",`<div class="row sq"></div><div class="row"><button type="button" class="primary q1">Gizli sayı bu sayıya kalansız bölünür mü?</button><button type="button" class="primary q2">Gizli sayı bu sayının çarpanı mı?</button></div><div class="list ipl"></div><div class="a8-et adet"></div><div class="k8-iz"></div><div class="row"><label class="a8-cvp">Gizli sayı: <input class="ans th" inputmode="numeric" aria-label="Tahmin"></label><button type="button" class="primary tb">Tahmin edin</button><button type="button" class="ghost yeni">Yeni gizli sayı</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="row sq"></div><div class="row"><button type="button" class="primary q1">Gizli sayı bu sayıya kalansız bölünür mü?</button><button type="button" class="primary q2">Gizli sayı bu sayının çarpanı mı?</button></div><div class="list ipl"></div><div class="a8-et adet"></div><div class="k8-iz"></div><div class="row"><label class="a8-cvp">Gizli sayı: <input class="ans th" inputmode="numeric" aria-label="Tahmin"></label><button type="button" class="primary tb">Tahmin edin</button></div><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const ipl=k.querySelector(".ipl"),iz=k.querySelector(".k8-iz"),ad=k.querySelector(".adet"),f=k.querySelector(".fb");let gizli,sorgu,bulunan=0,azS=99,bitti=false;
   const SQ=surgu("Sorgu sayısı",2,60,6,()=>{});k.querySelector(".sq").appendChild(SQ.el);
   const D=defter(k,["Gizli sayı","Sorgu sayısı","Sorgular"]);
+  const TZ=turZincir(k.querySelector(".sq"),{n:0,ad:"Oyun",dugme:k.querySelector(".r-tzd"),vurgu:()=>iz,kur:()=>yeni()});
   const G=gorevler(k,[{m:"Bir gizli sayı bulunuz.",ok:()=>bulunan>=1},{m:"Toplam <b>3</b> gizli sayı bulunuz.",ok:()=>bulunan>=3},{m:"Bir gizli sayıyı <b>en fazla 7 sorguyla</b> bulunuz. (Küçük sayılarla başlamayı deneyiniz.)",ok:()=>azS<=7,s:()=>`En az sorguyla bulduğunuz oyun: ${azS} sorgu`}],acikla);
   const uy=(x,[t,d,c])=>(t==="b"?x%d===0:d%x===0)===c;
   const kalan=()=>Array.from({length:59},(_,i)=>i+2).filter(x=>sorgu.every(q=>uy(x,q)));
@@ -1481,29 +1543,31 @@ const e_dedektif=p=>{const S=notr(asamali(p));
     iz.innerHTML=Array.from({length:59},(_,i)=>i+2).map(x=>`<span class="${K.has(x)?"":"el"}">${x}</span>`).join("");}
   k.querySelector(".tb").onclick=()=>{const v=+k.querySelector(".th").value;if(!v||bitti)return;
     if(v===gizli){bitti=true;bulunan++;azS=Math.min(azS,sorgu.length);D.ekle([gizli,sorgu.length,sorgu.map(([t,d,c])=>`${t==="b"?"÷":"çarpanı mı: "}${d} → ${c?"Evet":"Hayır"}`).join("; ")],"g"+bulunan);
-      fb(f,true,`Buldunuz! Gizli sayı ${gizli} = ${usl(gizli)}. ${sorgu.length} sorgu kullandınız. Yeni oyun için “Yeni gizli sayı” düğmesine basınız.`);bip(880,.3,"triangle");ciz();G.kontrol();}
+      fb(f,true,`Buldunuz! Gizli sayı ${gizli} = ${usl(gizli)}. ${sorgu.length} sorgu kullandınız.`);bip(880,.3,"triangle");ciz();G.kontrol();TZ.tamam(`gizli sayı ${gizli}, ${sorgu.length} sorgu`);}
     else fb(f,false,kalan().includes(v)?`${v} sorguların hepsine uyuyor ama gizli sayı değil. Bir sorgu daha yapınız.`:`${v} sorgulardan en az birine uymuyor; ızgarada sönük.`);};
   k.querySelector(".th").onkeydown=e=>{if(e.key==="Enter")k.querySelector(".tb").click();};
-  k.querySelector(".yeni").onclick=yeni;yeni();
+  yeni();
   function acikla(){const c=S.kural(2);
     S.soru(c,"“Gizli sayı 2'ye kalansız bölünür mü?” sorgusunun cevabı “Hayır” olunca ızgarada hangi sayılar söndü?",
-      ["Bütün çift sayılar (2'nin katları)",["Bütün tek sayılar",""],["Yalnız 2",""]],"Cevap “Hayır” ise gizli sayı tektir; 2'nin bütün katları elenir.",()=>
+      ["Bütün çift sayılar (2'nin katları)",["Bütün tek sayılar","Cevap “Hayır” ise gizli sayı 2'ye bölünmez; sönen sayılar 2'ye bölünenlerdir. Tek sayılar 2'ye bölünür mü?"],["Yalnız 2","Yalnız 2 değil: 4, 6, 8 … de 2'ye kalansız bölünür ve onlar da söner."]],"Cevap “Hayır” ise gizli sayı tektir; 2'nin bütün katları elenir.",()=>
     S.soru(c,"Gizli sayı hem 3'e hem 5'e kalansız bölünüyorsa aşağıdakilerden hangisine de kesinlikle kalansız bölünür?",
-      ["15",["8",""],["9",""]],"Sayının asal çarpanları arasında hem 3 hem 5 vardır; bu yüzden 3 · 5 = 15'e de bölünür.",meydan));}
+      ["15",["8","8 = 2 · 2 · 2; gizli sayının 2'ye bölündüğünü bilmiyoruz (ör. 15, 2'ye bölünmez)."],["9","9 = 3 · 3; sayıda iki tane 3 olduğunu bilmiyoruz: 15, 3'e ve 5'e bölünür ama 9'a bölünmez."]],"Sayının asal çarpanları arasında hem 3 hem 5 vardır; bu yüzden 3 · 5 = 15'e de bölünür.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Gizli sayı 2 ile 60 arasındadır.","2'ye kalansız bölünmez.","3'e ve 7'ye kalansız bölünür.","9'a kalansız bölünmez."])+soruKut("Gizli sayı kaçtır?"),21,"3'e ve 7'ye bölünen sayılar 21'in katlarıdır: 21 ve 42. 42 çifttir; 21 tektir ve 9'a bölünmez.","",
-      ()=>S.bitir("Bir sayının hangi sayılara kalansız bölündüğü, asal çarpanlarını ortaya çıkarır. Bir sayı iki farklı asala bölünüyorsa onların <b>çarpımına</b> da bölünür; küçük asallarla yapılan sorgular olası sayıları en hızlı azaltır."));}
+    S.sayi(m,yaz(["Gizli sayı 2 ile 60 arasındadır.","2'ye kalansız bölünmez.","3'e ve 7'ye kalansız bölünür.","9'a kalansız bölünmez."])+soruKut("Gizli sayı kaçtır?"),21,"3'e ve 7'ye bölünen sayılar 21'in katlarıdır: 21 ve 42. 42 çifttir; 21 tektir ve 9'a bölünmez.","Bilgileri sırayla kullanınız: önce 3'e ve 7'ye kalansız bölünen sayıları yazınız, sonra öteki bilgilere uymayanları eleyiniz.",
+      ()=>S.bitir("Bir sayının hangi sayılara kalansız bölündüğü, asal çarpanlarını ortaya çıkarır. Bir sayı iki farklı asala bölünüyorsa onların <b>çarpımına</b> da bölünür; küçük asallarla yapılan sorgular olası sayıları en hızlı azaltır."),
+      v=>v===42?"42, 2'ye kalansız bölünür; gizli sayı 2'ye bölünmüyor.":v===63?"63, 60'tan büyüktür ve 9'a da bölünür.":v===7||v===3?"Bu sayı 3'e ve 7'ye birlikte bölünmüyor.":null);}
 };
 
 /* 19 · ÇARPAN OYUNU */
 const e_oyun=p=>{const S=notr(asamali(p));const N=30;
-  const k=S.ac(1,{ne:"Rakibinize karşı çarpan oyunu oynayacak ve kazandıran stratejiyi keşfedeceksiniz.",
-    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Tahtada 1'den 30'a kadar sayılar var. Siz bir sayı seçersiniz ve o sayı kadar puan alırsınız.</li><li>Rakibiniz, seçtiğiniz sayının tahtada kalan ve kendisinden küçük bütün çarpanlarını alır; bunların toplamı kadar puan kazanır. Örnek: 12'yi seçerseniz 12 puan alırsınız; rakibiniz 1, 2, 3, 4 ve 6'yı alır ve 16 puan kazanır.</li><li>Tahtada kendisinden küçük çarpanı kalmayan sayı seçilemez (kesikli çerçeveli sayılar).</li><li>Seçebileceğiniz sayı kalmayınca oyun biter; tahtada kalan sayılar rakibe gider. Puanı çok olan kazanır.</li></ol>","Bir sayıya dokununuz: rakibinizin alacağı sayılar kırmızı yanar. Seçiminizi onaylamak için aynı sayıya yeniden dokununuz."],
+  const k=S.ac(1,{durum:"<b>Kurallar:</b> Tahtada 1'den 30'a kadar sayılar var. Siz bir sayı seçersiniz ve o sayı kadar puan alırsınız. Rakibiniz, seçtiğiniz sayının tahtada kalan ve kendisinden küçük bütün çarpanlarını alır; bunların toplamı kadar puan kazanır. Örnek: 12'yi seçerseniz 12 puan alırsınız; rakibiniz 1, 2, 3, 4 ve 6'yı alır ve 16 puan kazanır.",ne:"Rakibinize karşı çarpan oyunu oynayacak ve kazandıran stratejiyi keşfedeceksiniz.",
+    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Tahtada 1'den 30'a kadar sayılar var. Siz bir sayı seçersiniz ve o sayı kadar puan alırsınız.</li><li>Rakibiniz, seçtiğiniz sayının tahtada kalan ve kendisinden küçük bütün çarpanlarını alır; bunların toplamı kadar puan kazanır. Örnek: 12'yi seçerseniz 12 puan alırsınız; rakibiniz 1, 2, 3, 4 ve 6'yı alır ve 16 puan kazanır.</li><li>Tahtada kendisinden küçük çarpanı kalmayan sayı seçilemez (kesikli çerçeveli sayılar).</li><li>Seçebileceğiniz sayı kalmayınca oyun biter; tahtada kalan sayılar rakibe gider. Puanı çok olan kazanır.</li></ol>","Bir sayıya dokununuz: rakibinizin alacağı sayılar kırmızı yanar. Seçiminizi onaylamak için aynı sayıya yeniden dokununuz.","Oyun bitince “Sıradaki oyun →” düğmesine basınız; yeni oyun ancak bu düğmeyle başlar. Üstteki şerit kaçıncı oyunda olduğunuzu gösterir; görevler bitene kadar oynayabilirsiniz."],
     biter:bitG(3)});
   S.tahmin(k,"Tahta doluyken ilk hamlede hangisi daha iyi?",[[29,"29"],[30,"30"],[24,"24"],[1,"1"]],29,"29'u seçerseniz 29 puan alırsınız, rakibiniz yalnız 1 puan alır. 30'u seçerseniz rakibiniz 1 + 2 + 3 + 5 + 6 + 10 + 15 = 42 puan alır.");
-  k.insertAdjacentHTML("beforeend",`<div class="tahta"></div><p class="durum"></p><div class="row"><button class="ghost yeni">Yeni oyun</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="tahta"></div><p class="durum"></p><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const th=k.querySelector(".tahta"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let kalan,sen,rakip,hamle,bitti,oyun=0,asalSecti=false,kazanc=0,sec=null;
   const D=defter(k,["Hamle","Sizin sayınız","Rakibinizin aldığı","Puan (siz – rakip)"]);
+  const TZ=turZincir(th,{n:0,ad:"Oyun",dugme:k.querySelector(".r-tzd"),vurgu:()=>th,kur:()=>yeni()});
   const G=gorevler(k,[{m:"İlk hamlenizde büyük bir <b>asal</b> sayı seçiniz (29 ya da 23).",ok:()=>asalSecti,s:()=>"Rakip yalnız 1'i aldı!"},{m:"Bir oyunu sonuna kadar oynayınız.",ok:()=>oyun>0},{m:"Bir oyunu <b>kazanınız</b>. Oyunun sonunda kalan sayılar rakibe gider.",ok:()=>kazanc>0}],acikla);
   function yeni(){kalan=new Set(Array.from({length:N},(_,i)=>i+1));sen=0;rakip=0;hamle=0;bitti=false;sec=null;f.hidden=true;ciz();}
   const cps=n=>divs(n).filter(d=>d<n&&kalan.has(d));
@@ -1514,10 +1578,10 @@ const e_oyun=p=>{const S=notr(asamali(p));const N=30;
         sec=null;hamle++;kalan.delete(x);c.forEach(d=>kalan.delete(d));sen+=x;const r=c.reduce((a,b)=>a+b,0);rakip+=r;if(asal(x)&&x>20&&hamle===1)asalSecti=true;
         D.ekle([hamle,x,c.join(", "),`${sen} – ${rakip}`],oyun+"-"+hamle);bip(asal(x)?800:500,.1);f.hidden=true;
         if(![...kalan].some(y=>cps(y).length)){bitti=true;const art=[...kalan].reduce((a,b)=>a+b,0);rakip+=art;oyun++;if(sen>rakip)kazanc++;
-          fb(f,sen>rakip,`Oyun bitti. Tahtada kalan sayılar (toplam ${art}) rakibe geçti. Siz ${sen}, rakip ${rakip}. ${sen>rakip?"Kazandınız!":"Rakip kazandı; yeni oyunda büyük asalları erken seçmeyi ve rakibe az çarpan bırakmayı deneyiniz."}`);}
+          fb(f,sen>rakip,`Oyun bitti. Tahtada kalan sayılar (toplam ${art}) rakibe geçti. Siz ${sen}, rakip ${rakip}. ${sen>rakip?"Kazandınız!":"Rakip kazandı; sıradaki oyunda büyük asalları erken seçmeyi ve rakibe az çarpan bırakmayı deneyiniz."}`);TZ.tamam(`Siz ${sen} – Rakip ${rakip}`);}
         ciz();G.kontrol();};});
     du.innerHTML=dz(`Sizin puanınız: <b>${sen}</b>`,`Rakibinizin puanı: <b>${rakip}</b>`,bitti?"Oyun bitti.":"");}
-  k.querySelector(".yeni").onclick=yeni;yeni();
+  yeni();
   function acikla(){const c=S.kural(2);
     S.soru(c,"İlk hamlede büyük bir asal sayı seçmek neden iyidir?",
       ["Asal sayının kendisinden küçük tek çarpanı 1'dir; rakip yalnız 1 puan alır",["Asal sayılar tahtadaki en büyük sayılar olduğu için","30 tahtadaki en büyük sayıdır ama rakibe 42 puan kazandırır. Önemli olan, sayının kendisinden küçük çarpanları."],["Rakip asal sayı seçemediği için","Rakip sayı seçmez; sizin seçtiğiniz sayının çarpanlarını alır. Asal sayının kendisinden küçük kaç çarpanı var?"]],
@@ -1533,25 +1597,27 @@ const e_oyun=p=>{const S=notr(asamali(p));const N=30;
 
 /* 20 · ÇARPAN ZİNCİRİ */
 const e_zincir=p=>{const S=notr(asamali(p));const N=30;
-  const k=S.ac(1,{ne:"Bilgisayara karşı çarpan ve kat zinciri kuracak, zinciri bitiren sayıları keşfedeceksiniz.",
-    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Sayılar 1'den 30'a kadardır. Siz ve bilgisayar sırayla birer sayı seçersiniz; ilk sayıyı siz seçersiniz ve ilk sayı çift olmalıdır.</li><li>Seçilen her sayı, bir önceki sayının çarpanı ya da katı olmalıdır. Örnek: 6'dan sonra 1, 2, 3, 12, 18, 24 ya da 30 seçilebilir.</li><li>Bir sayı iki kez kullanılamaz.</li><li>Sırası geldiğinde sayı seçemeyen oyuncu kaybeder.</li></ol>","Seçebileceğiniz sayılar yeşil görünür; birine dokununuz. Bilgisayar hemen hamlesini yapar."],
+  const k=S.ac(1,{durum:"<b>Kurallar:</b> 1'den 30'a kadar sayılarla oynanır. Oyuncular sırayla birer sayı seçer; seçilen her sayı, bir önceki sayının çarpanı ya da katı olmalıdır. Örnek: 6'dan sonra 1, 2, 3, 12, 18, 24 ya da 30 seçilebilir. Bir sayı iki kez kullanılamaz. Sırası geldiğinde sayı seçemeyen oyuncu kaybeder.",ne:"Bilgisayara karşı çarpan ve kat zinciri kuracak, zinciri bitiren sayıları keşfedeceksiniz.",
+    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Sayılar 1'den 30'a kadardır. Siz ve bilgisayar sırayla birer sayı seçersiniz; ilk sayıyı siz seçersiniz ve ilk sayı çift olmalıdır.</li><li>Seçilen her sayı, bir önceki sayının çarpanı ya da katı olmalıdır. Örnek: 6'dan sonra 1, 2, 3, 12, 18, 24 ya da 30 seçilebilir.</li><li>Bir sayı iki kez kullanılamaz.</li><li>Sırası geldiğinde sayı seçemeyen oyuncu kaybeder.</li></ol>","Seçebileceğiniz sayılar yeşil görünür; birine dokununuz. Bilgisayar hemen hamlesini yapar.","Oyun bitince “Sıradaki oyun →” düğmesine basınız; yeni oyun ancak bu düğmeyle başlar. Üstteki şerit kaçıncı oyunda olduğunuzu gösterir; görevler bitene kadar oynayabilirsiniz."],
     biter:bitG(3)});
   S.tahmin(k,"Zincirde son sayı 17 ise sıradaki oyuncu hangi sayıları seçebilir?",[["a","Yalnız 1 (daha önce kullanılmadıysa)"],["b","1 ve 34"],["c","2, 3, 5 gibi asal sayılar"]],"a","1–30 arasında 17'nin çarpanları 1 ve 17'dir; katı 34 ise 30'dan büyüktür. Bu yüzden yalnız 1 seçilebilir.");
-  k.insertAdjacentHTML("beforeend",`<div class="a8-et">Zincir (mavi: siz, turuncu: bilgisayar)</div><div class="zincir"></div><div class="tahta"></div><p class="durum"></p><div class="row"><button class="ghost yeni">Yeni oyun</button></div><div class="fb" hidden></div>`);
-  const zc=k.querySelector(".zincir"),th=k.querySelector(".tahta"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let zin,bitti,oyun=0,kazan=0;
+  k.insertAdjacentHTML("beforeend",`<div class="a8-et">Zincir (mavi: siz, turuncu: bilgisayar)</div><div class="zincir"></div><div class="tahta"></div><p class="durum"></p><div class="fb" hidden></div><div class="r-tzd"></div>`);
+  const zc=k.querySelector(".zincir"),th=k.querySelector(".tahta"),du=k.querySelector(".durum"),f=k.querySelector(".fb");let zin,bitti,oyun=0,kazan=0;const D=defter(k,["Oyun","Zincir","Kazanan"]);
+  const TZ=turZincir(zc.previousElementSibling,{n:0,ad:"Oyun",dugme:k.querySelector(".r-tzd"),vurgu:()=>th,kur:()=>yeni()});
+  const oyunBitti=kz=>{D.ekle([`${oyun}. oyun`,zin.join(" → "),kz],"o"+oyun);TZ.tamam(`${zin.length} sayılık zincir; kazanan: ${kz}`);};
   const G=gorevler(k,[{m:"Oyunu başlatınız: bir çift sayı seçiniz.",ok:()=>zin.length>=1||oyun>0},{m:"Bir oyunu bitiriniz.",ok:()=>oyun>=1},{m:"Bilgisayarı <b>bir kez</b> yeniniz.",ok:()=>kazan>=1}],acikla);
   const iliski=(a,b)=>a%b===0||b%a===0;
   const secenek=()=>{if(!zin.length)return Array.from({length:N},(_,i)=>i+1).filter(x=>x%2===0);const s=zin[zin.length-1];return Array.from({length:N},(_,i)=>i+1).filter(x=>!zin.includes(x)&&iliski(x,s));};
   function yeni(){zin=[];bitti=false;f.hidden=true;ciz();}
-  function bilgisayar(){const sc=secenek();if(!sc.length){bitti=true;oyun++;kazan++;fb(f,true,`Bilgisayar ${ek(zin[zin.length-1],"in")} çarpanı ya da katı olan bir sayı bulamadı. <b>Kazandınız!</b>`);bip(880,.35,"triangle");ciz();G.kontrol();return;}
+  function bilgisayar(){const sc=secenek();if(!sc.length){bitti=true;oyun++;kazan++;fb(f,true,`Bilgisayar ${ek(zin[zin.length-1],"in")} çarpanı ya da katı olan bir sayı bulamadı. <b>Kazandınız!</b>`);bip(880,.35,"triangle");ciz();G.kontrol();oyunBitti("siz");return;}
     let en=sc[0],enAz=99;sc.forEach(x=>{zin.push(x);const n2=secenek().length;zin.pop();if(n2<enAz){enAz=n2;en=x;}});
-    zin.push(en);bip(400,.08);if(!secenek().length){bitti=true;oyun++;fb(f,false,`Bilgisayar ${en} seçti. ${ek(en,"in")} kullanılmamış çarpanı ya da katı kalmadı; bilgisayar kazandı.`);}ciz();G.kontrol();}
+    zin.push(en);bip(400,.08);if(!secenek().length){bitti=true;oyun++;fb(f,false,`Bilgisayar ${en} seçti. ${ek(en,"in")} kullanılmamış çarpanı ya da katı kalmadı; bilgisayar kazandı.`);oyunBitti("bilgisayar");}ciz();G.kontrol();}
   function ciz(){const sc=secenek();zc.innerHTML=zin.map((x,i)=>`<span class="${i%2?"bil":"sen"}">${x}</span>`).join("<i>→</i>")||'<span class="bosk">Zincir boş. Bir çift sayı seçerek başlayınız.</span>';
     th.innerHTML=Array.from({length:N},(_,i)=>i+1).map(x=>`<button class="ts ${zin.includes(x)?"alindi":sc.includes(x)&&!bitti?"yes":""}" data-x="${x}" ${zin.includes(x)?"disabled":""}>${x}</button>`).join("");
     th.querySelectorAll(".ts").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;if(bitti)return;if(!secenek().includes(x)){fb(f,false,zin.length?`${x}, ${zin[zin.length-1]} sayısının çarpanı ya da katı değil. Yeşil sayılardan birini seçiniz.`:"İlk sayı çift olmalı. Yeşil sayılardan birini seçiniz.");return;}
       zin.push(x);bip(600,.08);f.hidden=true;ciz();setTimeout(bilgisayar,azHareket()?0:450);});
     du.innerHTML=dz(`Zincir uzunluğu: <b>${zin.length}</b>`,`Kazandığınız oyun: <b>${kazan}</b>`);}
-  k.querySelector(".yeni").onclick=yeni;yeni();
+  yeni();
   function acikla(){const c=S.kural(1);
     S.soru(c,"Zincirde 17, 19, 23, 29 gibi büyük asallar neden tehlikelidir?",
       ["1–30 arasında tek çarpanları 1'dir, katları yoktur; 1 kullanıldıysa zincir biter",["Çift sayı oldukları için","17, 19, 23 ve 29 tek sayıdır. Bu sayıların 1–30 arasındaki çarpanlarını ve katlarını sayınız."],["Çok çarpanları olduğu için","Asal sayıların yalnız 2 çarpanı vardır: 1 ve kendisi. Katları da 30'u geçer."]],
