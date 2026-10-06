@@ -849,7 +849,7 @@ function asamaliTek(p,o){document.body.classList.add("ta-mod");
 
 /* ================= MAT.8.1.3 · Fasikül 3 · Rasyonel ve İrrasyonel Sayılar · 20 Keşfetme Etkinliği (06.10.2026) =================
    8. sınıf keşif API'si (asamali → derlemede adimli: tek adım düzeni, ANA_KURALLAR §4.z). Her etkinlik bir DÜZENEK içerir (§4.k):
-   öğrenci dener, sonucu görür, deney defterine yazılır, tekrar dener. Yanlışta yalnız "Yeniden deneyiniz." (§5.ip).
+   öğrenci dener, sonucu görür, deney defterine yazılır, tekrar dener. Yanlışta hatanın türünü söyleyen ipucu (o.ipucu, 07.10.2026) (§5.ip).
    Sayılar BigInt ile kesin hesaplanır (uzun bölme, karekök basamakları); hesap makinesi modeli fasikülle aynıdır:
    ekrana N rakam sığar, son rakam yuvarlanır. Karekök HTML'de K(x) (kök çizgili); devirli gösterim dvH() (çizgi yalnız devredenlerde).
    Kapsam dışı: "gerçek sayı", sayı doğrusu/aralık, kareköklü ifadelerle işlem. */
@@ -862,20 +862,32 @@ const kare=x=>`${x}<sup>2</sup>`;
 const V=(x,d=1)=>{const s=(Math.round(x*10**d)/10**d).toFixed(d).replace(".",",");return s.startsWith("-")?"−"+s.slice(1):s;};
 const Vk=x=>{const s=String(+x.toFixed(6)).replace(".",",");return s;};          /* kısa ondalık (0,25 · 1,44) */
 const bekle=(f,ms)=>setTimeout(f,azHareket()?0:ms);
-/* §5.ip İpucu verilmez (02.10.2026): ortak motordaki "İpucu" metni bu atölyede kullanılmaz. Yanlış seçenekte ve yanlış
-   sayıda yalnız nötr "Yeniden deneyiniz." yazılır; sayı cevaplı soruda 3. yanlıştan sonra yalnız doğru cevap gösterilir. */
+/* 07.10.2026 (§4-5, §4-9; keşif denetimi E7, Ekrem KOÇAK: "Yanlış cevapta tabii ki ipucu verilecek"): yanlış cevaptan sonra
+   HATANIN TÜRÜNÜ söyleyen ipucu verilir; seçmeli sorularda her yanlış seçeneğin kendi ipucu, sayı cevaplı soruda yaygın hatalar için
+   ayrı ipucu (ozel), yoksa genel ipucu. İpucu cevabı söylemez; 3. yanlıştan sonra doğru cevap da gösterilir. Soru metnine ipucu yazılmaz (§5.ip). */
 const YD="Yeniden deneyiniz.";
+window.__ipEksik=window.__ipEksik||[];
+const ipNrm=h=>{const t=document.createElement("div");t.innerHTML=h;return t.innerHTML;};
 const notr=S=>{const so=S.soru,sa=S.sayi,ku=S.kural;let kN=0,kI=0;
   /* 05.10.2026 (§4.k-5): "Kuralı bulun" adımında birden çok soru varsa her soru ekranında "Soru i / n" şeridi; doğru cevaptan sonra
      ekranda ve alttaki şeritte "Sıradaki soru (i+1 / n) →" düğmesi görünür (ortak kabuğa dokunmadan, yalnız bu atölyede). */
   S.kural=(k,o)=>{kN=k||1;kI=0;const r=ku(k,o);return r;};
   S.soru=(kap,soru,secs,ok,sonra)=>{const km=!!(kap&&kap.kural===true);if(km)kI++;const i=kI,n=kN;let d=null;
     const sonra2=km&&n>1&&i<n?()=>{sonra&&sonra();szIleri(d,i,n);}:sonra;
-    d=so(kap,soru,secs.map((x,j)=>j===0?x:[Array.isArray(x)?x[0]:x,YD]),ok,sonra2);
+    const IP=secs.slice(1).map(x=>[ipNrm(Array.isArray(x)?x[0]:x),Array.isArray(x)?x[1]:""]);
+    IP.forEach(([t,ip])=>{if(!ip)window.__ipEksik.push("soru: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50)+" → "+t.replace(/<[^>]+>/g,""));});
+    d=so(kap,soru,secs,ok,sonra2);
+    if(d&&d.querySelectorAll)d.querySelectorAll(".sec").forEach(b=>{const m=IP.find(([t])=>t===b.innerHTML);if(!m)return;b._ip=m[1];
+      b.addEventListener("click",()=>{if(!b.classList.contains("yanlis"))return;const sr=b.closest(".sor")||d,f=sr.querySelector(".fb");
+        if(f&&b._ip)fb(f,false,`<b>Bu seçenek doğru değil.</b> ${b._ip} ${YD}`);});});
+    if(d&&d.querySelectorAll&&[...d.querySelectorAll(".sec")].filter(b=>b._ip!==undefined).length<IP.length)window.__ipEksik.push("eşleşmedi: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50));
     if(km&&n>1&&d&&d.querySelector)szSerit(d,i,n);return d;};
-  S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
+  S.sayi=(kap,ust,dogru,ok,ip,sonra,ozel)=>{if(!ip&&!ozel)window.__ipEksik.push("sayi: "+String(ust).replace(/<[^>]+>/g,"").slice(0,60));
+    const ipG=Array.isArray(ip)?ip[0]:ip,ipO=Array.isArray(ip)?ip[1]:null;
+    const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
     const kontrol=()=>{const h=inp.value.replace(/[\s.]/g,"");if(!h||+h===dogru||inp.disabled)return asil();yn++;
-      fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
+      const v=+h.replace(",","."),oz=(ozel&&ozel(v))||(ipO&&ipO(v));
+      fb(f,false,`<b>${h} doğru değil.</b> ${oz||ipG||""} ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
   return S;};
 function szSerit(d,i,n){const ic=d.querySelector(".ta-ic")||d;const u=document.createElement("div");u.className="sz-ust";
@@ -889,6 +901,44 @@ function szAlt(){const t=document.querySelector(".ta-ileri");if(!t)return;
   if(!t.dataset.szGoz){t.dataset.szGoz="1";new MutationObserver(()=>szAlt()).observe(t,{childList:true,characterData:true,subtree:true});}
   const e=[...document.querySelectorAll(".ta-ekran")].find(x=>!x.hidden);
   if(e&&e.dataset.szBitti&&+e.dataset.szI<+e.dataset.szN&&!t.disabled){const y=`Sıradaki soru (${+e.dataset.szI+1} / ${e.dataset.szN}) →`;if(t.textContent!==y)t.textContent=y;}}
+/* 06.10.2026 (§4.k-5 · keşif denetimi E2): deney düzeneğinde sırayla gelen kartlar/trenler/turlar/kasalar için
+   "Kart i / n" ilerleme şeridi, her tur bitince "Sıradaki kart (i+1 / n) →" düğmesi; öğrenci düğmeye basmadan yeni tur açılmaz.
+   Çözülen tur kısa bir satırla özetlenir; yeni tur vurgulanır ve ekrana kaydırılır; son turdan sonra adımın bittiği yazılır.
+   (soruZincir ile aynı görünüm: .sz-ust şeridi, .sz-ileri düğmesi; ortak dosyalara dokunmadan yalnız bu atölyede.) */
+(function(){const st=document.createElement("style");st.textContent=`
+.tz-ust{scroll-margin-top:96px}
+.tz-ozet{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px}
+.tz-ozet:empty{display:none}
+.tz-ozet li{font-size:14.5px;line-height:1.45;color:var(--muted);padding:4px 10px;border-left:4px solid #2b8a3e;background:color-mix(in srgb,#2b8a3e 7%,var(--card));border-radius:6px}
+.tz-ozet li::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.tz-yeni{animation:tzGel .9s ease-out}
+@keyframes tzGel{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc,#1c5fbf) 60%,transparent);background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+.tz-son{font-weight:700;color:#2b8a3e;margin:10px 0 4px;line-height:1.45}
+.tz-dug{scroll-margin-bottom:120px}
+.r-tusl[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.tz-yeni{animation:none}}`;document.head.appendChild(st);})();
+/* once: şeridin önüne konacağı öğe · o: {n (0 = sınırsız), ad:"Kart", tamlayan:"kartın", kur:i=>…(i. turu kurar; 0'dan),
+   vurgu:()=>öğe (yeni turda vurgulanacak alan), dugme: öğe (düğmenin ekleneceği yer), son:"son turdan sonraki cümle"} */
+function turZincir(once,o){const n=o.n||0,ad=o.ad,kucuk=ad.toLocaleLowerCase("tr");let i=0,bitti=false,btn=null,sonP=null;
+  const ust=document.createElement("div");ust.className="sz-ust tz-ust";ust.setAttribute("aria-live","polite");once.before(ust);
+  const oz=document.createElement("ol");oz.className="tz-ozet";oz.setAttribute("aria-label","Biten turlar");ust.after(oz);
+  const ciz=()=>{const hepsi=n&&bitti&&i===n-1;
+    ust.innerHTML=`<span class="sz-et">${hepsi?`${n} ${o.tamlayan} hepsi tamamlandı ✓`:n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}</span>`+(n?`<span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i||(bitti&&j===i)?"ok":j===i?"su":""}"></i>`).join("")}</span>`:"");};
+  const kaydir=(el,b)=>setTimeout(()=>{if(!(el&&el.isConnected&&el.offsetParent))return;const sm=azHareket()?"auto":"smooth";
+    if(b!=="start"){el.scrollIntoView({behavior:sm,block:b});return;}
+    const u=document.querySelector(".etk-ust"),ofs=(u&&getComputedStyle(u).position.includes("sticky")?u.getBoundingClientRect().height:0)+12;
+    window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-ofs),behavior:sm});},80);
+  const yer=()=>o.dugme||once.parentNode;
+  const T={get i(){return i;},get bitti(){return bitti;},
+    tamam(ozet){if(bitti)return;bitti=true;ciz();
+      if(ozet){const li=document.createElement("li");li.innerHTML=`${n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}: ${ozet}`;oz.appendChild(li);}
+      if(!n||i<n-1){btn=document.createElement("button");btn.type="button";btn.className="primary sz-ileri tz-dug";
+        btn.textContent=n?`Sıradaki ${kucuk} (${i+2} / ${n}) →`:`Sıradaki ${kucuk} (${i+2}. ${kucuk}) →`;yer().appendChild(btn);kaydir(btn,"center");
+        btn.onclick=()=>{btn.remove();btn=null;i++;bitti=false;ciz();o.kur(i);const v=o.vurgu?o.vurgu():once.parentNode;
+          if(v){v.classList.remove("tz-yeni");void v.offsetWidth;v.classList.add("tz-yeni");}bip(660,.08);kaydir(ust,"start");};}
+      else{sonP=document.createElement("p");sonP.className="tz-son";sonP.innerHTML=o.son||`${n} ${o.tamlayan} hepsi bitti. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız.`;yer().appendChild(sonP);kaydir(sonP,"center");}},
+    sifirla(){i=0;bitti=false;oz.innerHTML="";if(btn){btn.remove();btn=null;}if(sonP){sonP.remove();sonP=null;}ciz();}};
+  ciz();return T;}
 /* SVG karekök: <text class="skok">√<tspan class="ski">içerik</tspan>[ek]</text>; çizgi kokDuz ile içerik genişliği ölçülerek çizilir */
 const sK=(x,y,ic,fs=16,o={})=>`<text class="skok" x="${x}" y="${y}" font-size="${fs}" font-weight="${o.w||700}"${o.fill?` fill="${o.fill}"`:""}${o.anchor?` text-anchor="${o.anchor}"`:""}>√<tspan class="ski">${ic}</tspan>${o.son?`<tspan>${o.son}</tspan>`:""}</text>`;
 function kokDuz(sv){sv.querySelectorAll("line.skc").forEach(l=>l.remove());
@@ -1032,7 +1082,7 @@ const KD=(x,kes_)=>kes_?kes(...x):x;
 .r-uyari{font-weight:700;color:var(--muted);font-size:14.5px}
 @media (max-width:560px){.r-bas .et{min-width:40px;font-size:12px;padding-right:3px}.r-p1,.r-p2{flex-wrap:nowrap;gap:2px}.r-bas.r-p1 span:not(.v):not(.et),.r-bas.r-p2 button{width:24px;min-width:0;padding:0}.r-bas{font-size:18px}.r-bas span{min-width:22px}.r-bas button{min-width:26px;font-size:18px}.r-ekr2{font-size:19px}.r-btab{font-size:14px}.r-btab th,.r-btab td{padding:3px 5px}}
 `;document.head.appendChild(st);})();
-/* Kartı kutuya yerleştirme düzeneği: karta, sonra kutuya dokunulur. Yanlışta yalnız "Yeniden deneyiniz." */
+/* Kartı kutuya yerleştirme düzeneği: karta, sonra kutuya dokunulur. Yanlışta hatanın türünü söyleyen ipucu (o.ipucu, 07.10.2026) */
 function kutuOyun(kap,kutular,o={}){const w=document.createElement("div");
   w.innerHTML=`<div class="r-kartlar"></div><div class="r-iki ${kutular.length>2?"r-kova3":""}">${kutular.map((x,i)=>`<div class="r-kova c${i+1}" data-k="${x.key}" role="button" tabindex="0"><h4>${x.ad}</h4><p>${x.acik||""}</p><div class="r-ic"></div></div>`).join("")}</div><div class="fb" hidden></div>`;
   kap.appendChild(w);const KL=w.querySelector(".r-kartlar"),f=w.querySelector(".fb");let sec=null;const yerl=[];
@@ -1042,7 +1092,7 @@ function kutuOyun(kap,kutular,o={}){const w=document.createElement("div");
     get kalan(){return KL.querySelectorAll(".r-kart").length;},yerl};
   w.querySelectorAll(".r-kova").forEach(kv=>{const at=()=>{if(!sec){fb(f,false,"Önce bir karta dokununuz.");return;}const c=sec._c;
       if(c.k===kv.dataset.k){sec.classList.remove("secili");sec.classList.add("ok");sec.disabled=true;if(c.ac)sec.innerHTML=c.ac;kv.querySelector(".r-ic").appendChild(sec);yerl.push(c);sec=null;f.hidden=true;bip(760,.1);o.dogru&&o.dogru(c,kv.dataset.k);}
-      else{const b=sec;b.classList.add("no");setTimeout(()=>b.classList.remove("no"),700);fb(f,false,YD);bip(220,.15,"triangle");o.yanlis&&o.yanlis(c,kv.dataset.k);}};
+      else{const b=sec;b.classList.add("no");setTimeout(()=>b.classList.remove("no"),700);fb(f,false,`<b>Bu kutu olmaz.</b> ${(o.ipucu&&o.ipucu(c,kv.dataset.k))||""} ${YD}`);bip(220,.15,"triangle");o.yanlis&&o.yanlis(c,kv.dataset.k);}};
     kv.onclick=at;kv.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();at();}};});
   return R;}
 /* Basit artır/azalt sayaç (pay, payda vb.) */
@@ -1078,7 +1128,7 @@ const e_bolme=p=>{const S=notr(asamali(p));let a=1,b=6;const gS=new Set(),gD=new
       ["1, 2, 3, 4, 5, 6",["1'den 10'a kadar bütün sayılar","Kalan bölenden, yani 7'den küçüktür."],["0'dan 70'e kadar bütün sayılar","Kalan bölenden küçüktür."]],
       "Kalan paydadan küçüktür. Bölme bitmiyorsa en geç 7. adımda bir kalan tekrar etmek zorundadır; bu yüzden bir kesrin ondalık gösterimi ya biter ya da devreder.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`Bölme makinesine ${kes(4,7)} kesri giriliyor.`])+soruKut("Ondalık gösterimde devreden blokta kaç basamak vardır? Cevabı sayı olarak yazınız."),6,`4 : 7 = ${dvH(4,7)}; kalanlar 4, 5, 1, 3, 2, 6 olur, sonra 4 yeniden çıkar. Devreden blok 571428: 6 basamak.`,"",
+    S.sayi(m,yaz([`Bölme makinesine ${kes(4,7)} kesri giriliyor.`])+soruKut("Ondalık gösterimde devreden blokta kaç basamak vardır? Cevabı sayı olarak yazınız."),6,`4 : 7 = ${dvH(4,7)}; kalanlar 4, 5, 1, 3, 2, 6 olur, sonra 4 yeniden çıkar. Devreden blok 571428: 6 basamak.`,["Bölmeyi kalanlarla sürdürünüz; ilk kalan yeniden çıkana kadar yazılan basamakları sayınız.",v=>v===7?"Bir kalan yeniden çıkınca blok başa döner; tekrar eden ilk basamağı ikinci kez saydınız mı?":v>0&&v<6?"Blok daha uzun: kalanlar henüz tekrar etmeye başlamadı.":null],
       ()=>S.bitir(`Bir kesrin ondalık gösterimi, pay paydaya bölünerek bulunur. Kalan 0 olursa gösterim <b>sonludur</b>. Kalan 0 olmazsa kalanlar paydadan küçük olduğu için bir kalan mutlaka tekrar eder ve gösterim <b>devirli</b> olur: ${kes(1,6)} = ${dvH(1,6)}, ${kes(4,7)} = ${dvH(4,7)}. Kesirlerin ondalık gösterimi ya sonludur ya da devirlidir.`));}
 };
 
@@ -1112,7 +1162,7 @@ const e_ekran=p=>{const S=notr(asamali(p));let N=10;const gor=new Set();
       ["Ondalık gösterim ekrandan uzundur; yalnız başı görünür",["Gösterimin sonsuz olduğunu kesin olarak kanıtlar","Uzun ekranda biten bir sayı kısa ekranı da doldurabilir; ekran yalnız ilk basamakları gösterir."],["Sayının bir kesir olmadığını gösterir","2 : 3 bir kesirdir ama ekranı doldurur."]],
       "Ekran dolduysa gösterimin yalnız başını görürüz. Sonlu mu, devirli mi, düzensiz mi olduğuna sayının nereden geldiğine (bölme mi, karekök mü) bakarak karar veririz.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Ekranına 10 rakam sığan ve son rakamı yuvarlayan bir hesap makinesinde 5 : 6 işlemi yapılıyor."])+soruKut("Ekranda kaç tane 3 rakamı görünür? Cevabı sayı olarak yazınız."),8,`5 : 6 = 0,8333…; ekranda 0,833333333 görünür: 0, 8 ve sekiz tane 3 (son rakam 3'tür çünkü sonraki rakam da 3).`,"",
+    S.sayi(m,yaz(["Ekranına 10 rakam sığan ve son rakamı yuvarlayan bir hesap makinesinde 5 : 6 işlemi yapılıyor."])+soruKut("Ekranda kaç tane 3 rakamı görünür? Cevabı sayı olarak yazınız."),8,`5 : 6 = 0,8333…; ekranda 0,833333333 görünür: 0, 8 ve sekiz tane 3 (son rakam 3'tür çünkü sonraki rakam da 3).`,["Ekrana sığan 10 rakamın hepsi 3 değildir; 3'lerden önce ekranda hangi rakamlar var?",v=>v===9||v===10?"Virgülden önceki 0 ve 8 rakamı da ekranda yer kaplar.":null],
       ()=>S.bitir("Hesap makinesi ondalık gösterimin yalnız <b>ekrana sığan ilk basamaklarını</b> gösterir ve son rakamı yuvarlar. Sonuç ekrana sığıyorsa gösterim sonludur. Ekran dolduysa gösterim ekrandan uzundur; devirli mi düzensiz mi olduğunu ekrana bakarak değil, sayının nereden geldiğine bakarak anlarız."));}
 };
 
@@ -1126,8 +1176,8 @@ const e_sinif3=p=>{const S=notr(asamali(p));const say={s:0,d:0,z:0};
     {h:"0,121212…<small>12 hep tekrar ediyor</small>",k:"d"},{h:"2,1666…<small>6 hep tekrar ediyor</small>",k:"d"},{h:"0,454545…<small>45 hep tekrar ediyor</small>",k:"d"},
     {h:"0,1010010001…<small>0'lar birer artıyor</small>",k:"z"},{h:"0,123456789101112…<small>ardışık doğal sayılar</small>",k:"z"},{h:"0,2525525552…<small>5'ler birer artıyor</small>",k:"z"}];
   const D=defter(k,["Kart","Kutu"]);const AD={s:"Sonlu",d:"Devirli sonsuz",z:"Düzensiz sonsuz"};
-  const O=kutuOyun(k,[{key:"s",ad:"Sonlu",acik:"Bir yerde biter."},{key:"d",ad:"Devirli sonsuz",acik:"Bir blok hep tekrar eder."},{key:"z",ad:"Düzensiz sonsuz",acik:"Bitmez; tekrar eden blok yok."}],
-    {dogru:(c,kk)=>{say[kk]++;D.ekle([c.h.replace(/<small>.*<\/small>/,""),AD[kk]],c.h);G.kontrol();}});
+  const O=kutuOyun(k,[{key:"s",ad:"Sonlu",acik:"Bir yerde biter."},{key:"d",ad:"Devirli sonsuz",acik:"Bir blok hep tekrar eder."},{key:"z",ad:"Düzensiz sonsuz",acik:"Bitmez; tekrar eden blok yok."}],{ipucu:(c,k)=>({"s>d":"Bu gösterim bir yerde bitiyor mu? Kartın altındaki nota bakınız.","s>z":"Bu gösterim bir yerde bitiyor mu? Kartın altındaki nota bakınız.","d>s":"Sondaki “…” basamakların sürdüğünü gösterir; gösterim bitmiyor.","d>z":"Basamaklarda aynı blok hep aynı biçimde tekrar ediyor mu? Bakınız.","z>s":"Sondaki “…” basamakların sürdüğünü gösterir; gösterim bitmiyor.","z>d":"Basamaklar bir kurala göre yazılıyor ama sabit bir blok tekrar ediyor mu? Kurallı olmak devirli olmak değildir."})[c.k+">"+k],
+    dogru:(c,kk)=>{say[kk]++;D.ekle([c.h.replace(/<small>.*<\/small>/,""),AD[kk]],c.h);G.kontrol();}});
   O.yukle(karistir(C));
   const G=gorevler(k,[{m:"Her kutuya <b>en az bir</b> kart yerleştiriniz.",ok:()=>say.s&&say.d&&say.z},
     {m:"<b>9 kartın hepsini</b> yerleştiriniz.",ok:()=>O.kalan===0,s:()=>"Her kutuda 3 kart var."}],acikla);
@@ -1139,7 +1189,7 @@ const e_sinif3=p=>{const S=notr(asamali(p));const say={s:0,d:0,z:0};
       ["Düzensiz sonsuz",["Devirli sonsuz","“30” bloğu tekrar etmiyor; 0'ların sayısı artıyor."],["Sonlu","Gösterim bitmiyor."]],
       "Basamaklar bir kurala göre yazılsa da sabit bir blok tekrar etmiyor: düzensiz sonsuz, yani irrasyonel.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Kartlar: 0,75 · 0,777… (7 hep tekrar ediyor) · 0,7077077707777… (7'ler birer artıyor) · 4,1 · 0,121212… (12 hep tekrar ediyor) · 0,1234554321 (bitti)"])+soruKut("Bu kartlardan kaç tanesi rasyonel bir sayı gösterir? Cevabı sayı olarak yazınız."),5,"0,75, 4,1 ve 0,1234554321 sonlu; 0,777… ve 0,121212… devirli: 5 rasyonel sayı. Yalnız 0,7077077707777… düzensizdir.","",
+    S.sayi(m,yaz(["Kartlar: 0,75 · 0,777… (7 hep tekrar ediyor) · 0,7077077707777… (7'ler birer artıyor) · 4,1 · 0,121212… (12 hep tekrar ediyor) · 0,1234554321 (bitti)"])+soruKut("Bu kartlardan kaç tanesi rasyonel bir sayı gösterir? Cevabı sayı olarak yazınız."),5,"0,75, 4,1 ve 0,1234554321 sonlu; 0,777… ve 0,121212… devirli: 5 rasyonel sayı. Yalnız 0,7077077707777… düzensizdir.",["Sonlu gösterimler de devirli gösterimler de kesirle yazılabilir; yalnız düzensiz sonsuz gösterim irrasyoneldir.",v=>v===2?"Yalnız devirli kartları saydınız; sonlu gösterimler de rasyoneldir.":v===3?"Yalnız sonlu kartları saydınız; devirli gösterimler de rasyoneldir.":v===6?"7'lerin birer arttığı kartta sabit bir blok tekrar ediyor mu?":null],
       ()=>S.bitir("Ondalık gösterimler üç türlüdür: <b>sonlu</b>, <b>devirli sonsuz</b> ve <b>düzensiz sonsuz</b>. Sonlu ya da devirli gösterime sahip sayılar <b>rasyonel</b>, düzensiz sonsuz (sonsuz ve devirsiz) gösterime sahip sayılar <b>irrasyoneldir</b>. Bir sayının basamaklarının bir kurala göre yazılması, onu devirli yapmaz."));}
 };
 
@@ -1155,7 +1205,7 @@ const e_devir=p=>{const S=notr(asamali(p));const KS=[[1,3],[5,6],[2,11],[7,12],[
   k.querySelector(".r-a1").onclick=()=>{ac=Math.min(30,ac+1);ciz();bip(560,.04);};k.querySelector(".r-a5").onclick=()=>{ac=Math.min(30,ac+5);ciz();bip(560,.04);};
   sayiDugme(bl,"Devreden blokta kaç basamak var?",[1,2,3,4,5,6].map(x=>[x,String(x)]),"",v=>{const o=devir(...ks);
     if(+v===o.dv.length){bdv=true;f.hidden=true;coz.add(ks.join("/"));D.ekle([kes(...ks),acik(...ks,12),o.dv.join(""),dvH(...ks)],ks.join("/"));bip(760,.1);ciz();G.kontrol();}
-    else{fb(f,false,YD);bip(220,.15,"triangle");}});
+    else{const L_=o.dv.length,V_=+v;fb(f,false,`<b>${V_} basamak değil.</b> ${o.on&&V_===o.on.length+L_?"Bir kez yazılıp tekrar etmeyen baştaki basamakları da bloğa kattınız; yalnız tekrar eden kısmı sayınız.":V_===2*L_||V_===3*L_?"Bloğu birden çok kez saydınız; aynen tekrar eden en kısa bloğa bakınız.":V_<L_?"Daha fazla basamak açınız; bu uzunlukta bir grup aynen tekrar ediyor mu?":"Daha kısa bir blok tekrar ediyor; açılan basamakları gruplayarak bakınız."} ${YD}`);bip(220,.15,"triangle");}});
   const G=gorevler(k,[{m:"<b>2 kesrin</b> devreden bloğunu bulunuz.",ok:()=>coz.size>=2},
     {m:"Devredeni virgülden hemen sonra <b>başlamayan</b> bir kesrin bloğunu bulunuz.",ok:()=>["5/6","7/12","3/22"].some(x=>coz.has(x)),s:()=>"5/6 = 0,8<span class=\"dv\">3</span>: 8 tekrar etmiyor, çizgi yalnız 3'ün üstünde."},
     {m:"Devreden bloğu <b>6 basamaklı</b> bir kesir bulunuz.",ok:()=>coz.has("1/7")||coz.has("4/13"),s:()=>"1/7 = 0,<span class=\"dv\">142857</span>"}],acikla);
@@ -1172,27 +1222,30 @@ const e_devir=p=>{const S=notr(asamali(p));const KS=[[1,3],[5,6],[2,11],[7,12],[
       ["0,272727…",["0,27777…","Çizgi 27'nin tamamının üstünde; 27 bloğu tekrar eder."],["0,27","Çizgi, bloğun sonsuza kadar tekrar ettiğini gösterir."]],
       "Çizginin altındaki blok olduğu gibi tekrar eder: 0,<span class=\"dv\">27</span> = 0,272727…",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`${kes(1,37)} kesrinin ondalık gösterimi 0,027027027… biçiminde devam ediyor.`])+soruKut("Devreden blokta kaç basamak vardır? Cevabı sayı olarak yazınız."),3,`1/37 = 0,<span class="dv">027</span>: devreden 027, yani 3 basamak (baştaki 0 da bloğun içindedir).`,"",
+    S.sayi(m,yaz([`${kes(1,37)} kesrinin ondalık gösterimi 0,027027027… biçiminde devam ediyor.`])+soruKut("Devreden blokta kaç basamak vardır? Cevabı sayı olarak yazınız."),3,`1/37 = 0,<span class="dv">027</span>: devreden 027, yani 3 basamak (baştaki 0 da bloğun içindedir).`,["Gösterimi eş uzunlukta gruplara ayırıp hangi grubun aynen tekrar ettiğine bakınız.",v=>v===2?"Baştaki 0'ı bloğa katmadınız; 0 da tekrar eden bloğun içinde mi?":v===1?"Yalnız bir rakamı saydınız; 0, 2 ve 7 birlikte tekrar ediyor mu?":null],
       ()=>S.bitir(`Devirli gösterimde tekrar eden bloğa <b>devreden</b> denir; devreden bir kez yazılır ve üstüne çizgi çekilir: 0,121212… = 0,<span class="dv">12</span>, 0,8333… = 0,8<span class="dv">3</span>. Devreden virgülden hemen sonra başlamayabilir; çizgi yalnız tekrar eden basamakların üstüne çekilir.`));}
 };
 
 /* 5 · KESİR KASASI (pay/payda deneyerek şifre bulma) */
-const e_kasa=p=>{const S=notr(asamali(p));const H=[[3,8],[4,9],[1,6],[5,11]];let hi=0,a=1,b=2;const acilan=new Set();
+const e_kasa=p=>{const S=notr(asamali(p));const H=[[3,8],[4,9],[1,6],[5,11]];let hi=0,a=1,b=2,bekle=false;const acilan=new Set();
   const k=S.ac(1,{ne:"Ekranda yazan ondalık gösterime eşit bir kesir bularak kasaların şifresini açacaksınız.",
     durum:"Her kasanın üstünde bir ondalık gösterim yazıyor. Pay ve paydası seçilen kesrin ondalık gösterimi kasadaki gösterime eşitse kasa açılır. Sonlu gösterimler de devirli gösterimler de bir kesirden gelir.",
-    nasil:["“Pay” ve “Payda” sürgüleriyle bir kesir kurunuz; kesrin ondalık gösterimi hemen altta yazar.","“Kasayı deneyiniz” düğmesine basınız.","Kasa açılınca sıradaki kasa gelir; denemeleriniz deney defterine yazılır."],biter:bitG(2)});
+    nasil:["Sırayla <b>4 kasa</b> gelecek; üstteki “Kasa 1 / 4” şeridi kaçıncı kasada olduğunuzu gösterir. “Pay” ve “Payda” sürgüleriyle bir kesir kurunuz; kesrin ondalık gösterimi hemen altta yazar.","“Kasayı deneyiniz” düğmesine basınız. Denemeleriniz deney defterine yazılır.","Kasa açılınca “Sıradaki kasa (2 / 4) →” düğmesine basınız; yeni kasa ancak bu düğmeyle gelir."],biter:bitG(2)});
   S.tahmin(k,"0,<span class=\"dv\">4</span> = 0,444… gösterimine eşit bir kesir var mıdır?",[["e","Evet, vardır"],["h","Hayır; gösterim bitmediği için kesirle yazılamaz"]],"e","4/9 = 0,444…: devirli gösterimler de kesirle yazılabilir.");
-  k.insertAdjacentHTML("beforeend",`<div class="r-kilit"></div><div class="r-den"></div><p class="r-sonuc"></p><div class="row"><button class="primary r-dene">Kasayı deneyiniz</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="r-kilit"></div><div class="r-den"></div><p class="r-sonuc"></p><div class="row"><button class="primary r-dene">Kasayı deneyiniz</button></div><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const kl=k.querySelector(".r-kilit"),dn=k.querySelector(".r-den"),son=k.querySelector(".r-sonuc"),f=k.querySelector(".fb");
+  const TZ=turZincir(kl,{n:4,ad:"Kasa",tamlayan:"kasanın",dugme:k.querySelector(".r-tzd"),vurgu:()=>kl,kur:i=>{hi=i;bekle=false;f.hidden=true;ciz();},
+    son:"4 kasanın hepsi açıldı. Deney bitti; alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   const U1=surgu("Pay",1,30,a,v=>{a=v;ciz();}),U2=surgu("Payda",1,30,b,v=>{b=v;ciz();});dn.append(U1.el,U2.el);
   const G=gorevler(k,[{m:"<b>Sonlu</b> gösterimli kasayı açınız.",ok:()=>acilan.has(0),s:()=>"0,375 = 3/8"},{m:"<b>Devirli</b> gösterimli 3 kasayı da açınız.",ok:()=>acilan.size>=4,s:()=>"0,<span class=\"dv\">4</span> = 4/9 · 0,1<span class=\"dv\">6</span> = 1/6 · 0,<span class=\"dv\">45</span> = 5/11"}],acikla);
   const D=defter(k,["Kasa","Deneme","Gösterim","Sonuç"]);
-  function ciz(){const h=H[Math.min(hi,3)];kl.className="r-kilit"+(hi>=4?" acik":"");
-    kl.innerHTML=hi>=4?"🔓 Bütün kasalar açıldı":`🔒 Kasa ${hi+1} / 4: <span>${dvH(...h)}</span>`;
-    son.innerHTML=dz(`Kesriniz: ${kes(a,b)}`,`${kes(a,b)} = <b>${dvH(a,b)}</b>`);k.querySelector(".r-dene").disabled=hi>=4;}
-  k.querySelector(".r-dene").onclick=()=>{if(hi>=4)return;const h=H[hi],ok=a*h[1]===b*h[0];
+  function ciz(){const h=H[hi];kl.className="r-kilit"+(bekle?" acik":"");
+    kl.innerHTML=`${bekle?"🔓":"🔒"} Kasa ${hi+1} / 4: <span>${dvH(...h)}</span>${bekle?" · açıldı":""}`;
+    son.innerHTML=dz(`Kesriniz: ${kes(a,b)}`,`${kes(a,b)} = <b>${dvH(a,b)}</b>`);k.querySelector(".r-dene").disabled=bekle;}
+  k.querySelector(".r-dene").onclick=()=>{if(bekle)return;const h=H[hi],ok=a*h[1]===b*h[0];
     D.ekle([`Kasa ${hi+1}: ${dvH(...h)}`,kes(a,b),dvH(a,b),ok?"Açıldı":"Açılmadı"],hi+"-"+a+"/"+b);
-    if(ok){acilan.add(hi);hi++;fb(f,true,`Kasa açıldı: ${kes(a,b)} = ${dvH(...h)}.`);bip(880,.15);}else{fb(f,false,YD);bip(220,.15,"triangle");}ciz();G.kontrol();};
+    if(ok){acilan.add(hi);bekle=true;fb(f,true,`Kasa açıldı: ${kes(a,b)} = ${dvH(...h)}.`);bip(880,.15);ciz();G.kontrol();TZ.tamam(`${dvH(...h)} = ${kes(a,b)}`);return;}
+    const fk=a/b-h[0]/h[1];fb(f,false,`<b>Kasa açılmadı.</b> Kesrinizin değeri kasadaki gösterimden ${fk>0?"büyük":"küçük"}; ${fk>0?"payı küçültmeyi ya da paydayı büyütmeyi":"payı büyütmeyi ya da paydayı küçültmeyi"} deneyiniz. ${YD}`);bip(220,.15,"triangle");ciz();G.kontrol();};
   ciz();
   function acikla(){const c=S.kural(2);
     S.soru(c,"Açtığınız kasaların şifreleri hakkında hangisi doğrudur?",
@@ -1202,22 +1255,22 @@ const e_kasa=p=>{const S=notr(asamali(p));const H=[[3,8],[4,9],[1,6],[5,11]];let
       [kes(7,9),[kes(7,10),"7/10 = 0,7; gösterim bitiyor."],[kes(1,7),"1/7 = 0,142857…"]],
       "7 : 9 bölmesinde kalan hep 7 olur ve basamaklar hep 7 çıkar: 7/9 = 0,<span class=\"dv\">7</span>.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`Bir kasanın üstünde 0,8<span class="dv">3</span> = 0,8333… yazıyor. Kasanın şifresi payı 5 olan bir kesirdir.`])+soruKut("Bu kesrin paydası kaçtır? Cevabı sayı olarak yazınız."),6,"5 : 6 = 0,8333…: kesir 5/6, payda 6.","",
+    S.sayi(m,yaz([`Bir kasanın üstünde 0,8<span class="dv">3</span> = 0,8333… yazıyor. Kasanın şifresi payı 5 olan bir kesirdir.`])+soruKut("Bu kesrin paydası kaçtır? Cevabı sayı olarak yazınız."),6,"5 : 6 = 0,8333…: kesir 5/6, payda 6.",["Payı 5 olan kesirleri bölerek deneyiniz: 5 : payda bölmesi 0,8333… vermeli.",v=>v>0&&v<5?"Payda paydan küçük olunca sonuç 1'den büyük çıkar; 0,8333… ise 1'den küçüktür.":v===10?"5/10 = 0,5; gösterim devirli değil.":null],
       ()=>S.bitir(`Sonlu gösterimler de (0,375 = ${kes(3,8)}) devirli gösterimler de (0,<span class="dv">45</span> = ${kes(5,11)}, 0,1<span class="dv">6</span> = ${kes(1,6)}) bir kesirle yazılabilir. a ve b tam sayı, b ≠ 0 olmak üzere a/b biçiminde yazılabilen sayılara <b>rasyonel sayı</b> denir.`));}
 };
 
 /* 6 · VARSAYIM TERAZİSİ (karşı örnek arama) */
 const e_terazi=p=>{const S=notr(asamali(p));const say={u:0,c:0,i:0};
   const k=S.ac(1,{ne:"“Ondalık gösterimi sonsuz olan her sayı irrasyoneldir.” varsayımını kartlarla tartacaksınız.",
-    durum:"Kartlarda bazı sayılar ve nereden geldikleri yazıyor. Bir karta dokununca ondalık gösterimi açılır. Gösterimi <b>sonsuz ve irrasyonel</b> olan kart varsayıma <b>uyar</b>. Gösterimi <b>sonsuz ama rasyonel</b> olan kart varsayımı <b>çürütür</b> (karşı örnektir). Gösterimi <b>sonlu</b> olan kart varsayımla <b>ilgisizdir</b>.",
+    durum:"<b>Varsayım:</b> “Ondalık gösterimi sonsuz olan her sayı irrasyoneldir.” Bu varsayım kartlarla sınanacak. Kartlarda bazı sayılar ve nereden geldikleri yazıyor. Bir karta dokununca ondalık gösterimi açılır. Gösterimi <b>sonsuz ve irrasyonel</b> olan kart varsayıma <b>uyar</b>. Gösterimi <b>sonsuz ama rasyonel</b> olan kart varsayımı <b>çürütür</b> (karşı örnektir). Gösterimi <b>sonlu</b> olan kart varsayımla <b>ilgisizdir</b>.",
     nasil:["Bir karta dokununuz; ondalık gösterimi açılır.","Kartı “Uyar”, “Çürütür” ya da “İlgisiz” kefesine koymak için o kutuya dokununuz.","Terazi kefelerdeki kartlara göre eğilir."],biter:bitG(2)});
-  S.tahmin(k,"Bu varsayım doğru mudur?",[["e","Evet, her zaman doğrudur"],["h","Hayır, yanlıştır"]],"h","1/3 = 0,333… sonsuzdur ama bir kesirdir, yani rasyoneldir: varsayımı çürüten bir karşı örnek.");
+  S.tahmin(k,"“Ondalık gösterimi sonsuz olan her sayı irrasyoneldir.” varsayımı doğru mudur?",[["e","Evet, her zaman doğrudur"],["h","Hayır, yanlıştır"]],"h","1/3 = 0,333… sonsuzdur ama bir kesirdir, yani rasyoneldir: varsayımı çürüten bir karşı örnek.");
   const C=[{h:kes(1,3),ac:`${kes(1,3)}<small>0,333…</small>`,k:"c"},{h:K(2),ac:`${K(2)}<small>1,41421356…</small>`,k:"u"},{h:kes(2,9),ac:`${kes(2,9)}<small>0,222…</small>`,k:"c"},{h:"π",ac:"π<small>3,14159265…</small>",k:"u"},
     {h:kes(5,11),ac:`${kes(5,11)}<small>0,4545…</small>`,k:"c"},{h:K(5),ac:`${K(5)}<small>2,23606797…</small>`,k:"u"},{h:kes(1,4),ac:`${kes(1,4)}<small>0,25</small>`,k:"i"},{h:K(9),ac:`${K(9)}<small>3</small>`,k:"i"}];
   k.insertAdjacentHTML("beforeend",`<div class="stage"></div><p class="r-sonuc"></p>`);const st=k.querySelector(".stage"),son=k.querySelector(".r-sonuc");
   const D=defter(k,["Kart","Ondalık gösterim","Kefe"]);const AD={u:"Uyar",c:"Çürütür",i:"İlgisiz"};
-  const O=kutuOyun(k,[{key:"u",ad:"Uyar",acik:"Sonsuz ve irrasyonel"},{key:"c",ad:"Çürütür",acik:"Sonsuz ama rasyonel (karşı örnek)"},{key:"i",ad:"İlgisiz",acik:"Gösterimi sonlu"}],
-    {sec:(c,b)=>{b.innerHTML=c.ac;b.classList.add("ac");},dogru:(c,kk)=>{say[kk]++;D.ekle([c.h,c.ac.match(/<small>(.*)<\/small>/)[1],AD[kk]],c.h);ciz();G.kontrol();}});
+  const O=kutuOyun(k,[{key:"u",ad:"Uyar",acik:"Sonsuz ve irrasyonel"},{key:"c",ad:"Çürütür",acik:"Sonsuz ama rasyonel (karşı örnek)"},{key:"i",ad:"İlgisiz",acik:"Gösterimi sonlu"}],{ipucu:(c,k)=>({"u>c":"Bu sayı bir kesirle yazılabilir mi? Çürüten kart, gösterimi sonsuz ama rasyonel olan karttır.","u>i":"Açılan gösterim bir yerde bitiyor mu? Bakınız.","c>u":"Bu sayı bir kesirden geliyor; kesirler rasyoneldir. Varsayıma uyar mı?","c>i":"Açılan gösterim bitmiyor; sonlu değil.","i>u":"Bu gösterim bir yerde bitiyor; varsayım yalnız sonsuz gösterimlerden söz ediyor.","i>c":"Bu gösterim bir yerde bitiyor; varsayım yalnız sonsuz gösterimlerden söz ediyor."})[c.k+">"+k],
+    sec:(c,b)=>{b.innerHTML=c.ac;b.classList.add("ac");},dogru:(c,kk)=>{say[kk]++;D.ekle([c.h,c.ac.match(/<small>(.*)<\/small>/)[1],AD[kk]],c.h);ciz();G.kontrol();}});
   O.yukle(karistir(C));
   const G=gorevler(k,[{m:"Varsayımı çürüten <b>bir karşı örnek</b> bulunuz.",ok:()=>say.c>=1,s:()=>"Sonsuz ama kesirle yazılabilen bir sayı varsayımı çürütür."},{m:"<b>8 kartın hepsini</b> kefelere koyunuz.",ok:()=>O.kalan===0}],acikla);
   function ciz(){const sv=svgEl(360,150),e=Math.max(-14,Math.min(14,(say.c-say.u)*4));const r=e*Math.PI/180,cx=180,cy=40,L=130;
@@ -1236,7 +1289,7 @@ const e_terazi=p=>{const S=notr(asamali(p));const say={u:0,c:0,i:0};
       ["Bir tane yeter",["Uyan örneklerden fazla olmalı","Bir tane karşı örnek, varsayımın “her sayı için” doğru olmadığını gösterir."],["Hiç gerekmez","Yanlış olduğunu göstermek için bir örnek göstermek gerekir."]],
       "Tek bir karşı örnek (ör. 1/3) “her” ile başlayan bir varsayımı çürütür.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`Sayılar: ${kes(2,3)} · ${K(3)} · ${kes(1,6)} · 0,5 · ${kes(4,11)} · π`])+soruKut("Bu sayılardan kaç tanesi aynı varsayımı çürüten bir karşı örnektir? Cevabı sayı olarak yazınız."),3,`${kes(2,3)} = 0,<span class="dv">6</span>, ${kes(1,6)} = 0,1<span class="dv">6</span> ve ${kes(4,11)} = 0,<span class="dv">36</span>: sonsuz ama rasyonel. 0,5 sonlu; ${K(3)} ve π varsayıma uyar.`,"",
+    S.sayi(m,yaz([`Sayılar: ${kes(2,3)} · ${K(3)} · ${kes(1,6)} · 0,5 · ${kes(4,11)} · π`])+soruKut("Bu sayılardan kaç tanesi aynı varsayımı çürüten bir karşı örnektir? Cevabı sayı olarak yazınız."),3,`${kes(2,3)} = 0,<span class="dv">6</span>, ${kes(1,6)} = 0,1<span class="dv">6</span> ve ${kes(4,11)} = 0,<span class="dv">36</span>: sonsuz ama rasyonel. 0,5 sonlu; ${K(3)} ve π varsayıma uyar.`,["Karşı örnek, gösterimi sonsuz ama rasyonel olan sayıdır. Her sayının gösterimine ve türüne ayrı ayrı bakınız.",v=>v===4?"0,5 sonlu bir gösterimdir; varsayımla ilgisizdir, çürütmez.":v===5||v===6?"√3 ve π irrasyoneldir; varsayıma uyarlar, çürütmezler.":v===2?"Kesirlerin hepsini bölerek gösterimlerine bakınız; hepsi devirli mi?":null],
       ()=>S.bitir("Ondalık gösterimi sonsuz olan her sayı irrasyonel değildir: <b>devirli</b> sonsuz gösterimli sayılar kesirle yazılabilir, yani rasyoneldir. Bir sayı ancak ondalık gösterimi <b>sonsuz ve devirsiz</b> ise irrasyoneldir. “Her” diye başlayan bir varsayımı çürütmek için tek bir karşı örnek yeter."));}
 };
 
@@ -1270,7 +1323,7 @@ const e_hali=p=>{const S=notr(asamali(p));let A=20;const ras=new Set(),irr=new S
       ["İrrasyonel bir sayı",["Rasyonel bir sayı: 5,477225575","Ekrandaki sayı yalnız yaklaşık değerdir; 30 tam kare değildir."],["Doğal sayı: 5,5","5,5 · 5,5 = 30,25; 30 değil."]],
       `25 < 30 < 36 olduğu için ${K(30)} 5 ile 6 arasındadır ve 30 tam kare olmadığından irrasyoneldir.`,meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Bir mağazada alanları 1 m², 2 m², 3 m², … , 30 m² olan 30 kare halı var."])+soruKut("Bu halılardan kaçının kenar uzunluğu rasyonel bir sayıdır? Cevabı sayı olarak yazınız."),5,"1, 4, 9, 16 ve 25 tam karedir: bu 5 halının kenarı doğal sayı (1, 2, 3, 4, 5 m), öteki 25 halının kenarı irrasyoneldir.","",
+    S.sayi(m,yaz(["Bir mağazada alanları 1 m², 2 m², 3 m², … , 30 m² olan 30 kare halı var."])+soruKut("Bu halılardan kaçının kenar uzunluğu rasyonel bir sayıdır? Cevabı sayı olarak yazınız."),5,"1, 4, 9, 16 ve 25 tam karedir: bu 5 halının kenarı doğal sayı (1, 2, 3, 4, 5 m), öteki 25 halının kenarı irrasyoneldir.",["Kenarı rasyonel olan halının alanı bir tam kare sayıdır. 30'a kadar tam kareleri sayınız.",v=>v===25?"Kenarı irrasyonel olan halıları saydınız; soru rasyonel olanları soruyor.":v===4?"1 m² de bir tam karedir: 1 = 1 · 1.":v===6?"6 · 6 = 36; alanlar 30 m²'ye kadar.":null],
       ()=>S.bitir(`Bir doğal sayı <b>tam kare</b> ise karekökü bir doğal sayıdır ve rasyoneldir: ${K(49)} = 7. Tam kare değilse karekökünün ondalık gösterimi sonsuz ve devirsizdir, yani <b>irrasyoneldir</b>: ${K(20)} = 4,472135955…`));}
 };
 
@@ -1278,7 +1331,7 @@ const e_hali=p=>{const S=notr(asamali(p));let A=20;const ras=new Set(),irr=new S
 const e_suzgec=p=>{const S=notr(asamali(p));let kural="cift";const den=new Map();let bak=new Set();
   const KR={cift:["Çift sayılar",n=>n%2===0],tek:["Tek sayılar",n=>n%2===1],k5:["5'in katları",n=>n%5===0],kare:["Tam kare sayılar",n=>tamKare(n)]};
   const k=S.ac(1,{ne:"1'den 50'ye kadar sayıları bir süzgeçten geçirip karekökü rasyonel olanları ayıracaksınız.",
-    durum:"Süzgeç seçtiğiniz kurala uyan sayıların karekökünü “rasyonel”, öteki sayıların karekökünü “irrasyonel” diye işaretler. Sonra her sayının karekökü hesap makinesiyle sınanır; süzgecin yanlış işaretlediği sayılar kırmızı çerçeveyle gösterilir.",
+    durum:"Süzgece 1'den 50'ye kadar bütün doğal sayılar girer. Süzgecin kuralı “Çift sayılar”, “Tek sayılar”, “5'in katları” ya da “Tam kare sayılar” olabilir. Süzgeç seçtiğiniz kurala uyan sayıların karekökünü “rasyonel”, öteki sayıların karekökünü “irrasyonel” diye işaretler. Sonra her sayının karekökü hesap makinesiyle sınanır; süzgecin yanlış işaretlediği sayılar kırmızı çerçeveyle gösterilir.",
     nasil:["Süzgecin kuralını seçiniz ve “Süzgeci çalıştırınız” düğmesine basınız.","Mavi kutular “rasyonel”, turuncu kutular “irrasyonel” diye işaretlenenlerdir. Kırmızı çerçeveli kutular hatalıdır.","Bir sayıya dokununca karekökünün ekranı görünür."],biter:bitG(3)});
   S.tahmin(k,"Hangi kuralla çalışan süzgeç hiç hata yapmaz?",[["cift","Çift sayılar"],["kare","Tam kare sayılar"],["k5","5'in katları"]],"kare","Karekökü rasyonel olan sayılar yalnız tam karelerdir: 1, 4, 9, 16, 25, 36, 49.");
   k.insertAdjacentHTML("beforeend",`<div class="r-den"></div><div class="row"><button class="primary r-calis">Süzgeci çalıştırınız</button></div><p class="r-sonuc"></p><div class="r-izg"></div><div class="r-ekran-y"></div>`);
@@ -1301,7 +1354,7 @@ const e_suzgec=p=>{const S=notr(asamali(p));let kural="cift";const den=new Map()
       ["İrrasyoneldir, çünkü 48 tam kare değildir",["Rasyoneldir, çünkü 48 çifttir","Çift olmak karekökü rasyonel yapmaz."],["Rasyoneldir, çünkü 49'a çok yakındır","Yakın olmak yetmez; 48 tam kare değil."]],
       "36 < 48 < 49: 48 iki ardışık tam karenin arasında, karekökü irrasyonel.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["1, 2, 3, … , 50 sayılarının her birinin karekökü alınıyor."])+soruKut("Bu kareköklerden kaç tanesi irrasyoneldir? Cevabı sayı olarak yazınız."),43,"1'den 50'ye kadar 7 tam kare var (1, 4, 9, 16, 25, 36, 49). 50 − 7 = 43 sayının karekökü irrasyoneldir.","",
+    S.sayi(m,yaz(["1, 2, 3, … , 50 sayılarının her birinin karekökü alınıyor."])+soruKut("Bu kareköklerden kaç tanesi irrasyoneldir? Cevabı sayı olarak yazınız."),43,"1'den 50'ye kadar 7 tam kare var (1, 4, 9, 16, 25, 36, 49). 50 − 7 = 43 sayının karekökü irrasyoneldir.",["Önce 1–50 arasındaki tam kareleri sayınız; karekökü irrasyonel olanlar geri kalan sayılardır.",v=>v===7?"Tam kareleri saydınız; soru karekökü irrasyonel olanları soruyor.":v===44?"Bir tam kareyi unuttunuz: 49 da tam kare mi?":v===50?"Tam karelerin karekökü doğal sayıdır, irrasyonel değildir.":null],
       ()=>S.bitir(`Bir doğal sayının karekökü yalnız sayı <b>tam kare</b> ise rasyoneldir. Çift, tek ya da 5'in katı olmak bunu belirlemez. 1'den 50'ye kadar 7 tam kare vardır; öteki 43 sayının karekökü irrasyoneldir.`));}
 };
 
@@ -1319,7 +1372,8 @@ const e_av=p=>{const S=notr(asamali(p));const AR=[[51,100],[101,150],[151,200]];
       x.onclick=()=>{if(coz.has(ai))return;isa.has(n)?isa.delete(n):isa.add(n);x.classList.toggle("isa");bip(560,.04);};iz.appendChild(x);}}
   k.querySelector(".r-kont").onclick=()=>{const [a,b]=AR[ai];const T=[];for(let n=a;n<=b;n++)if(tamKare(n))T.push(n);
     if(T.length===isa.size&&T.every(x=>isa.has(x))){coz.add(ai);fb(f,true,`Doğru: ${T.join(", ")}. Karekökü irrasyonel olan sayı: 50 − ${T.length} = ${50-T.length}.`);D.ekle([`${a}–${b}`,T.join(", "),T.length,50-T.length],String(ai));bip(820,.12);ciz();G.kontrol();}
-    else{fb(f,false,YD);bip(220,.15,"triangle");}};
+    else{const fazla=[...isa].filter(x=>!tamKare(x)),eksik=T.filter(x=>!isa.has(x));
+      fb(f,false,`${fazla.length?`<b>${fazla.join(", ")}</b> tam kare değil: hiçbir doğal sayının kendisiyle çarpımı ${fazla.length>1?"bunlara":"buna"} eşit değil. `:""}${eksik.length?`Aralıkta işaretlemediğiniz ${eksik.length} tam kare daha var; aralıktaki doğal sayıların karelerini düşününüz. `:""}${YD}`);bip(220,.15,"triangle");}};
   const G=gorevler(k,[{m:"<b>51–100</b> aralığındaki tam kareleri bulunuz.",ok:()=>coz.has(0)},{m:"<b>101–150</b> aralığındaki tam kareleri bulunuz.",ok:()=>coz.has(1)},{m:"<b>151–200</b> aralığındaki tam kareleri bulunuz.",ok:()=>coz.has(2),s:()=>"Sayılar büyüdükçe ardışık tam kareler arası açılıyor; aralıktaki tam kare sayısı azalıyor."}],acikla);
   const D=defter(k,["Aralık","Tam kareler","Karekökü rasyonel","Karekökü irrasyonel"]);
   ciz();
@@ -1331,7 +1385,7 @@ const e_av=p=>{const S=notr(asamali(p));const AR=[[51,100],[101,150],[151,200]];
       ["225",["225 ve 250","250 tam kare değil: 15² = 225, 16² = 256."],["200 ve 225","200 aralıkta değil ve tam kare değil."]],
       "14² = 196 < 201 ve 16² = 256 > 250: aralıkta yalnız 15² = 225 var.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["301, 302, 303, … , 400 sayılarının her birinin karekökü alınıyor (100 sayı)."])+soruKut("Bu kareköklerden kaç tanesi irrasyoneldir? Cevabı sayı olarak yazınız."),97,"Aralıktaki tam kareler: 18² = 324, 19² = 361, 20² = 400. 100 − 3 = 97 sayının karekökü irrasyoneldir.","",
+    S.sayi(m,yaz(["301, 302, 303, … , 400 sayılarının her birinin karekökü alınıyor (100 sayı)."])+soruKut("Bu kareköklerden kaç tanesi irrasyoneldir? Cevabı sayı olarak yazınız."),97,"Aralıktaki tam kareler: 18² = 324, 19² = 361, 20² = 400. 100 − 3 = 97 sayının karekökü irrasyoneldir.",["Karesi 301 ile 400 arasında olan doğal sayıları bulunuz; geri kalan sayıların karekökü irrasyoneldir.",v=>v===98?"400 = 20 · 20 de aralığın içindedir.":v===3?"Tam kareleri saydınız; soru karekökü irrasyonel olanları soruyor.":v===96?"Aralıkta olmayan bir tam kareyi saydınız mı? 17 · 17 = 289.":v===100?"Aralıkta tam kareler de var; onların karekökü doğal sayıdır.":null],
       ()=>S.bitir("Bir aralıkta karekökü rasyonel olan sayılar yalnız <b>tam kare</b> sayılardır. Karekökü irrasyonel olanların sayısı, aralıktaki sayı adedinden tam kare sayısı çıkarılarak bulunur. Sayılar büyüdükçe tam kareler seyrekleşir; kareköklerin çoğu irrasyoneldir."));}
 };
 
@@ -1362,7 +1416,7 @@ const e_cember=p=>{const S=notr(asamali(p));let d=4;const gor=new Set();
       ["İrrasyoneldir; 3,14 ve 22/7 yaklaşık değerleridir",["π = 3,14'tür, rasyoneldir","3,14 yalnız yaklaşık değerdir: π = 3,14159265…"],["π = 22/7'dir, rasyoneldir","22/7 = 3,142857…; π = 3,141592… Üçüncü basamakta ayrılırlar."]],
       "π'nin ondalık gösterimi 3,14159265358979… sonsuz ve devirsizdir: π irrasyoneldir. Ölçümle bulunan oranlar yalnız yaklaşık değerlerdir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Çapı 50 cm olan bir bisiklet tekerleğinin çevre uzunluğu hesaplanacak. π yerine yaklaşık değer olarak 3,14 kullanılıyor."])+soruKut("Tekerleğin çevre uzunluğu yaklaşık kaç santimetredir? Cevabı sayı olarak yazınız."),157,"Uzunluk = π · çap ≈ 3,14 · 50 = 157 cm.","",
+    S.sayi(m,yaz(["Çapı 50 cm olan bir bisiklet tekerleğinin çevre uzunluğu hesaplanacak. π yerine yaklaşık değer olarak 3,14 kullanılıyor."])+soruKut("Tekerleğin çevre uzunluğu yaklaşık kaç santimetredir? Cevabı sayı olarak yazınız."),157,"Uzunluk = π · çap ≈ 3,14 · 50 = 157 cm.",["Çemberin uzunluğu, çap ile π'nin çarpımıdır.",v=>v===78.5||v===79?"Çapın yarısıyla çarptınız; burada çap kullanılır.":v===314?"Çapı 2 ile de çarptınız; 2 · yarıçap zaten çapa eşittir.":v===150||v===153?"π yerine 3 değil, 3,14 kullanılacak.":null],
       ()=>S.bitir("Her çemberin uzunluğunun çapına oranı aynı sayıdır: <b>π</b>. π'nin ondalık gösterimi 3,14159265… sonsuz ve devirsizdir, bu yüzden π <b>irrasyonel</b> bir sayıdır. Hesaplarda kullandığımız 3, 3,14 ya da 22/7 π'nin yalnız yaklaşık değerleridir."));}
 };
 
@@ -1381,7 +1435,7 @@ const e_oruntu=p=>{const S=notr(asamali(p));
   const dn=k.querySelector(".r-den"),ur=k.querySelector(".r-ur"),f=k.querySelector(".fb");
   sayiDugme(dn,"Kural",KR.map(x=>[x.id,x.ad]),"a",v=>{cur=KR.find(x=>x.id===v);n=10;f.hidden=true;ciz();});
   k.querySelector(".r-10").onclick=()=>{n=Math.min(60,n+10);ciz();bip(560,.04);};
-  const sec=t=>{if(t===cur.t){coz.set(cur.id,t);fb(f,true,t==="d"?"Doğru: sabit bir blok hep tekrar ediyor; bu sayı rasyoneldir.":"Doğru: kurala göre yazılıyor ama sabit bir blok tekrar etmiyor; bu sayı irrasyoneldir.");D.ekle([cur.ad,"0,"+cur.f(16)+"…",t==="d"?"Devirli: rasyonel":"Devirsiz: irrasyonel"],cur.id);bip(820,.12);G.kontrol();}else{fb(f,false,YD);bip(220,.15,"triangle");}};
+  const sec=t=>{if(t===cur.t){coz.set(cur.id,t);fb(f,true,t==="d"?"Doğru: sabit bir blok hep tekrar ediyor; bu sayı rasyoneldir.":"Doğru: kurala göre yazılıyor ama sabit bir blok tekrar etmiyor; bu sayı irrasyoneldir.");D.ekle([cur.ad,"0,"+cur.f(16)+"…",t==="d"?"Devirli: rasyonel":"Devirsiz: irrasyonel"],cur.id);bip(820,.12);G.kontrol();}else{fb(f,false,`${cur.t==="z"?"Basamaklar bir kurala göre yazılıyor; ama aynı blok hep aynen tekrar ediyor mu? “10 basamak daha yazınız” ile bakınız. Kurallı olmak devirli olmak değildir.":"Basamaklara bakınız: aynı blok hep aynen tekrar ediyor. Başta bir kez yazılan basamaklar devri bozmaz."} ${YD}`);bip(220,.15,"triangle");}};
   k.querySelector(".r-dv").onclick=()=>sec("d");k.querySelector(".r-dz").onclick=()=>sec("z");
   const G=gorevler(k,[{m:"<b>Devirli</b> bir sayı üreten kuralı bulunuz.",ok:()=>[...coz.values()].includes("d")},{m:"<b>5 kuralın hepsini</b> sınıflandırınız.",ok:()=>coz.size>=5,s:()=>"2 kural devirli, 3 kural devirsiz sayı üretti."}],acikla);
   const D=defter(k,["Kural","Üretilen sayı","Karar"]);
@@ -1395,7 +1449,7 @@ const e_oruntu=p=>{const S=notr(asamali(p));
       ["Devirli, rasyonel",["Devirsiz, irrasyonel","81 bloğu hep tekrar ediyor."],["Sonlu, rasyonel","Gösterim bitmiyor."]],
       "0,5<span class=\"dv\">81</span>: 5 bir kez yazılıyor, 81 bloğu tekrar ediyor. Devirli olduğu için rasyoneldir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Kurallar: (1) hep 9 yaz · (2) önce 3, sonra hep 45 yaz · (3) tek sayıları yan yana yaz: 1, 3, 5, 7, 9, 11, … · (4) 2 ile 5'i sırayla yaz: 2, 5, 2, 5, … · (5) 1 yaz, sonra iki 1, sonra üç 1, aralara birer 0 koy: 1011011101111…"])+soruKut("Bu kurallardan kaç tanesi rasyonel bir sayı üretir? Cevabı sayı olarak yazınız."),3,"(1) 0,<span class=\"dv\">9</span>, (2) 0,3<span class=\"dv\">45</span>, (4) 0,<span class=\"dv\">25</span> devirlidir: 3 kural rasyonel sayı üretir. (3) ve (5) devirsizdir.","",
+    S.sayi(m,yaz(["Kurallar: (1) hep 9 yaz · (2) önce 3, sonra hep 45 yaz · (3) tek sayıları yan yana yaz: 1, 3, 5, 7, 9, 11, … · (4) 2 ile 5'i sırayla yaz: 2, 5, 2, 5, … · (5) 1 yaz, sonra iki 1, sonra üç 1, aralara birer 0 koy: 1011011101111…"])+soruKut("Bu kurallardan kaç tanesi rasyonel bir sayı üretir? Cevabı sayı olarak yazınız."),3,"(1) 0,<span class=\"dv\">9</span>, (2) 0,3<span class=\"dv\">45</span>, (4) 0,<span class=\"dv\">25</span> devirlidir: 3 kural rasyonel sayı üretir. (3) ve (5) devirsizdir.",["Sabit bir blok hep tekrar ediyorsa sayı rasyoneldir; kurala göre yazılıp sabit blok tekrar etmiyorsa irrasyoneldir.",v=>v===5?"Her kural bir örüntüdür ama her örüntü devirli değildir; tek sayıları yan yana yazınca sabit bir blok tekrar eder mi?":v===4?"(3) ve (5) kurallarında sabit bir blok tekrar ediyor mu, yeniden bakınız.":v===2?"“Önce 3, sonra hep 45” kuralında baştaki 3'ten sonra sabit blok tekrar ediyor; bu da devirlidir.":null],
       ()=>S.bitir("Ondalık gösterimde <b>aynı blok hiç değişmeden tekrar ediyorsa</b> gösterim devirlidir ve sayı rasyoneldir. Basamaklar bir kurala göre yazılsa bile sabit bir blok tekrar etmiyorsa gösterim sonsuz ve devirsizdir, sayı <b>irrasyoneldir</b>: 0,1010010001…, 0,123456789101112…"));}
 };
 
@@ -1416,7 +1470,7 @@ const e_pi=p=>{const S=notr(asamali(p));
     p2.innerHTML=`<span class="et">${cur.l}</span><span class="v">3</span><span class="v">,</span>`+[...b].map((d,i)=>`<button type="button" data-i="${i+1}" class="${c&&i+1===A?"ok":""}">${d}</button>`).join("");
     p2.querySelectorAll("button").forEach(x=>x.onclick=()=>{if(coz.has(cur.id))return;const i=+x.dataset.i;
       if(i===A){coz.add(cur.id);x.classList.add("ok");fb(f,true,`Doğru: virgülden sonraki ${A}. basamakta ayrılıyor (${a[A-1]} ≠ ${b[A-1]}).`);D.ekle([cur.h,cur.s.slice(0,A+2)+"…",`${A}. basamak`],cur.id);bip(820,.12);G.kontrol();}
-      else{x.classList.add("no");setTimeout(()=>x.classList.remove("no"),700);fb(f,false,YD);bip(220,.15,"triangle");}});}
+      else{x.classList.add("no");setTimeout(()=>x.classList.remove("no"),700);fb(f,false,`${i<A?`Bu basamak π'nin ${i}. basamağıyla aynı; ayrılma daha sağda.`:"Bu basamaktan önce farklı bir basamak var; basamakları soldan başlayarak birer birer karşılaştırınız."} ${YD}`);bip(220,.15,"triangle");}});}
   const G=gorevler(k,[{m:"<b>2 yaklaşık değerin</b> ayrıldığı basamağı bulunuz.",ok:()=>coz.size>=2},{m:"<b>4 yaklaşık değerin hepsini</b> yarıştırınız.",ok:()=>coz.size>=4,s:()=>"355/113 π'ye çok yakın: ilk 6 basamak aynı, 7. basamakta ayrılıyor. Yine de π'ye eşit değil."}],acikla);
   const D=defter(k,["Yaklaşık değer","Gösterimi","Ayrıldığı basamak"]);
   ciz();
@@ -1428,7 +1482,7 @@ const e_pi=p=>{const S=notr(asamali(p));
       [kes(22,7),["3,14","3,14 2. basamaktan sonra ayrılıyor (3,140 ↔ 3,141); 22/7 de 3. basamakta ayrılıyor ama farkı daha küçük: 3,1428 − 3,1416 ≈ 0,0013, 3,1416 − 3,14 ≈ 0,0016."],["İkisi eşit uzaklıktadır","Farklar 0,0013 ve 0,0016: eşit değil."]],
       "22/7 − π ≈ 0,0013; π − 3,14 ≈ 0,0016. 22/7 biraz daha yakındır.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`${kes(333,106)} = 3,1415094… ve π = 3,1415926…`])+soruKut("333/106, π'den virgülden sonraki kaçıncı basamakta ayrılır? Cevabı sayı olarak yazınız."),5,"3,1415|0… ile 3,1415|9…: ilk dört basamak aynı, 5. basamakta 0 ≠ 9.","",
+    S.sayi(m,yaz([`${kes(333,106)} = 3,1415094… ve π = 3,1415926…`])+soruKut("333/106, π'den virgülden sonraki kaçıncı basamakta ayrılır? Cevabı sayı olarak yazınız."),5,"3,1415|0… ile 3,1415|9…: ilk dört basamak aynı, 5. basamakta 0 ≠ 9.",["Basamakları virgülden sonra birer birer karşılaştırınız; ilk farklı basamağın sırasını yazınız.",v=>v===4?"Aynı olan son basamağın sırasını yazdınız; ilk farklı basamak bir sonrakidir.":v===6?"Basamakları sayarken birini fazla saydınız mı? Virgülden hemen sonraki basamak 1. basamaktır.":null],
       ()=>S.bitir("π'nin ondalık gösterimi 3,14159265358979… <b>sonsuz ve devirsizdir</b>; π irrasyoneldir. 3,14, 3,1416, 22/7, 355/113 gibi sayılar π'ye yakın <b>rasyonel</b> sayılardır ve π'den bir basamakta mutlaka ayrılırlar. Hesaplarda bunları yaklaşık değer olarak kullanırız."));}
 };
 
@@ -1444,7 +1498,7 @@ const e_uzun=p=>{const S=notr(asamali(p));const KS=[[1,7],[5,13],[1,11],[7,12],[
   const U=surgu("Ekrana sığan rakam",8,30,N,v=>{N=v;f.hidden=true;ciz();});dn.appendChild(U.el);
   const gerek=()=>{const o=devir(...ks);return o.on.length+2*o.dv.length;};
   k.querySelector(".r-gor").onclick=()=>{const o=devir(...ks);if(dogruBas(...ks,N)>=gerek()){coz.set(ks.join("/"),N);fb(f,true,`Doğru: ekranda devreden ${o.dv.join("")} iki kez görünüyor.`);D.ekle([kes(...ks),N,ekranK(...ks,N),dvH(...ks)],ks.join("/")+N);bip(820,.12);G.kontrol();}
-    else{fb(f,false,YD);bip(220,.15,"triangle");}};
+    else{fb(f,false,`Ekranda devreden blok (${o.dv.length} basamak) henüz iki kez tamamen görünmüyor. Ekranı uzatınız; son rakamın yuvarlandığını, virgülden önceki 0'ın da yer kapladığını unutmayınız. ${YD}`);bip(220,.15,"triangle");}};
   const G=gorevler(k,[{m:"<b>1/11</b> için devri ekranda iki kez gösteriniz.",ok:()=>coz.has("1/11")},{m:"<b>1/7</b> için devri ekranda iki kez gösteriniz.",ok:()=>coz.has("1/7"),s:()=>"Altı basamaklı blok için uzun bir ekran gerekiyor."},{m:"<b>3 farklı</b> kesirde devri gösteriniz.",ok:()=>coz.size>=3}],acikla);
   const D=defter(k,["Kesir","Ekrana sığan rakam","Ekran","Kısa yazılış"]);
   function ciz(){ey.innerHTML=ekrKut(`${ks[0]} : ${ks[1]} · ekrana ${N} rakam sığıyor`,ekranK(...ks,N));}
@@ -1457,27 +1511,29 @@ const e_uzun=p=>{const S=notr(asamali(p));const KS=[[1,7],[5,13],[1,11],[7,12],[
       ["384615",["38","38 bloğu tekrar etmiyor: 0,38461538…"],["3846153846","Bu ekranın tamamıdır; blok 384615'tir."]],
       "5/13 = 0,<span class=\"dv\">384615</span>: altı basamaklı blok tekrar ediyor.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`${kes(4,37)} = 0,<span class="dv">108</span> = 0,108108108…`])+soruKut("Devreden bloğun ekranda iki kez tamamen görünmesi için ekrana en az kaç rakam sığmalıdır? (Ekrandaki 0 da bir rakamdır; son rakam yuvarlanır.)"),7,"0,108108 için 0 ile birlikte 7 rakam gerekir: 0,108108|1… yuvarlanınca son rakam değişmez ve ekranda 0,108108 görünür.","",
+    S.sayi(m,yaz([`${kes(4,37)} = 0,<span class="dv">108</span> = 0,108108108…`])+soruKut("Devreden bloğun ekranda iki kez tamamen görünmesi için ekrana en az kaç rakam sığmalıdır? (Ekrandaki 0 da bir rakamdır; son rakam yuvarlanır.)"),7,"0,108108 için 0 ile birlikte 7 rakam gerekir: 0,108108|1… yuvarlanınca son rakam değişmez ve ekranda 0,108108 görünür.",["Ekrandaki rakamları sayarken virgülden önceki 0'ı da sayınız; blok iki kez tamamen görünmeli.",v=>v===6?"Virgülden önceki 0'ı saymadınız.":v===3||v===4?"Bu ekranda blok yalnız bir kez görünür; iki kez görünmesi gerekiyor.":v>=9?"Daha kısa bir ekran da yeter; en az kaç rakam gerektiği soruluyor.":null],
       ()=>S.bitir("Hesap makinesi ekranı gösterimin yalnız başını gösterir. Bir kesrin devreden bloğu uzunsa onu görmek için uzun bir ekran gerekir; ekran kısa diye sayı irrasyonel olmaz. Kesirlerin ondalık gösterimi her zaman <b>sonlu ya da devirlidir</b>."));}
 };
 
 /* 14 · KESİR DEDEKTİFİ (ekranın kaynağını deneyerek bulma) */
 const e_dedektif=p=>{const S=notr(asamali(p));
   const H=[{e:ekranK(5,11),k:"k",v:5/11},{e:ekranR(3),k:"r",v:Math.sqrt(3)},{e:ekranK(1,6),k:"k",v:1/6},{e:ekranR(5),k:"r",v:Math.sqrt(5)}];
-  let hi=0,mod="k",a=1,b=2,r=2;const coz=new Set();
+  let hi=0,mod="k",a=1,b=2,r=2,bekle=false;const coz=new Set();
   const k=S.ac(1,{ne:"Ekranı verilen bir sayının bir kesirden mi, bir karekökten mi geldiğini denemelerle bulacaksınız.",
     durum:"Dedektife dört ekran getirildi. Her ekran ya bir bölme işleminden (a : b) ya da bir doğal sayının karekökünden geliyor. Hesap makinesinin ekranına 10 rakam sığar, son rakam yuvarlanır.",
-    nasil:["“Kesir dene” ya da “Karekök dene” seçiniz ve sürgülerle bir sayı kurunuz.","“Ekranı karşılaştırınız” düğmesine basınız. Ekranlar aynıysa kaynak bulunur ve sıradaki ekran gelir.","Denemeleriniz deney defterine yazılır."],biter:bitG(2)});
+    nasil:["Sırayla <b>4 ekran</b> getirilecek; üstteki “Ekran 1 / 4” şeridi kaçıncı ekranda olduğunuzu gösterir. “Kesir dene” ya da “Karekök dene” seçiniz ve sürgülerle bir sayı kurunuz.","“Ekranı karşılaştırınız” düğmesine basınız. Ekranlar aynıysa kaynak bulunur. Denemeleriniz deney defterine yazılır.","Kaynak bulununca “Sıradaki ekran (2 / 4) →” düğmesine basınız; yeni ekran ancak bu düğmeyle gelir."],biter:bitG(2)});
   S.tahmin(k,"Ekranda 1,732050808 yazıyor. Bu sayı nereden gelmiş olabilir?",[["k","Bir kesirden"],["r","Bir doğal sayının karekökünden"],["?","Yalnız ekrana bakarak kesin söylenemez"]],"?","Ekran yalnız ilk basamakları gösterir; kaynak denenerek bulunur. Bu ekran " + K(3) + "'ten geliyor.");
-  k.insertAdjacentHTML("beforeend",`<div class="r-ekran-y r-hedef"></div><div class="r-den r-mod"></div><div class="r-den r-sg"></div><div class="r-ekran-y r-deneme"></div><div class="row"><button class="primary r-kars">Ekranı karşılaştırınız</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="r-ekran-y r-hedef"></div><div class="r-den r-mod"></div><div class="r-den r-sg"></div><div class="r-ekran-y r-deneme"></div><div class="row"><button class="primary r-kars">Ekranı karşılaştırınız</button></div><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const he=k.querySelector(".r-hedef"),md=k.querySelector(".r-mod"),sg=k.querySelector(".r-sg"),de=k.querySelector(".r-deneme"),f=k.querySelector(".fb");
+  const TZ=turZincir(he,{n:4,ad:"Ekran",tamlayan:"ekranın",dugme:k.querySelector(".r-tzd"),vurgu:()=>he,kur:i=>{hi=i;bekle=false;f.hidden=true;ciz();},
+    son:"4 ekranın hepsinin kaynağı bulundu. Deney bitti; alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   sayiDugme(md,"Deneme türü",[["k","Kesir dene (a : b)"],["r","Karekök dene"]],"k",v=>{mod=v;kur();ciz();});
   function kur(){sg.innerHTML="";if(mod==="k"){sg.append(surgu("Pay (a)",1,20,a,v=>{a=v;ciz();}).el,surgu("Payda (b)",1,20,b,v=>{b=v;ciz();}).el);}else sg.append(surgu("Kök içindeki sayı",1,50,r,v=>{r=v;ciz();}).el);}
   const dE=()=>mod==="k"?ekranK(a,b):ekranR(r),dH=()=>mod==="k"?`${a} : ${b}`:K(r);
-  function ciz(){he.innerHTML=hi<4?ekrKut(`Getirilen ekran ${hi+1} / 4`,H[hi].e):ekrKut("Bütün ekranların kaynağı bulundu","✓");de.innerHTML=ekrKut(`Denemeniz: ${mod==="k"?a+" : "+b:"√"+r}`,dE());k.querySelector(".r-kars").disabled=hi>=4;}
-  k.querySelector(".r-kars").onclick=()=>{if(hi>=4)return;const ok=dE()===H[hi].e;D.ekle([H[hi].e,dH(),dE(),ok?"Aynı":"Farklı"],hi+"-"+mod+a+"-"+b+"-"+r);
-    if(ok){coz.add(hi);fb(f,true,`Kaynak bulundu: ${dH()}, ekranı ${H[hi].e}. ${H[hi].k==="k"?"Kesirden geliyor: rasyonel.":"Tam kare olmayan bir sayının karekökü: irrasyonel."}`);hi++;bip(820,.12);ciz();G.kontrol();}
-    else{fb(f,false,YD);bip(220,.15,"triangle");}};
+  function ciz(){he.innerHTML=ekrKut(`Getirilen ekran ${hi+1} / 4${bekle?" · kaynağı bulundu ✓":""}`,H[hi].e);de.innerHTML=ekrKut(`Denemeniz: ${mod==="k"?a+" : "+b:"√"+r}`,dE());k.querySelector(".r-kars").disabled=bekle;}
+  k.querySelector(".r-kars").onclick=()=>{if(bekle)return;const ok=dE()===H[hi].e;D.ekle([H[hi].e,dH(),dE(),ok?"Aynı":"Farklı"],hi+"-"+mod+a+"-"+b+"-"+r);
+    if(ok){coz.add(hi);fb(f,true,`Kaynak bulundu: ${dH()}, ekranı ${H[hi].e}. ${H[hi].k==="k"?"Kesirden geliyor: rasyonel.":"Tam kare olmayan bir sayının karekökü: irrasyonel."}`);bekle=true;bip(820,.12);ciz();G.kontrol();TZ.tamam(`${H[hi].e} ← ${dH()} (${H[hi].k==="k"?"rasyonel":"irrasyonel"})`);}
+    else{const dv=mod==="k"?a/b:Math.sqrt(r),yk=Math.abs(dv-H[hi].v)<.001;fb(f,false,`Ekranlar aynı değil: denemenizin değeri getirilen ekrandakinden ${dv>H[hi].v?"büyük":"küçük"}${yk?"; ilk basamaklar tutuyor ama sondaki basamaklar ayrılıyor":""}. Bu deneme türüyle tutmuyorsa öteki deneme türünü de düşününüz. ${YD}`);bip(220,.15,"triangle");}};
   const G=gorevler(k,[{m:"<b>İlk iki ekranın</b> kaynağını bulunuz.",ok:()=>coz.size>=2},{m:"<b>Dört ekranın hepsinin</b> kaynağını bulunuz.",ok:()=>coz.size>=4,s:()=>"İki ekran kesirden (rasyonel), iki ekran karekökten (irrasyonel) geldi."}],acikla);
   const D=defter(k,["Getirilen ekran","Deneme","Denemenin ekranı","Sonuç"]);
   kur();ciz();
@@ -1489,7 +1545,7 @@ const e_dedektif=p=>{const S=notr(asamali(p));
       ["Rasyonel: 0,1<span class=\"dv\">6</span>",["İrrasyonel, çünkü ekran doldu","Ekranın dolması gösterimin ekrandan uzun olduğunu gösterir; 1/6 devirlidir."],["Rasyonel: tam olarak 0,166666667","Son rakam yuvarlandı; gerçek gösterim 0,1666… diye sürer."]],
       "1/6 bir kesirdir; gösterimi 0,1<span class=\"dv\">6</span> devirlidir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Bir ekranda 0,818181818 yazıyor. Bu sayı paydası 11 olan bir kesirden geliyor."])+soruKut("Kesrin payı kaçtır? Cevabı sayı olarak yazınız."),9,`9 : 11 = 0,818181… = 0,<span class="dv">81</span>; ekranda son rakam yuvarlanarak 0,818181818 görünür.`,"",
+    S.sayi(m,yaz(["Bir ekranda 0,818181818 yazıyor. Bu sayı paydası 11 olan bir kesirden geliyor."])+soruKut("Kesrin payı kaçtır? Cevabı sayı olarak yazınız."),9,`9 : 11 = 0,818181… = 0,<span class="dv">81</span>; ekranda son rakam yuvarlanarak 0,818181818 görünür.`,["Paydası 11 olan kesirleri bölerek deneyiniz; 0,8181… veren payı arayınız.",v=>v===8?"8 : 11 = 0,7272…; biraz daha büyük bir pay gerekir.":v===81?"81 devreden bloktur, kesrin payı değil.":v===10?"10 : 11 = 0,9090…; biraz küçük bir pay gerekir.":null],
       ()=>S.bitir("Hesap makinesi ekranı yalnız ilk basamakları gösterir; aynı görünen ekranlar farklı kaynaklardan gelebilir. Bir sayının rasyonel mi irrasyonel mi olduğuna <b>nereden geldiğine</b> bakarak karar verilir: kesirden geliyorsa rasyoneldir; tam kare olmayan bir doğal sayının karekökünden geliyorsa irrasyoneldir."));}
 };
 
@@ -1525,7 +1581,7 @@ const e_bolEkr=p=>{const S=notr(asamali(p));const KS=[[3,8],[2,7],[1,17],[5,12]]
       ["Ya sonludur ya da devirlidir",["Ekrana sığmazsa irrasyoneldir","Ekrana sığmamak irrasyonel olmak değildir; 1/17 bir kesirdir."],["Her zaman 16 basamaktan sonra biter","1/17'nin gösterimi bitmez; devreder."]],
       "Kalanlar paydadan küçük olduğu için ya bir kalan 0 olur (sonlu) ya da bir kalan tekrar eder (devirli). Kesirler rasyoneldir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`${kes(1,19)} bölmesinde kalanlar 1'den 18'e kadar sayıların hepsi olarak birer kez çıkıyor, sonra 1 kalanı yeniden çıkıyor.`])+soruKut("1/19'un devreden bloğunda kaç basamak vardır? Cevabı sayı olarak yazınız."),18,"18 farklı kalan, 18 farklı adım demektir; sonra kalan 1 yeniden çıkar. Devreden blok 18 basamaklıdır.","",
+    S.sayi(m,yaz([`${kes(1,19)} bölmesinde kalanlar 1'den 18'e kadar sayıların hepsi olarak birer kez çıkıyor, sonra 1 kalanı yeniden çıkıyor.`])+soruKut("1/19'un devreden bloğunda kaç basamak vardır? Cevabı sayı olarak yazınız."),18,"18 farklı kalan, 18 farklı adım demektir; sonra kalan 1 yeniden çıkar. Devreden blok 18 basamaklıdır.",["Her bölme adımında bir kalan ve bir basamak çıkar; kalanlar tekrar etmeye başlayana kadar kaç adım yapılır?",v=>v===19?"Bölen 19'dur ama sıfırdan farklı kalanlar yalnız 1'den 18'e kadardır.":v===17?"1'den 18'e kadar kaç sayı olduğunu yeniden sayınız.":null],
       ()=>S.bitir("Uzun bölmede her adımın kalanı görünür. Kalan 0 olursa gösterim <b>sonludur</b>; bir kalan yeniden çıkarsa gösterim <b>devirlidir</b> ve devreden blok, iki aynı kalan arasındaki basamaklardır. Hesap makinesi ekranı yalnız ilk basamakları gösterdiği için uzun blokları göremeyebilir."));}
 };
 
@@ -1546,7 +1602,7 @@ const e_eslestir=p=>{const S=notr(asamali(p));
     if(sec===b){b.classList.remove("secili");sec=null;return;}
     const a=sec;sec=null;a.classList.remove("secili");den++;
     if(Math.abs(a._c.v-b._c.v)<1e-9){[a,b].forEach(x=>{x.classList.add("g"+x._c.g);es.add(x._c);});fb(f,true,`Eşit: ${a._c.h} = ${b._c.h}`);D.ekle([a._c.h,b._c.h,{1:"0,5",2:"0,<span class=\"dv\">3</span>",3:"1,5",4:"2"}[a._c.g]],[a._c.h,b._c.h].sort().join("|"));bip(820,.1);G.kontrol();}
-    else{[a,b].forEach(x=>{x.classList.add("no");setTimeout(()=>x.classList.remove("no"),700);});fb(f,false,YD);bip(220,.15,"triangle");}}
+    else{[a,b].forEach(x=>{x.classList.add("no");setTimeout(()=>x.classList.remove("no"),700);});fb(f,false,`Bu iki kart aynı sayıyı göstermiyor: ${a._c.h} ${a._c.v<b._c.v?"&lt;":"&gt;"} ${b._c.h}. Her kartın değerini ondalık gösterimle düşününüz (karekökte hangi sayının karesi kök içindeki sayıya eşit?). ${YD}`);bip(220,.15,"triangle");}}
   const grup=()=>[1,2,3,4].filter(g=>ms.querySelectorAll(`.g${g}`).length===3).length;
   const G=gorevler(k,[{m:"<b>Bir grubu</b> (aynı sayının üç gösterimini) tamamlayınız.",ok:()=>grup()>=1},{m:"<b>4 grubun hepsini</b> tamamlayınız.",ok:()=>grup()>=4,s:()=>"Her grupta bir kesir, bir ondalık gösterim ya da bir karekök var; değer aynı."}],acikla);
   const D=defter(k,["Kart","Kart","Ortak değer"]);
@@ -1558,25 +1614,30 @@ const e_eslestir=p=>{const S=notr(asamali(p));
       ["Rasyonel, çünkü 1,5'e eşittir",["İrrasyonel, çünkü karekök gösterimiyle yazılmıştır",`${K("2,25")} = 1,5 = ${kes(3,2)}; karekök işareti sayıyı irrasyonel yapmaz.`],["İrrasyonel, çünkü 2,25 doğal sayı değildir","1,5 · 1,5 = 2,25 olduğu için kökü 1,5'tir."]],
       `${K("2,25")} = 1,5 = ${kes(3,2)}: rasyoneldir.`,meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`${K("0,36")} sayısı payı 3 olan bir kesirle de yazılabiliyor.`])+soruKut("Bu kesrin paydası kaçtır? Cevabı sayı olarak yazınız."),5,`${K("0,36")} = 0,6 = ${kes(3,5)}: payda 5.`,"",
+    S.sayi(m,yaz([`${K("0,36")} sayısı payı 3 olan bir kesirle de yazılabiliyor.`])+soruKut("Bu kesrin paydası kaçtır? Cevabı sayı olarak yazınız."),5,`${K("0,36")} = 0,6 = ${kes(3,5)}: payda 5.`,["Önce karekökün değerini ondalık sayı olarak bulunuz; sonra bu sayıyı payı 3 olan bir kesirle yazınız.",v=>v===25||v===100?"0,36'yı kesre çevirdiniz; karekökünü almadınız.":v===10?"6/10 kesrini payı 3 olacak biçimde sadeleştiriniz.":null],
       ()=>S.bitir(`Bir sayının kesir, ondalık ve karekök gösterimleri olabilir: ${kes(1,2)} = 0,5 = ${K("0,25")}. Gösterim değişse de sayı aynıdır. Karekök işaretiyle yazılmış bir sayı da, değeri bir kesre eşitse <b>rasyoneldir</b>.`));}
 };
 
 /* 17 · KILIK DEĞİŞTİREN SAYILAR (bir sayıyı kesir ve kök gösterimiyle kurma) */
-const e_kilik=p=>{const S=notr(asamali(p));const H=[{d:"0,5",p:1,q:2},{d:"1,5",p:3,q:2},{d:"0,2",p:1,q:5},{d:"3",p:3,q:1}];let hi=0,a=1,b=1,m=4;const KM=[4,25,40,50,150,225,300,900];const tam=new Set();
+const e_kilik=p=>{const S=notr(asamali(p));const H=[{d:"0,5",p:1,q:2},{d:"1,5",p:3,q:2},{d:"0,2",p:1,q:5},{d:"3",p:3,q:1}];let hi=0,a=1,b=1,m=4,bekle=false;const KM=[4,25,40,50,150,225,300,900];const tam=new Set();
   const k=S.ac(1,{ne:"Ekrandaki sayıyı hem bir kesirle hem bir karekökle yazarak kılık değiştireceksiniz.",
     durum:"Her turda bir sayı veriliyor. Bu sayıya eşit bir kesir ve kök içinde bir ondalık sayı ya da doğal sayı olan bir karekök kuracaksınız. İki gösterim de sayıya eşitse tur tamamlanır.",
-    nasil:["“Pay” ve “Payda” sürgüleriyle bir kesir kurunuz; kesrin ondalık gösterimi yazar.","“Kök içi” düğmelerinden birini seçiniz; karekökün değeri yazar.","İkisi de sayıya eşitse “Kontrol edin” düğmesine basınız."],biter:bitG(2)});
+    nasil:["Sırayla <b>4 sayı</b> gelecek; üstteki “Sayı 1 / 4” şeridi kaçıncı sayıda olduğunuzu gösterir. “Pay” ve “Payda” sürgüleriyle bir kesir kurunuz; kesrin ondalık gösterimi yazar.","“Kök içi” düğmelerinden birini seçiniz; karekökün değeri yazar. İkisi de sayıya eşitse “Kontrol edin” düğmesine basınız.","Sayı kılık değiştirince “Sıradaki sayı (2 / 4) →” düğmesine basınız; yeni sayı ancak bu düğmeyle gelir."],biter:bitG(2)});
   S.tahmin(k,"1,5 sayısı bir karekökle yazılabilir mi?",[["e","Evet: √2,25"],["h","Hayır, karekökler hep irrasyoneldir"]],"e",`1,5 · 1,5 = 2,25 olduğu için 1,5 = ${K("2,25")}.`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-kilit"></div><div class="r-den r-k1"></div><p class="r-sonuc r-s1"></p><div class="r-den r-k2"></div><p class="r-sonuc r-s2"></p><div class="row"><button class="primary r-kont">Kontrol edin</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="r-kilit"></div><div class="r-den r-k1"></div><p class="r-sonuc r-s1"></p><div class="r-den r-k2"></div><p class="r-sonuc r-s2"></p><div class="row"><button class="primary r-kont">Kontrol edin</button></div><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const kl=k.querySelector(".r-kilit"),k1=k.querySelector(".r-k1"),k2=k.querySelector(".r-k2"),s1=k.querySelector(".r-s1"),s2=k.querySelector(".r-s2"),f=k.querySelector(".fb");
+  const TZ=turZincir(kl,{n:4,ad:"Sayı",tamlayan:"sayının",dugme:k.querySelector(".r-tzd"),vurgu:()=>kl,kur:i=>{hi=i;bekle=false;f.hidden=true;ciz();},
+    son:"4 sayının hepsi kılık değiştirdi. Deney bitti; alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   k1.append(surgu("Pay",1,12,a,v=>{a=v;ciz();}).el,surgu("Payda",1,12,b,v=>{b=v;ciz();}).el);
   sayiDugme(k2,"Kök içi",KM.map(x=>[x,trs(x/100)]),m,v=>{m=+v;ciz();});
-  function ciz(){const h=H[Math.min(hi,3)];kl.className="r-kilit"+(hi>=4?" acik":"");kl.innerHTML=hi>=4?"Bütün sayılar kılık değiştirdi ✓":`Sayı ${hi+1} / 4: <b>${h.d}</b>`;
-    s1.innerHTML=dz(`Kesir: ${kes(a,b)} = <b>${dvH(a,b)}</b>`);s2.innerHTML=dz(`Karekök: ${K(trs(m/100))} = <b>${ekranR(m,1)}</b>${tamKare(m)?"":" (yaklaşık)"}`);k.querySelector(".r-kont").disabled=hi>=4;}
-  k.querySelector(".r-kont").onclick=()=>{if(hi>=4)return;const h=H[hi],okK=a*h.q===b*h.p,okR=m*h.q*h.q===100*h.p*h.p;
-    if(okK&&okR){tam.add(hi);D.ekle([h.d,kes(a,b),K(trs(m/100))],String(hi));fb(f,true,`${h.d} = ${kes(a,b)} = ${K(trs(m/100))}`);hi++;bip(880,.15);ciz();G.kontrol();}
-    else{fb(f,false,YD);bip(220,.15,"triangle");}};
+  function ciz(){const h=H[hi];kl.className="r-kilit"+(bekle?" acik":"");kl.innerHTML=`Sayı ${hi+1} / 4: <b>${h.d}</b>${bekle?" · kılık değiştirdi ✓":""}`;
+    s1.innerHTML=dz(`Kesir: ${kes(a,b)} = <b>${dvH(a,b)}</b>`);s2.innerHTML=dz(`Karekök: ${K(trs(m/100))} = <b>${ekranR(m,1)}</b>${tamKare(m)?"":" (yaklaşık)"}`);k.querySelector(".r-kont").disabled=bekle;}
+  k.querySelector(".r-kont").onclick=()=>{if(bekle)return;const h=H[hi],okK=a*h.q===b*h.p,okR=m*h.q*h.q===100*h.p*h.p;
+    if(okK&&okR){tam.add(hi);D.ekle([h.d,kes(a,b),K(trs(m/100))],String(hi));fb(f,true,`${h.d} = ${kes(a,b)} = ${K(trs(m/100))}`);bekle=true;bip(880,.15);ciz();G.kontrol();TZ.tamam(`${h.d} = ${kes(a,b)} = ${K(trs(m/100))}`);}
+    else{const hv=h.p/h.q,kv=a/b,rv=Math.sqrt(m/100),P=[];
+      if(!okK)P.push(`Kesriniz (${kes(a,b)}) sayıdan ${kv>hv?"büyük":"küçük"}.`);
+      if(!okR)P.push(`Karekökünüz (${K(trs(m/100))}) sayıdan ${rv>hv?"büyük":"küçük"}; kök içi için ${rv>hv?"daha küçük":"daha büyük"} bir sayı seçiniz.`);
+      fb(f,false,`${P.join(" ")} ${YD}`);bip(220,.15,"triangle");}};
   const G=gorevler(k,[{m:"<b>İlk iki sayının</b> kılığını değiştiriniz.",ok:()=>tam.size>=2},{m:"<b>Dört sayının hepsinin</b> kılığını değiştiriniz.",ok:()=>tam.size>=4,s:()=>"Her sayı hem kesirle hem karekökle yazıldı; değeri değişmedi."}],acikla);
   const D=defter(k,["Sayı","Kesir","Karekök"]);
   ciz();
@@ -1588,7 +1649,7 @@ const e_kilik=p=>{const S=notr(asamali(p));const H=[{d:"0,5",p:1,q:2},{d:"1,5",p
       [K("0,04"),[K("0,4"),`0,4 bir sayının karesi değil: ${K("0,4")} = 0,632455532…`],[K(3),"3 tam kare değil."]],
       `${K("0,04")} = 0,2 = ${kes(1,5)}, çünkü 0,2 · 0,2 = 0,04.`,meydan));}
   function meydan(){const mm=S.son();
-    S.sayi(mm,yaz([`1,25 sayısı paydası 4 olan bir kesirle yazılmak isteniyor.`])+soruKut("Kesrin payı kaçtır? Cevabı sayı olarak yazınız."),5,`1,25 = ${kes(125,100)} = ${kes(5,4)}.`,"",
+    S.sayi(mm,yaz([`1,25 sayısı paydası 4 olan bir kesirle yazılmak isteniyor.`])+soruKut("Kesrin payı kaçtır? Cevabı sayı olarak yazınız."),5,`1,25 = ${kes(125,100)} = ${kes(5,4)}.`,["1,25'i önce paydası 100 olan bir kesirle yazınız, sonra paydası 4 olacak biçimde sadeleştiriniz.",v=>v===125?"125/100 kesrini sadeleştirmediniz; payda 4 olmalı.":v===1||v===2?"1,25, 1'den büyüktür; kesrin payı paydasından büyük olmalı.":null],
       ()=>S.bitir(`Bir sayı kesir, ondalık ya da karekök biçiminde yazılabilir: 0,5 = ${kes(1,2)} = ${K("0,25")}. Yazılış değişse de sayı aynıdır; rasyonel mi irrasyonel mi olduğuna <b>değerine</b> bakarak karar verilir.`));}
 };
 
@@ -1598,24 +1659,26 @@ const e_duello=p=>{const S=notr(asamali(p));
   let tur=0,siz=0,pc=0,oyun=0,dogruS=0,kazan=0,ciftler=[],secK=null,bekl=false;
   const k=S.ac(1,{ne:"Bilgisayara karşı 5 turluk bir kart düellosu yapacaksınız.",
     durum:"<b>Kurallar:</b> Her turda iki kart kapalı gelir. Siz birini seçersiniz, öteki bilgisayarın olur. Seçtiğiniz kartın rasyonel mi irrasyonel mi olduğunu söylersiniz. Doğru söylerseniz rasyonel kart <b>1 puan</b>, irrasyonel kart <b>2 puan</b> kazandırır; yanlış söylerseniz puan alamazsınız. Bilgisayar kendi kartını her zaman doğru söyler. 5 turun sonunda puanı yüksek olan kazanır.",
-    nasil:["Kapalı kartlardan birine dokununuz.","Kartın türünü “Rasyonel” ya da “İrrasyonel” düğmesiyle söyleyiniz.","Puanlar tabloda; turlar deney defterine yazılır."],biter:bitG(2)});
+    nasil:["Düello <b>5 tur</b>dur; üstteki “Tur 1 / 5” şeridi kaçıncı turda olduğunuzu gösterir. Kapalı kartlardan birine dokununuz.","Kartın türünü “Rasyonel” ya da “İrrasyonel” düğmesiyle söyleyiniz. Puanlar tabloda; turlar deney defterine yazılır.","Tur bitince “Sıradaki tur (2 / 5) →” düğmesine basınız; yeni kartlar ancak bu düğmeyle gelir."],biter:bitG(2)});
   S.tahmin(k,`Turda ${K(16)} ve ${K(12)} kartları var. Türünü doğru söylerseniz hangisi daha çok puan kazandırır?`,[["a",K(16)],["b",K(12)]],"b",`${K(12)} irrasyonel (2 puan), ${K(16)} = 4 rasyonel (1 puan).`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-skor"><div>Siz<b class="r-ps">0</b></div><div>Bilgisayar<b class="r-pp">0</b></div><div>Tur<b class="r-pt">0 / 5</b></div></div><div class="r-kartlar r-kk"></div><div class="row r-tusl" hidden><button class="ghost r-ra">Rasyonel</button><button class="ghost r-ir">İrrasyonel</button></div><div class="fb" hidden></div><div class="row"><button class="primary r-son" hidden>Sonraki tur →</button></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="r-skor"><div>Siz<b class="r-ps">0</b></div><div>Bilgisayar<b class="r-pp">0</b></div><div>Tur<b class="r-pt">0 / 5</b></div></div><div class="r-kartlar r-kk"></div><div class="row r-tusl" hidden><button class="ghost r-ra">Rasyonel</button><button class="ghost r-ir">İrrasyonel</button></div><div class="fb" hidden></div><div class="r-tzd"></div><div class="row"><button class="primary r-son" hidden>Yeni düello başlatınız</button></div>`);
   const kk=k.querySelector(".r-kk"),tl=k.querySelector(".r-tusl"),f=k.querySelector(".fb"),sb=k.querySelector(".r-son");
+  const TZ=turZincir(k.querySelector(".r-skor"),{n:5,ad:"Tur",tamlayan:"turun",dugme:k.querySelector(".r-tzd"),vurgu:()=>kk,kur:()=>sonrakiTur(),
+    son:"5 turun hepsi bitti. Görevler tamamlanmadıysa “Yeni düello başlatınız” düğmesiyle yeniden oynayınız; tamamlandıysa alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   const skor=()=>{k.querySelector(".r-ps").textContent=siz;k.querySelector(".r-pp").textContent=pc;k.querySelector(".r-pt").textContent=`${tur} / 5`;};
-  function yeniOyun(){const L=karistir(P);ciftler=[0,1,2,3,4].map(i=>[L[2*i],L[2*i+1]]);tur=0;siz=0;pc=0;skor();sonrakiTur();}
+  function yeniOyun(){const L=karistir(P);ciftler=[0,1,2,3,4].map(i=>[L[2*i],L[2*i+1]]);tur=0;siz=0;pc=0;skor();TZ.sifirla();sonrakiTur();}
   function sonrakiTur(){tur++;skor();secK=null;bekl=false;f.hidden=true;sb.hidden=true;tl.hidden=true;kk.innerHTML="";
     ciftler[tur-1].forEach((c,i)=>{const b=document.createElement("button");b.type="button";b.className="r-kart kapali";b.innerHTML="?<small>kapalı kart</small>";
       b.onclick=()=>{if(secK)return;secK=c;b.classList.remove("kapali");b.classList.add("secili");b.innerHTML=c.h+"<small>sizin kartınız</small>";tl.hidden=false;bip(600,.05);};kk.appendChild(b);});}
   const soyle=r=>{if(!secK||bekl)return;bekl=true;const c=secK,o=ciftler[tur-1].find(x=>x!==c),ok=c.r===r,pu=ok?(c.r?1:2):0,po=o.r?1:2;
     siz+=pu;pc+=po;if(ok)dogruS++;tl.hidden=true;
     const kb=[...kk.children].find(x=>x.classList.contains("kapali"));if(kb){kb.classList.remove("kapali");kb.innerHTML=o.h+"<small>bilgisayarın kartı</small>";}
-    fb(f,ok,ok?`Doğru: ${c.h} ${c.r?"rasyonel":"irrasyonel"} (+${pu}). Bilgisayarın kartı ${o.h} ${o.r?"rasyonel":"irrasyonel"} (+${po}).`:`${YD} Bu tur puan alamadınız. Bilgisayarın kartı ${o.h} (+${po}).`);
+    fb(f,ok,ok?`Doğru: ${c.h} ${c.r?"rasyonel":"irrasyonel"} (+${pu}). Bilgisayarın kartı ${o.h} ${o.r?"rasyonel":"irrasyonel"} (+${po}).`:`Bu kez yanlış söylediniz: ${c.h} ${c.r?"bir kesirle yazılabilir (kök içindeki sayı tam kare ya da gösterim sonlu/devirli), yani rasyoneldir":"bir kesirle yazılamaz (kök içindeki sayı tam kare değil ya da gösterim sonsuz ve devirsiz), yani irrasyoneldir"}. Bu tur puan alamadınız. Bilgisayarın kartı ${o.h} (+${po}).`);
     D.ekle([`${oyun+1}. düello, ${tur}. tur`,c.h,ok?`+${pu}`:"0",o.h,`+${po}`],oyun+"-"+tur);bip(ok?820:220,.12,ok?"sine":"triangle");skor();
-    if(tur>=5){oyun++;if(siz>pc)kazan++;sb.textContent="Yeni düello başlatınız";f.innerHTML+=`<br><b>Düello bitti: Siz ${siz} – Bilgisayar ${pc}.</b> ${siz>pc?"Kazandınız!":siz===pc?"Berabere.":"Bilgisayar kazandı; yeniden deneyebilirsiniz."}`;}else sb.textContent="Sonraki tur →";
-    sb.hidden=false;G.kontrol();};
+    if(tur>=5){oyun++;if(siz>pc)kazan++;sb.hidden=false;f.innerHTML+=`<br><b>Düello bitti: Siz ${siz} – Bilgisayar ${pc}.</b> ${siz>pc?"Kazandınız!":siz===pc?"Berabere.":"Bilgisayar kazandı; yeniden deneyebilirsiniz."}`;}
+    G.kontrol();TZ.tamam(`kartınız ${c.h} (${ok?"+"+pu:"0"}), bilgisayarın kartı ${o.h} (+${po})`);};
   k.querySelector(".r-ra").onclick=()=>soyle(1);k.querySelector(".r-ir").onclick=()=>soyle(0);
-  sb.onclick=()=>{if(tur>=5)yeniOyun();else sonrakiTur();};
+  sb.onclick=()=>{yeniOyun();};
   const G=gorevler(k,[{m:"<b>Bir düelloyu</b> sonuna kadar oynayınız.",ok:()=>oyun>=1},{m:"Toplam <b>8 kartın</b> türünü doğru söyleyiniz.",ok:()=>dogruS>=8,s:()=>"İrrasyonel kartı tanımak 2 puan getiriyor."}],acikla);
   const D=defter(k,["Tur","Kartınız","Puanınız","Bilgisayarın kartı","Puanı"]);
   yeniOyun();
@@ -1627,7 +1690,7 @@ const e_duello=p=>{const S=notr(asamali(p));
       ["Rasyoneldir; π'ye yakın bir kesirdir",["İrrasyoneldir, çünkü π'ye eşittir","22/7 = 3,142857…, π = 3,141592…; eşit değiller."],["İrrasyoneldir, çünkü gösterimi sonsuzdur","Gösterimi devirli: 3,<span class=\"dv\">142857</span>."]],
       "Her kesir rasyoneldir; 22/7 π'nin yalnız yaklaşık değeridir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`Bir oyuncu dört kartının türünü de doğru söyledi. Kartları: ${K(9)} · ${K(10)} · ${kes(2,3)} · π. Rasyonel kart 1 puan, irrasyonel kart 2 puan kazandırıyor.`])+soruKut("Oyuncu toplam kaç puan kazandı? Cevabı sayı olarak yazınız."),6,`${K(9)} = 3 (1) + ${K(10)} (2) + ${kes(2,3)} (1) + π (2) = 6 puan.`,"",
+    S.sayi(m,yaz([`Bir oyuncu dört kartının türünü de doğru söyledi. Kartları: ${K(9)} · ${K(10)} · ${kes(2,3)} · π. Rasyonel kart 1 puan, irrasyonel kart 2 puan kazandırıyor.`])+soruKut("Oyuncu toplam kaç puan kazandı? Cevabı sayı olarak yazınız."),6,`${K(9)} = 3 (1) + ${K(10)} (2) + ${kes(2,3)} (1) + π (2) = 6 puan.`,["Her kartın değerine bakıp rasyonel mi irrasyonel mi olduğunu belirleyiniz; sonra puanları toplayınız.",v=>v===7?"√9'un değerini düşününüz: tam karenin karekökü rasyoneldir, 1 puan getirir.":v===8?"Yalnız iki kart irrasyonel; √9 ve 2/3 rasyoneldir.":v===4?"İrrasyonel kartlar 2 puan getirir.":null],
       ()=>S.bitir(`Sayının türünü belirlerken yazılışına değil değerine bakılır: ${K(16)} = 4 ve ${K("0,09")} = 0,3 rasyoneldir; ${K(12)}, ${K(20)}, π irrasyoneldir. Kesirler (${kes(22,7)} gibi) ve devirli gösterimler her zaman rasyoneldir.`));}
 };
 
@@ -1657,7 +1720,7 @@ const e_sema=p=>{const S=notr(asamali(p));
     st.replaceChildren(sv);son.innerHTML=dz(`Kart: <b>${cur.h}</b>`,`Ondalık gösterimi: <b>${cur.g}</b>`,yer>=2?`Ulaştığı kutu: <b>${cur.s||cur.d?"Rasyonel":"İrrasyonel"}</b>`:"");
     const bit=yer>=2;k.querySelector(".r-ev").disabled=bit;k.querySelector(".r-hy").disabled=bit;}
   const git=ev=>{if(yer>=2)return;const dog=yer===0?!!cur.s:!!cur.d;
-    if(ev!==dog){fb(f,false,YD);bip(220,.15,"triangle");return;}f.hidden=true;yol.push(ev?"Evet":"Hayır");
+    if(ev!==dog){fb(f,false,`${yer===0?(cur.s?"Ondalık gösterim bir yerde bitiyor; yazılı gösterime bakınız.":"Gösterimin sonundaki “…” basamakların sürdüğünü gösterir; gösterim bitmiyor."):(cur.d?"Gösterimde aynı blok hep aynen tekrar ediyor; bakınız.":"Basamaklar bir kurala göre gidebilir; ama sabit bir blok aynen tekrar ediyor mu?")} ${YD}`);bip(220,.15,"triangle");return;}f.hidden=true;yol.push(ev?"Evet":"Hayır");
     yer=yer===0?(ev?2:1):(ev?3:4);bip(640,.06);
     if(yer>=2){coz.add(cur.id);D.ekle([cur.h,cur.g,yol.join(" → "),yer===4?"İrrasyonel":"Rasyonel"],cur.id);bip(820,.12);G.kontrol();}ciz();};
   k.querySelector(".r-ev").onclick=()=>git(true);k.querySelector(".r-hy").onclick=()=>git(false);
@@ -1672,7 +1735,7 @@ const e_sema=p=>{const S=notr(asamali(p));
       ["Gösterimi sonlu değilse ve devreden blok yoksa",["Gösterimi sonlu değilse","0,2666… sonlu değildir ama 2. kapıdan Evet ile Rasyonel'e gider."],["Karekök işaretiyle yazılmışsa","√1,44 Rasyonel kutusuna gitti."]],
       "İrrasyonel sayıların ondalık gösterimi sonsuz ve devirsizdir: iki kapıdan da “Hayır” çıkar.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz([`Kartlar: ${kes(1,3)} · ${kes(3,4)} · ${K(2)} · ${kes(5,6)} · ${kes(2,9)} · 0,7`])+soruKut("Bu kartlardan kaç tanesi şemada 2. kapıdan “Evet” çıkışıyla Rasyonel kutusuna ulaşır? Cevabı sayı olarak yazınız."),3,`${kes(1,3)} = 0,<span class="dv">3</span>, ${kes(5,6)} = 0,8<span class="dv">3</span>, ${kes(2,9)} = 0,<span class="dv">2</span> devirlidir: 3 kart. ${kes(3,4)} ve 0,7 1. kapıdan geçer, ${K(2)} İrrasyonel'e gider.`,"",
+    S.sayi(m,yaz([`Kartlar: ${kes(1,3)} · ${kes(3,4)} · ${K(2)} · ${kes(5,6)} · ${kes(2,9)} · 0,7`])+soruKut("Bu kartlardan kaç tanesi şemada 2. kapıdan “Evet” çıkışıyla Rasyonel kutusuna ulaşır? Cevabı sayı olarak yazınız."),3,`${kes(1,3)} = 0,<span class="dv">3</span>, ${kes(5,6)} = 0,8<span class="dv">3</span>, ${kes(2,9)} = 0,<span class="dv">2</span> devirlidir: 3 kart. ${kes(3,4)} ve 0,7 1. kapıdan geçer, ${K(2)} İrrasyonel'e gider.`,["2. kapıya yalnız gösterimi sonlu olmayan kartlar gelir; bunlardan yalnız devirli olanlar “Evet” çıkışına gider.",v=>v===5?"3/4 ve 0,7'nin gösterimi sonludur; 1. kapıdan geçip Rasyonel'e giderler, 2. kapıya gelmezler.":v===4?"√2 devirli değildir; 2. kapıdan “Hayır” çıkışına gider.":v===2?"Kesirleri bölerek gösterimlerine bakınız; hangileri devirli?":null],
       ()=>S.bitir("Bir sayının türüne ondalık gösterimine bakarak karar verilir: gösterim <b>sonluysa</b> rasyonel; sonlu değilse ve <b>devreden bir blok varsa</b> rasyonel; <b>sonsuz ve devirsizse</b> irrasyoneldir."));}
 };
 
@@ -1683,17 +1746,16 @@ const e_kartoyun=p=>{const S=notr(asamali(p));
   let el=0,puan=0,yan=0;const eller=[];
   const k=S.ac(1,{ne:"Elinize gelen kartları rasyonel ve irrasyonel gruplarına ayırıp puan toplayacaksınız.",
     durum:"<b>Kurallar:</b> Her elde destenizden 6 kart gelir. Bir karta, sonra grubuna dokunursunuz. Doğru gruba koyduğunuz her kart <b>+2 puan</b>, yanlış gruba koymaya çalıştığınız her deneme <b>−1 puan</b> getirir; kart elinizde kalır. 6 kartın hepsi gruplanınca el biter.",
-    nasil:["Bir karta dokununuz, sonra “Rasyonel” ya da “İrrasyonel” grubuna dokununuz.","El bitince puanınız deney defterine yazılır.","“Yeni el” düğmesiyle yeni kartlar alınız."],biter:bitG(2)});
+    nasil:["En az <b>2 el</b> oynayacaksınız; her elde 6 kart gelir ve üstteki şerit kaçıncı elde olduğunuzu gösterir. Bir karta dokununuz, sonra “Rasyonel” ya da “İrrasyonel” grubuna dokununuz.","El bitince puanınız deney defterine yazılır.","“Sıradaki el →” düğmesine basınız; yeni kartlar ancak bu düğmeyle gelir."],biter:bitG(2)});
   S.tahmin(k,`${K("0,49")} hangi gruba girer?`,[["r","Rasyonel"],["i","İrrasyonel"]],"r","0,7 · 0,7 = 0,49: kök 0,7'dir, rasyoneldir.");
   k.insertAdjacentHTML("beforeend",`<div class="r-skor"><div>El<b class="r-pe">1</b></div><div>Bu elin puanı<b class="r-pp">0</b></div></div>`);
-  const O=kutuOyun(k,[{key:"r",ad:"Rasyonel",acik:"Kesirle yazılabilir; gösterimi sonlu ya da devirli."},{key:"i",ad:"İrrasyonel",acik:"Gösterimi sonsuz ve devirsiz."}],
-    {dogru:()=>{puan+=2;skor();if(O.kalan===0)bitir();},yanlis:()=>{puan-=1;yan++;skor();}});
-  k.insertAdjacentHTML("beforeend",`<div class="row"><button class="primary r-yeni" hidden>Yeni el →</button></div>`);
-  const yb=k.querySelector(".r-yeni");
+  const O=kutuOyun(k,[{key:"r",ad:"Rasyonel",acik:"Kesirle yazılabilir; gösterimi sonlu ya da devirli."},{key:"i",ad:"İrrasyonel",acik:"Gösterimi sonsuz ve devirsiz."}],{ipucu:(c,k)=>c.k==="r"?"Bu sayı bir kesirle yazılabilir mi? Kök içindeki sayı tam kare mi, gösterim sonlu ya da devirli mi bakınız.":"Bu sayı bir kesirle yazılabilir mi? Kök içindeki sayı tam kare mi, gösterimde sabit bir blok tekrar ediyor mu bakınız.",
+    dogru:()=>{puan+=2;skor();if(O.kalan===0)bitir();},yanlis:()=>{puan-=1;yan++;skor();}});
+  k.insertAdjacentHTML("beforeend",`<div class="r-tzd"></div>`);
+  const TZ=turZincir(k.querySelector(".r-skor"),{n:0,ad:"El",dugme:k.querySelector(".r-tzd"),vurgu:()=>k.querySelector(".r-kartlar")||k,kur:()=>yeniEl()});
   const skor=()=>{k.querySelector(".r-pe").textContent=el+1;k.querySelector(".r-pp").textContent=puan;};
-  function yeniEl(){puan=0;yan=0;yb.hidden=true;O.yukle(karistir(P).slice(0,6));skor();}
-  function bitir(){eller.push({puan,yan});D.ekle([`${el+1}. el`,6,yan,puan],String(el));el++;yb.hidden=false;bip(880,.15);G.kontrol();}
-  yb.onclick=()=>{yeniEl();};
+  function yeniEl(){puan=0;yan=0;O.yukle(karistir(P).slice(0,6));skor();}
+  function bitir(){eller.push({puan,yan});D.ekle([`${el+1}. el`,6,yan,puan],String(el));el++;bip(880,.15);G.kontrol();TZ.tamam(`${puan} puan, ${yan} yanlış deneme`);}
   const G=gorevler(k,[{m:"<b>2 eli</b> bitiriniz.",ok:()=>eller.length>=2},{m:"<b>Hatasız</b> bir el oynayınız (12 puan).",ok:()=>eller.some(e=>e.yan===0),s:()=>"Hatasız bir el 6 · 2 = 12 puan getirir."}],acikla);
   const D=defter(k,["El","Kart","Yanlış deneme","Puan"]);
   yeniEl();
@@ -1705,7 +1767,7 @@ const e_kartoyun=p=>{const S=notr(asamali(p));
       ["Hayır; bir sayı ya rasyoneldir ya irrasyoneldir",["Evet; √25 gibi sayılar iki gruba da girer",`${K(25)} = 5: yalnız rasyonel.`],["Evet; π ≈ 3,14 olduğu için","3,14 π'nin yaklaşık değeridir; π yalnız irrasyoneldir."]],
       "Ondalık gösterim ya sonlu/devirlidir (rasyonel) ya da sonsuz ve devirsizdir (irrasyonel); ikisi birden olamaz.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Bir oyuncu bir elde 6 kartı gruplarken 1 kez yanlış gruba koymaya çalıştı, sonra kartı doğru gruba koydu. Doğru gruba koyulan her kart +2, her yanlış deneme −1 puan getiriyor."])+soruKut("Oyuncu bu elde kaç puan aldı? Cevabı sayı olarak yazınız."),11,"6 · 2 = 12 puan, 1 yanlış deneme −1: 12 − 1 = 11 puan.","",
+    S.sayi(m,yaz(["Bir oyuncu bir elde 6 kartı gruplarken 1 kez yanlış gruba koymaya çalıştı, sonra kartı doğru gruba koydu. Doğru gruba koyulan her kart +2, her yanlış deneme −1 puan getiriyor."])+soruKut("Oyuncu bu elde kaç puan aldı? Cevabı sayı olarak yazınız."),11,"6 · 2 = 12 puan, 1 yanlış deneme −1: 12 − 1 = 11 puan.",["Doğru gruba koyulan kartların puanını ve yanlış denemenin puanını ayrı ayrı hesaplayıp birleştiriniz.",v=>v===12?"Yanlış denemenin −1 puanını unuttunuz.":v===10?"Yanlış denenen kart sonunda doğru gruba konduğu için o da +2 getirir.":v===13?"Yanlış deneme puan kazandırmaz, puan götürür.":null],
       ()=>S.bitir(`Her sayı ya <b>rasyoneldir</b> ya <b>irrasyoneldir</b>. Kesirler, tam sayılar, sonlu ve devirli gösterimler ile tam karelerin karekökleri (${K(25)} = 5, ${K("0,49")} = 0,7) rasyoneldir. Tam kare olmayan doğal sayıların karekökleri (${K(24)}, ${K(3)}), π ve sonsuz-devirsiz gösterimler irrasyoneldir.`));}
 };
 
@@ -1715,7 +1777,7 @@ const ACT=[
  {ad:"Ekran Gözlemcisi",amac:"Hesap makinesinin ekranına sığan basamakları ve yuvarlanan son rakamı inceleyerek ekranın gösterimin yalnız başını gösterdiğini keşfetmek.",adimlar:ynr("Hesap makinesinde farklı işlemlerin sonuçlarını ekranda inceleyeceksiniz.","Bir işlem düğmesine dokununuz; kısa ve uzun ekranı karşılaştırınız."),ciz:e_ekran},
  {ad:"Ondalık Sınıflandırıcı",amac:"Ondalık gösterimleri sonlu, devirli sonsuz ve düzensiz sonsuz diye sınıflandırmak.",adimlar:ynr("Ondalık gösterim kartlarını üç kutuya yerleştireceksiniz.","Bir karta, sonra gireceği kutuya dokununuz."),ciz:e_sinif3},
  {ad:"Devir Avcısı",amac:"Ondalık basamakları tek tek açıp devreden bloğu bulmak ve devirli gösterimi kısaca yazmak.",adimlar:ynr("Kesirlerin basamaklarını açıp devreden bloğu bulacaksınız.","Bir kesir seçiniz; basamakları açıp devreden bloğun kaç basamaklı olduğunu seçiniz."),ciz:e_devir},
- {ad:"Kesir Kasası",amac:"Sonlu ve devirli ondalık gösterimlere eşit kesirler bularak bu sayıların rasyonel olduğunu görmek.",adimlar:ynr("Ondalık gösterime eşit bir kesir bularak kasaları açacaksınız.","“Pay” ve “Payda” sürgüleriyle kesir kurup “Kasayı deneyiniz” düğmesine basınız."),ciz:e_kasa},
+ {ad:"Kesir Kasası",amac:"Sonlu ve devirli ondalık gösterimlere eşit kesirler bularak bu sayıların rasyonel olduğunu görmek.",adimlar:ynr("Ondalık gösterime eşit bir kesir bularak sırayla gelen <b>4 kasayı</b> açacaksınız.","“Pay” ve “Payda” sürgüleriyle kesir kurup “Kasayı deneyiniz” düğmesine basınız. Kasa açılınca “Sıradaki kasa” düğmesiyle yeni kasaya geçiniz."),ciz:e_kasa},
  {ad:"Varsayım Terazisi",amac:"“Ondalık gösterimi sonsuz olan her sayı irrasyoneldir.” varsayımını örneklerle sınayıp bir karşı örnekle çürütmek.",adimlar:ynr("Bir varsayımı kartlarla tartıp karşı örnek arayacaksınız.","Bir karta dokununuz; gösterimine bakıp kartı bir kefeye koyunuz."),ciz:e_terazi},
  {ad:"Kare Halı Atölyesi",amac:"Kare halının alanından kenar uzunluğunu bulup kenarın ne zaman rasyonel, ne zaman irrasyonel olduğunu keşfetmek.",adimlar:ynr("Kare halıların alanını seçip kenar uzunluğunun türünü inceleyeceksiniz.","“Halının alanı” sürgüsünü kullanınız; ekrana ve türe bakınız."),ciz:e_hali},
  {ad:"Karekök Süzgeci",amac:"1'den 50'ye kadar sayıların kareköklerini süzerek karekökü rasyonel olanların yalnız tam kareler olduğunu keşfetmek.",adimlar:ynr("Sayıları bir süzgeçten geçirip karekökü rasyonel olanları ayıracaksınız.","Bir kural seçip “Süzgeci çalıştırınız” düğmesine basınız; hatalı sayılara bakınız."),ciz:e_suzgec},
@@ -1724,13 +1786,13 @@ const ACT=[
  {ad:"Örüntü mü, Devir mi?",amac:"Kurallı basamak dizileri üretip kurallı olmanın devirli olmak anlamına gelmediğini keşfetmek.",adimlar:ynr("Kurallı basamak dizileri üretip devirli olup olmadıklarını sınayacaksınız.","Bir kural seçiniz; basamakları yazdırıp “Devirli” ya da “Devirsiz” düğmesine basınız."),ciz:e_oruntu},
  {ad:"π Basamak Yarışı",amac:"π'nin yaklaşık değerlerinin π'den hangi basamakta ayrıldığını bulup bu değerlerin π'ye eşit olmadığını görmek.",adimlar:ynr("π'nin yaklaşık değerlerini π'nin basamaklarıyla yarıştıracaksınız.","Bir yaklaşık değer seçiniz; π'den ilk farklı olan basamağa dokununuz."),ciz:e_pi},
  {ad:"Uzun Ekran",amac:"Ekrana sığan rakam sayısını artırarak uzun devreden blokların ancak uzun ekranda göründüğünü keşfetmek.",adimlar:ynr("Ekranı uzatarak devreden bloğu ekranda iki kez göstereceksiniz.","Bir kesir seçiniz; “Ekrana sığan rakam” sürgüsünü kullanıp “Devri gördüm” düğmesine basınız."),ciz:e_uzun},
- {ad:"Kesir Dedektifi",amac:"Ekranı verilen bir sayının bir kesirden mi, bir karekökten mi geldiğini denemelerle bulmak.",adimlar:ynr("Ekranları getirilen sayıların kaynağını bulacaksınız.","Kesir ya da karekök deneyip “Ekranı karşılaştırınız” düğmesine basınız."),ciz:e_dedektif},
+ {ad:"Kesir Dedektifi",amac:"Ekranı verilen bir sayının bir kesirden mi, bir karekökten mi geldiğini denemelerle bulmak.",adimlar:ynr("Sırayla getirilen <b>4 ekrandaki</b> sayıların kaynağını bulacaksınız.","Kesir ya da karekök deneyip “Ekranı karşılaştırınız” düğmesine basınız. Kaynak bulununca “Sıradaki ekran” düğmesiyle yeni ekrana geçiniz."),ciz:e_dedektif},
  {ad:"Bölme mi, Ekran mı?",amac:"Aynı kesri uzun bölmeyle ve hesap makinesiyle bölüp kalanların tekrarını izlemek.",adimlar:ynr("Aynı kesri uzun bölmeyle ve hesap makinesiyle karşılaştıracaksınız.","Bir kesir seçiniz; “1 adım bölünüz” ya da “5 adım bölünüz” düğmelerine basınız."),ciz:e_bolEkr},
  {ad:"Gösterim Eşleştirme Masası",amac:"Aynı sayının kesir, ondalık ve karekök gösterimlerini eşleştirerek gösterim değişse de sayının değişmediğini görmek.",adimlar:ynr("Aynı sayıyı gösteren kartları eşleştireceksiniz.","İki karta art arda dokununuz; eşitse aynı renge boyanır."),ciz:e_eslestir},
- {ad:"Kılık Değiştiren Sayılar",amac:"Bir sayıyı kesir, ondalık ve karekök gösterimiyle yazıp değerin ve türün değişmediğini görmek.",adimlar:ynr("Verilen sayıyı hem kesirle hem karekökle yazacaksınız.","Sürgülerle kesri, düğmelerle kök içini seçip “Kontrol edin” düğmesine basınız."),ciz:e_kilik},
- {ad:"Sayı Kartı Düellosu",amac:"Kartların değerini belirleyip rasyonel ve irrasyonel sayıları ayırt ederek bilgisayara karşı puan toplamak.",adimlar:ynr("Bilgisayara karşı 5 turluk bir kart düellosu yapacaksınız.","Kurallar: Her turda iki kapalı karttan birini seçip türünü söylersiniz. Doğruysa rasyonel kart 1, irrasyonel kart 2 puan getirir; yanlışsa puan yok. Öteki kart bilgisayarındır ve bilgisayar hep doğru söyler. 5 turun sonunda puanı yüksek olan kazanır."),ciz:e_duello},
+ {ad:"Kılık Değiştiren Sayılar",amac:"Bir sayıyı kesir, ondalık ve karekök gösterimiyle yazıp değerin ve türün değişmediğini görmek.",adimlar:ynr("Sırayla verilen <b>4 sayıyı</b> hem kesirle hem karekökle yazacaksınız.","Sürgülerle kesri, düğmelerle kök içini seçip “Kontrol edin” düğmesine basınız. Sayı kılık değiştirince “Sıradaki sayı” düğmesiyle yeni sayıya geçiniz."),ciz:e_kilik},
+ {ad:"Sayı Kartı Düellosu",amac:"Kartların değerini belirleyip rasyonel ve irrasyonel sayıları ayırt ederek bilgisayara karşı puan toplamak.",adimlar:ynr("Bilgisayara karşı 5 turluk bir kart düellosu yapacaksınız.","Kurallar: Her turda iki kapalı karttan birini seçip türünü söylersiniz. Doğruysa rasyonel kart 1, irrasyonel kart 2 puan getirir; yanlışsa puan yok. Öteki kart bilgisayarındır ve bilgisayar hep doğru söyler. Tur bitince “Sıradaki tur” düğmesiyle yeni tura geçersiniz. 5 turun sonunda puanı yüksek olan kazanır."),ciz:e_duello},
  {ad:"Karar Şeması Yolculuğu",amac:"Sayı kartlarını ondalık gösterime dayanan bir karar şemasından geçirerek rasyonel ya da irrasyonel olduğuna karar vermek.",adimlar:ynr("Sayı kartlarını karar şemasının kapılarından geçireceksiniz.","Bir kart seçiniz; her kapıda “Evet” ya da “Hayır” düğmesine basınız."),ciz:e_sema},
- {ad:"Rasyonel–İrrasyonel Kart Oyunu",amac:"Gelen kartları rasyonel ve irrasyonel olarak gruplayıp puan toplamak.",adimlar:ynr("Elinize gelen kartları iki gruba ayırıp puan toplayacaksınız.","Kurallar: Her elde 6 kart gelir. Bir karta, sonra grubuna dokunursunuz. Doğru grup +2 puan, yanlış deneme −1 puan getirir. 6 kart gruplanınca el biter; “Yeni el” ile devam edersiniz."),ciz:e_kartoyun}];
+ {ad:"Rasyonel–İrrasyonel Kart Oyunu",amac:"Gelen kartları rasyonel ve irrasyonel olarak gruplayıp puan toplamak.",adimlar:ynr("Elinize gelen kartları iki gruba ayırıp puan toplayacaksınız.","Kurallar: Her elde 6 kart gelir. Bir karta, sonra grubuna dokunursunuz. Doğru grup +2 puan, yanlış deneme −1 puan getirir. 6 kart gruplanınca el biter; “Sıradaki el” düğmesiyle devam edersiniz. En az 2 el oynanır."),ciz:e_kartoyun}];
 kesifBaslat(ACT,{baslik:"Rasyonel ve İrrasyonel Sayılar Keşif Atölyesi",kisa:"Rasyonel ve İrrasyonel Sayılar Keşif Atölyesi",kod:"MAT.8.1.3",ust:"8. Sınıf · Sayılar ve Nicelikler · MAT.8.1.3 · Fasikül 3",
   aciklama:"Rasyonel ve irrasyonel sayılar için yirmi keşfetme etkinliği: bölmede kalanlar, hesap makinesi ekranı, sonlu, devirli ve devirsiz ondalık gösterimler, kareköklerin türü, π, aynı sayının farklı gösterimleri ve karar şeması. Her etkinlik farklı bir düzenek; tahmin ediniz, deneyiniz, kuralı bulunuz ve yeni bir örnekte kullanınız."});
 
