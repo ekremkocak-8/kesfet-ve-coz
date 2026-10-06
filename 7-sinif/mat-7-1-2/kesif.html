@@ -883,7 +883,7 @@ function cevap(kap,ust,dogru,okMsg,ipucu,sonra,o={}){
     if(deg&&bic==="sade"&&r.tur==="ondalik"){fb(f,false,"Değer doğru. Şimdi aynı sayıyı <b>kesir</b> olarak yazınız.");return;}
     if(deg&&bic==="sade"&&r.tur==="kesir"&&gcd(r.v[0],r.v[1])!==1){fb(f,false,`Değer doğru ama kesir en sade hâlde değil. ${YD}`);return;}
     if(deg){ok=true;d.dataset.ok="1";inp.disabled=true;d.querySelectorAll(".tus").forEach(x=>x.disabled=true);fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,250);}
-    else{bip(220,.12);fb(f,false,den>=3?`${YD} Doğru cevap: <b>${bic==="ondalik"?dH(sa,sb):sb===1?T(sa):(sa<0?EKSI:"")+kH(Math.abs(sa),sb)}</b>`:YD);}};
+    else{bip(220,.12);const ip=(o.ozel&&o.ozel(r.v))||(typeof ipucu==="function"?ipucu(r.v):ipucu)||"Cevabınız doğru değil. İşleminizi yeniden kontrol ediniz.";fb(f,false,den>=3?`${ip} Doğru cevap: <b>${bic==="ondalik"?dH(sa,sb):sb===1?T(sa):(sa<0?EKSI:"")+kH(Math.abs(sa),sb)}</b>`:ip);}};
   d.querySelector(".k").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};
   return d;}
 /* Artı/eksi düğmeli sayaç */
@@ -911,15 +911,89 @@ const duzYazi=h=>String(h).replace(/<[^>]+>/g,"");
 /* Ekrana bağlanmamış deney defteri: "Kuralı bulun" aşamasında gösterilir */
 function defterY(b){const c=document.createElement("div");const D=defter(c,b);D.el=c.firstElementChild;return D;}
 /* Çoktan seçmeli soru. secs[0] doğrudur (karıştırılır). ip: kullanılmaz (§5.ip, 02.10.2026: yanlışta yalnız nötr geri bildirim) */
+/* Yanlış seçenek ipucu (§4-5, 07.10.2026): ip dizi ise her yanlış seçeneğin kendi ipucu (ip[i-1]); metin ise ortak ipucu; işlev ise ip(i) */
+function ipY(ip,i,secs,soru){let x=Array.isArray(ip)?ip[i-1]:typeof ip==="function"?ip(i,secs):ip;if(x)return x;
+  const dz=h=>String(h).replace(/<[^>]+>/g,"").replace(/\s+/g," ").trim(),q=dz(soru),o=dz(secs[i]);const e=(typeof IPS!=="undefined"?IPS:[]).find(z=>q.includes(z[0]));
+  if(e&&(e[1][o]||e[1]["*"]))return e[1][o]||e[1]["*"];return "Bu seçenek deneyde gördüğünüzle uyuşmuyor. Deney defterindeki satırlara yeniden bakınız.";}
 function soruY(kap,soru,secs,okMsg,ip,sonra){const s=karistir(secs.map((_,i)=>i));
   const d=yeniEl("div","sor");d.dataset.tur="soru";
   d.innerHTML=`<p class="soru">${soru}</p><div class="secler">${s.map(i=>`<button type="button" class="sec" data-i="${i}">${secs[i]}</button>`).join("")}</div><div class="fb" hidden></div>`;
   kap.appendChild(d);const f=d.querySelector(".fb");let bitti=false;
   d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;const i=+b.dataset.i;
     if(i===0){bitti=true;d.dataset.ok="1";b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,okMsg);bip(760,.12);sonra&&setTimeout(sonra,250);}
-    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);fb(f,false,"Bu seçenek doğru değil. "+YD);}});
+    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);fb(f,false,ipY(ip,i,secs,soru));}});
   return d;}
 /* Soruları sırayla sorar: [soru, seçenekler(ilki doğru), doğru açıklaması, ipuçları] */
+/* ================= turZincir (06.10.2026 · §4.k-5, denetim E2) =================
+   Bir adımda birden çok tur / problem / kasa / görev varsa öğrenci sıradakini fark eder:
+   üstte "Tur i / n" şeridi; her tur kendi kutusunda açılır; tur bitince "Sıradaki tur (i+1 / n) →" düğmesi çıkar,
+   basılmadan yenisi açılmaz; basılınca biten tur tek satırlık özete küçülür, yenisi vurgulanarak açılır ve ekrana kaydırılır;
+   son turdan sonra adımın bittiği yazılır. kurTur(ic, i, bitti(ozet)) · o.et: "Tur" | "Problem" | "Kasa" | "Görev" …
+   o.ileri: düğme metni (varsayılan "Sıradaki tur") · o.hepsi: son satır ("3 turun hepsi tamamlandı") · dönen nesne: {sonraki(), i} */
+const tzIn=w=>{const v=[...w].reverse().find(c=>"aeıioöuü".includes(c))||"e";const h={a:"ı",ı:"ı",e:"i",i:"i",o:"u",u:"u",ö:"ü",ü:"ü"}[v];return ("aeıioöuü".includes(w[w.length-1])?"n":"")+h+"n";};
+/* kaydırma: üstteki yapışkan başlığın altına, alttaki sabit "Bu adımda" şeridinin üstüne getirir */
+function tzKaydir(x,bas){setTimeout(()=>{if(!x.isConnected)return;const r=x.getBoundingClientRect();const al=document.querySelector(".ta-alt"),us=document.querySelector(".etk-ust");
+    const altT=al&&al.offsetParent!==null?Math.min(innerHeight,al.getBoundingClientRect().top):innerHeight;const ustB=us&&/sticky|fixed/.test(getComputedStyle(us).position)?Math.max(0,us.getBoundingClientRect().bottom):0;
+    let dy=0;if(bas||r.top<ustB+8)dy=r.top-ustB-12;else if(r.bottom>altT-8)dy=Math.min(r.bottom-altT+16,r.top-ustB-12);
+    if(Math.abs(dy)>2)window.scrollBy({top:dy,behavior:azHareket()?"auto":"smooth"});},40);}
+(()=>{if(document.getElementById("tz-stil"))return;const st=document.createElement("style");st.id="tz-stil";st.textContent=`
+.tz-kutu{border:2px solid var(--line);border-radius:14px;padding:8px 12px 10px;margin:8px 0;background:var(--card);min-width:0}
+.tz-kutu.tz-acik{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 18%,transparent)}
+.tz-bas{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-weight:800;color:var(--acc);margin:0 0 6px}
+.tz-no{background:var(--acc);color:#fff;border-radius:999px;padding:2px 10px;font-size:.9em;white-space:nowrap}
+.tz-kutu.tz-kapali{padding:6px 12px;opacity:.8;border-style:dashed;box-shadow:none}
+.tz-kutu.tz-kapali>.tz-ic{display:none}
+.tz-kutu.tz-kapali .tz-bas{margin:0;color:var(--ink);font-weight:700}
+.tz-kutu.tz-kapali .tz-no{background:#2b8a3e}
+.tz-kutu.sz-yeni{animation:szGel .45s ease-out}
+.tz-son{margin:8px 0 0;padding:8px 12px;border-left:6px solid #2b8a3e;border-radius:10px;background:color-mix(in srgb,#2b8a3e 10%,var(--card));font-weight:700}
+@media (prefers-reduced-motion:reduce){.tz-kutu.sz-yeni{animation:none}}
+/* E6: yazı kutuları ve sürgüler en az 44 px */
+.ta-ic input.ans,.ta-ic input[type=text],.ta-ic input[type=number]{min-height:44px;box-sizing:border-box}.ta-ic input[type=range]{min-height:44px}
+.ta-ic .sec,.ta-ic .chip{min-width:44px;min-height:44px}
+.tz-vurgu{animation:tzParla 1.4s ease-out}
+@keyframes tzParla{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 55%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
+.tz-dug{margin:8px 0}
+@media (prefers-reduced-motion:reduce){.tz-vurgu{animation:none;outline:3px solid var(--acc)}}`;document.head.appendChild(st);})();
+function turZincir(kap,n,kurTur,bitince,o={}){
+  const et=o.et||"Tur",kucuk=et.toLocaleLowerCase("tr"),ileriAd=o.ileri||("Sıradaki "+kucuk);
+  const ust=yeniEl("div","sz-ust tz-ust");kap.appendChild(ust);const govde=yeniEl("div","tz-govde");kap.appendChild(govde);
+  let i=0,bek=null;
+  const ciz=()=>{ust.innerHTML=`<span class="sz-et">${et} ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span>`;};
+  const kaydir=tzKaydir;
+  const git=()=>{i++;ciz();const no=i;
+    const kutu=yeniEl("section","tz-kutu tz-acik sz-yeni");kutu.innerHTML=`<div class="tz-bas"><span class="tz-no">${et} ${no} / ${n}</span><span class="tz-baslik">${o.baslik?o.baslik(no):""}</span></div>`;
+    const ic=yeniEl("div","tz-ic");kutu.appendChild(ic);govde.appendChild(kutu);if(no>1)kaydir(kutu,true);
+    let bitti=false;
+    kurTur(ic,no,oz=>{if(bitti)return;bitti=true;kutu.classList.remove("tz-acik");
+      const ozet=`✓ ${et} ${no} / ${n}${oz?": "+oz:" tamamlandı"}`;
+      if(no>=n){ust.innerHTML=`<span class="sz-et">${o.hepsi||`${n} ${kucuk}${tzIn(kucuk)} hepsi tamamlandı`} ✓</span><span class="sz-nok">${Array.from({length:n},()=>`<i class="ok"></i>`).join("")}</span>`;
+        const s=yeniEl("p","tz-son",`${ozet}. <b>Bu adım tamamlandı.</b> ${o.sonMetin||"Alttaki “Sonraki adım” düğmesine basınız."}`);kutu.after(s);kaydir(s);bitince&&bitince();return;}
+      const b=yeniEl("button","primary sz-ileri",`${ileriAd} (${no+1} / ${n}) →`);b.type="button";ic.appendChild(b);bek=b;kaydir(b);
+      b.onclick=()=>{bek=null;b.remove();kutu.classList.add("tz-kapali");kutu.querySelector(".tz-bas").innerHTML=`<span class="tz-no">${et} ${no} / ${n} ✓</span><span>${oz||"tamamlandı"}</span>`;bip(660,.06);git();};});};
+  git();
+  return {sonraki(){if(bek&&bek.isConnected){bek.click();return true;}return false;},get i(){return i;}};}
+/* Aynı düzenekte (ortak sahnede) sırayla gelen maddeler için: üstte "Nesne i / n" şeridi; madde bitince
+   "Sıradaki … (i+1 / n) →" düğmesi çıkar, basılmadan yeni madde gelmez; basılınca yeni maddenin kartı vurgulanır ve ekrana kaydırılır;
+   biten maddeler şeridin altındaki özet satırına yazılır; son maddeden sonra adımın bittiği söylenir.
+   S=turSerit(seritYeri,n,{et,ileri,hepsi,dugYer,vurgu:()=>el}) · S.bitti(ozet,sonra) · S.sonraki() · S.i */
+function turSerit(yer,n,o={}){const et=o.et||"Tur",kucuk=et.toLocaleLowerCase("tr"),ileriAd=o.ileri||("Sıradaki "+kucuk);
+  const ust=yeniEl("div","sz-ust tz-ust");if(o.once)o.once.parentNode.insertBefore(ust,o.once);else yer.prepend(ust);
+  const oz=yeniEl("div","tz-ozet");oz.style.cssText="font-size:.92em;color:var(--muted);margin:-4px 0 8px";ust.after(oz);
+  const dug=yeniEl("div","tz-dug");(o.dugYer||yer).appendChild(dug);
+  let i=1,bek=null;const ozet=[];
+  const ciz=()=>{ust.innerHTML=`<span class="sz-et">${et} ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span>`;
+    oz.innerHTML=ozet.map((x,j)=>`<div>✓ ${et} ${j+1}: ${x}</div>`).join("");if(n<2){ust.hidden=true;oz.hidden=true;}};ciz();
+  return {get i(){return i;},bekliyor:()=>!!bek,
+    bitti(ozt,sonra){ozet[i-1]=ozt||"tamamlandı";
+      if(i>=n){ciz();ust.innerHTML=`<span class="sz-et">${o.hepsi||`${n} ${kucuk}${tzIn(kucuk)} hepsi tamamlandı`} ✓</span><span class="sz-nok">${Array.from({length:n},()=>`<i class="ok"></i>`).join("")}</span>`;
+        dug.innerHTML=`<p class="tz-son">✓ ${et} ${n} / ${n}: ${ozt||"tamamlandı"}. <b>Bu adım tamamlandı.</b> ${o.sonMetin||"Alttaki “Sonraki adım” düğmesine basınız."}</p>`;tzKaydir(dug);return;}
+      const b=yeniEl("button","primary sz-ileri",`${ileriAd} (${i+1} / ${n}) →`);b.type="button";dug.innerHTML="";dug.appendChild(b);bek=b;tzKaydir(b);
+      b.onclick=()=>{bek=null;dug.innerHTML="";i++;ciz();bip(660,.06);sonra&&sonra();
+        const v=o.vurgu&&o.vurgu();if(v){v.classList.remove("tz-vurgu","sz-yeni");void v.offsetWidth;v.classList.add("tz-vurgu");}tzKaydir(ust,true);};},
+    sonraki(){if(bek&&bek.isConnected){bek.click();return true;}return false;},
+    kaldir(){bek=null;ust.remove();oz.remove();dug.remove();}};}
+/* turZincir-SON */
 function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
   /* 04.10.2026: sıradaki soru belirgin — ilerleme şeridi, "Sıradaki soru →" düğmesi, çözülen soru küçülür, yeni soru görünür alana gelir */
   const ust=n>1?yeniEl("div","sz-ust"):null;if(ust)kap.appendChild(ust);
@@ -927,9 +1001,9 @@ function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
   const git=()=>{if(i>=n){if(ust)ust.innerHTML=`<span class="sz-et">${n} sorunun hepsi tamamlandı ✓</span>`;bitince&&bitince();return;}const q=liste[i++];ciz();
     const d=soruY(kap,q[0],q[1],q[2],q[3],()=>{if(i>=n){git();return;}
       const b=yeniEl("button","primary sz-ileri",`Sıradaki soru (${i+1} / ${n}) →`);b.type="button";d.appendChild(b);
-      setTimeout(()=>{if(b.isConnected)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},40);
+      tzKaydir(b);
       b.onclick=()=>{b.remove();d.classList.add("sz-kapali");git();};});
-    d.classList.add("sz-yeni");if(i>1)setTimeout(()=>{if(d.isConnected)d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"});},40);};
+    d.classList.add("sz-yeni");if(i>1)tzKaydir(d,true);};
   git();}
 const kuralA=(D,liste,ozet)=>({ad:"Kuralı bulun",yon:["Deney defterindeki sonuçlarınıza bakınız.","Soruları sırayla cevaplayınız. Yanlış seçerseniz başka bir seçenek deneyiniz."],bitis:"Soruların hepsini doğru cevaplayınca.",
   kur:(k,A)=>{if(D&&D.el&&D.n){k.appendChild(D.el);}soruZincir(k,liste,()=>A.tamam(ozet||"Kuralı buldunuz."));}});
@@ -970,7 +1044,7 @@ function asamali(p,o){
 
 /* Sadeleştirme düğmeleri (Önce Sadeleştir, Ondalıktan Kesre): pay ile paydayı ortak bir asal sayıya böl; en sade olunca "En sade" */
 function sadeDugme(kap,x,y,asallar,degis,bitince,f){const r=el(kap,"row");let X=x,Y=y;
-  r.innerHTML=asallar.map(d=>`<button type="button" class="sec" data-v="${d}">÷ ${d}</button>`).join("")+`<button type="button" class="sec" data-v="s">En sade</button>`;
+  r.innerHTML=asallar.map(d=>`<button type="button" class="sec" data-v="${d}">: ${d}</button>`).join("")+`<button type="button" class="sec" data-v="s">En sade</button>`;
   r.querySelectorAll("button").forEach(b=>b.onclick=()=>{const v=b.dataset.v;
     if(v==="s"){if(gcd(X,Y)!==1){bip(220,.12);fb(f,false,`${X} ile ${Y} sayılarının hâlâ ortak böleni var. ${YD}`);return;}r.querySelectorAll("button").forEach(z=>z.disabled=true);f.hidden=true;bitince(X,Y);return;}
     const d=+v;if(X%d||Y%d){bip(220,.12);fb(f,false,`${X} ve ${Y} sayılarının ikisi birden ${d} ile tam bölünmüyor. Başka bir sayı deneyiniz.`);return;}f.hidden=true;X/=d;Y/=d;bip(640,.07);degis(X,Y);});
@@ -985,24 +1059,25 @@ const etiketH=u=>`<div class="etiket"><div class="et-ad">${u[0]}</div><div class
 function carpanTur(k,liste,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart dt-kart"></div><div class="dt-iz"></div><p class="lab2">Paydayı tam bölen bir asal sayıya dokununuz:</p><div class="row dt-asal">${[2,3,5,7,11,13].map(x=>`<button type="button" class="rk-b" data-p="${x}">${x}</button>`).join("")}</div><div class="dt-karar"></div><div class="fb" hidden></div><div class="row"><button type="button" class="primary yeni" hidden>Sıradaki kesir</button></div>`);
   const kt=k.querySelector(".dt-kart"),iz=k.querySelector(".dt-iz"),as=k.querySelector(".dt-asal"),kr=k.querySelector(".dt-karar"),f=k.querySelector(".fb"),yb=k.querySelector(".yeni");let qi=-1,a,b,kal,carp,faz;
+  const TS=turSerit(k,liste.length,{et:"Kesir",ileri:"Sıradaki kesir",once:kt,vurgu:()=>kt});
   function yeni(){qi++;[a,b]=liste[qi];kal=b;carp=[];faz="a";f.hidden=true;yb.hidden=true;kr.innerHTML="";ciz();A.durum(`${qi} / ${liste.length}`);}
   function ciz(){kt.innerHTML=`<small>İncelenen kesir (en sade hâlde) ${qi+1} / ${liste.length}</small><p class="buyuk">${kH(a,b)}</p>`;
-    iz.innerHTML=`<div class="iz"><span>Payda: <b>${b}</b></span>${carp.map((x,i)=>`<span class="ok">÷ ${x}</span><span>${carp.slice(0,i+1).reduce((s,y)=>s/y,b)}</span>`).join("")}</div>`+(kal===1?`<p><b>${b} = ${carp.join(" · ")}</b></p>`:"");
+    iz.innerHTML=`<div class="iz"><span>Payda: <b>${b}</b></span>${carp.map((x,i)=>`<span class="ok">: ${x}</span><span>${carp.slice(0,i+1).reduce((s,y)=>s/y,b)}</span>`).join("")}</div>`+(kal===1?`<p><b>${b} = ${carp.join(" · ")}</b></p>`:"");
     as.querySelectorAll("button").forEach(x=>x.disabled=faz!=="a");}
   as.querySelectorAll("button").forEach(x=>x.onclick=()=>{if(faz!=="a")return;const pr=+x.dataset.p;
     if(kal%pr){bip(220,.12);fb(f,false,`${kal}, ${pr} ile tam bölünmez. Başka bir asal sayı deneyiniz.`);return;}
     f.hidden=true;kal/=pr;carp.push(pr);bip(640,.07);ciz();
     if(kal===1){faz="k";const s=sonlu(a,b);
-      soruY(kr,`Payda 1'e indi: ${b} = ${carp.join(" · ")}. Bu paydada 2 ve 5 dışında asal çarpan var mı?`,s?["Yok; yalnız 2 ve 5 var (biri ya da ikisi).","Var; 2 ve 5 dışında asal çarpan var."]:["Var; 2 ve 5 dışında asal çarpan var.","Yok; yalnız 2 ve 5 var (biri ya da ikisi)."],`Doğru! Bölme de bunu doğruluyor: ${kH(a,b)} = ${a} ÷ ${b} = ${dH(a,b,{nokta:true})}. Ondalık gösterim <b>${s?"sonlu":"devirli"}</b>.`,`Çarpanlara bir daha bakınız: ${b} = ${carp.join(" · ")}.`,()=>{
-        D.ekle([kH(a,b),carp.join(" · "),dH(a,b),s?"sonlu":"devirli"],a+"/"+b);if(qi+1<liste.length)yb.hidden=false;else{A.durum(`${liste.length} / ${liste.length}`);A.tamam("Kesirleri incelediniz.");}});}});
-  yb.onclick=yeni;A.oto=()=>{if(faz==="a"){const pr=[2,3,5,7,11,13].find(z=>kal%z===0);as.querySelector(`[data-p="${pr}"]`).click();}else if(!yb.hidden)yb.click();};yeni();}
+      soruY(kr,`Payda 1'e indi: ${b} = ${carp.join(" · ")}. Bu paydada 2 ve 5 dışında asal çarpan var mı?`,s?["Yok; yalnız 2 ve 5 var (biri ya da ikisi).","Var; 2 ve 5 dışında asal çarpan var."]:["Var; 2 ve 5 dışında asal çarpan var.","Yok; yalnız 2 ve 5 var (biri ya da ikisi)."],`Doğru! Bölme de bunu doğruluyor: ${kH(a,b)} = ${a} : ${b} = ${dH(a,b,{nokta:true})}. Ondalık gösterim <b>${s?"sonlu":"devirli"}</b>.`,`Çarpanlara bir daha bakınız: ${b} = ${carp.join(" · ")}.`,()=>{
+        D.ekle([kH(a,b),carp.join(" · "),dH(a,b),s?"sonlu":"devirli"],a+"/"+b);faz="b";TS.bitti(`${kH(a,b)}: ${b} = ${carp.join(" · ")} → ${s?"sonlu":"devirli"}`,yeni);if(qi+1>=liste.length){A.durum(`${liste.length} / ${liste.length}`);A.tamam("Kesirleri incelediniz.");}});}});
+  A.oto=()=>{if(TS.sonraki())return true;if(faz==="a"){const pr=[2,3,5,7,11,13].find(z=>kal%z===0);as.querySelector(`[data-p="${pr}"]`).click();return true;}return false;};yeni();}
 const e_dedektif=p=>{const D=defterY(["Kesir","Paydanın asal çarpanları","Ondalık gösterim","Tür"]);
   const SN=karistir([[7,8],[3,20],[9,40],[11,25],[13,50],[3,16],[7,10]]),DV=karistir([[5,6],[4,15],[7,12],[2,21],[5,14],[8,33],[1,18],[7,30],[3,11],[5,26]]);
   const yon=["Paydayı asal çarpanlarına ayırınız: Paydayı tam bölen bir asal sayıya dokununuz; payda 1'e inene kadar sürdürünüz.","Sonra soruyu cevaplayınız: Paydada 2 ve 5 dışında asal çarpan var mı?"];
   asamali(p,{tahmin:{giris:`${kH(3,8)} = 0,375 ve ${kH(1,6)} = 0,1666… (6'lar hiç bitmiyor).`,soru:"Bu farkın sebebi kesrin neresinde saklıdır?",secs:[["pd","Paydada"],["py","Payda değil, payda"],["h","Hiçbir yerde; şans"]],dogru:"pd",neden:"8 = 2 · 2 · 2, 6 = 2 · 3: Paydadaki 3, ondalık gösterimi devirli yapar."},
     asamalar:[
-      {ad:"İki kesri incele",yon,bitis:"İki kesri de inceleyince.",kur:(k,A)=>carpanTur(k,karistir([SN[0],DV[0]]),D,A)},
-      {ad:"İki kesir daha",yon,bitis:"İki kesri de inceleyince.",kur:(k,A)=>carpanTur(k,karistir([SN[1],DV[1]]),D,A)},
+      {ad:"İki kesri incele",yon:["<b>2 kesir</b> sırayla gelir; biri bitince <b>Sıradaki kesir</b> düğmesine basınız.",...yon],bitis:"İki kesri de inceleyince.",kur:(k,A)=>carpanTur(k,karistir([SN[0],DV[0]]),D,A)},
+      {ad:"İki kesir daha",yon:["<b>2 kesir</b> daha sırayla gelir; biri bitince <b>Sıradaki kesir</b> düğmesine basınız.",...yon],bitis:"İki kesri de inceleyince.",kur:(k,A)=>carpanTur(k,karistir([SN[1],DV[1]]),D,A)},
       kuralA(D,[["Ondalık gösterimi sonlu olan kesirlerin paydalarında hangi asal çarpanlar vardı?",["Yalnız 2 ve 5 (biri ya da ikisi)","Yalnız 3 ve 7","Her asal sayı olabilir"],"Doğru! 10 = 2 · 5 olduğu için böyle paydalar 10, 100, 1000'e tamamlanabilir.",["3 ya da 7 olan paydalar devirli çıktı.","Deftere bakınız: Sonlu olanlarda yalnız belirli asallar vardı."]],
         ["En sade hâldeki bir kesrin paydasında 3, 7 ya da 11 gibi bir asal çarpan varsa ondalık gösterimi nasıldır?",["Devirlidir: Bazı basamaklar sonsuza kadar tekrar eder.","Sonludur.","Ondalık gösterimi yoktur."],"Doğru!",["Deftere bakınız: Paydasında 3 olan kesirler sonlu çıkmadı.","Her kesrin ondalık gösterimi vardır."]]]),
       kendiA((m,son)=>{const d=rastgele([[5,12],[7,15],[3,14],[11,30],[5,22],[2,3]]),s=karistir([[9,16],[7,40],[3,25],[17,20],[11,50],[5,8]]).slice(0,3);
@@ -1014,23 +1089,27 @@ const e_dedektif=p=>{const D=defterY(["Kesir","Paydanın asal çarpanları","Ond
 function ayirDeste(k,sinir,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="sd-kart"></div><div class="kovalar"><button type="button" class="kova" data-d="s"><b>Sonlu</b><small>Basamaklar bir yerde biter.</small><span></span></button><button type="button" class="kova" data-d="d"><b>Devirli</b><small>Bazı basamaklar sonsuza kadar tekrar eder.</small><span></span></button></div><div class="fb" hidden></div><div class="row"><button type="button" class="ghost yeni" hidden>Yeni desteyle yeniden deneyin</button></div>`);
   const kart=k.querySelector(".sd-kart"),f=k.querySelector(".fb"),yb=k.querySelector(".yeni");
-  const KS=[[3,8],[7,20],[9,25],[1,16],[13,40],[4,5],[11,8],[3,50]],KD=[[2,3],[5,6],[4,11],[7,9],[1,12],[5,7],[7,15],[13,6]];let deste=[],i=0,hata=0;
-  function yeniDeste(){const ks=karistir(KS),kd=karistir(KD);
+  const KS=[[3,8],[7,20],[9,25],[1,16],[13,40],[4,5],[11,8],[3,50]],KD=[[2,3],[5,6],[4,11],[7,9],[1,12],[5,7],[7,15],[13,6]];let deste=[],i=0,hata=0,TS=null,bek=false;
+  function yeniDeste(){if(TS)TS.kaldir();bek=false;const ks=karistir(KS),kd=karistir(KD);
     deste=karistir([...ks.slice(0,3).map(x=>({h:kH(...x),d:"s",o:dH(...x)})),...kd.slice(0,3).map(x=>({h:kH(...x),d:"d",o:dH(...x)})),{h:dH(...ks[3]),d:"s",o:dH(...ks[3])},{h:Math.random()<.5?dH(...kd[3]):dH(...kd[3],{nokta:true}),d:"d",o:dH(...kd[3])}]);
-    i=0;hata=0;k.querySelectorAll(".kova span").forEach(s=>s.innerHTML="");yb.hidden=true;f.hidden=true;goster();}
-  function goster(){kart.innerHTML=i<deste.length?`<div class="dkart"><small>Kart ${i+1} / ${deste.length}</small><p class="buyuk">${deste[i].h}</p></div>`:`<div class="dkart"><p>Deste bitti. Hata sayınız: <b>${hata}</b></p></div>`;A.durum(`${i} / ${deste.length}${sinir?`, hata ${hata}`:""}`);}
-  k.querySelectorAll(".kova").forEach(b=>b.onclick=()=>{if(i>=deste.length)return;const c=deste[i];
-    if(b.dataset.d===c.d){fb(f,true,`Doğru! ${c.h===c.o?"":c.h+" = "}${c.o}: <b>${c.d==="s"?"sonlu":"devirli"}</b>.`);b.querySelector("span").insertAdjacentHTML("beforeend",`<i>${c.h}</i>`);D.ekle([c.h,c.o,c.d==="s"?"sonlu":"devirli"],c.h);i++;bip(760,.08);goster();
-      if(i===deste.length){if(sinir&&hata>1){fb(f,false,`Deste bitti ama ${hata} hata yaptınız. Bu aşamada en fazla 1 hata olmalı. Yeni desteyle yeniden deneyiniz.`);yb.hidden=false;}else A.tamam(`Desteyi ${hata} hatayla bitirdiniz.`);}}
-    else{hata++;goster();bip(220,.12);fb(f,false,YD);}});
-  yb.onclick=yeniDeste;A.oto=()=>{if(!yb.hidden){yb.click();return;}const c=deste[i];if(c)k.querySelector(`.kova[data-d="${c.d}"]`).click();};yeniDeste();}
+    i=0;hata=0;k.querySelectorAll(".kova span").forEach(s=>s.innerHTML="");yb.hidden=true;f.hidden=true;
+    TS=turSerit(k,deste.length,{et:"Kart",ileri:"Sıradaki kart",hepsi:`${deste.length} kartın hepsi yerleşti`,once:kart,vurgu:()=>kart.firstElementChild,dugYer:yb.parentNode,sonMetin:sinir?"":undefined});goster();}
+  function goster(){kart.innerHTML=i<deste.length?`<div class="dkart"><small>Kart ${i+1} / ${deste.length}</small><p class="buyuk">${deste[i].h}</p></div>`:`<div class="dkart"><p>Deste bitti. Hata sayınız: <b>${hata}</b></p></div>`;if(!A.bitti)A.durum(`${i} / ${deste.length}${sinir?`, hata ${hata}`:""}`);}
+  k.querySelectorAll(".kova").forEach(b=>b.onclick=()=>{if(i>=deste.length||bek)return;const c=deste[i];
+    if(b.dataset.d===c.d){fb(f,true,`Doğru! ${c.h===c.o?"":c.h+" = "}${c.o}: <b>${c.d==="s"?"sonlu":"devirli"}</b>.`);b.querySelector("span").insertAdjacentHTML("beforeend",`<i>${c.h}</i>`);D.ekle([c.h,c.o,c.d==="s"?"sonlu":"devirli"],c.h);bip(760,.08);
+      const son=i===deste.length-1,kotu=son&&sinir&&hata>1;
+      if(!son){bek=true;TS.bitti(`${c.h} → ${c.d==="s"?"sonlu":"devirli"}`,()=>{bek=false;i++;f.hidden=true;goster();});return;}
+      i++;goster();
+      if(kotu){TS.kaldir();fb(f,false,`Deste bitti ama ${hata} hata yaptınız. Bu aşamada en fazla 1 hata olmalı. Yeni desteyle yeniden deneyiniz.`);yb.hidden=false;}else{TS.bitti(`${c.h} → ${c.d==="s"?"sonlu":"devirli"}`);A.tamam(`Desteyi ${hata} hatayla bitirdiniz.`);}}
+    else{hata++;goster();bip(220,.12);fb(f,false,c.h===c.o?(c.d==="s"?"Bu gösterimde devir çizgisi ya da “…” var mı? Basamaklar bir yerde bitiyorsa sonludur.":"Gösterime dikkat: devir çizgisi ya da “…” basamakların sonsuza kadar tekrar ettiğini gösterir."):(c.d==="s"?"Paydayı asal çarpanlarına ayırınız: yalnız 2 ve 5 varsa bölme bir yerde biter.":"Paydayı asal çarpanlarına ayırınız: 2 ve 5 dışında bir asal çarpan varsa bölme bitmez."));}});
+  yb.onclick=yeniDeste;A.oto=()=>{if(TS&&TS.sonraki())return true;if(!yb.hidden){yb.click();return true;}const c=deste[i];if(c&&!bek){k.querySelector(`.kova[data-d="${c.d}"]`).click();return true;}return false;};yeniDeste();}
 /* 6 · ÖNCE SADELEŞTİR */
 /* 7 · KALANLAR TEKRAR EDİYOR */
 function kalanTur(k,a,b,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart kl-kart"></div><div class="kl-serit"></div><div class="row"><button type="button" class="primary adimb">Bir adım bölün</button><button type="button" class="ghost tekr">Bu kalan daha önce çıktı!</button></div><div class="fb" hidden></div>`);
   const kt=k.querySelector(".kl-kart"),sr=k.querySelector(".kl-serit"),ab=k.querySelector(".adimb"),tb=k.querySelector(".tekr"),f=k.querySelector(".fb");let kal=[a],bas="",bitti=false,fazla=0;
   const tekrarVar=()=>kal.slice(0,-1).includes(kal[kal.length-1]);
-  function ciz(){kt.innerHTML=`<small>Bölme</small><p class="buyuk">${a} ÷ ${b} = 0,${bas}<span class="imlec">_</span></p>`;const ilk=bitti?kal.indexOf(kal[kal.length-1]):-1;
+  function ciz(){kt.innerHTML=`<small>Bölme</small><p class="buyuk">${a} : ${b} = 0,${bas}<span class="imlec">_</span></p>`;const ilk=bitti?kal.indexOf(kal[kal.length-1]):-1;
     sr.innerHTML=`<small>Kalan şeridi (her adımdaki kalan)</small><div class="boncuklar">${kal.map((r,i)=>`<span class="bnc${bitti&&(i===ilk||i===kal.length-1)?" ayni":""}">${r}</span>`).join('<i>→</i>')}</div>`;A.durum(`${kal.length-1} adım`);}
   ab.onclick=()=>{if(bitti)return;const r=kal[kal.length-1];bas+=Math.floor(r*10/b);kal.push(r*10%b);bip(560,.05);if(tekrarVar())fazla++;
     ciz();if(fazla>=4)ab.disabled=true;};
@@ -1042,14 +1121,14 @@ function kalanTur(k,a,b,D,A){
   A.oto=()=>{(tekrarVar()?tb:ab).click();};ciz();}
 const e_kalan=p=>{const D=defterY(["Kesir","Kalanlar","Ondalık gösterim"]);const b1=rastgele([[5,6],[2,3],[1,6],[7,12],[8,9],[7,15]]),b2=rastgele([[4,11],[5,11],[7,22],[2,11]]);
   const yon=["<b>Bir adım bölün</b> düğmesine basınız: Bölüme bir basamak, kalan şeridine bir boncuk eklenir.","Bir kalan <b>daha önce çıkmış bir kalanla aynı</b> olunca hemen <b>Bu kalan daha önce çıktı!</b> düğmesine basınız."];
-  asamali(p,{tahmin:{giris:"5 ÷ 6 bölmesinde kalanın yanına 0 ekleyerek bölmeyi sürdürüyoruz.",soru:"Bu bölme bir gün biter mi?",secs:[["e","Evet, kalan bir gün 0 olur."],["h","Hayır, hiç bitmez."]],dogru:"h",neden:"Kalan 2 tekrar tekrar çıkar; bölüme hep 3 yazılır: 0,8333…"},
+  asamali(p,{tahmin:{giris:"5 : 6 bölmesinde kalanın yanına 0 ekleyerek bölmeyi sürdürüyoruz.",soru:"Bu bölme bir gün biter mi?",secs:[["e","Evet, kalan bir gün 0 olur."],["h","Hayır, hiç bitmez."]],dogru:"h",neden:"Kalan 2 tekrar tekrar çıkar; bölüme hep 3 yazılır: 0,8333…"},
     asamalar:[
       {ad:"İlk tekrar",yon,bitis:"Tekrar eden kalanı yakalayınca.",kur:(k,A)=>kalanTur(k,b1[0],b1[1],D,A)},
       {ad:"İkili tekrar",yon,bitis:"Tekrar eden kalanı yakalayınca.",kur:(k,A)=>kalanTur(k,b2[0],b2[1],D,A)},
       kuralA(D,[["Bir kalan, daha önce çıkmış bir kalana eşit olunca bölümde ne oldu?",["Aynı basamaklar aynı sırayla tekrar etmeye başladı.","Bölme bitti, kalan 0 oldu.","Bölümün basamakları rastgele değişti."],"Doğru! Aynı kalandan sonra hep aynı adımlar gelir.",["Kalan 0 olmadı; bölme sürdü.","Aynı kalandan sonra hep aynı işlemler yapılır; basamaklar rastgele olamaz."]],
         ["Bir sayıyı 7'ye bölerken 0'dan farklı en fazla kaç değişik kalan çıkabilir?",["6 tane: 1, 2, 3, 4, 5, 6","Sonsuz sayıda","10 tane"],"Doğru! Kalan bölenden küçüktür. Kalanlar sınırlı olduğu için ya kalan 0 olur ya da bir kalan mutlaka tekrar eder.",["Kalan her zaman bölenden küçüktür; 7'den küçük kaç doğal sayı var?","Kalan 7 ya da daha büyük olamaz."]]]),
       kendiA((m,son)=>{const [a,b]=rastgele([[5,11],[4,11],[2,11],[7,11]]);const d=acilim(a,b).devir;
-        soruY(m,`${a} ÷ ${b} bölmesinde kalanlar sırasıyla ${a}, ${a*10%b}, ${a}, ${a*10%b}, … diye tekrar ediyor. Bölüme yazılan basamaklar ${d[0]}, ${d[1]}, ${d[0]}, ${d[1]}, … Ondalık gösterim hangisidir?`,[dvH(0,"",d),dvH(0,d[0],d[1]),`<span class="ond">0,${d}</span>`,dvH(0,"",d[0])],`Doğru! ${kH(a,b)} = ${dH(a,b,{nokta:true})} = ${dH(a,b)}`,["İki basamak birlikte tekrar ediyor; çizgi ikisinin de üstünde olmalı.","Devir çizgisi yok; bu sayı sonlu olurdu.","Yalnız bir basamak değil, iki basamak tekrar ediyor."],son);})],
+        soruY(m,`${a} : ${b} bölmesinde kalanlar sırasıyla ${a}, ${a*10%b}, ${a}, ${a*10%b}, … diye tekrar ediyor. Bölüme yazılan basamaklar ${d[0]}, ${d[1]}, ${d[0]}, ${d[1]}, … Ondalık gösterim hangisidir?`,[dvH(0,"",d),dvH(0,d[0],d[1]),`<span class="ond">0,${d}</span>`,dvH(0,"",d[0])],`Doğru! ${kH(a,b)} = ${dH(a,b,{nokta:true})} = ${dH(a,b)}`,["İki basamak birlikte tekrar ediyor; çizgi ikisinin de üstünde olmalı.","Devir çizgisi yok; bu sayı sonlu olurdu.","Yalnız bir basamak değil, iki basamak tekrar ediyor."],son);})],
     kural:"Bölmede kalan <b>bölenden küçüktür</b>; bu yüzden kalanlar sınırlıdır. Kalan 0 olmazsa bir kalan mutlaka <b>tekrar eder</b> ve o andan sonra bölümün basamakları da aynı sırayla tekrar eder. Böylece <b>devirli</b> ondalık gösterim oluşur."});
 };
 
@@ -1059,27 +1138,28 @@ const CARK="142857";
 function carkTur(k,liste,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="two"><div class="stage ck"></div><div class="yan"><div class="dkart ck-kart"></div><div class="ck-sonuc"></div><div class="fb" hidden></div><div class="row"><button type="button" class="primary yeni" hidden>Sıradaki kesir</button></div></div></div>`);
   const st=k.querySelector(".ck"),kt=k.querySelector(".ck-kart"),so=k.querySelector(".ck-sonuc"),f=k.querySelector(".fb"),yb=k.querySelector(".yeni");let qi=-1,nn,bitti,okunan=-1,bas=-1,yan_=0;
+  const TS=turSerit(k,liste.length,{et:"Kesir",ileri:"Sıradaki kesir",once:kt,vurgu:()=>kt,dugYer:yb.parentNode.parentNode});
   const sv=svgEl(300,300);st.appendChild(sv);
   function ciz(){const R=96,c=150,ra_=R+50,P=g=>[c+ra_*Math.cos(g*Math.PI/180),c+ra_*Math.sin(g*Math.PI/180)],[x1,y1]=P(-75),[x2,y2]=P(-25);
     let h=`<circle cx="${c}" cy="${c}" r="${R+40}" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/><path d="M${x1} ${y1}A${ra_} ${ra_} 0 0 1 ${x2} ${y2}" fill="none" stroke="#e8590c" stroke-width="3"/><path d="M${x2-9} ${y2-6}L${x2} ${y2}L${x2+2} ${y2-11}" fill="none" stroke="#e8590c" stroke-width="3" stroke-linejoin="round"/>`;
-    h+=`<text x="${c}" y="${c-8}" text-anchor="middle" font-size="15" font-weight="700" fill="${css('--muted')}">saat yönünde okuyunuz</text>`;if(nn)h+=`<text x="${c}" y="${c+26}" text-anchor="middle" font-size="26" font-weight="800">${nn} ÷ 7</text>`;
+    h+=`<text x="${c}" y="${c-8}" text-anchor="middle" font-size="15" font-weight="700" fill="${css('--muted')}">saat yönünde okuyunuz</text>`;if(nn)h+=`<text x="${c}" y="${c+26}" text-anchor="middle" font-size="26" font-weight="800">${nn} : 7</text>`;
     for(let i=0;i<6;i++){const ang=(-90+i*60)*Math.PI/180,x=c+R*Math.cos(ang),y=c+R*Math.sin(ang);let sira=-1;if(bas>=0&&okunan>=0){sira=(i-bas+6)%6;if(sira>okunan)sira=-1;}
       h+=`<g class="ckd" data-i="${i}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="30" fill="${sira>=0?"#ffd8a8":css('--card')}" stroke="${sira===0?"#e8590c":"currentColor"}" stroke-width="${sira===0?4:2}"/><text x="${x}" y="${y+11}" text-anchor="middle" font-size="30" font-weight="800">${CARK[i]}</text>${sira>=0?`<text x="${x+22}" y="${y-20}" font-size="13" font-weight="800" fill="#e8590c">${sira+1}</text>`:""}</g>`;}
     sv.innerHTML=h;sv.querySelectorAll(".ckd").forEach(g=>g.addEventListener("click",()=>dokun(+g.dataset.i)));}
-  function yeni(){qi++;nn=liste[qi];bitti=false;okunan=-1;bas=-1;yan_=0;f.hidden=true;yb.hidden=true;so.innerHTML="";kt.innerHTML=`<small>Kesir ${qi+1} / ${liste.length}</small><p class="buyuk">${kH(nn,7)} = ${nn} ÷ 7 = 0,?</p>`;ciz();A.durum(`${qi} / ${liste.length}`);}
+  function yeni(){qi++;nn=liste[qi];bitti=false;okunan=-1;bas=-1;yan_=0;f.hidden=true;yb.hidden=true;so.innerHTML="";kt.innerHTML=`<small>Kesir ${qi+1} / ${liste.length}</small><p class="buyuk">${kH(nn,7)} = ${nn} : 7 = 0,?</p>`;ciz();A.durum(`${qi} / ${liste.length}`);}
   function dokun(i){if(bitti)return;const ilk=Math.floor(nn*10/7),dg=CARK.indexOf(String(ilk));
-    if(i!==dg){bip(220,.12);fb(f,false,YD);return;}
+    if(i!==dg){bip(220,.12);fb(f,false,`Bu, ilk basamak değil. İlk basamak için ${nn} : 7 bölmesine başlayınız: ${nn*10} içinde kaç tane 7 var?`);return;}
     bitti=true;bas=i;okunan=0;f.hidden=true;const s=CARK.slice(i)+CARK.slice(0,i);
     const adim=()=>{if(!k.isConnected)return;ciz();so.innerHTML=`<p class="buyuk">${kH(nn,7)} = 0,${s.slice(0,okunan+1)}${okunan<5?"":"…"}</p>`;bip(500+okunan*60,.06);
-      if(okunan<5){okunan++;yas(240,adim);}else{fb(f,true,`Doğru! ${kH(nn,7)} = 0,${s}${s}… = ${dH(nn,7)}`);D.ekle([kH(nn,7),s[0],dH(nn,7)],String(nn));A.durum(`${qi+1} / ${liste.length}`);if(qi+1<liste.length)yb.hidden=false;else A.tamam("Çarkta kesirleri okudunuz.");}};adim();}
-  yb.onclick=yeni;A.oto=()=>{if(!yb.hidden){yb.click();return;}if(!bitti)dokun(CARK.indexOf(String(Math.floor(nn*10/7))));};yeni();}
+      if(okunan<5){okunan++;yas(240,adim);}else{fb(f,true,`Doğru! ${kH(nn,7)} = 0,${s}${s}… = ${dH(nn,7)}`);D.ekle([kH(nn,7),s[0],dH(nn,7)],String(nn));A.durum(`${qi+1} / ${liste.length}`);TS.bitti(`${kH(nn,7)} = ${dH(nn,7)} (ilk basamak ${s[0]})`,yeni);if(qi+1>=liste.length)A.tamam("Çarkta kesirleri okudunuz.");}};adim();}
+  A.oto=()=>{if(TS.sonraki())return true;if(!bitti){dokun(CARK.indexOf(String(Math.floor(nn*10/7))));return true;}return false;};yeni();}
 /* 10 · KAÇ BASAMAK DEVREDER? */
 function kacTur(k,cur,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart kc-kart"></div><div class="kc-bas"></div><div class="row kc-ayar"></div><div class="fb" hidden></div>`);
   const kt=k.querySelector(".kc-kart"),kb=k.querySelector(".kc-bas"),ay=k.querySelector(".kc-ayar"),f=k.querySelector(".fb");const Ac=acilim(...cur);let len=1,bitti=false;
   const sy=sayac("Grup uzunluğu",1,6,1,v=>{len=v;f.hidden=true;ciz();});ay.appendChild(sy.el);const ob=el(ay,"primary","Ölç","button");
   function ciz(){const dig=basam(cur[0],cur[1],Ac.sabit.length+(len===5?25:24)).slice(Ac.sabit.length);
-    kt.innerHTML=`<small>Kesir</small><p class="buyuk">${kH(...cur)} = ${cur[0]} ÷ ${cur[1]}</p>`;
+    kt.innerHTML=`<small>Kesir</small><p class="buyuk">${kH(...cur)} = ${cur[0]} : ${cur[1]}</p>`;
     let h=`<span class="rk-t">${Ac.tam},</span>`+Ac.sabit.split("").map(d=>`<span class="kd gri">${d}</span>`).join("");
     for(let i=0;i<dig.length;i+=len)h+=`<span class="kgrup g${(i/len)%2}">${dig.slice(i,i+len)}</span>`;
     kb.innerHTML=`<div class="kdizi">${h}<span class="rk-t">…</span></div><p class="ipucu">Gri kesikli çerçeveli basamaklar tekrar etmez. Renkli gruplar, seçtiğiniz grup uzunluğuna göre ayrıldı.</p>`;A.durum(`Grup uzunluğu ${len}`);}
@@ -1098,7 +1178,7 @@ const e_kac=p=>{const D=defterY(["Kesir","Ondalık gösterim","Devreden basamak 
       kuralA(D,[["Devir çizgisinin altındaki basamak sayısı neyi gösterir?",["Devreden basamak sayısını","Virgülden sonraki bütün basamakların sayısını","Kesrin paydasını"],`Doğru! ${dvH(0,"","142857")}: 6 basamak devreder.`,[`${kH(1,6)} = ${dH(1,6)}: Virgülden sonra 1 de var ama çizginin altında değil.`,`${kH(1,11)} kesrinde payda 11 ama 2 basamak devretti.`]],
         [`${kH(1,6)} = ${dH(1,6)} için hangisi doğrudur?`,["1 devretmez; yalnız 6 devreder. Devreden basamak sayısı 1'dir.","16 devreder; devreden basamak sayısı 2'dir.","Hiçbir basamak devretmez."],"Doğru!",["1 yalnız bir kez yazılıyor; tekrar etmiyor.","Sayıda devir çizgisi var."]]]),
       kendiA((m,son)=>{const q=rastgele([[5,11],[7,33],[1,37],[4,15],[2,9],[4,27]]),d=acilim(...q).devir.length;
-        cevap(m,soruKut(`${kH(...q)} kesrinin ondalık gösteriminde kaç basamak devreder?`),d,`Doğru! ${kH(...q)} = ${dH(...q,{nokta:true})} = ${dH(...q)}: ${d} basamak.`,`${q[0]} ÷ ${q[1]} bölmesini birkaç adım yapınız ve kalanların ne zaman tekrar ettiğine bakınız.`,son,{sayi:true});})],
+        cevap(m,soruKut(`${kH(...q)} kesrinin ondalık gösteriminde kaç basamak devreder?`),d,`Doğru! ${kH(...q)} = ${dH(...q,{nokta:true})} = ${dH(...q)}: ${d} basamak.`,`${q[0]} : ${q[1]} bölmesini birkaç adım yapınız ve kalanların ne zaman tekrar ettiğine bakınız.`,son,{sayi:true});})],
     kural:`Devirli ondalık gösterimde tekrar eden basamak grubuna <b>devreden basamaklar</b> denir; sayıları kesirden kesre değişir: ${kH(1,3)} → 1, ${kH(1,11)} → 2, ${kH(1,27)} → 3, ${kH(1,7)} → 6 basamak. Devir çizgisinin altında tam bu basamaklar yer alır.`});
 };
 
@@ -1124,12 +1204,12 @@ function dokuzTur(k,o,D,A){const K=dvK(o),sH=()=>dvH(o.t,o.s,o.d);let pd="",den=
     const g=el(ad,"dk-payda");const r=el(ad,"row");
     r.innerHTML=`<button type="button" class="ghost tus" data-t="9">9 ekleyin</button><button type="button" class="ghost tus" data-t="0">0 ekleyin</button><button type="button" class="ghost tus" data-t="s">Sil</button><button type="button" class="primary dene">Bölün ve deneyin</button>`;
     const cz=()=>{g.innerHTML=kH(K.pay,pd||"?");};cz();
-    r.querySelectorAll(".tus").forEach(b=>b.onclick=()=>{const t=b.dataset.t;if(t==="s")pd=pd.slice(0,-1);else{if(pd.length>=4)return;if(t==="9"&&pd.includes("0")){fb(f,false,YD);return;}pd+=t;}f.hidden=true;cz();});
-    r.querySelector(".dene").onclick=()=>{if(bitti)return;if(!pd||pd[0]==="0"){fb(f,false,YD);return;}den++;const q=+pd;
+    r.querySelectorAll(".tus").forEach(b=>b.onclick=()=>{const t=b.dataset.t;if(t==="s")pd=pd.slice(0,-1);else{if(pd.length>=4)return;if(t==="9"&&pd.includes("0")){fb(f,false,"Paydada önce 9'lar, sonra 0'lar yazılır; 0'dan sonra 9 gelmez.");return;}pd+=t;}f.hidden=true;cz();});
+    r.querySelector(".dene").onclick=()=>{if(bitti)return;if(!pd||pd[0]==="0"){fb(f,false,"Payda 0 ile başlayamaz; önce 9 yazınız.");return;}den++;const q=+pd;
       if(q===K.pd){bitti=true;r.querySelectorAll("button").forEach(z=>z.disabled=true);bip(760,.1);
-        fb(f,true,`Doğru! ${K.pay} ÷ ${q} = ${dH(K.pay,q)}. Yani ${sH()} = ${kH(K.pay,q)}${gcd(K.pay,q)>1?` = ${kHs(K.pay,q)}`:""}. Paydada ${o.d.length} tane 9${o.s.length?` ve ${o.s.length} tane 0`:""} var.`);
+        fb(f,true,`Doğru! ${K.pay} : ${q} = ${dH(K.pay,q)}. Yani ${sH()} = ${kH(K.pay,q)}${gcd(K.pay,q)>1?` = ${kHs(K.pay,q)}`:""}. Paydada ${o.d.length} tane 9${o.s.length?` ve ${o.s.length} tane 0`:""} var.`);
         D.ekle([sH(),String(K.pay),String(q),`<b>${kHs(K.pay,q)}</b>`],sH());A.tamam(`${sH()} = ${kHs(K.pay,q)}`);return;}
-      bip(220,.12);fb(f,false,`${K.pay} ÷ ${q} = ${dH(K.pay,q)} çıktı; istenen ${sH()}. ${YD}`);};
+      bip(220,.12);fb(f,false,`${K.pay} : ${q} = ${dH(K.pay,q)} çıktı; istenen ${sH()}. ${YD}`);};
     A.oto=()=>{pd="9".repeat(o.d.length)+"0".repeat(o.s.length);cz();r.querySelector(".dene").click();};}}
 const e_dokuz=p=>{const D=defterY(["Ondalık gösterim","Pay","Payda","Kesir"]);
   const P1=[{t:0,s:"",d:"4"},{t:0,s:"",d:"7"},{t:0,s:"",d:"36"},{t:0,s:"",d:"12"}],P2=[{t:0,s:"1",d:"6"},{t:0,s:"8",d:"3"},{t:0,s:"2",d:"7"},{t:0,s:"0",d:"5"},{t:0,s:"4",d:"1"}],P3=[{t:1,s:"",d:"2"},{t:2,s:"",d:"45"},{t:1,s:"0",d:"3"},{t:3,s:"",d:"6"}];
@@ -1151,10 +1231,10 @@ const e_dokuz=p=>{const D=defterY(["Ondalık gösterim","Pay","Payda","Kesir"]);
 function negTur(k,a,b,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart ng-kart"><small>Kesir</small><p class="buyuk">${EKSI}${kH(a,b)}</p><div class="ng-ayir"><span class="ng-k"><small>İşaret</small><b>${EKSI}</b></span><span class="ng-k"><small>Sayı kısmı</small><b>${kH(a,b)}</b></span></div></div><div class="ng-adim"></div><div class="stage ng-sd" hidden></div><div class="fb" hidden></div>`);
   const ad=k.querySelector(".ng-adim"),sd=k.querySelector(".ng-sd"),f=k.querySelector(".fb");
-  el(ad,"lab2",`1. Sayı kısmı: ${kH(a,b)} = ${a} ÷ ${b} = ?`);
-  if(sonlu(a,b)){const c=cevap(ad,"",[a,b],`Doğru! ${kH(a,b)} = ${dMet(a,b)}`,`${a} ÷ ${b} bölmesini yapınız. İşareti şimdilik yazmayınız.`,null,{bicim:"ondalik"});c.addEventListener("dogru",isaret);}
+  el(ad,"lab2",`1. Sayı kısmı: ${kH(a,b)} = ${a} : ${b} = ?`);
+  if(sonlu(a,b)){const c=cevap(ad,"",[a,b],`Doğru! ${kH(a,b)} = ${dMet(a,b)}`,`${a} : ${b} bölmesini yapınız. İşareti şimdilik yazmayınız.`,null,{bicim:"ondalik"});c.addEventListener("dogru",isaret);}
   else{const Ac=acilim(a,b),s=[...new Set([dH(a,b),`<span class="ond">0,${basam(a,b,2)}</span>`,`<span class="ond">0,${basam(a,b,1)}</span>`,Ac.sabit?dvH(0,"",Ac.sabit+Ac.devir):`<span class="ond">${a},${b}</span>`])];
-    soruY(ad,`${a} ÷ ${b} bölmesi hiç bitmiyor. Sayı kısmının ondalık gösterimi hangisidir?`,s,`Doğru! ${kH(a,b)} = ${dH(a,b,{nokta:true})} = ${dH(a,b)}`,"Hangi basamaklar tekrar ediyor? Devir çizgisi tam o basamakların üstünde olmalı; kesilmiş (sonlu) bir sayı olmamalı.",isaret);}
+    soruY(ad,`${a} : ${b} bölmesi hiç bitmiyor. Sayı kısmının ondalık gösterimi hangisidir?`,s,`Doğru! ${kH(a,b)} = ${dH(a,b,{nokta:true})} = ${dH(a,b)}`,"Hangi basamaklar tekrar ediyor? Devir çizgisi tam o basamakların üstünde olmalı; kesilmiş (sonlu) bir sayı olmamalı.",isaret);}
   function isaret(){soruY(ad,"2. Ondalık gösterimin işaretini seçiniz:",[EKSI+" (negatif)","+ (pozitif)"],`Doğru! ${EKSI}${kH(a,b)} = <b>${dH(-a,b)}</b>`,"Kesir negatifti. Ondalık gösterimi de aynı sayıyı gösterir; işareti değişmez.",()=>{D.ekle([EKSI+kH(a,b),dH(a,b),`<b>${dH(-a,b)}</b>`],a+"/"+b);dogru();A.tamam(`${EKSI}${kH(a,b)} = ${dH(-a,b)}`);});}
   function dogru(){sd.hidden=false;const W=Math.min(560,Math.max(320,(sd.getBoundingClientRect().width||560)-14)),L=30,x=v=>L+(v+2)/4*(W-2*L);const sv=svgEl(W,110);let h=`<line x1="${L-14}" y1="60" x2="${W-L+14}" y2="60" stroke="currentColor" stroke-width="2.5"/>`;
     for(let i=-8;i<=8;i++){const v=i/4,tam=i%4===0;h+=`<line x1="${x(v)}" y1="${tam?51:55}" x2="${x(v)}" y2="${tam?69:65}" stroke="currentColor" stroke-width="${tam?2:1}"/>`;if(tam)h+=`<text x="${x(v)}" y="90" text-anchor="middle" font-size="16" font-weight="700">${T(v)}</text>`;}
@@ -1178,11 +1258,11 @@ function tsTur(k,u,kontrol,D,A){const [t,r,q,ne]=u,son=dMet(t*q+r,q);
   k.insertAdjacentHTML("beforeend",`<div class="stage ts-st"></div><div class="dkart ts-kart"><small>Tarif</small><p class="buyuk">${karmaH(t,r,q)} su bardağı ${ne}</p><p class="ts-hal"></p></div><div class="ts-adim"></div><div class="fb" hidden></div>`);
   const st=k.querySelector(".ts-st"),ad=k.querySelector(".ts-adim"),hl=k.querySelector(".ts-hal"),f=k.querySelector(".fb");tsModel(st,t,r,q,false);
   soruY(ad,"1. Modele bakınız: Dolu bütünler tam kısmı gösterir. Virgülden önce hangi sayı gelir?",[String(t),...[...new Set([r,q])].filter(v=>v!==t).map(String)],`Doğru! ${t} dolu bütün var; virgülden önce ${t} yazılır.`,"Tam dolu bütünleri sayınız: Tam kısım virgülden önce yazılır.",()=>{
-    hl.innerHTML=`<span class="ond">${t},_ _ _</span>`;el(ad,"lab2",`2. Kesir kısmı (son bütündeki dolu parçalar): ${kH(r,q)} = ${r} ÷ ${q} = ?`);
-    const c=cevap(ad,"",[r,q],`Doğru! ${kH(r,q)} = ${dMet(r,q)}`,`${r} ÷ ${q} bölmesini yapınız. Sonuç 1'den küçüktür: 0 ile başlar.`,null,{bicim:"ondalik"});
+    hl.innerHTML=`<span class="ond">${t},_ _ _</span>`;el(ad,"lab2",`2. Kesir kısmı (son bütündeki dolu parçalar): ${kH(r,q)} = ${r} : ${q} = ?`);
+    const c=cevap(ad,"",[r,q],`Doğru! ${kH(r,q)} = ${dMet(r,q)}`,`${r} : ${q} bölmesini yapınız. Sonuç 1'den küçüktür: 0 ile başlar.`,null,{bicim:"ondalik"});
     c.addEventListener("dogru",()=>{hl.innerHTML=`${karmaH(t,r,q)} = <b>${son}</b>`;tsModel(st,t,r,q,true);D.ekle([karmaH(t,r,q),kH(t*q+r,q),`<b>${son}</b>`],t+"-"+r+"/"+q);
       if(!kontrol){A.tamam(`${karmaH(t,r,q)} = ${son}. Turuncu nokta sayı doğrusunda bu sayıyı gösteriyor.`);return;}
-      soruY(ad,`3. Kontrol: ${karmaH(t,r,q)} bileşik kesir olarak hangisidir?`,[kH(t*q+r,q),kH(t+r,q),kH(t*r+q,q)],`Doğru! ${karmaH(t,r,q)} = ${kH(`${t} · ${q} + ${r}`,q)} = ${kH(t*q+r,q)} = ${t*q+r} ÷ ${q} = <b>${son}</b>. İki yol da aynı sonucu verdi.`,[`Tam kısım ${t} bütündür; her bütünde ${q} parça var. ${t} · ${q} + ${r} hesaplayınız.`,`Tam kısmı paydayla çarpmayı unutmayınız: ${t} · ${q} + ${r}.`],()=>A.tamam(`${karmaH(t,r,q)} = ${kH(t*q+r,q)} = ${son}`));});});}
+      soruY(ad,`3. Kontrol: ${karmaH(t,r,q)} bileşik kesir olarak hangisidir?`,[kH(t*q+r,q),kH(t+r,q),kH(t*r+q,q)],`Doğru! ${karmaH(t,r,q)} = ${kH(`${t} · ${q} + ${r}`,q)} = ${kH(t*q+r,q)} = ${t*q+r} : ${q} = <b>${son}</b>. İki yol da aynı sonucu verdi.`,[`Tam kısım ${t} bütündür; her bütünde ${q} parça var. ${t} · ${q} + ${r} hesaplayınız.`,`Tam kısmı paydayla çarpmayı unutmayınız: ${t} · ${q} + ${r}.`],()=>A.tamam(`${karmaH(t,r,q)} = ${kH(t*q+r,q)} = ${son}`));});});}
 /* 16 · SAYI DOĞRUSUNDA ONDALIK */
 const sdCiz=(W,k,etk,renk)=>{const L=26,x=i=>L+i/20*(W-2*L);let h=`<line x1="${L-14}" y1="70" x2="${W-L+14}" y2="70" stroke="currentColor" stroke-width="2.5"/>`;const dar=W<480;
   for(let i=0;i<=20;i++){const on=i%2===0;h+=`<line x1="${x(i)}" y1="${on?60:64}" x2="${x(i)}" y2="${on?80:76}" stroke="currentColor" stroke-width="${on?2:1.2}"/>`;
@@ -1192,27 +1272,29 @@ const sdCiz=(W,k,etk,renk)=>{const L=26,x=i=>L+i/20*(W-2*L);let h=`<line x1="${L
 function sdTur(k,H,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart sd-hedef"></div><div class="stage sd-st"></div><div class="gosterge sd-g"><small>Nokta</small><b class="gk"></b><span class="gi"></span></div><div class="fb" hidden></div>`);
   const st=k.querySelector(".sd-st"),gk=k.querySelector(".gk"),gi=k.querySelector(".gi"),f=k.querySelector(".fb"),hd=k.querySelector(".sd-hedef");
-  const W=Math.round(Math.min(640,Math.max(320,(st.getBoundingClientRect().width||640)-14)));const sv=svgEl(W,120);sv.style.touchAction="none";sv.style.cursor="pointer";st.appendChild(sv);let kk=10,hi=0,bas=false;
+  const W=Math.round(Math.min(640,Math.max(320,(st.getBoundingClientRect().width||640)-14)));const sv=svgEl(W,120);sv.style.touchAction="none";sv.style.cursor="pointer";st.appendChild(sv);let kk=10,hi=0,bas=false,bek=false;
+  const TS=turSerit(k,H.length,{et:"Hedef",ileri:"Sıradaki hedef",once:hd,vurgu:()=>hd});
   const hH=h=>h.t==="k"?kH(...h.v):`<span class="ond">${dMet(...h.v)}</span>`;
   function ciz(){const d=sdCiz(W,kk,dMet(kk,20));sv.innerHTML=d.h;gk.textContent=dMet(kk,20);gi.innerHTML=kk===0||kk===20?"tam sayı":`${kH(kk*5,100)} = ${kHs(kk,20)}`;
     hd.innerHTML=hi<H.length?`<small>Hedef ${hi+1} / ${H.length}</small><p>Noktayı <b>${hH(H[hi])}</b> sayısına götürünüz ve bırakınız.</p>`:"<p>Hedeflerin hepsine ulaştınız.</p>";A.durum(`${hi} / ${H.length}`);}
   const kx=e=>{const pt=svgNokta(sv,e);return Math.max(0,Math.min(20,Math.round((pt.x-26)/(W-52)*20)));};
-  sv.addEventListener("pointerdown",e=>{bas=true;try{sv.setPointerCapture(e.pointerId);}catch(_){}kk=kx(e);ciz();e.preventDefault();});
+  sv.addEventListener("pointerdown",e=>{if(bek)return;bas=true;try{sv.setPointerCapture(e.pointerId);}catch(_){}kk=kx(e);ciz();e.preventDefault();});
   sv.addEventListener("pointermove",e=>{if(!bas)return;const n=kx(e);if(n!==kk){kk=n;ciz();}});
   sv.addEventListener("pointerup",()=>{if(!bas)return;bas=false;if(hi>=H.length)return;const h=H[hi],hk=h.v[0]*20/h.v[1];
-    if(kk===hk){fb(f,true,`Doğru! ${kH(...h.v)} ile ${dMet(...h.v)} <b>aynı noktadır</b>.`);bip(760,.1);D.ekle([kH(...h.v),dMet(...h.v),"aynı nokta"],h.v.join("/"));hi++;ciz();if(hi>=H.length)A.tamam("Hedeflerin hepsine ulaştınız.");}
-    else{bip(220,.12);fb(f,false,`Nokta şu an ${dMet(kk,20)} sayısında. ${YD}`);}});
+    if(kk===hk){fb(f,true,`Doğru! ${kH(...h.v)} ile ${dMet(...h.v)} <b>aynı noktadır</b>.`);bip(760,.1);D.ekle([kH(...h.v),dMet(...h.v),"aynı nokta"],h.v.join("/"));bek=true;A.durum(`${hi+1} / ${H.length}`);
+      TS.bitti(`${hH(h)} → ${dMet(...h.v)}`,()=>{bek=false;hi++;f.hidden=true;ciz();});if(hi>=H.length-1){hi++;ciz();A.tamam("Hedeflerin hepsine ulaştınız.");}}
+    else{bip(220,.12);fb(f,false,`Nokta şu an ${dMet(kk,20)} sayısında; hedef ${kk<hk?"daha sağda":"daha solda"}. Her küçük parça 0,05'tir. ${YD}`);}});
   sv.addEventListener("pointercancel",()=>{bas=false;});
-  A.oto=()=>{const h=H[hi];if(!h)return;simTik(sv,sdCiz(W,null).x(h.v[0]*20/h.v[1]),70);};ciz();}
+  A.oto=()=>{if(TS.sonraki())return true;const h=H[hi];if(!h||bek)return false;simTik(sv,sdCiz(W,null).x(h.v[0]*20/h.v[1]),70);return true;};ciz();}
 const e_sd=p=>{const D=defterY(["Kesir","Ondalık gösterim","Sayı doğrusunda"]);
   const F1=[[1,4],[3,4]],F2=[[3,5],[2,5],[4,5],[1,5]],F3=[[7,20],[9,20],[11,20],[13,20],[3,20],[17,20]],F4=[[3,10],[7,10],[9,10],[1,2]];
   const yon=["0 ile 1 arası <b>20 eş parçaya</b> bölünmüş; her küçük parça 0,05'tir.","Turuncu noktayı parmağınızla ya da farenizle sürükleyiniz ve hedef sayıda bırakınız. Göstergede noktanın ondalık ve kesir hâlini görürsünüz."];
-  asamali(p,{tahmin:{giris:`Ali ${kH(1,4)} noktasını, Ayşe 0,25 noktasını sayı doğrusunda işaretleyecek.`,soru:"İkisi aynı noktayı mı işaretler?",secs:[["e","Evet, aynı nokta"],["h","Hayır, farklı noktalar"]],dogru:"e",neden:`${kH(1,4)} = 1 ÷ 4 = 0,25.`},
+  asamali(p,{tahmin:{giris:`Ali ${kH(1,4)} noktasını, Ayşe 0,25 noktasını sayı doğrusunda işaretleyecek.`,soru:"İkisi aynı noktayı mı işaretler?",secs:[["e","Evet, aynı nokta"],["h","Hayır, farklı noktalar"]],dogru:"e",neden:`${kH(1,4)} = 1 : 4 = 0,25.`},
     asamalar:[
-      {ad:"Kesirleri yerleştir",yon,bitis:"İki hedefe de ulaşınca.",kur:(k,A)=>sdTur(k,[{v:rastgele(F1),t:"k"},{v:rastgele(F3),t:"k"}],D,A)},
-      {ad:"Ondalıkları yerleştir",yon,bitis:"İki hedefe de ulaşınca.",kur:(k,A)=>sdTur(k,[{v:rastgele(F2),t:"o"},{v:rastgele(F4),t:"o"}],D,A)},
+      {ad:"Kesirleri yerleştir",yon:["<b>2 hedef</b> sırayla gelir; biri bitince <b>Sıradaki hedef</b> düğmesine basınız.",...yon],bitis:"İki hedefe de ulaşınca.",kur:(k,A)=>sdTur(k,[{v:rastgele(F1),t:"k"},{v:rastgele(F3),t:"k"}],D,A)},
+      {ad:"Ondalıkları yerleştir",yon:["<b>2 hedef</b> sırayla gelir; biri bitince <b>Sıradaki hedef</b> düğmesine basınız.",...yon],bitis:"İki hedefe de ulaşınca.",kur:(k,A)=>sdTur(k,[{v:rastgele(F2),t:"o"},{v:rastgele(F4),t:"o"}],D,A)},
       kuralA(D,[[`${kH(1,4)} ile 0,25 sayı doğrusunda nerededir?`,["Aynı noktada: Aynı sayının iki farklı gösterimidir.","Farklı noktalarda","0,25 sayı doğrusunda gösterilemez."],"Doğru!",["Deftere bakınız: Her kesir, ondalık gösterimiyle aynı noktadaydı.","Ondalık gösterimli sayılar da sayı doğrusunda birer noktadır."]],
-        ["0 ile 1 arası 20 eş parçaya bölündü. Bir parça kaça eşittir?",[`${kH(1,20)} = 0,05`,"0,2","0,5"],"Doğru! 1 ÷ 20 = 0,05",["0,2 = 4 küçük parçadır.","0,5 = 10 küçük parçadır."]]]),
+        ["0 ile 1 arası 20 eş parçaya bölündü. Bir parça kaça eşittir?",[`${kH(1,20)} = 0,05`,"0,2","0,5"],"Doğru! 1 : 20 = 0,05",["0,2 = 4 küçük parçadır.","0,5 = 10 küçük parçadır."]]]),
       kendiA((m,son)=>{let kk;do{kk=ra(1,19);}while(kk%10===0);const w=el(m,"stage mini");const W=Math.round(Math.min(640,Math.max(320,(w.getBoundingClientRect().width||640)-14))),sv=svgEl(W,120);sv.innerHTML=sdCiz(W,kk,"A","#1c7ed6").h;w.appendChild(sv);
         cevap(m,soruKut("A noktasının gösterdiği sayıyı ondalık gösterimle yazınız."),[kk,20],`Doğru! A = ${dMet(kk,20)} = ${kHs(kk,20)}`,"Her küçük parça 0,05. 0'dan başlayıp A'ya kadar parçaları sayınız.",son,{bicim:"ondalik"});})],
     kural:`Bir kesir ile ondalık gösterimi sayı doğrusunda <b>aynı noktayı</b> gösterir: ${kH(1,4)} = 0,25, ${kH(3,5)} = 0,6. Bunlar aynı rasyonel sayının farklı gösterimleridir.`});
@@ -1221,7 +1303,7 @@ const e_sd=p=>{const D=defterY(["Kesir","Ondalık gösterim","Sayı doğrusunda"
 /* 17 · 0,999… GİZEMİ */
 /* 18 · HESAP MAKİNESİ EKRANI */
 function hesapTur(k,qa,qb,D,A){
-  k.insertAdjacentHTML("beforeend",`<div class="two"><div><div class="hm"><div class="hm-ekran"><small class="hm-is"></small><b class="hm-s">0</b></div><div class="hm-tus"></div></div></div><div class="yan"><div class="dkart"><small>Görev</small><p><b>${qa} ÷ ${qb}</b> işlemini hesap makinesinde yapınız. Tuşlara sırayla basınız: ${qa} ÷ ${qb} =</p></div><div class="hm-sor"></div><div class="fb" hidden></div></div></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="two"><div><div class="hm"><div class="hm-ekran"><small class="hm-is"></small><b class="hm-s">0</b></div><div class="hm-tus"></div></div></div><div class="yan"><div class="dkart"><small>Görev</small><p><b>${qa} : ${qb}</b> işlemini hesap makinesinde yapınız. Tuşlara sırayla basınız: ${qa} : ${qb} =</p></div><div class="hm-sor"></div><div class="fb" hidden></div></div></div>`);
   const eis=k.querySelector(".hm-is"),es=k.querySelector(".hm-s"),tus=k.querySelector(".hm-tus"),so=k.querySelector(".hm-sor"),f=k.querySelector(".fb");let a="",b="",op="",son=null,faz="g";
   const TUS=["7","8","9","÷","4","5","6","×","1","2","3","−","0",",","=","+","C"];
   tus.innerHTML=TUS.map(t=>`<button type="button" class="hmt${/\d/.test(t)?"":" op"}" data-t="${t}" aria-label="${t==="C"?"Temizle":t}">${t}</button>`).join("");
@@ -1236,14 +1318,14 @@ function hesapTur(k,qa,qb,D,A){
     if(t==="="){if(!(a&&op&&b))return;const ta=!a.includes(","),tb=!b.includes(",");
       if(op==="÷"&&ta&&tb)son=ekran(+a,+b);else{const x=sayi(a),y=sayi(b);son=bicim(op==="+"?x+y:op==="−"?x-y:op==="×"?x*y:(y===0?NaN:x/y));}
       goster();if(op==="÷"&&ta&&tb)sonuc(+a,+b);}});
-  function sonuc(x,y){if(faz!=="g")return;if(x!==qa||y!==qb){fb(f,false,`Bu sonuç ${x} ÷ ${y} işleminin. Görevdeki işlem ${qa} ÷ ${qb}.`);return;}
+  function sonuc(x,y){if(faz!=="g")return;if(x!==qa||y!==qb){fb(f,false,`Bu sonuç ${x} : ${y} işleminin. Görevdeki işlem ${qa} : ${qb}.`);return;}
     f.hidden=true;faz="k";const Ac=acilim(qa,qb),sl=!Ac.devir;
     soruY(so,`Ekranda <b>${son}</b> görünüyor. Hangisi doğru?`,sl?["Sonuç ekrana sığdı; bölme bitti, ondalık gösterim sonludur.","Ekran basamakları kesti; ondalık gösterim devirlidir."]:["Ekran basamakları kesti; ondalık gösterim devirlidir.","Sonuç ekrana sığdı; bölme bitti, ondalık gösterim sonludur."],sl?"Doğru! Ekranda boş yer kaldı; bölme bitti.":"Doğru! Ekran dolu ve bir basamak grubu tekrar ediyor; basamaklar ekranın dışında da sürer.",sl?"Ekranda boş yer kaldı mı? Rakamlar tekrar ediyor mu?":"Ekran dolu. Hangi basamaklar tekrar ediyor? Bu tekrar bitecek mi?",()=>{
       if(sl){bitir_();return;}
       const u3=Ac.sabit?dvH(0,"",Ac.sabit+Ac.devir):Ac.devir.length>1?dvH(0,Ac.devir[0],Ac.devir.slice(1)):`<span class="ond">0,${basam(qa,qb,2)}</span>`;
       const sec=[...new Set([dH(qa,qb),`<span class="ond">${son}</span>`,u3])];
-      soruY(so,"Bu bölmenin gerçek ondalık gösterimi hangisidir?",sec,`Doğru! ${qa} ÷ ${qb} = ${dH(qa,qb)}`,[ "Ekrandaki sayı kesilmiş bir parçadır; basamaklar ekranın dışında da sürer.","Hangi basamak grubu tekrar ediyor? Devir çizgisi tam o grubun üstünde olmalı."],bitir_);});}
-  function bitir_(){faz="b";D.ekle([`${qa} ÷ ${qb}`,son,dH(qa,qb)],qa+"/"+qb);A.tamam(`${qa} ÷ ${qb} = ${dH(qa,qb)}`);}
+      soruY(so,"Bu bölmenin gerçek ondalık gösterimi hangisidir?",sec,`Doğru! ${qa} : ${qb} = ${dH(qa,qb)}`,[ "Ekrandaki sayı kesilmiş bir parçadır; basamaklar ekranın dışında da sürer.","Hangi basamak grubu tekrar ediyor? Devir çizgisi tam o grubun üstünde olmalı."],bitir_);});}
+  function bitir_(){faz="b";D.ekle([`${qa} : ${qb}`,son,dH(qa,qb)],qa+"/"+qb);A.tamam(`${qa} : ${qb} = ${dH(qa,qb)}`);}
   A.oto=()=>{if(faz!=="g")return;tus.querySelector('[data-t="C"]').click();for(const c of [...String(qa),"÷",...String(qb),"="])tus.querySelector(`[data-t="${c}"]`).click();};goster();}
 /* 19 · MARKET ETİKETİ AVI */
 function marketRaf(k,sinir,D,A){
@@ -1257,9 +1339,9 @@ function marketRaf(k,sinir,D,A){
     A.durum(`${es} / ${cift.length}, hata ${hata}`);
     sol.querySelectorAll(".etb").forEach(b=>b.onclick=()=>{secili=+b.dataset.i;bip(700,.04);f.hidden=true;ciz();});
     sag.querySelectorAll(".fis").forEach(b=>b.onclick=()=>{if(secili===null){fb(f,false,"Önce soldan bir raf etiketine dokununuz.");return;}const j=+b.dataset.i,c=cift[secili];
-      if(j===secili){c.ok=true;es++;bip(760,.08);fb(f,true,`Doğru! ${kH(...c.v)} = ${c.v[0]} ÷ ${c.v[1]} = ${dH(...c.v)}`);D.ekle([`${c.ad}: ${kH(...c.v)} kg`,`${dH(...c.v)} kg`],c.ad+c.v);secili=null;ciz();
+      if(j===secili){c.ok=true;es++;bip(760,.08);fb(f,true,`Doğru! ${kH(...c.v)} = ${c.v[0]} : ${c.v[1]} = ${dH(...c.v)}`);D.ekle([`${c.ad}: ${kH(...c.v)} kg`,`${dH(...c.v)} kg`],c.ad+c.v);secili=null;ciz();
         if(es===cift.length){if(sinir&&hata>1){fb(f,false,`Raf bitti ama ${hata} hata yaptınız. Bu aşamada en fazla 1 hata olmalı. Yeni rafla yeniden deneyiniz.`);yb.hidden=false;}else A.tamam(`Rafı ${hata} hatayla bitirdiniz.`);}}
-      else{hata++;bip(220,.12);const w=cift[j];fb(f,false,`Bu eşleştirme doğru değil. ${YD}`);secili=null;ciz();}});}
+      else{hata++;bip(220,.12);const w=cift[j];fb(f,false,Math.abs(w.v[0]/w.v[1]-c.v[0]/c.v[1])<0.06?`Bu fiş etikete çok yakın ama aynı değil. ${c.v[0]} : ${c.v[1]} bölmesini yapıp devir çizgisine ve basamaklara dikkatle bakınız.`:`Bu fiş başka bir miktarı gösteriyor. ${c.v[0]} : ${c.v[1]} bölmesinin ilk basamaklarını bulup fişlerle karşılaştırınız.`);secili=null;ciz();}});}
   yb.onclick=yeniRaf;A.oto=()=>{if(!yb.hidden){yb.click();return;}const i=cift.findIndex(c=>!c.ok);if(i<0)return;sol.querySelector(`.etb[data-i="${i}"]`).click();sag.querySelector(`.fis[data-i="${i}"]`).click();};yeniRaf();}
 /* 20 · ONDALIK DÜELLOSU */
 /* Düello düzeneği (iki atölyede aynı kurallar): 8 tur, süre çubuğu, puan */
@@ -1309,30 +1391,30 @@ function seritTur(k,u,D,A){const [ad,p,q,br]=u,hedef=p*1000/q,U=Math.max(1,Math.
       h+=`<rect x="${X(i)}" y="86" width="${X(i+1)-X(i)}" height="34" fill="none" stroke="currentColor" stroke-width="1.5"/>`;for(let j=1;j<10;j++)h+=`<line x1="${X(i+j/10)}" y1="86" x2="${X(i+j/10)}" y2="120" stroke="currentColor" stroke-opacity=".35"/>`;}
     h+=`<rect x="${X(0)}" y="22" width="${X(p/q)-X(0)}" height="34" fill="#f4b942" fill-opacity=".85" stroke="${ok?"#2f9e44":"none"}" stroke-width="4"/>`;
     const v=Math.min(deg()/1000,U);h+=`<rect x="${X(0)}" y="86" width="${X(v)-X(0)}" height="34" fill="#74c0fc" fill-opacity=".85" stroke="${ok?"#2f9e44":"none"}" stroke-width="4"/>`;
-    h+=`<line x1="${X(p/q)}" y1="16" x2="${X(p/q)}" y2="126" stroke="#e8590c" stroke-width="2" stroke-dasharray="5 4"/><text x="${X(0)}" y="15" font-size="13" font-weight="800">Kesir şeridi: ${p} ÷ ${q}</text><text x="${X(0)}" y="140" font-size="13" font-weight="800">Ondalık şerit: ${yaz()}</text>`;
+    h+=`<line x1="${X(p/q)}" y1="16" x2="${X(p/q)}" y2="126" stroke="#e8590c" stroke-width="2" stroke-dasharray="5 4"/><text x="${X(0)}" y="15" font-size="13" font-weight="800">Kesir şeridi: ${p} : ${q}</text><text x="${X(0)}" y="140" font-size="13" font-weight="800">Ondalık şerit: ${yaz()}</text>`;
     const sv=svgEl(W,148);sv.innerHTML=h;st.replaceChildren(sv);}
   function oyna(){if(bitti)return;const v=deg();ciz();if(!tr.has(v)){tr.add(v);den++;}A.durum(`${den} deneme`);
-    if(v===hedef){bitti=true;S.forEach(s=>s.el.querySelectorAll("button").forEach(b=>b.disabled=true));bip(760,.1);nt.innerHTML=`<span class="ok">Şeritler çakıştı!</span> ${kH(p,q)} ${br} = ${p} ÷ ${q} = <b>${dMet(p,q)}</b> ${br}.`;
+    if(v===hedef){bitti=true;S.forEach(s=>s.el.querySelectorAll("button").forEach(b=>b.disabled=true));bip(760,.1);nt.innerHTML=`<span class="ok">Şeritler çakıştı!</span> ${kH(p,q)} ${br} = ${p} : ${q} = <b>${dMet(p,q)}</b> ${br}.`;
       D.ekle([ad,kH(p,q)+" "+br,`${den} deneme`,`<b>${dMet(p,q)}</b> ${br}`],ad);A.tamam(`${kH(p,q)} = ${dMet(p,q)}`);return;}
     nt.innerHTML=`Ondalık şerit <b>${yaz()}</b>: ${v<hedef?"kesir şeridine yetişmedi.":"kesir şeridini geçti."}`;bip(500,.03);}
   A.oto=()=>{if(bitti)return;const s=dMet(p,q).split(","),t=+s[0],f=((s[1]||"")+"000").slice(0,3);S[0].set(t,true);tam=t;[0,1,2].forEach(i=>{S[i+1].set(+f[i],true);d[i]=+f[i];});oyna();};
   ciz();nt.innerHTML="Sayaçlarla ondalık şeridi uzatınız ya da kısaltınız.";}
 function rafYaz(k,liste,D,A){const r=el(k,"raf-et");let n=0;A.durum(`0 / ${liste.length}`);
   liste.forEach(u=>{const w=el(r,"et-kut",etiketH(u));
-    const c=cevap(w,"",[u[1],u[2]],`Doğru! ${u[1]} ÷ ${u[2]} = <b>${dMet(u[1],u[2])}</b> ${u[3]}`,"",null,{bicim:"ondalik",ph:"ör. 0,5"});
-    c.addEventListener("dogru",()=>{n++;D.ekle([u[0],kH(u[1],u[2])+" "+u[3],`${u[1]} ÷ ${u[2]}`,`<b>${dMet(u[1],u[2])}</b> ${u[3]}`],u[0]);A.durum(`${n} / ${liste.length}`);if(n===liste.length)A.tamam("Etiketi ondalık gösterimle yazdınız.");});});}
+    const c=cevap(w,"",[u[1],u[2]],`Doğru! ${u[1]} : ${u[2]} = <b>${dMet(u[1],u[2])}</b> ${u[3]}`,x=>Math.abs(x[0]/x[1]-u[2]/u[1])<1e-9?"Paydayı paya böldünüz; kesir çizgisi “pay bölü payda” demektir.":"Kesir çizgisi bölme demektir: payı paydaya bölünüz.",null,{bicim:"ondalik",ph:"ör. 0,5"});
+    c.addEventListener("dogru",()=>{n++;D.ekle([u[0],kH(u[1],u[2])+" "+u[3],`${u[1]} : ${u[2]}`,`<b>${dMet(u[1],u[2])}</b> ${u[3]}`],u[0]);A.durum(`${n} / ${liste.length}`);if(n===liste.length)A.tamam("Etiketi ondalık gösterimle yazdınız.");});});}
 const e_etiket=p=>{const D=defterY(["Ürün","Etiket","Bulma","Ondalık gösterim"]);
   const kc=karistir(URUN.filter(u=>u[1]<u[2]&&!(u[1]===1&&u[2]===5))),by=karistir(URUN.filter(u=>u[1]>u[2]));
-  asamali(p,{tahmin:{giris:`Bir süt kutusunun etiketinde ${kH(1,5)} L yazıyor.`,soru:"Kutudaki süt miktarının ondalık gösterimi hangisidir?",secs:[["a","0,2 L"],["b","0,5 L"],["c","1,5 L"]],dogru:"a",neden:"1 ÷ 5 = 0,2"},
+  asamali(p,{tahmin:{giris:`Bir süt kutusunun etiketinde ${kH(1,5)} L yazıyor.`,soru:"Kutudaki süt miktarının ondalık gösterimi hangisidir?",secs:[["a","0,2 L"],["b","0,5 L"],["c","1,5 L"]],dogru:"a",neden:"1 : 5 = 0,2"},
     asamalar:[
       {ad:"Şeritleri çakıştırın",yon:["Üstteki turuncu şerit etiketteki kesri gösterir. Alttaki mavi ondalık şeridi sayaçlarla uzatınız ya da kısaltınız.","İki şeridin uçları tam çakışınca ondalık gösterimi bulmuş olursunuz."],bitis:"Şeritler çakışınca.",kur:(k,A)=>seritTur(k,kc[0],D,A)},
       {ad:"Payı büyük olan etiket",yon:["Bu etikette pay paydadan büyük: Kesir şeridi 1 bütünü geçiyor.","Tam kısmı da sayaçla ayarlayarak şeritleri çakıştırınız."],bitis:"Şeritler çakışınca.",kur:(k,A)=>seritTur(k,by[0],D,A)},
       {ad:"Etiketi yazın",yon:["Şimdi şerit yok. Etiketteki miktarı ondalık gösterimle (virgülle) yazınız ve <b>Kontrol edin</b> düğmesine basınız."],bitis:"Etiketi doğru yazınca.",kur:(k,A)=>rafYaz(k,[kc[1]],D,A)},
-      kuralA(D,[["Etiketteki kesri ondalık gösterime çevirmek için ne yaptınız?",["Payı paydaya böldüm.","Paydayı paya böldüm.","Payı ve paydayı virgülle yan yana yazdım."],`Doğru! ${kH(3,4)} = 3 ÷ 4 = 0,75.`,[]],
-        [`${kH(7,4)} kg gibi payı paydasından büyük bir kesrin ondalık gösteriminde virgülden önce ne olur?`,["1 ya da daha büyük bir sayı olur: 7 ÷ 4 = 1,75","Her zaman 0 olur.","Paydanın kendisi yazılır: 4,7"],"Doğru! Şerit 1 bütünü geçti; tam kısım virgülden önce yazılır.",[]]]),
+      kuralA(D,[["Etiketteki kesri ondalık gösterime çevirmek için ne yaptınız?",["Payı paydaya böldüm.","Paydayı paya böldüm.","Payı ve paydayı virgülle yan yana yazdım."],`Doğru! ${kH(3,4)} = 3 : 4 = 0,75.`,[]],
+        [`${kH(7,4)} kg gibi payı paydasından büyük bir kesrin ondalık gösteriminde virgülden önce ne olur?`,["1 ya da daha büyük bir sayı olur: 7 : 4 = 1,75","Her zaman 0 olur.","Paydanın kendisi yazılır: 4,7"],"Doğru! Şerit 1 bütünü geçti; tam kısım virgülden önce yazılır.",[]]]),
       kendiA((m,son)=>{const u=rastgele(URUN.filter(x=>!(x[1]===1&&x[2]===5)));
-        cevap(m,etiketH(u)+soruKut("Etiketteki miktarın ondalık gösterimi nedir? (Birimi yazmayınız.)"),[u[1],u[2]],`Doğru! ${kH(u[1],u[2])} ${u[3]} = <b>${dMet(u[1],u[2])}</b> ${u[3]}.`,"",son,{bicim:"ondalik"});})],
-    kural:`Bir kesrin ondalık gösterimini bulmak için <b>payı paydaya böleriz</b>: ${kH(3,4)} = 3 ÷ 4 = 0,75. Kesir şeridi ile ondalık şerit aynı uzunlukta olunca iki gösterim aynı sayıdır. Pay paydadan büyükse virgülden önce tam kısım gelir: ${kH(7,4)} = 1,75.`});
+        cevap(m,etiketH(u)+soruKut("Etiketteki miktarın ondalık gösterimi nedir? (Birimi yazmayınız.)"),[u[1],u[2]],`Doğru! ${kH(u[1],u[2])} ${u[3]} = <b>${dMet(u[1],u[2])}</b> ${u[3]}.`,x=>Math.abs(x[0]/x[1]-u[2]/u[1])<1e-9?"Paydayı paya böldünüz; kesir çizgisi “pay bölü payda” demektir.":"Kesir çizgisi bölme demektir: payı paydaya bölünüz. Pay ile paydayı virgülle yan yana yazmak yetmez.",son,{bicim:"ondalik"});})],
+    kural:`Bir kesrin ondalık gösterimini bulmak için <b>payı paydaya böleriz</b>: ${kH(3,4)} = 3 : 4 = 0,75. Kesir şeridi ile ondalık şerit aynı uzunlukta olunca iki gösterim aynı sayıdır. Pay paydadan büyükse virgülden önce tam kısım gelir: ${kH(7,4)} = 1,75.`});
 };
 
 /* 2 · BÖLME MAKİNESİ — bölüm rakamı sayaçla denenir, "sığdı / taştı" göstergesi */
@@ -1344,19 +1426,19 @@ function bolmeMak2(k,P,Qd,D,A){
     const sv=svgEl(W,96);sv.innerHTML=`<rect x="${L}" y="14" width="${x(n)-L}" height="24" rx="4" fill="#ffd8a8" stroke="#e8590c"/><text x="${L+4}" y="31" font-size="14" font-weight="800">Sayı: ${n}</text>
       <rect x="${L}" y="50" width="${Math.max(2,x(X)-L)}" height="24" rx="4" fill="${sig?"#b2f2bb":"#ffc9c9"}" stroke="${sig?"#2f9e44":"#e03131"}"/><text x="${L+4}" y="67" font-size="14" font-weight="800">${Qd} · ${r} = ${X}</text>
       <text x="${R}" y="92" text-anchor="end" font-size="14" font-weight="800" fill="${sig?"#2b8a3e":"#c92a2a"}">${sig?`Sığdı · kalan ${n-X}`:"Taştı"}</text>`;gg.replaceChildren(sv);}
-  function goster(){bk.innerHTML=`${kH(P,Qd)} = ${P} ÷ ${Qd}`;bb.innerHTML=(bol||"")+(bitti?"":`<span class="imlec">_</span>`);yb.disabled=bitti;
+  function goster(){bk.innerHTML=`${kH(P,Qd)} = ${P} : ${Qd}`;bb.innerHTML=(bol||"")+(bitti?"":`<span class="imlec">_</span>`);yb.disabled=bitti;
     bs.innerHTML=bitti?`<b>Kalan 0 oldu. Bölme bitti:</b> ${kH(P,Qd)} = <b>${bol}</b>`:adim===0?`<b>${P}</b> içinde kaç tane <b>${Qd}</b> var? Rakamı sayaçla değiştirip göstergeye bakınız.`:`Kalanın yanına 0 eklendi: <b>${n}</b>. <b>${n}</b> içinde kaç tane <b>${Qd}</b> var?`;A.durum(`${adim}. basamak · ${den} deneme`);gost();}
   yb.onclick=()=>{if(bitti)return;const d=r;
-    if(d*Qd>n||n-d*Qd>=Qd){bip(220,.12);fb(f,false,YD);return;}
+    if(d*Qd>n||n-d*Qd>=Qd){bip(220,.12);fb(f,false,d*Qd>n?`${Qd} · ${d} = ${d*Qd}, ${n} sayısına sığmıyor; rakam büyük.`:`Kalan ${n-d*Qd}, bölenden (${Qd}) küçük olmalı; rakam küçük.`);return;}
     const kal=n-d*Qd;f.hidden=true;bip(620,.08);if(adim===0)bol=String(d);else{if(adim===1)bol+=",";bol+=d;}
-    ad.insertAdjacentHTML("beforeend",`<li>${n} ÷ ${Qd}: bölüme <b>${d}</b> yazıldı. ${Qd} · ${d} = ${d*Qd}, kalan <b>${kal}</b>.${adim===0&&kal?" Kalanın yanına 0 eklenecek ve bölüme virgül konacak.":""}</li>`);
-    adim++;if(kal===0){bitti=true;D.ekle([kH(P,Qd),`${P} ÷ ${Qd}`,`<b>${bol}</b>`,String(adim-1)],P+"/"+Qd);fb(f,true,`Doğru! Kalan 0 oldu: ${kH(P,Qd)} = <b>${bol}</b>`);goster();A.tamam(`${kH(P,Qd)} = ${bol}`);return;}
+    ad.insertAdjacentHTML("beforeend",`<li>${n} : ${Qd}: bölüme <b>${d}</b> yazıldı. ${Qd} · ${d} = ${d*Qd}, kalan <b>${kal}</b>.${adim===0&&kal?" Kalanın yanına 0 eklenecek ve bölüme virgül konacak.":""}</li>`);
+    adim++;if(kal===0){bitti=true;D.ekle([kH(P,Qd),`${P} : ${Qd}`,`<b>${bol}</b>`,String(adim-1)],P+"/"+Qd);fb(f,true,`Doğru! Kalan 0 oldu: ${kH(P,Qd)} = <b>${bol}</b>`);goster();A.tamam(`${kH(P,Qd)} = ${bol}`);return;}
     n=kal*10;r=0;S.set(0,true);goster();};
   A.oto=()=>{if(bitti)return;const d=Math.floor(n/Qd);if(r!==d){S.set(d);return;}yb.click();};goster();}
 const e_bolme=p=>{const D=defterY(["Kesir","Bölme","Ondalık gösterim","Eklenen 0 sayısı"]);
   const KC=[[3,8],[5,8],[7,8],[9,20],[7,16],[13,40],[7,25],[17,20],[3,16]],BY=[[11,8],[19,8],[9,4],[13,5],[27,20],[15,8]];const a1=rastgele(KC),a2=rastgele(BY);
   const yon=["Makine bölmeyi adım adım yapar; bölüme yazılacak rakamı <b>siz</b> denersiniz.","Rakamı sayaçla değiştiriniz: Gösterge, bölenin bu rakamla çarpımının sayıya <b>sığıp sığmadığını</b> ve kalanı gösterir.","Uygun rakamı bulunca <b>Bu rakamı bölüme yazın</b> düğmesine basınız."];
-  asamali(p,{tahmin:{giris:"3 m uzunluğundaki bir kurdele 8 eş parçaya kesilecek.",soru:"Bir parçanın uzunluğu kaç metre olur?",secs:[["a","0,375 m"],["b","3,8 m"],["c","2,6 m"]],dogru:"a",neden:"3 ÷ 8 = 0,375"},
+  asamali(p,{tahmin:{giris:"3 m uzunluğundaki bir kurdele 8 eş parçaya kesilecek.",soru:"Bir parçanın uzunluğu kaç metre olur?",secs:[["a","0,375 m"],["b","3,8 m"],["c","2,6 m"]],dogru:"a",neden:"3 : 8 = 0,375"},
     asamalar:[
       {ad:"İlk bölme",yon,bitis:"Kalan 0 olunca.",kur:(k,A)=>bolmeMak2(k,a1[0],a1[1],D,A)},
       {ad:"Payı büyük kesir",yon:["Bu kez pay paydadan büyük: Bölüme önce tam kısım yazılır.",yon[1],yon[2]],bitis:"Kalan 0 olunca.",kur:(k,A)=>bolmeMak2(k,a2[0],a2[1],D,A)},
@@ -1364,7 +1446,7 @@ const e_bolme=p=>{const D=defterY(["Kesir","Bölme","Ondalık gösterim","Eklene
         ["Bölüme yazılacak rakamı nasıl seçtiniz?",["Bölenle çarpımı sayıya sığan en büyük rakamı seçtim; kalan bölenden küçük kaldı.","Her zaman 5'i seçtim.","Sayının ilk rakamını yazdım."],"Doğru! Kalan, bölenden küçük olmalıdır.",[]],
         ["Kalanın yanına 0 eklemek ne anlama gelir?",["Kalanı onda birlere çevirmek: 3 bütün = 30 onda bir","Sayıyı 0 ile çarpmak","Bölümü 10 kat büyütmek"],"Doğru! Bu yüzden ilk 0 eklendiğinde bölüme virgül konur.",[]]]),
       kendiA((m,son)=>{const q=rastgele([[7,8,"7 m'lik bir tahta 8"],[5,4,"5 L'lik bir sürahi limonata 4"],[9,20,"9 kg'lık bir çuval un 20"],[13,8,"13 m'lik bir ip 8"]]);
-        cevap(m,yaz([`${q[2]} eş parçaya ayrılıyor.`])+soruKut("Bir parçanın ölçüsünü ondalık gösterimle yazınız. (Birimi yazmayınız.)"),[q[0],q[1]],`Doğru! ${q[0]} ÷ ${q[1]} = <b>${dMet(q[0],q[1])}</b>`,"",son,{bicim:"ondalik"});})],
+        cevap(m,yaz([`${q[2]} eş parçaya ayrılıyor.`])+soruKut("Bir parçanın ölçüsünü ondalık gösterimle yazınız. (Birimi yazmayınız.)"),[q[0],q[1]],`Doğru! ${q[0]} : ${q[1]} = <b>${dMet(q[0],q[1])}</b>`,x=>Math.abs(x[0]/x[1]-q[1]/q[0])<1e-9?"Parça sayısını uzunluğa böldünüz; uzunluk parça sayısına bölünmelidir.":"Uzunluğu parça sayısına bölünüz; kalanın yanına 0 ekleyerek bölmeyi sürdürünüz.",son,{bicim:"ondalik"});})],
     kural:"Kesrin ondalık gösterimini <b>uzun bölmeyle</b> buluruz. Her adımda bölenle çarpımı sayıya sığan en büyük rakam bölüme yazılır; kalan bölenden küçüktür. Kalanın yanına 0 ekleyerek bölmeyi sürdürürüz; ilk 0 eklenince bölüme virgül konur. <b>Kalan 0 olunca</b> bölme biter ve ondalık gösterim <b>sonlu</b> olur."});
 };
 
@@ -1374,6 +1456,7 @@ function tamamlaTur(k,deste,D,A){
     <div class="row"><button type="button" class="ghost tm-x">Hiçbir çarpan olmuyor: Tamamlanamaz</button><button type="button" class="primary tm-y" hidden>Sıradaki kart</button></div></div><div class="fb" hidden></div>`);
   const kt=k.querySelector(".tm-kart"),gg=k.querySelector(".tm-g"),nt=k.querySelector(".tm-not"),tb=k.querySelector(".tm-tab tbody"),xb=k.querySelector(".tm-x"),yb=k.querySelector(".tm-y"),f=k.querySelector(".fb");
   let i=0,c=1,bitti=false,tr=new Set();
+  const TS=turSerit(k,deste.length,{et:"Kart",ileri:"Sıradaki kart",once:kt,vurgu:()=>kt,dugYer:yb.parentNode});
   const S=sayacF("Çarpan",1,250,1,String,v=>{c=v;dene();});k.querySelector(".tm-s").appendChild(S.el);
   chips(k.querySelector(".tm-ch"),[2,3,4,5,7,8,10,20,25,50,125],v=>S.set(v),v=>"× "+v);
   const olur=b=>[10,100,1000].some(t=>t%b===0);
@@ -1381,31 +1464,30 @@ function tamamlaTur(k,deste,D,A){
     [1,10,100,1000].forEach(t=>{h+=`<line x1="${x(t)}" y1="30" x2="${x(t)}" y2="50" stroke="#2f9e44" stroke-width="3"/><text x="${x(t)}" y="68" text-anchor="middle" font-size="14" font-weight="800" fill="#2b8a3e">${t}</text>`;});
     h+=`<circle cx="${x(Math.min(y,1900))}" cy="40" r="9" fill="${[10,100,1000].includes(y)?"#2f9e44":"#e8590c"}"/><text x="${x(Math.min(y,1900))}" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#d9480f">payda ${y}</text>`;const sv=svgEl(W,76);sv.innerHTML=h;gg.replaceChildren(sv);}
   function goster(){const [a,b]=deste[i];bitti=false;c=1;S.set(1,true);tr=new Set();tb.innerHTML="";yb.hidden=true;xb.disabled=false;f.hidden=true;kt.innerHTML=`<small>Kart ${i+1} / ${deste.length}</small><p class="buyuk">${kH(a,b)}</p>`;nt.innerHTML="Çarpanı değiştiriniz: Pay ve payda bu sayıyla çarpılır.";gost();A.durum(`${i} / ${deste.length}`);}
-  function bitir(){bitti=true;xb.disabled=true;if(i+1<deste.length)yb.hidden=false;else{A.durum(`${deste.length} / ${deste.length}`);A.tamam("Kartların hepsini incelediniz.");}}
+  function bitir(oz){bitti=true;xb.disabled=true;TS.bitti(oz,()=>{i++;goster();});if(i+1>=deste.length){A.durum(`${deste.length} / ${deste.length}`);A.tamam("Kartların hepsini incelediniz.");}}
   function dene(){if(bitti)return;const [a,b]=deste[i],y=b*c,ok=[10,100,1000].includes(y);gost();
     if(!tr.has(c)){tr.add(c);tb.insertAdjacentHTML("beforeend",`<tr class="${ok?"ok":""}"><td>× ${c}</td><td>${kH(a*c,y)}</td><td>${ok?"evet ✔":"hayır"}</td></tr>`);}
-    if(ok){bip(760,.1);nt.innerHTML=`<span class="ok">Payda ${y} oldu!</span> ${kH(a,b)} = ${kH(a+" · "+c,b+" · "+c)} = ${kH(a*c,y)} = <b>${dMet(a,b)}</b>`;D.ekle([kH(a,b),kH(a*c,y),`<b>${dMet(a,b)}</b>`],a+"/"+b);bitir();}
+    if(ok){bip(760,.1);nt.innerHTML=`<span class="ok">Payda ${y} oldu!</span> ${kH(a,b)} = ${kH(a+" · "+c,b+" · "+c)} = ${kH(a*c,y)} = <b>${dMet(a,b)}</b>`;D.ekle([kH(a,b),kH(a*c,y),`<b>${dMet(a,b)}</b>`],a+"/"+b);bitir(`${kH(a,b)} = ${kH(a*c,y)} = ${dMet(a,b)}`);}
     else{nt.innerHTML=`${kH(a,b)} = ${kH(a*c,y)}: payda <b>${y}</b>.`;bip(480,.03);}A.durum(`${i} / ${deste.length} · ${tr.size} çarpan`);}
   xb.onclick=()=>{if(bitti)return;const [a,b]=deste[i];
     if(tr.size<4){fb(f,false,"Karar vermeden önce en az 4 farklı çarpan deneyiniz.");return;}
-    if(olur(b)){bip(220,.12);fb(f,false,YD);return;}
+    if(olur(b)){bip(220,.12);fb(f,false,`${b} = ${fac(b).join(" · ")}: paydada yalnız 2 ve 5 var; 10, 100 ya da 1000 yapan bir çarpan bulunabilir. Başka çarpanlar deneyiniz.`);return;}
     f.hidden=true;bip(760,.1);nt.innerHTML=`<span class="ok">Doğru!</span> ${b} = ${fac(b).join(" · ")}: Paydada 2 ve 5 dışında çarpan var; hiçbir çarpanla 10, 100, 1000 olmaz. Ondalık gösterim <b>bölmeyle</b> bulunur: ${kH(a,b)} = ${dH(a,b,{nokta:true})}`;
-    D.ekle([kH(a,b),"tamamlanamaz",dH(a,b,{nokta:true})],a+"/"+b);bitir();};
-  yb.onclick=()=>{i++;goster();};
-  A.oto=()=>{if(bitti){if(!yb.hidden)yb.click();return;}const b=deste[i][1];if(olur(b)){S.set([10,100,1000].find(t=>t%b===0)/b);return;}const z=[2,5,4,10,3].find(v=>!tr.has(v));if(z&&tr.size<4){S.set(z);return;}xb.click();};
+    D.ekle([kH(a,b),"tamamlanamaz",dH(a,b,{nokta:true})],a+"/"+b);bitir(`${kH(a,b)}: tamamlanamaz (${b} = ${fac(b).join(" · ")})`);};
+  A.oto=()=>{if(TS.sonraki())return true;if(bitti)return false;const b=deste[i][1];if(olur(b)){S.set([10,100,1000].find(t=>t%b===0)/b);return;}const z=[2,5,4,10,3].find(v=>!tr.has(v));if(z&&tr.size<4){S.set(z);return true;}xb.click();return true;};
   goster();}
 const e_tamamla=p=>{const D=defterY(["Kesir","Genişletme","Ondalık gösterim"]);
   const EV=karistir([[3,4],[7,20],[3,8],[2,5],[11,25],[9,50],[1,4],[17,20],[7,40],[13,25],[1,8],[3,125]]),HY=karistir([[1,3],[5,6],[4,7],[2,9],[7,12],[5,11],[4,15]]);
   const yon=["Kartta bir kesir var. <b>Çarpan</b> sayacını ya da hazır çarpan düğmelerini kullanınız: Pay ve payda bu sayıyla çarpılır; göstergede yeni payda belirir.","Payda 10, 100 ya da 1000 olunca kart biter. Hiçbir çarpan işe yaramıyorsa (en az 4 deneme sonra) <b>Tamamlanamaz</b> düğmesine basınız."];
   asamali(p,{tahmin:{giris:`${kH(3,4)} kesrinin payını ve paydasını 25 ile çarparsak ${kH(75,100)} olur.`,soru:`${kH(1,3)} kesrinin paydası da 10, 100 ya da 1000 yapılabilir mi?`,secs:[["e","Evet, yapılabilir."],["h","Hayır, yapılamaz."]],dogru:"h",neden:"3 sayısı 10'un, 100'ün ve 1000'in böleni değildir."},
     asamalar:[
-      {ad:"Paydayı tamamlayın",yon,bitis:"2 kartın ikisi de bitince.",kur:(k,A)=>tamamlaTur(k,EV.slice(0,2),D,A)},
-      {ad:"Olur mu, olmaz mı?",yon:["Bu destede paydası tamamlanamayan kartlar da var.",...yon],bitis:"3 kartın hepsi bitince.",kur:(k,A)=>tamamlaTur(k,karistir([EV[2],HY[0],HY[1]]),D,A)},
+      {ad:"Paydayı tamamlayın",yon:["<b>2 kart</b> sırayla gelir; biri bitince <b>Sıradaki kart</b> düğmesine basınız.",...yon],bitis:"2 kartın ikisi de bitince.",kur:(k,A)=>tamamlaTur(k,EV.slice(0,2),D,A)},
+      {ad:"Olur mu, olmaz mı?",yon:["Bu destede <b>3 kart</b> var; paydası tamamlanamayan kartlar da var. Biri bitince <b>Sıradaki kart</b> düğmesine basınız.",...yon],bitis:"3 kartın hepsi bitince.",kur:(k,A)=>tamamlaTur(k,karistir([EV[2],HY[0],HY[1]]),D,A)},
       kuralA(D,[[`Paydası 100 olan ${kH(75,100)} kesrinin ondalık gösterimi nasıl yazılır?`,["0,75: Pay yazılır; virgülden sonra paydadaki sıfır sayısı kadar basamak olur.","7,5","75,100"],`Doğru! ${kH(75,100)} = 0,75 (yetmiş beş yüzde bir).`,[]],
         ["Paydası tamamlanamayan kesirlerin paydalarında ne vardı?",["2 ve 5 dışında bir asal çarpan (3, 7, 11 gibi)","Yalnız 2","Yalnız 5"],"Doğru! 10 = 2 · 5 olduğundan yalnız 2 ve 5 çarpanları 10'un kuvvetine tamamlanabilir.",[]],
-        [`${kH(1,3)} kesrinin paydası 10, 100 ya da 1000 yapılamadı. Ondalık gösterimi nasıl bulunur?`,["Pay paydaya bölünür: 1 ÷ 3","Ondalık gösterimi yoktur.","Payda 10 kabul edilir."],"Doğru! Her kesrin bir ondalık gösterimi vardır; bölme her zaman işe yarar.",[]]]),
+        [`${kH(1,3)} kesrinin paydası 10, 100 ya da 1000 yapılamadı. Ondalık gösterimi nasıl bulunur?`,["Pay paydaya bölünür: 1 : 3","Ondalık gösterimi yoktur.","Payda 10 kabul edilir."],"Doğru! Her kesrin bir ondalık gösterimi vardır; bölme her zaman işe yarar.",[]]]),
       kendiA((m,son)=>{const [a,b]=rastgele([[9,25],[7,20],[3,4],[13,50],[11,20],[21,25]]);
-        cevap(m,soruKut(`${kH(a,b)} kesrinin paydasını 100 yapınız ve ondalık gösterimini yazınız.`),[a,b],`Doğru! ${kH(a,b)} = ${kH(a*100/b,100)} = <b>${dMet(a,b)}</b>`,"",son,{bicim:"ondalik"});})],
+        cevap(m,soruKut(`${kH(a,b)} kesrinin paydasını 100 yapınız ve ondalık gösterimini yazınız.`),[a,b],`Doğru! ${kH(a,b)} = ${kH(a*100/b,100)} = <b>${dMet(a,b)}</b>`,x=>Math.abs(x[0]/x[1]-a*100/b)<1e-9?"Payı buldunuz ama ondalık gösterime çevirmediniz: paydası 100 olan kesirde virgülden sonra iki basamak olur.":"Paydayı 100 yapmak için pay ve paydayı aynı sayıyla çarpınız; payı da çarpmayı unutmayınız.",son,{bicim:"ondalik"});})],
     kural:`Paydası <b>10, 100, 1000</b> yapılabilen kesirlerin ondalık gösterimi kolayca yazılır: ${kH(3,4)} = ${kH(75,100)} = 0,75. Paydada 2 ve 5 dışında çarpan varsa (${kH(1,3)} gibi) hiçbir çarpan işe yaramaz; ondalık gösterim <b>bölmeyle</b> bulunur.`});
 };
 
@@ -1413,7 +1495,7 @@ const e_tamamla=p=>{const D=defterY(["Kesir","Genişletme","Ondalık gösterim"]
 function akisTur(k,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="k8d"><div class="k8-sk ak-s"></div><div class="row"><button type="button" class="primary ak-b">Böl ▶</button></div><div class="dkart ak-k"><small>Bölme makinesi</small><p class="k8-big k8-dig ak-d">—</p><p class="ak-n"></p></div><div class="k8-iki"><div><b>Bölme durdu (sonlu)</b><div class="ak-s1"></div></div><div><b>Bölme durmadı (devirli)</b><div class="ak-s2"></div></div></div></div><div class="ak-gr"></div>`);
   const dg=k.querySelector(".ak-d"),an=k.querySelector(".ak-n"),s1=k.querySelector(".ak-s1"),s2=k.querySelector(".ak-s2"),bb=k.querySelector(".ak-b");let q=6,calis=false;const den=new Map();
-  const S=sayacF("Payda",2,20,q,String,v=>{q=v;dg.innerHTML=`${kH(1,q)} = 1 ÷ ${q} = ?`;an.textContent="Böl düğmesine basınız.";});k.querySelector(".ak-s").appendChild(S.el);
+  const S=sayacF("Payda",2,20,q,String,v=>{q=v;dg.innerHTML=`${kH(1,q)} = 1 : ${q} = ?`;an.textContent="Böl düğmesine basınız.";});k.querySelector(".ak-s").appendChild(S.el);
   const G=gorevler(k.querySelector(".ak-gr"),[{m:"En az 8 farklı payda deneyiniz.",ok:()=>den.size>=8},{m:"Bölmesi duran en az 3 payda bulunuz.",ok:()=>[...den.values()].filter(Boolean).length>=3},{m:"Bölmesi durmayan en az 3 payda bulunuz.",ok:()=>[...den.values()].filter(x=>!x).length>=3}],()=>A.tamam("Paydaları iki gruba ayırdınız."));
   bb.onclick=()=>{if(calis)return;calis=true;bb.disabled=true;const Ac=acilim(1,q),sl=!Ac.devir,B=(Ac.sabit+Ac.devir.repeat(14)).slice(0,sl?Ac.sabit.length:12);let i=0;
     const ad=()=>{if(!k.isConnected)return;dg.innerHTML=`${kH(1,q)} = 0,${B.slice(0,i)}${i<B.length?'<span class="g">…</span>':sl?"":'<span class="y">…</span>'}`;
@@ -1422,17 +1504,17 @@ function akisTur(k,D,A){
       if(!den.has(q)){den.set(q,sl);(sl?s1:s2).insertAdjacentHTML("beforeend",`<span class="${sl?"s":"d"}">${q}</span>`);D.ekle([kH(1,q),dH(1,q),sl?"sonlu":"devirli"],"p"+q);}
       calis=false;bb.disabled=false;A.durum(`${den.size} payda`);G.kontrol();};ad();};
   A.oto=()=>{if(calis)return;const z=[2,3,4,5,6,7,8,9,10,12,16,20].find(v=>!den.has(v));if(z===undefined)return;S.set(z);bb.click();};
-  dg.innerHTML=`${kH(1,q)} = 1 ÷ ${q} = ?`;}
+  dg.innerHTML=`${kH(1,q)} = 1 : ${q} = ?`;}
 const e_ayir=p=>{const D=defterY(["Kart","Ondalık gösterim","Tür"]);const yon=["Kartta bir kesir ya da bir ondalık gösterim var.","Ondalık gösterimi <b>sonlu</b> mu, <b>devirli</b> mi? Doğru kutuya dokununuz."];
   asamali(p,{tahmin:{giris:"0,4545… sayısında 45 sonsuza kadar tekrar ediyor. 0,45 sayısında ise virgülden sonra iki basamak var.",soru:"Bu iki sayı aynı mıdır?",secs:[["e","Evet, aynıdır."],["h","Hayır, farklıdır."]],dogru:"h",neden:`0,4545… = ${kH(5,11)}, 0,45 = ${kH(9,20)}.`},
     asamalar:[
       {ad:"Paydayı değiştirip bölün",yon:[`Paydayı sayaçla seçiniz ve <b>Böl</b> düğmesine basınız: Makine ${kH(1,"payda")} kesrini böler, basamaklar akar.`,"Bölme durursa payda “sonlu”, durmazsa “devirli” sütununa yazılır. Paydanın asal çarpanlarına da bakınız."],bitis:"Görev listesindeki üç görev bitince.",kur:(k,A)=>akisTur(k,D,A)},
-      {ad:"Kartları ayırın",yon:[...yon,"Bu kez <b>en fazla 1 hata</b> yapabilirsiniz; daha fazla hata olursa yeni desteyle yeniden denersiniz."],bitis:"8 kartı en fazla 1 hatayla yerleştirince.",kur:(k,A)=>ayirDeste(k,1,D,A)},
+      {ad:"Kartları ayırın",yon:["Destede <b>8 kart</b> var; kart yerleşince <b>Sıradaki kart</b> düğmesine basınız.",...yon,"Bu kez <b>en fazla 1 hata</b> yapabilirsiniz; daha fazla hata olursa yeni desteyle yeniden denersiniz."],bitis:"8 kartı en fazla 1 hatayla yerleştirince.",kur:(k,A)=>ayirDeste(k,1,D,A)},
       kuralA(D,[["Bölmesi duran paydaların asal çarpanları neydi?",["Yalnız 2 ve 5 (biri ya da ikisi)","3, 7, 11 gibi asallar","Her asal sayı"],"Doğru! Bu paydalar 10, 100, 1000'in bölenidir.",[]],
         ["0,4545… ile 0,45 için hangisi doğrudur?",[`0,4545… = ${dvH(0,"","45")} devirlidir; 0,45 sonludur. Farklı sayılardır.`,"İkisi aynı sayıdır.","İkisi de sonludur."],"Doğru!",[]],
         ["“Her rasyonel sayının ondalık gösterimi ya sonludur ya da devirlidir.” Bu ifade için ne dersiniz?",["Doğrudur: Bölmede ya kalan 0 olur ya da kalanlar tekrar eder.","Yanlıştır: Bazı kesirlerin ondalık gösterimi yoktur.","Yanlıştır: Bütün kesirlerin ondalık gösterimi sonludur."],"Doğru!",[]]]),
       kendiA((m,son)=>{const s=karistir([[3,8],[7,20],[9,25],[1,16],[13,40],[4,5],[3,50]]).slice(0,ra(1,4)),d=karistir([[2,3],[5,6],[4,11],[7,9],[1,12],[5,7],[7,15]]).slice(0,5-s.length);
-        cevap(m,`<div class="kartsira">${karistir([...s,...d]).map(x=>`<span class="skart">${kH(...x)}</span>`).join("")}</div>`+soruKut("Yukarıdaki kesirlerden kaç tanesinin ondalık gösterimi <b>sonludur</b>?"),s.length,`Doğru! Sonlu olanlar: ${s.map(x=>kH(...x)+" = "+dH(...x)).join("; ")}`,"",son,{sayi:true});})],
+        cevap(m,`<div class="kartsira">${karistir([...s,...d]).map(x=>`<span class="skart">${kH(...x)}</span>`).join("")}</div>`+soruKut("Yukarıdaki kesirlerden kaç tanesinin ondalık gösterimi <b>sonludur</b>?"),s.length,`Doğru! Sonlu olanlar: ${s.map(x=>kH(...x)+" = "+dH(...x)).join("; ")}`,x=>x[0]>s.length?"Fazla saydınız: kesirleri önce sadeleştirip paydada 2 ve 5 dışında asal çarpan kalıp kalmadığına bakınız.":"Eksik saydınız: sadeleşince paydası yalnız 2 ve 5 içeren kesirleri de sayınız.",son,{sayi:true});})],
     kural:"Her rasyonel sayının bir ondalık gösterimi vardır. Bölme ya durur (<b>sonlu</b>: 0,375 gibi) ya da bir kalan tekrar eder ve basamaklar sonsuza kadar döner (<b>devirli</b>: 0,4545… gibi). En sade hâlde paydası yalnız 2 ve 5 çarpanlarını içeren kesirlerin bölmesi durur."});
 };
 
@@ -1440,21 +1522,22 @@ const e_ayir=p=>{const D=defterY(["Kart","Ondalık gösterim","Tür"]);const yon
 function sadeTur2(k,liste,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart sl-kart"></div><table class="k8-tab sl-tab"><thead><tr><th>Kesir</th><th>Payda</th><th>Paydaya göre</th><th>Bölmenin sonucu</th></tr></thead><tbody></tbody></table><div class="sl-adim"></div><div class="fb" hidden></div><div class="row"><button type="button" class="primary yeni" hidden>Sıradaki kesir</button></div>`);
   const kt=k.querySelector(".sl-kart"),tb=k.querySelector(".sl-tab tbody"),ad=k.querySelector(".sl-adim"),f=k.querySelector(".fb"),yb=k.querySelector(".yeni");let qi=-1,a,b,SD_=null,faz;
+  const TS=turSerit(k,liste.length,{et:"Kesir",ileri:"Sıradaki kesir",once:kt,vurgu:()=>kt,dugYer:yb.parentNode});
   const satir=(x,y)=>{const t=fac(y).every(z=>z===2||z===5)?"sonlu":"devirli",g=sonlu(a,b)?"sonlu":"devirli";tb.insertAdjacentHTML("beforeend",`<tr class="${t===g?"ok":"no"}"><td>${kH(x,y)}</td><td>${y} = ${fac(y).join(" · ")||"1"}</td><td>${t}</td><td>${g} (${dH(a,b,{nokta:true})})</td></tr>`);};
   function yeni(){qi++;[a,b]=liste[qi];faz=1;f.hidden=true;yb.hidden=true;ad.innerHTML="";tb.innerHTML="";kt.innerHTML=`<small>Kesir ${qi+1} / ${liste.length}</small><p class="buyuk">${kH(a,b)}</p>`;satir(a,b);A.durum(`${qi} / ${liste.length}`);
     el(ad,"lab2","Pay ile paydayı ikisini birden bölen bir sayıya dokununuz; her adım tabloya yazılır. En sade olunca <b>En sade</b> düğmesine basınız.");
     SD_=sadeDugme(ad,a,b,[2,3,5,7,11,13],(X,Y)=>satir(X,Y),(X,Y)=>karar(X,Y),f);}
   function karar(x,y){faz=2;const s=sonlu(a,b);
     soruY(el(ad,""),`Tabloya bakınız. Paydaya bakarak verilen karar hangi satırda bölmenin sonucuyla <b>her zaman</b> uyuşur?`,["En sade hâlin satırında","İlk satırda (sadeleştirmeden önce)","Hiçbir satırda"],`Doğru! ${kH(a,b)} = ${kH(x,y)}; en sade paydası ${y}. Ondalık gösterim <b>${s?"sonlu":"devirli"}</b>: ${dH(a,b)}.`,"",()=>{
-      D.ekle([kH(a,b),fac(b).every(z=>z===2||z===5)?"sonlu":"devirli",kH(x,y),`<b>${s?"sonlu":"devirli"}</b>`],a+"/"+b);faz=3;if(qi+1<liste.length)yb.hidden=false;else{A.durum(`${liste.length} / ${liste.length}`);A.tamam("Kesirleri sadeleştirip karşılaştırdınız.");}});}
-  yb.onclick=yeni;A.oto=()=>{if(faz===1)SD_.oto();else if(faz===3&&!yb.hidden)yb.click();};yeni();}
+      D.ekle([kH(a,b),fac(b).every(z=>z===2||z===5)?"sonlu":"devirli",kH(x,y),`<b>${s?"sonlu":"devirli"}</b>`],a+"/"+b);faz=3;TS.bitti(`${kH(a,b)} = ${kH(x,y)} → ${s?"sonlu":"devirli"}`,yeni);if(qi+1>=liste.length){A.durum(`${liste.length} / ${liste.length}`);A.tamam("Kesirleri sadeleştirip karşılaştırdınız.");}});}
+  A.oto=()=>{if(TS.sonraki())return true;if(faz===1){SD_.oto();return true;}return false;};yeni();}
 const e_sadelestir=p=>{const D=defterY(["Kesir","İlk paydaya göre","En sade hâli","Gerçek tür"]);
   const TUZ=karistir([[21,35],[9,12],[6,15],[18,15],[22,55],[33,44],[27,36],[26,65],[14,56],[12,30]]),DUZ=karistir([[12,18],[8,14],[10,30],[9,33],[15,18],[20,24],[6,9]]);
   const yon=["Kesrin paydasına bakılarak verilen karar ile bölmenin gerçek sonucu tabloda yan yana yazılır.","Kesri adım adım sadeleştiriniz; her adımda yeni bir satır eklenir. Kırmızı satırlarda karar yanlış çıkıyor."];
   asamali(p,{tahmin:{giris:`${kH(21,35)} kesrinin paydası 35 = 5 · 7.`,soru:`Paydada 7 olduğuna göre ${kH(21,35)} kesrinin ondalık gösterimi devirli midir?`,secs:[["e","Evet, devirlidir."],["h","Hayır, sonludur."]],dogru:"h",neden:`${kH(21,35)} = ${kH(3,5)} = 0,6; sadeleşince 7 gider.`},
     asamalar:[
       {ad:"Tuzaklı bir kesir",yon,bitis:"Kesri sadeleştirip soruyu doğru cevaplayınca.",kur:(k,A)=>sadeTur2(k,[TUZ[0]],D,A)},
-      {ad:"İki kesir daha",yon,bitis:"İki kesir için de bitince.",kur:(k,A)=>sadeTur2(k,karistir([DUZ[0],TUZ[1]]),D,A)},
+      {ad:"İki kesir daha",yon:["<b>2 kesir</b> sırayla gelir; biri bitince <b>Sıradaki kesir</b> düğmesine basınız.",...yon],bitis:"İki kesir için de bitince.",kur:(k,A)=>sadeTur2(k,karistir([DUZ[0],TUZ[1]]),D,A)},
       kuralA(D,[[`${kH(21,35)} kesrinin paydasında 7 var ama ondalık gösterimi sonlu çıktı. Neden?`,[`En sade hâli ${kH(3,5)}; paydası yalnız 5 çarpanını içerir.`,"7 asal sayı değildir.","Pay paydadan küçüktür."],`Doğru! ${kH(21,35)} = ${kH(3,5)} = 0,6`,[]],
         ["Sonlu mu devirli mi kararı kesrin hangi hâline bakılarak verilir?",["En sade hâline","Sadeleştirilmemiş hâline","Yalnız payına"],"Doğru!",[]]]),
       kendiA((m,son)=>{const d=rastgele([[27,36],[14,35],[33,55],[9,15],[21,28],[39,65]]),yy=karistir([[10,12],[8,18],[14,21],[15,18],[4,14],[20,30]]).slice(0,3);
@@ -1495,7 +1578,7 @@ const e_cizgi=p=>{const D=defterY(["Hedef","Denenen yazılış","Açılımı","H
 /* 9 · YEDİLİ DEVİR ÇARKI — pay sayaçla değiştirilir, çark başlangıcı canlı kayar */
 function carkCiz(sv,nn,bas,okunan){const R=96,c=150,ra_=R+50,P=g=>[c+ra_*Math.cos(g*Math.PI/180),c+ra_*Math.sin(g*Math.PI/180)],[x1,y1]=P(-75),[x2,y2]=P(-25);
   let h=`<circle cx="${c}" cy="${c}" r="${R+40}" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/><path d="M${x1} ${y1}A${ra_} ${ra_} 0 0 1 ${x2} ${y2}" fill="none" stroke="#e8590c" stroke-width="3"/><path d="M${x2-9} ${y2-6}L${x2} ${y2}L${x2+2} ${y2-11}" fill="none" stroke="#e8590c" stroke-width="3" stroke-linejoin="round"/>`;
-  h+=`<text x="${c}" y="${c-8}" text-anchor="middle" font-size="15" font-weight="700" fill="${css('--muted')}">saat yönünde</text><text x="${c}" y="${c+26}" text-anchor="middle" font-size="26" font-weight="800">${nn} ÷ 7</text>`;
+  h+=`<text x="${c}" y="${c-8}" text-anchor="middle" font-size="15" font-weight="700" fill="${css('--muted')}">saat yönünde</text><text x="${c}" y="${c+26}" text-anchor="middle" font-size="26" font-weight="800">${nn} : 7</text>`;
   for(let i=0;i<6;i++){const ang=(-90+i*60)*Math.PI/180,x=c+R*Math.cos(ang),y=c+R*Math.sin(ang);let sira=(i-bas+6)%6;if(sira>okunan)sira=-1;
     h+=`<circle cx="${x}" cy="${y}" r="30" fill="${sira>=0?"#ffd8a8":css('--card')}" stroke="${sira===0?"#e8590c":"currentColor"}" stroke-width="${sira===0?4:2}"/><text x="${x}" y="${y+11}" text-anchor="middle" font-size="30" font-weight="800">${CARK[i]}</text>${sira>=0?`<text x="${x+22}" y="${y-20}" font-size="13" font-weight="800" fill="#e8590c">${sira+1}</text>`:""}`;}
   sv.innerHTML=h;}
@@ -1505,7 +1588,7 @@ function carkOyna(k,D,A){
   const G=gorevler(k.querySelector(".ck-gr"),[{m:"Payı değiştirerek en az 4 farklı kesir deneyiniz.",ok:()=>den.size>=4},{m:`${kH(1,7)}'den ${kH(6,7)}'ye kadar altı kesrin hepsini deneyiniz.`,ok:()=>den.size>=6,s:()=>"Altı kesir de aynı çarkı kullandı."}],()=>A.tamam("Altı kesrin aynı çarkı paylaştığını gördünüz."));
   const S=sayacF("Pay",1,6,1,v=>kH(v,7),v=>{n=v;oyna();});k.querySelector(".ck-s").appendChild(S.el);
   function oyna(){const ilk=Math.floor(n*10/7),bas=CARK.indexOf(String(ilk)),s=CARK.slice(bas)+CARK.slice(0,bas);carkCiz(sv,n,bas,5);
-    k.querySelector(".ck-i").innerHTML=`${n*10} ÷ 7 = <b>${ilk}</b>, kalan ${n*10%7}. Çark ${ilk} basamağından başlar.`;k.querySelector(".ck-r").innerHTML=`${kH(n,7)} = ${dH(n,7)}`;
+    k.querySelector(".ck-i").innerHTML=`${n*10} : 7 = <b>${ilk}</b>, kalan ${n*10%7}. Çark ${ilk} basamağından başlar.`;k.querySelector(".ck-r").innerHTML=`${kH(n,7)} = ${dH(n,7)}`;
     if(!den.has(n)){den.add(n);D.ekle([kH(n,7),String(ilk),dH(n,7)],"o"+n);bip(520+n*40,.05);}A.durum(`${den.size} / 6 kesir`);G.kontrol();}
   A.oto=()=>{const z=[1,2,3,4,5,6].find(v=>!den.has(v));if(z)S.set(z);};oyna();}
 const e_cark=p=>{const D=defterY(["Kesir","İlk basamak","Ondalık gösterim"]);const Q=karistir([2,3,4,5,6]);
@@ -1513,12 +1596,12 @@ const e_cark=p=>{const D=defterY(["Kesir","İlk basamak","Ondalık gösterim"]);
   asamali(p,{tahmin:{giris:`${kH(1,7)} = 0,142857142857… Burada 142857 grubu tekrar ediyor.`,soru:`${kH(2,7)} kesrinin ondalık gösteriminde hangi basamaklar tekrar eder?`,secs:[["a","Başka altı basamak"],["b","Yine 1, 4, 2, 8, 5, 7 basamakları"],["c","Hiçbir basamak tekrar etmez."]],dogru:"b",neden:`${kH(2,7)} = ${dH(2,7)}: aynı basamaklar, farklı başlangıç.`},
     asamalar:[
       {ad:"Payı değiştirin",yon:["Pay sayacını değiştiriniz: Bölmenin ilk adımı hesaplanır ve çark o basamaktan başlayarak saat yönünde okunur.","Her kesrin ondalık gösterimi deney defterine yazılır. Altı kesri de deneyiniz."],bitis:"Görev listesindeki iki görev bitince.",kur:(k,A)=>carkOyna(k,D,A)},
-      {ad:"Başlangıcı siz bulun",yon,bitis:"Üç kesri de çarkta okuyunca.",kur:(k,A)=>carkTur(k,Q.slice(0,3),D,A)},
+      {ad:"Başlangıcı siz bulun",yon:["<b>3 kesir</b> sırayla gelir; biri bitince <b>Sıradaki kesir</b> düğmesine basınız.",...yon],bitis:"Üç kesri de çarkta okuyunca.",kur:(k,A)=>carkTur(k,Q.slice(0,3),D,A)},
       kuralA(D,[[`${kH(1,7)}, ${kH(2,7)}, …, ${kH(6,7)} kesirlerinin ondalık gösterimlerinde ne fark ettiniz?`,["Hepsinde aynı altı basamak (1, 4, 2, 8, 5, 7) aynı sırayla tekrar eder; yalnız başlangıç yeri değişir.","Hepsi sonludur.","Her birinde bambaşka basamaklar tekrar eder."],"Doğru!",[]],
         [`${kH(1,7)} kesrinin ondalık gösteriminde kaç basamak devreder?`,["6","7","1"],"Doğru! 7'ye bölmede 0'dan farklı en fazla 6 değişik kalan çıkar.",[]]]),
       kendiA((m,son)=>{const n_=rastgele([2,3,4,5,6]),dg=CARK.indexOf(String(Math.floor(n_*10/7))),s=CARK.slice(dg)+CARK.slice(0,dg);
         const y=karistir([1,2,3,4,5].map(j=>CARK.slice((dg+j)%6)+CARK.slice(0,(dg+j)%6))).slice(0,2);
-        soruY(m,`${kH(1,7)} = ${dH(1,7)} olduğuna göre ${kH(n_,7)} kesrinin ondalık gösterimi hangisidir?`,[dvH(0,"",s),...y.map(z=>dvH(0,"",z)),dvH(0,"",String(n_))],`Doğru! ${n_} ÷ 7 bölmesinin ilk basamağı ${s[0]}; çark oradan başlar.`,"",son);})],
+        soruY(m,`${kH(1,7)} = ${dH(1,7)} olduğuna göre ${kH(n_,7)} kesrinin ondalık gösterimi hangisidir?`,[dvH(0,"",s),...y.map(z=>dvH(0,"",z)),dvH(0,"",String(n_))],`Doğru! ${n_} : 7 bölmesinin ilk basamağı ${s[0]}; çark oradan başlar.`,"",son);})],
     kural:`Paydası 7 olan kesirlerin (${kH(1,7)}, ${kH(2,7)}, …, ${kH(6,7)}) ondalık gösterimleri <b>devirlidir</b> ve hepsinde aynı <b>altı basamak</b> (142857) aynı sırayla tekrar eder; yalnız başlangıç basamağı değişir: ${kH(3,7)} = ${dH(3,7)}.`});
 };
 
@@ -1546,7 +1629,7 @@ const e_ondkes=p=>{const D=defterY(["Ondalık gösterim","Kesir","En sade hâli"
       kuralA(D,[["0,375 sayısını kesre çevirirken paydayı neden 1000 seçtiniz?",["Virgülden sonra 3 basamak var; son basamak binde birler basamağında.","Pay 3 basamaklı olduğu için","1000 en büyük seçenek olduğu için"],"Doğru! Virgülden sonraki basamak sayısı kadar sıfırlı payda: 10, 100, 1000.",[]],
         ["0,50 ile 0,5 için hangisi doğrudur?",[`Aynı sayıdır: ${kH(50,100)} = ${kH(5,10)} = ${kH(1,2)}`,"0,50 daha büyüktür.","0,5 daha büyüktür."],"Doğru! Sondaki 0 değeri değiştirmez.",[]]]),
       kendiA((m,son)=>{const q=rastgele([["2","45"],["1","25"],["0","35"],["3","6"],["0","875"],["0","24"]]),pay=parseInt(q[0]+q[1],10),pd=10**q[1].length;
-        cevap(m,soruKut(`${q[0]},${q[1]} sayısını <b>en sade kesir</b> olarak yazınız.`),[pay,pd],`Doğru! ${q[0]},${q[1]} = ${kH(pay,pd)} = ${kHs(pay,pd)}`,"",son,{bicim:"sade",kesir:true});})],
+        cevap(m,soruKut(`${q[0]},${q[1]} sayısını <b>en sade kesir</b> olarak yazınız.`),[pay,pd],`Doğru! ${q[0]},${q[1]} = ${kH(pay,pd)} = ${kHs(pay,pd)}`,x=>Math.abs(x[0]/x[1]-pay/pd)>1e-9?"Kesrin değeri sayıyla aynı değil: son basamak hangi basamakta? Paydayı ona göre seçiniz ve tam kısmı paya katınız.":"Değer doğru ama kesir en sade hâlde değil; pay ile paydayı ortak bölenlerine bölünüz.",son,{bicim:"sade",kesir:true});})],
     kural:`Sonlu bir ondalık gösterimi kesre çevirmek için virgülü kaldırıp payı yazarız; paydaya <b>son basamağın basamak değerine</b> göre 10, 100, 1000 … yazarız. Sondaki 0'lar değeri değiştirmez. Sonra <b>sadeleştiririz</b>: 0,375 = ${kH(375,1000)} = ${kH(3,8)}.`});
 };
 
@@ -1554,6 +1637,7 @@ const e_ondkes=p=>{const D=defterY(["Ondalık gösterim","Kesir","En sade hâli"
 function sinaTur2(k,liste,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="k8d"><div class="dkart sn-kart"></div><div class="k8-sk sn-s"></div><div class="sn-ch"></div><div class="dkart"><small>Bölme makinesi</small><p class="k8-big k8-dig sn-b"></p><p class="sn-k"></p></div><div class="sn-sor"></div><div class="row"><button type="button" class="primary yeni" hidden>Sıradaki iddia</button></div></div><div class="fb" hidden></div>`);
   const kt=k.querySelector(".sn-kart"),bo=k.querySelector(".sn-b"),kk=k.querySelector(".sn-k"),so=k.querySelector(".sn-sor"),yb=k.querySelector(".yeni");let qi=-1,it,P,Q,faz;
+  const TS=turSerit(k,liste.length,{et:"İddia",ileri:"Sıradaki iddia",once:kt,vurgu:()=>kt,dugYer:yb.parentNode});
   const SP=sayacF("Pay",1,999,1,String,v=>{P=v;oyna();}),SQ=sayacF("Payda",1,999,9,String,v=>{Q=v;oyna();});k.querySelector(".sn-s").append(SP.el,SQ.el);
   chips(k.querySelector(".sn-ch"),[9,90,99,900,10,100],v=>SQ.set(v),v=>"Payda "+v);
   const hedef=()=>dvH(it.o.t,it.o.s,it.o.d),hedAc=()=>{const o=it.o;return o.t+","+(o.s+o.d.repeat(12)).slice(0,10);};
@@ -1563,8 +1647,8 @@ function sinaTur2(k,liste,D,A){
     bo.innerHTML=`${kH(P,Q)} = ${ac.slice(0,i)}<span class="y">${ac.slice(i)}</span>…`;kk.innerHTML=ayni?`<span style="color:var(--acc3);font-weight:800">Bölme sonucu hedef sayıyla aynı ✔</span>`:`Hedeften farklı (turuncu basamaklar).`;
     D.ekle([`${hedef()} için ${kH(P,Q)}`,ac+"…",ayni?"aynı":"farklı"],"s"+qi+"-"+P+"/"+Q);
     if(ayni){faz=2;bip(760,.1);const ilk=P===it.c[0]&&Q===it.c[1];
-      soruY(so,`İddiadaki kesir (${kH(...it.c)}) doğru muydu?`,it.d?["Evet; bölmesi ilk denemede hedefi verdi.","Hayır; kesri değiştirmem gerekti."]:["Hayır; kesri değiştirmem gerekti.","Evet; bölmesi ilk denemede hedefi verdi."],it.d?`Doğru! Kural doğru uygulanmış.`:`Doğru! İddia hatalıydı. ${it.h} Doğrusu: ${hedef()} = ${kH(P,Q)}${gcd(P,Q)>1?` = ${kHs(P,Q)}`:""}`,"",()=>{faz=3;if(qi+1<liste.length)yb.hidden=false;else{A.durum(`${liste.length} / ${liste.length}`);A.tamam("İddiaları bölerek sınadınız.");}});}}
-  yb.onclick=yeni;A.oto=()=>{if(faz===1){const K=dvK(it.o);if(P!==K.pay){SP.set(K.pay);return;}if(Q!==K.pd){SQ.set(K.pd);return;}}if(faz===3&&!yb.hidden)yb.click();};yeni();}
+      soruY(so,`İddiadaki kesir (${kH(...it.c)}) doğru muydu?`,it.d?["Evet; bölmesi ilk denemede hedefi verdi.","Hayır; kesri değiştirmem gerekti."]:["Hayır; kesri değiştirmem gerekti.","Evet; bölmesi ilk denemede hedefi verdi."],it.d?`Doğru! Kural doğru uygulanmış.`:`Doğru! İddia hatalıydı. ${it.h} Doğrusu: ${hedef()} = ${kH(P,Q)}${gcd(P,Q)>1?` = ${kHs(P,Q)}`:""}`,"",()=>{faz=3;TS.bitti(`${it.ad}: ${hedef()} = ${kH(P,Q)} (${it.d?"iddia doğru":"iddia hatalı"})`,yeni);if(qi+1>=liste.length){A.durum(`${liste.length} / ${liste.length}`);A.tamam("İddiaları bölerek sınadınız.");}});}}
+  A.oto=()=>{if(TS.sonraki())return true;if(faz===1){const K=dvK(it.o);if(P!==K.pay){SP.set(K.pay);return true;}if(Q!==K.pd){SQ.set(K.pd);return true;}}return false;};yeni();}
 const hepsiAc0=o=>o.t+","+(o.s+o.d.repeat(12)).slice(0,10);
 const e_sina=p=>{const D=defterY(["Denenen kesir","Bölme sonucu","Hedefle"]);const AD=karistir(["Arda","Elif","Kerem","Zeynep","Mert","Defne"]);
   const C=karistir([{o:{t:0,s:"1",d:"6"},w:[[16,99,"Pay için devretmeyen 1 çıkarılmamış ve payda 90 yerine 99 yazılmış."],[15,99,"Payda 90 olmalıydı: 1 basamak devreder (bir 9), 1 basamak devretmez (bir 0)."]]},
@@ -1575,14 +1659,14 @@ const e_sina=p=>{const D=defterY(["Denenen kesir","Bölme sonucu","Hedefle"]);co
     {o:{t:0,s:"0",d:"5"},w:[[5,99,"Virgülden sonra devretmeyen bir 0 var; payda 90 olmalıydı."],[5,9,"Virgülden sonraki 0 devretmiyor; paydaya bir 0 eklenmeli: 90."]]}]);
   const Q=[0,1,2,3].map(i=>{const c=C[i],K=dvK(c.o),hatali=[false,true,true,false][i];if(!hatali)return {o:c.o,c:[K.pay,K.pd],d:true,ad:AD[i]};const w=rastgele(c.w);return {o:c.o,c:[w[0],w[1]],d:false,h:w[2],ad:AD[i]};});
   const yon=["Öğrenciler devirli sayıları kurala göre kesre çevirdi; bazıları hata yaptı. Sayaçlar iddiadaki kesirle başlar ve bölme makinesi bu kesri böler.","Bölme sonucu hedeften farklıysa pay ve paydayı (hazır payda düğmeleriyle de) değiştirerek hedefi veren kesri bulunuz."];
-  asamali(p,{tahmin:{giris:`Ece kuralı kullanarak ${dvH(0,"","4")} = ${kH(4,9)} buldu.`,soru:"Bu sonucun doğru olup olmadığını nasıl kontrol edebilir?",secs:[["b","4 ÷ 9 bölmesini yaparak"],["t","4 ile 9'u toplayarak"],["y","Kontrol edemez."]],dogru:"b",neden:`4 ÷ 9 = 0,444… = ${dvH(0,"","4")}.`},
+  asamali(p,{tahmin:{giris:`Ece kuralı kullanarak ${dvH(0,"","4")} = ${kH(4,9)} buldu.`,soru:"Bu sonucun doğru olup olmadığını nasıl kontrol edebilir?",secs:[["b","4 : 9 bölmesini yaparak"],["t","4 ile 9'u toplayarak"],["y","Kontrol edemez."]],dogru:"b",neden:`4 : 9 = 0,444… = ${dvH(0,"","4")}.`},
     asamalar:[
-      {ad:"İlk iki iddia",yon,bitis:"İki iddia için de hedefi veren kesri bulup soruyu cevaplayınca.",kur:(k,A)=>sinaTur2(k,karistir([Q[0],Q[1]]),D,A)},
-      {ad:"İki iddia daha",yon,bitis:"İki iddia için de bitince.",kur:(k,A)=>sinaTur2(k,karistir([Q[2],Q[3]]),D,A)},
+      {ad:"İlk iki iddia",yon:["<b>2 iddia</b> sırayla gelir; biri bitince <b>Sıradaki iddia</b> düğmesine basınız.",...yon],bitis:"İki iddia için de hedefi veren kesri bulup soruyu cevaplayınca.",kur:(k,A)=>sinaTur2(k,karistir([Q[0],Q[1]]),D,A)},
+      {ad:"İki iddia daha",yon:["<b>2 iddia</b> daha sırayla gelir; biri bitince <b>Sıradaki iddia</b> düğmesine basınız.",...yon],bitis:"İki iddia için de bitince.",kur:(k,A)=>sinaTur2(k,karistir([Q[2],Q[3]]),D,A)},
       kuralA(D,[["Kuralla bulduğunuz kesrin doğru olup olmadığını nasıl kontrol edersiniz?",["Payı paydaya bölerim; çıkan ondalık gösterim ilk sayıyla aynı olmalı.","Pay ile paydayı toplarım.","Kesri ters çeviririm."],"Doğru! Bölme, kuralın sağlamasıdır.",[]],
         [`${dvH(0,"1","6")} için ${kH(16,99)} yazan biri hangi hatayı yapmıştır?`,["Devretmeyen 1'i çıkarmamış ve payda 90 yerine 99 yazmış.","Hiç hata yapmamıştır.","Yalnız tam kısmı yanlış yazmıştır."],`Doğru! ${kH(16,99)} = ${dH(16,99)} olur.`,[]]]),
       kendiA((m,son)=>{const a=ra(1,8);
-        soruY(m,`Arda ${dvH(0,"",String(a))} sayısını ${kH(a,10)} olarak yazdı. ${a} ÷ 10 = 0,${a} çıktığı için bu yanlıştır. Doğrusu hangisidir?`,[kHs(a,9),kH(a,99),kH(a,90),kH(a*10,9)],`Doğru! ${a} ÷ 9 = ${dH(a,9)}`,"",son);})],
+        soruY(m,`Arda ${dvH(0,"",String(a))} sayısını ${kH(a,10)} olarak yazdı. ${a} : 10 = 0,${a} çıktığı için bu yanlıştır. Doğrusu hangisidir?`,[kHs(a,9),kH(a,99),kH(a,90),kH(a*10,9)],`Doğru! ${a} : 9 = ${dH(a,9)}`,"",son);})],
     kural:"Kuralla bulunan kesri <b>bölerek sınarız</b>: Payı paydaya böldüğümüzde ilk devirli sayıyı elde etmeliyiz. En sık hatalar: devretmeyen kısmı çıkarmamak ve paydada 90 yerine 99 (ya da 99 yerine 90) yazmak."});
 };
 
@@ -1611,7 +1695,7 @@ const e_negatif=p=>{const D=defterY(["Kesir","Sayı kısmı","Ondalık gösterim
       kuralA(D,[[`${EKSI}${kH(7,4)} sayısının ondalık gösterimini nasıl buldunuz?`,[`Önce ${kH(7,4)} = 1,75 buldum, sonra başına ${EKSI} koydum.`,"Sayıyı pozitif yaptım: 1,75",`7 ile 4'ü virgülle yazdım: ${EKSI}7,4`],"Doğru!",[]],
         [`${EKSI}${kH(2,3)} sayısının ondalık gösterimi devirlidir. Bunu işaret mi belirler?`,["Hayır: Sonlu mu devirli mi olduğunu en sade hâldeki payda belirler; işaret belirlemez.","Evet: Negatif sayıların hepsi devirlidir.","Evet: Negatif kesirlerin ondalık gösterimi yoktur."],`Doğru! ${kH(2,3)} = ${dH(2,3)} ve ${EKSI}${kH(2,3)} = ${dH(-2,3)}`,[]]]),
       kendiA((m,son)=>{const [a,b]=rastgele([[9,8],[13,4],[7,5],[11,8],[9,4]]);
-        cevap(m,yaz([`Bir dalgıç deniz seviyesinin ${kH(a,b)} m altında. Deniz seviyesi 0 kabul ediliyor.`])+soruKut("Dalgıcın konumunu gösteren sayının ondalık gösterimi nedir? (Birimi yazmayınız.)"),[-a,b],`Doğru! ${EKSI}${kH(a,b)} = <b>${dMet(-a,b)}</b>`,"",son,{bicim:"ondalik",eksi:true});})],
+        cevap(m,yaz([`Bir dalgıç deniz seviyesinin ${kH(a,b)} m altında. Deniz seviyesi 0 kabul ediliyor.`])+soruKut("Dalgıcın konumunu gösteren sayının ondalık gösterimi nedir? (Birimi yazmayınız.)"),[-a,b],`Doğru! ${EKSI}${kH(a,b)} = <b>${dMet(-a,b)}</b>`,x=>Math.abs(x[0]/x[1]-a/b)<1e-9?"Sayı kısmı doğru, işarete dikkat: deniz seviyesinin altı negatiftir.":"Önce sayı kısmını bulunuz: payı paydaya bölünüz; sonra işareti ekleyiniz.",son,{bicim:"ondalik",eksi:true});})],
     kural:`Negatif bir kesrin ondalık gösterimini bulmak için sayı kısmını bölüp başına <b>${EKSI}</b> koyarız: ${EKSI}${kH(7,4)} = ${EKSI}1,75 ve ${EKSI}${kH(2,3)} = ${dH(-2,3)}. Aynadaki sayının yalnız işareti değişir; sonlu ya da devirli olması değişmez.`});
 };
 
@@ -1632,18 +1716,18 @@ const e_tamsayili=p=>{const D=defterY(["Tam sayılı kesir","Bileşik kesir","On
     asamalar:[
       {ad:"Modeli kurun",yon:["Sayaçlarla dolu bütün sayısını ve son bütündeki dolu parça sayısını değiştiriniz. Model ve sayı doğrusundaki nokta değişir; ondalık gösterim anında yazılır.","Modeli tarifteki miktara eşitleyiniz."],bitis:"Model tarifteki miktarla aynı olunca.",kur:(k,A)=>tsKurTur(k,L[0],D,A)},
       {ad:"İkinci ölçü ve kontrol",yon:[...yon,"Sonunda sonucunu bileşik kesirle kontrol ediniz."],bitis:"Kontrol sorusunu da doğru cevaplayınca.",kur:(k,A)=>tsTur(k,L[1],true,D,A)},
-      kuralA(D,[[`${karmaH(2,3,8)} = 2,375 gösteriminde virgülden önceki 2 nereden geldi?`,[`Tam kısımdan (2 dolu bütün); ${kH(3,8)} = 0,375 virgülden sonrasını verdi.`,"8'in yarısından","3 ÷ 8 bölmesinden"],"Doğru!",[]],
+      kuralA(D,[[`${karmaH(2,3,8)} = 2,375 gösteriminde virgülden önceki 2 nereden geldi?`,[`Tam kısımdan (2 dolu bütün); ${kH(3,8)} = 0,375 virgülden sonrasını verdi.`,"8'in yarısından","3 : 8 bölmesinden"],"Doğru!",[]],
         [`${karmaH(1,2,3)} sayısının ondalık gösterimi hangisidir?`,[dvH(1,"","6"),"1,23","1,6","12,3"],`Doğru! ${kH(2,3)} = ${dH(2,3)} olduğu için ${karmaH(1,2,3)} = ${dH(5,3)}`,[]]]),
       kendiA((m,son)=>{const [t,r,q]=rastgele([[3,1,4],[5,3,8],[2,7,20],[1,3,5],[4,1,8]]);
-        cevap(m,soruKut(`${karmaH(t,r,q)} sayısının ondalık gösterimini yazınız.`),[t*q+r,q],`Doğru! ${karmaH(t,r,q)} = <b>${dMet(t*q+r,q)}</b>`,"",son,{bicim:"ondalik"});})],
-    kural:`Tam sayılı bir kesrin ondalık gösteriminde <b>tam kısım virgülden önce</b> yazılır; kesir kısmının ondalık gösterimi virgülden sonrasını verir: ${karmaH(2,3,8)} = 2,375. Bileşik kesre çevirip bölerek de aynı sonuç bulunur: ${kH(19,8)} = 19 ÷ 8 = 2,375.`});
+        cevap(m,soruKut(`${karmaH(t,r,q)} sayısının ondalık gösterimini yazınız.`),[t*q+r,q],`Doğru! ${karmaH(t,r,q)} = <b>${dMet(t*q+r,q)}</b>`,x=>Math.floor(x[0]/x[1])!==t?"Virgülden önce tam kısım yazılır; tam kısmı kontrol ediniz.":"Tam kısım doğru; kesir kısmını (pay bölü payda) yeniden bölünüz.",son,{bicim:"ondalik"});})],
+    kural:`Tam sayılı bir kesrin ondalık gösteriminde <b>tam kısım virgülden önce</b> yazılır; kesir kısmının ondalık gösterimi virgülden sonrasını verir: ${karmaH(2,3,8)} = 2,375. Bileşik kesre çevirip bölerek de aynı sonuç bulunur: ${kH(19,8)} = 19 : 8 = 2,375.`});
 };
 
 /* 17 · 0,999… GİZEMİ — 9 ekledikçe 1'e uzaklık çubuğu küçülür */
 const e_gizem=p=>{const D=defterY(["Yol","Ne buldum?"]);
   const yol1=(ic,A)=>{let s=0;const tb=el(ic,"tsar",`<table class="t"><thead><tr><th>Kesir</th><th>Bölme</th><th>Ondalık gösterim</th></tr></thead><tbody></tbody></table>`).querySelector("tbody");
     const r=el(ic,"row");r.innerHTML=`<button type="button" class="primary snr">Sıradaki kesri bölün</button>`;const snr=r.querySelector(".snr");
-    snr.onclick=()=>{if(s>=8)return;s++;A.durum(`${s} / 8`);tb.insertAdjacentHTML("beforeend",`<tr class="yeni"><td>${kH(s,9)}</td><td>${s} ÷ 9</td><td>0,${String(s).repeat(4)}… = ${dH(s,9)}</td></tr>`);bip(520+s*30,.05);
+    snr.onclick=()=>{if(s>=8)return;s++;A.durum(`${s} / 8`);tb.insertAdjacentHTML("beforeend",`<tr class="yeni"><td>${kH(s,9)}</td><td>${s} : 9</td><td>0,${String(s).repeat(4)}… = ${dH(s,9)}</td></tr>`);bip(520+s*30,.05);
       if(s===8){snr.disabled=true;tb.insertAdjacentHTML("beforeend",`<tr class="yeni"><td>${kH(9,9)}</td><td colspan="2">Örüntüye göre: 0,9999… = ${dvH(0,"","9")}</td></tr>`);
         soruY(ic,`Örüntü ${kH(9,9)} = 0,999… diyor. Peki ${kH(9,9)} hangi sayıya eşittir?`,["1","0,9","9"],`Doğru! ${kH(9,9)} = 1. Örüntüye göre de ${kH(9,9)} = 0,999… Demek ki <b>0,999… = 1</b>.`,"",()=>{D.ekle(["1. yol (örüntü)",`${kH(9,9)} = 0,999… = 1`],"y1");A.tamam("Örüntü: 0,999… = 1");});}};
     A.oto=()=>{if(!snr.disabled)snr.click();};};
@@ -1676,7 +1760,7 @@ const e_gizem=p=>{const D=defterY(["Yol","Ne buldum?"]);
 function hesapSerbest(k,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="two"><div><div class="hm"><div class="hm-ekran"><small class="hm-is"></small><b class="hm-s">0</b></div><div class="hm-tus"></div></div></div><div class="yan"><div class="k8-iki"><div><b>Ekrana sığdı, bölme bitti</b><div class="hs-1"></div></div><div><b>Ekran doldu, kesildi</b><div class="hs-2"></div></div></div></div></div><div class="hs-gr"></div>`);
   const eis=k.querySelector(".hm-is"),es=k.querySelector(".hm-s"),tus=k.querySelector(".hm-tus"),s1=k.querySelector(".hs-1"),s2=k.querySelector(".hs-2");let a="",b="",son=null,op="";const den=new Map();
-  const G=gorevler(k.querySelector(".hs-gr"),[{m:"Paydası (böleni) farklı en az 6 bölme yapınız (ör. 3 ÷ 8, 2 ÷ 3).",ok:()=>new Set([...den.values()].map(x=>x.b)).size>=6},{m:"Sonucu ekrana sığan en az 2 bölme bulunuz.",ok:()=>[...den.values()].filter(x=>x.s).length>=2},{m:"Sonucu ekranda kesilen en az 2 bölme bulunuz.",ok:()=>[...den.values()].filter(x=>!x.s).length>=2}],()=>A.tamam("Bölmeleri iki gruba ayırdınız."));
+  const G=gorevler(k.querySelector(".hs-gr"),[{m:"Paydası (böleni) farklı en az 6 bölme yapınız (ör. 3 : 8, 2 : 3).",ok:()=>new Set([...den.values()].map(x=>x.b)).size>=6},{m:"Sonucu ekrana sığan en az 2 bölme bulunuz.",ok:()=>[...den.values()].filter(x=>x.s).length>=2},{m:"Sonucu ekranda kesilen en az 2 bölme bulunuz.",ok:()=>[...den.values()].filter(x=>!x.s).length>=2}],()=>A.tamam("Bölmeleri iki gruba ayırdınız."));
   const TUS=["7","8","9","÷","4","5","6","=","1","2","3","C","0"];
   tus.innerHTML=TUS.map(t=>`<button type="button" class="hmt${/\d/.test(t)?"":" op"}" data-t="${t}" aria-label="${t==="C"?"Temizle":t}">${t}</button>`).join("");
   function ekran(x,y){const Ac=acilim(x,y),tl=String(Ac.tam).length,yer=10-tl;if(!Ac.devir&&Ac.sabit.length<=yer)return String(Ac.tam)+(Ac.sabit?","+Ac.sabit:"");return Ac.tam+","+basam(x,y,yer);}
@@ -1684,21 +1768,21 @@ function hesapSerbest(k,D,A){
   tus.querySelectorAll("button").forEach(bt=>bt.onclick=()=>{const t=bt.dataset.t;bip(880,.03);
     if(t==="C"){a="";b="";op="";son=null;goster();return;}
     if(/\d/.test(t)){if(son!=null){a="";b="";op="";son=null;}if(!op){if(a.length<3)a=a==="0"?t:a+t;}else if(b.length<3)b=b==="0"?t:b+t;goster();return;}
-    if(t==="÷"){if(a&&!op&&son==null){op="÷";goster();}return;}
+    if(t==="÷"){if(a&&!op&&son==null){op=":";goster();}return;}
     if(t==="="){if(!(a&&op&&b))return;const x=+a,y=+b;if(!y){son="Hata";goster();return;}son=ekran(x,y);goster();const sl=sonlu(x,y)&&acilim(x,y).sabit.length<=10-String(Math.floor(x/y)).length,key=x+"/"+y;
-      if(!den.has(key)){den.set(key,{s:sl,b:y});(sl?s1:s2).insertAdjacentHTML("beforeend",`<span class="${sl?"s":"d"}">${x} ÷ ${y}</span>`);D.ekle([`${x} ÷ ${y}`,son,dH(x,y)],key);}A.durum(`${den.size} bölme`);G.kontrol();}});
+      if(!den.has(key)){den.set(key,{s:sl,b:y});(sl?s1:s2).insertAdjacentHTML("beforeend",`<span class="${sl?"s":"d"}">${x} : ${y}</span>`);D.ekle([`${x} : ${y}`,son,dH(x,y)],key);}A.durum(`${den.size} bölme`);G.kontrol();}});
   A.oto=()=>{const h=[[3,8],[2,3],[7,20],[5,6],[1,4],[4,11]].find(([x,y])=>!den.has(x+"/"+y));if(!h)return;tus.querySelector('[data-t="C"]').click();for(const c of [...String(h[0]),"÷",...String(h[1]),"="])tus.querySelector(`[data-t="${c}"]`).click();};goster();}
 const e_hesap=p=>{const D=defterY(["İşlem","Ekran","Ondalık gösterim"]);const S2=rastgele([[2,3],[5,6],[1,9],[7,9],[4,15],[1,12],[1,7],[3,7],[5,11],[2,11],[4,7]]);
   const yon=["Görevdeki bölme işlemini hesap makinesinin tuşlarına basarak yapınız. Ekrana en fazla 10 rakam sığar.","Sonra ekrana bakıp soruları cevaplayınız. Yanlış tuşa basarsanız <b>C</b> ile temizleyiniz."];
-  asamali(p,{tahmin:{giris:"Bir hesap makinesinin ekranına en fazla 10 rakam sığar. Sığmayan basamaklar kesilip atılır.",soru:"2 ÷ 3 işleminin sonucu ekrana tamamen sığar mı?",secs:[["e","Evet, sığar."],["h","Hayır, sığmaz."]],dogru:"h",neden:"2 ÷ 3 = 0,666… : 6'lar hiç bitmez."},
+  asamali(p,{tahmin:{giris:"Bir hesap makinesinin ekranına en fazla 10 rakam sığar. Sığmayan basamaklar kesilip atılır.",soru:"2 : 3 işleminin sonucu ekrana tamamen sığar mı?",secs:[["e","Evet, sığar."],["h","Hayır, sığmaz."]],dogru:"h",neden:"2 : 3 = 0,666… : 6'lar hiç bitmez."},
     asamalar:[
       {ad:"Kendi bölmeleriniz",yon:["Hesap makinesinde istediğiniz bölmeleri yapınız: sayı, ÷, sayı, = tuşlarına basınız.","Her bölme, sonucu ekrana sığdıysa soldaki, ekran doldu ve kesildiyse sağdaki gruba yazılır. Farklı bölenler deneyiniz."],bitis:"Görev listesindeki üç görev bitince.",kur:(k,A)=>hesapSerbest(k,D,A)},
       {ad:"Ekranı yorumlayın",yon,bitis:"Ekrandaki sonucu doğru yorumlayınca.",kur:(k,A)=>hesapTur(k,S2[0],S2[1],D,A)},
-      kuralA(D,[["Ekranda 0,666666666 görünüyor. 2 ÷ 3 işleminin ondalık gösterimi tam olarak bu mudur?",[`Hayır: 6'lar sonsuza kadar sürer, ekran sığmayanları kesti. Doğru yazılış ${dH(2,3)}`,"Evet, tam olarak budur.","Hayır, doğrusu 0,6'dır."],"Doğru!",[]],
+      kuralA(D,[["Ekranda 0,666666666 görünüyor. 2 : 3 işleminin ondalık gösterimi tam olarak bu mudur?",[`Hayır: 6'lar sonsuza kadar sürer, ekran sığmayanları kesti. Doğru yazılış ${dH(2,3)}`,"Evet, tam olarak budur.","Hayır, doğrusu 0,6'dır."],"Doğru!",[]],
         ["Sonucu ekrana sığan bölmelerin bölenleri için ne söylenebilir?",["Asal çarpanları yalnız 2 ve 5'tir (sadeleşmiş hâlde).","Hepsi tek sayıdır.","Hepsi 3'ün katıdır."],"Doğru! Bu bölmeler biter; sonuç sonludur.",[]],
         ["Ekranda 0,142857142 görünüyor. Devreden basamak grubu hangisidir?",["142857","142","14"],`Doğru! ${kH(1,7)} = ${dH(1,7)}`,[]]]),
       kendiA((m,son)=>{const [a,b]=rastgele([[3,11],[5,11],[4,11],[7,11],[1,11]]),Ac=acilim(a,b),e="0,"+basam(a,b,9);
-        soruY(m,`Hesap makinesi ${a} ÷ ${b} işlemi için ekranda <b>${e}</b> gösteriyor. Bu bölmenin ondalık gösterimi hangisidir?`,[dH(a,b),dvH(0,Ac.devir[0],Ac.devir[1]),`<span class="ond">0,${Ac.devir}</span>`,dvH(0,"",Ac.devir[0])],`Doğru! ${Ac.devir} grubu tekrar ediyor: ${dH(a,b)}`,"",son);})],
+        soruY(m,`Hesap makinesi ${a} : ${b} işlemi için ekranda <b>${e}</b> gösteriyor. Bu bölmenin ondalık gösterimi hangisidir?`,[dH(a,b),dvH(0,Ac.devir[0],Ac.devir[1]),`<span class="ond">0,${Ac.devir}</span>`,dvH(0,"",Ac.devir[0])],`Doğru! ${Ac.devir} grubu tekrar ediyor: ${dH(a,b)}`,"",son);})],
     kural:`Hesap makinesi ekranı sınırlıdır: <b>Sonlu</b> bir sonuç ekrana sığar ve bölme biter. <b>Devirli</b> bir sonucun basamakları sonsuza kadar sürer; ekran yalnız ilk basamakları gösterir, sığmayanlar kesilir. Doğru yazılışta devreden grup devir çizgisiyle gösterilir: ${kH(2,3)} = ${dH(2,3)}.`});
 };
 
@@ -1724,7 +1808,7 @@ const e_market=p=>{const D=defterY(["Etiket","Tartı fişi"]);const yon=["Soldak
       kuralA(D,[[`Hangi etiket ${dH(1,3)} kg fişiyle eşleşir?`,[kH(1,3)+" kg",kH(3,10)+" kg","İkisi de"],`Doğru! ${kH(3,10)} = 0,3 ama ${kH(1,3)} = ${dH(1,3)}`,[]],
         [`0,4 ile ${dH(4,9)} için hangisi doğrudur?`,[`0,4 = ${kH(2,5)} ve ${dH(4,9)} = ${kH(4,9)}; farklı sayılardır.`,"Aynı sayıdır.",`${dH(4,9)} sonludur.`],"Doğru! Devir çizgisi sayıyı değiştirir.",[]]]),
       kendiA((m,son)=>{const [a,b,ne]=rastgele([[1,8,"kıyma"],[3,8,"kuşbaşı"],[5,8,"kıyma"],[7,8,"tavuk"],[3,4,"pirzola"]]);const secs=[...new Set([dMet(a,b),`0,${a}${b}`,`${b},${a}`,`${a},${b}`])];
-        soruY(m,`Bir kasap ${kH(a,b)} kg ${ne} tartıyor. Tartının ekranında hangi sayı görünür?`,secs,`Doğru! ${a} ÷ ${b} = ${dMet(a,b)}`,"",son);})],
+        soruY(m,`Bir kasap ${kH(a,b)} kg ${ne} tartıyor. Tartının ekranında hangi sayı görünür?`,secs,`Doğru! ${a} : ${b} = ${dMet(a,b)}`,"",son);})],
     kural:`Kesirle yazılmış bir miktarın ondalık gösterimini <b>payı paydaya bölerek</b> buluruz; tartı da bunu yapar. Devirli bir miktarı tartı tam gösteremez. Benzer görünen gösterimlere dikkat: ${kH(3,10)} = 0,3 ama ${kH(1,3)} = ${dH(1,3)}; ${kH(2,5)} = 0,4 ama ${kH(4,9)} = ${dH(4,9)}.`});
 };
 
@@ -1736,23 +1820,25 @@ function yarisKur(k,D,A,sureF){
   const ds=k.querySelector(".dsoru"),bar=k.querySelector(".yaris i"),bb=k.querySelector(".basl"),f=k.querySelector(".fb"),st=k.querySelector(".yr");
   let tur=0,sen=0,bil=0,puan=0,zam=null,acik=false,Q=null,t0=0,sure=0,oyn=0,iz=[],geo=null;
   const et=v=>String(v).replace(".",",");
+  const TS=turSerit(k.querySelector(".duel"),8,{et:"Tur",ileri:"Sıradaki tur",hepsi:"8 turun hepsi bitti",once:ds,vurgu:()=>ds,dugYer:k,sonMetin:"Sonucunuz aşağıda yazıyor; sonra alttaki “Sonraki adım” düğmesine basınız."});
   function ciz(){const W=genislik(st,640,340);const G=dogruSvg(W,{min:0,max:2,bol:10,y:70,et:v=>et(v)});geo={W,x:G.x};let h=G.h;
     iz.forEach(([v,rk,e])=>{h+=`<circle cx="${G.x(v)}" cy="70" r="9" fill="${rk}" stroke="#fff" stroke-width="2"/><text x="${G.x(v)}" y="44" text-anchor="middle" font-size="15" font-weight="800" fill="${rk}">${e}</text>`;});
     const sv=svgEl(W,110);sv.innerHTML=h;sv.style.cursor="pointer";sv.addEventListener("click",e=>{const pt=svgNokta(sv,e);const v=Math.round(((pt.x-28)/(W-56))*2*10)/10;dokun(Math.max(0,Math.min(2,v)));});st.replaceChildren(sv);}
   function skor(){k.querySelector(".s-tur").textContent=`${Math.min(tur,8)} / 8`;k.querySelector(".s-sen").textContent=sen;k.querySelector(".s-bil").textContent=bil;k.querySelector(".s-puan").textContent=puan;A.durum(`Tur ${Math.min(tur,8)} / 8`);}
   const durdur=()=>{if(zam){clearInterval(zam);zam=null;}};
   function turBitti(kaz,yer){acik=false;durdur();if(kaz)sen++;else bil++;D.ekle([kH(Q.p,Q.q),yer==null?"süre bitti":et(yer),dMet(Q.p,Q.q),kaz?"Siz":"Bilgisayar"],"t"+oyn+"-"+tur);skor();
-    if(tur>=8){setTimeout(()=>{if(!k.isConnected)return;fb(f,sen>=bil,sen>bil?`Yarışı kazandınız! Siz ${sen}, bilgisayar ${bil}. Puanınız: ${puan}.`:sen===bil?`Berabere: ${sen} – ${bil}. Puanınız: ${puan}.`:`Bilgisayar kazandı: ${bil} – ${sen}. Deney defterinde doğru yerlere bakınız.`);A.tamam(`Yarış bitti: Siz ${sen}, bilgisayar ${bil}.`);},900);}
-    else setTimeout(()=>{if(k.isConnected)yeniTur();},1700);}
+    const oz=`${kH(Q.p,Q.q)} = ${dMet(Q.p,Q.q)} → ${kaz?"siz aldınız":"bilgisayar aldı"}`;
+    if(tur>=8){TS.bitti(oz);setTimeout(()=>{if(!k.isConnected)return;fb(f,sen>=bil,sen>bil?`Yarışı kazandınız! Siz ${sen}, bilgisayar ${bil}. Puanınız: ${puan}.`:sen===bil?`Berabere: ${sen} – ${bil}. Puanınız: ${puan}.`:`Bilgisayar kazandı: ${bil} – ${sen}. Deney defterinde doğru yerlere bakınız.`);A.tamam(`Yarış bitti: Siz ${sen}, bilgisayar ${bil}.`);},900);}
+    else TS.bitti(oz,()=>{if(k.isConnected)yeniTur();});}
   function yeniTur(){tur++;skor();Q=yarisSayi();acik=true;iz=[];ciz();ds.innerHTML=`Bu kesrin ondalık gösteriminin yerine dokununuz: <span class="k8-big">${kH(Q.p,Q.q)}</span>`;f.hidden=true;
     sure=sureF(tur);t0=Date.now();bar.style.width="0%";durdur();
     zam=setInterval(()=>{if(!k.isConnected){durdur();return;}const o=(Date.now()-t0)/sure;bar.style.width=Math.min(100,o*100)+"%";
       if(o>=1&&acik){iz=[[Q.p/Q.q,"#2f9e44",dMet(Q.p,Q.q)]];ciz();fb(f,false,`Süre bitti; tur bilgisayarın. ${kH(Q.p,Q.q)} = ${dMet(Q.p,Q.q)}`);turBitti(false,null);}},50);}
   function dokun(v){if(!acik)return;const dg=Q.p/Q.q;
-    if(Math.abs(v-dg)<1e-9){iz=[[v,"#2f9e44",dMet(Q.p,Q.q)+" ✔"]];ciz();const hizli=Date.now()-t0<sure/2;puan+=10+(hizli?5:0);bip(760,.1);fb(f,true,`Doğru! ${kH(Q.p,Q.q)} = ${Q.p} ÷ ${Q.q} = ${dMet(Q.p,Q.q)}. ${hizli?"Hızlı cevap: 15 puan.":"10 puan."}`);turBitti(true,v);}
+    if(Math.abs(v-dg)<1e-9){iz=[[v,"#2f9e44",dMet(Q.p,Q.q)+" ✔"]];ciz();const hizli=Date.now()-t0<sure/2;puan+=10+(hizli?5:0);bip(760,.1);fb(f,true,`Doğru! ${kH(Q.p,Q.q)} = ${Q.p} : ${Q.q} = ${dMet(Q.p,Q.q)}. ${hizli?"Hızlı cevap: 15 puan.":"10 puan."}`);turBitti(true,v);}
     else{iz=[[v,"#e03131",et(v)],[dg,"#2f9e44",dMet(Q.p,Q.q)]];ciz();bip(220,.12);fb(f,false,`Tur bilgisayarın. ${kH(Q.p,Q.q)} = ${dMet(Q.p,Q.q)}; yeri yeşil noktadır.`);turBitti(false,v);}}
   bb.onclick=()=>{oyn++;tur=0;sen=0;bil=0;puan=0;bb.hidden=true;f.hidden=true;yeniTur();};
-  A.oto=()=>{if(!bb.hidden&&!tur){bb.click();return;}if(acik)dokun(Q.p/Q.q);};
+  A.oto=()=>{if(TS.sonraki())return true;if(!bb.hidden&&!tur){bb.click();return true;}if(acik){dokun(Q.p/Q.q);return true;}return false;};
   skor();ciz();}
 function yarisKurallar(k,A,bitince){
   k.insertAdjacentHTML("beforeend",`<div class="kurallar"><h4>Yarış kuralları</h4><ul>
@@ -1764,15 +1850,15 @@ function yarisKurallar(k,A,bitince){
     <p class="soru">Isınma (süre yok): ${kH(4,5)} sayısının ondalık gösteriminin yerine dokununuz.</p><div class="stage ys"></div><div class="fb" hidden></div>`);
   const f=k.querySelector(".fb"),st=k.querySelector(".ys");let ok=false;
   const W=genislik(st,640,340),G=dogruSvg(W,{min:0,max:2,bol:10,y:60,et:v=>String(v).replace(".",",")});const sv=svgEl(W,96);sv.innerHTML=G.h;sv.style.cursor="pointer";st.appendChild(sv);
-  const dokun=v=>{if(ok)return;if(Math.abs(v-.8)<1e-9){ok=true;sv.innerHTML=G.h+`<circle cx="${G.x(.8)}" cy="60" r="9" fill="#2f9e44"/>`;bip(760,.1);fb(f,true,`Evet! ${kH(4,5)} = 4 ÷ 5 = 0,8. Artık yarışa hazırsınız.`);setTimeout(bitince,300);}else{sv.innerHTML=G.h+`<circle cx="${G.x(v)}" cy="60" r="8" fill="#e03131"/>`;bip(220,.12);fb(f,false,YD);}};
+  const dokun=v=>{if(ok)return;if(Math.abs(v-.8)<1e-9){ok=true;sv.innerHTML=G.h+`<circle cx="${G.x(.8)}" cy="60" r="9" fill="#2f9e44"/>`;bip(760,.1);fb(f,true,`Evet! ${kH(4,5)} = 4 : 5 = 0,8. Artık yarışa hazırsınız.`);setTimeout(bitince,300);}else{sv.innerHTML=G.h+`<circle cx="${G.x(v)}" cy="60" r="8" fill="#e03131"/>`;bip(220,.12);fb(f,false,v>0.8?"Fazla sağa dokundunuz: 4 : 5 bölmesinin sonucu 1'den küçüktür.":"Fazla sola dokundunuz: 4 : 5 bölmesini yapınız; her küçük çentik 0,1'dir.");}};
   sv.addEventListener("click",e=>{const pt=svgNokta(sv,e);dokun(Math.max(0,Math.min(2,Math.round(((pt.x-28)/(W-56))*20)/10)));});
   A.oto=()=>dokun(.8);}
 const e_duello=p=>{const D=defterY(["Kesir","Sizin yeriniz","Doğru yer","Turu alan"]);
-  asamali(p,{tahmin:{giris:"Bilgisayara karşı bir sayı doğrusu yarışı yapacaksınız. Önce bir tahminle ısınınız.",soru:`${kH(7,5)} sayısının ondalık gösterimi sayı doğrusunda nerededir?`,secs:[["a","1 ile 1,5 arasında (1,4)"],["b","0 ile 1 arasında"],["c","7 ile 8 arasında"]],dogru:"a",neden:"7 ÷ 5 = 1,4"},
+  asamali(p,{tahmin:{giris:"Bilgisayara karşı bir sayı doğrusu yarışı yapacaksınız. Önce bir tahminle ısınınız.",soru:`${kH(7,5)} sayısının ondalık gösterimi sayı doğrusunda nerededir?`,secs:[["a","1 ile 1,5 arasında (1,4)"],["b","0 ile 1 arasında"],["c","7 ile 8 arasında"]],dogru:"a",neden:"7 : 5 = 1,4"},
     asamalar:[
       {ad:"Kuralları öğrenin",yon:["Yarış kurallarını madde madde okuyunuz.","Süresiz ısınma kesrinin yerine dokununuz."],bitis:"Isınma kesrinin yerini bulunca.",kur:(k,A)=>yarisKurallar(k,A,()=>A.tamam("Kuralları öğrendiniz."))},
-      {ad:"Yarış",yon:["<b>Yarışı başlatın</b> düğmesine basınız.","Her turda kesri bölünüz ve süre çubuğu dolmadan sayı doğrusunda yerine dokununuz. Yanlışsa doğru yer yeşil noktayla gösterilir."],bitis:"8 tur bitince (kazanıp kaybetmeniz fark etmez; çok tur almaya çalışınız).",kur:(k,A)=>yarisKur(k,D,A,t=>Math.max(8000,12000-t*500))},
-      kuralA(D,[[`${kH(7,4)} sayısının yeri için hangisi doğrudur?`,["1,75: 1 ile 2 arasında, 1'den sonra 7,5 onda bir","0,74: 0 ile 1 arasında","7,4: 7 ile 8 arasında"],"Doğru! 7 ÷ 4 = 1,75.",[]],
+      {ad:"Yarış",yon:["Yarışta <b>8 tur</b> vardır. <b>Yarışı başlatın</b> düğmesine basınız. Tur bitince <b>Sıradaki tur</b> düğmesine basınız; yeni turun süresi o zaman başlar.","Her turda kesri bölünüz ve süre çubuğu dolmadan sayı doğrusunda yerine dokununuz. Yanlışsa doğru yer yeşil noktayla gösterilir."],bitis:"8 tur bitince (kazanıp kaybetmeniz fark etmez; çok tur almaya çalışınız).",kur:(k,A)=>yarisKur(k,D,A,t=>Math.max(8000,12000-t*500))},
+      kuralA(D,[[`${kH(7,4)} sayısının yeri için hangisi doğrudur?`,["1,75: 1 ile 2 arasında, 1'den sonra 7,5 onda bir","0,74: 0 ile 1 arasında","7,4: 7 ile 8 arasında"],"Doğru! 7 : 4 = 1,75.",[]],
         [`${kH(3,5)} ile 0,6 sayı doğrusunda nerededir?`,["Aynı noktadadır.",`${kH(3,5)} daha sağdadır.`,"0,6 sayı doğrusunda gösterilemez."],"Doğru! Kesir ve ondalık gösterimi aynı noktayı gösterir.",[]]]),
       kendiA((m,son)=>{const y=rastgele([{m:`${kH(3,8)} = 3,8`},{m:`${kH(4,15)} kesrinin ondalık gösterimi sonludur.`},{m:`${dvH(0,"1","6")} = ${kH(16,99)}`},{m:`${EKSI}${kH(1,4)} = 0,25`}]);
         const dg=karistir([`${kH(7,20)} = 0,35`,`${dvH(0,"","5")} = ${kH(5,9)}`,`${kH(9,12)} kesrinin ondalık gösterimi sonludur.`,`${karmaH(1,1,4)} = 1,25`,"0,999… = 1"]).slice(0,3);
@@ -1782,6 +1868,10 @@ const e_duello=p=>{const D=defterY(["Kesir","Sizin yeriniz","Doğru yer","Turu a
 
 
 const SON="Sonra <b>Kuralı bulun</b> ve <b>Kendinizi deneyin</b> aşamalarını yapınız. Son soruyu doğru cevaplayınca etkinlik biter.";
+/* ================= Seçmeli soruların yanlış seçenek ipuçları (§4-5, 07.10.2026) =================
+   [sorudaki sabit ifade, {yanlış seçenek metni: ipucu, "*": ortak ipucu}] */
+const IPS=[["Etiketteki kesri ondalık gösterime çevirmek için",{"Paydayı paya böldüm.": "Kesir çizgisi “pay bölü payda” demektir; hangi sayı hangisine bölünür?","Payı ve paydayı virgülle yan yana yazdım.": "1/5 kesrini 1,5 yazarsanız şeritler çakışır mı? Şeride bakınız."}],["payı paydasından büyük bir kesrin ondalık",{"Her zaman 0 olur.": "Pay paydadan büyükse kesir 1 bütünü geçer; virgülden önce 0 kalır mı?","Paydanın kendisi yazılır: 4,7": "7 : 4 bölmesini yapınız; bölüm 4,7 mi çıkıyor?"}],["Bölme ne zaman bitti",{"Bölüme üç basamak yazınca": "Bazı bölmeler bir basamakta, bazıları daha geç bitti; neye bakarak durdunuz?","Kalan bölenden büyük olunca": "Kalan bölenden büyük olursa bölüme daha büyük rakam yazılmalıdır; bölme ne zaman durdu?"}],["Bölüme yazılacak rakamı nasıl seçtiniz",{"Her zaman 5'i seçtim.": "Göstergede 5 her seferinde sığdı mı? Kalan bölenden küçük kaldı mı?","Sayının ilk rakamını yazdım.": "Gösterge, bölenle rakamın çarpımının sayıya sığmasına bakıyordu; ilk rakam buna uyuyor mu?"}],["Kalanın yanına 0 eklemek ne anlama gelir",{"Sayıyı 0 ile çarpmak": "0 ile çarpınca sayı 0 olur; kalan 0 oldu mu?","Bölümü 10 kat büyütmek": "Bölüm büyümedi; virgülden sonraki basamağa geçildi. Kalan neye çevrildi?"}],["Paydası 100 olan",{"*": "Paydada kaç sıfır var? Virgülden sonra o kadar basamak olmalı."}],["Paydası tamamlanamayan kesirlerin paydalarında",{"Yalnız 2": "Paydası yalnız 2 olan kesirler 5 ile genişletilip 10 yapıldı; tamamlanamayanlarda ne vardı?","Yalnız 5": "Paydası yalnız 5 olan kesirler 2 ile genişletilip 10 yapıldı; tamamlanamayanlarda ne vardı?"}],["Ondalık gösterimi nasıl bulunur",{"Ondalık gösterimi yoktur.": "Her kesir bir bölmedir; 1 : 3 bölmesi yapılabilir mi?","Payda 10 kabul edilir.": "Payda değiştirilirse kesrin değeri değişir; değeri korumak için ne yapılmalı?"}],["Bölmesi duran paydaların asal çarpanları",{"3, 7, 11 gibi asallar": "Paydası 3 olan bölme durdu mu? Sonlu sütununa bakınız.","Her asal sayı": "Devirli sütununda hangi paydalar var? Onların asal çarpanları nedir?"}],["0,4545… ile 0,45 için",{"İkisi aynı sayıdır.": "0,45 iki basamakta biter; 0,4545… sürer. İkisini basamak basamak karşılaştırınız.","İkisi de sonludur.": "0,4545… sayısında basamaklar bir yerde bitiyor mu?"}],["ya sonludur ya da devirlidir",{"Yanlıştır: Bazı kesirlerin ondalık gösterimi yoktur.": "Her kesir, payın paydaya bölünmesidir; bölme yapılamayan kesir var mı?","Yanlıştır: Bütün kesirlerin ondalık gösterimi sonludur.": "1/3 bölmesi bitti mi?"}],["Paydaya bakarak verilen karar hangi satırda",{"İlk satırda (sadeleştirmeden önce)": "Tablodaki kırmızı satırlara bakınız: karar hangi satırda bölmeyle uyuşmadı?","Hiçbir satırda": "Tabloda karar ile bölme sonucunun aynı olduğu (yeşil) satır var mı?"}],["paydasında 7 var ama ondalık gösterimi sonlu",{"7 asal sayı değildir.": "7'nin çarpanları 1 ve 7'dir; asal mı?","Pay paydadan küçüktür.": "Pay paydadan küçük olan 1/3 devirlidir; asıl sebep kesri sadeleştirince ortaya çıkar."}],["kesrin hangi hâline bakılarak verilir",{"Sadeleştirilmemiş hâline": "Tablonun ilk satırında karar yanlış çıkan kesirler vardı; hangi satırda doğru çıktı?","Yalnız payına": "Karar paydanın asal çarpanlarına göre verildi; pay mı, payda mı?"}],["hangisinin ondalık gösterimi sonludur",{"*": "Kesri önce sadeleştiriniz; sonra paydanın asal çarpanlarına bakınız: 2 ve 5 dışında çarpan kaldı mı?"}],["aynı sayı mıdır?",{"*": "Devir çizgisinin altındaki basamakları sonsuza kadar yazınız; iki sayıyı basamak basamak karşılaştırınız."}],["Devir çizgisi nereye çizilir",{"Virgülden sonraki bütün basamakların üstüne": "0,1666… sayısında 1 tekrar ediyor mu? Çizgi yalnız tekrar eden basamakların üstünde olmalı.","Sayının altına": "Deneyde çizgiyi basamakların altına mı, üstüne mi çizdiniz?"}],["devir çizgisiyle nasıl yazılır",{"*": "Hangi basamağın tekrar ettiğine bakınız; 8 tekrar ediyor mu? Çizgi yalnız tekrar eden basamağın üstüne bir kez çizilir."}],["kesirlerinin ondalık gösterimlerinde ne fark ettiniz",{"Hepsi sonludur.": "Payda 7; 7'nin asal çarpanı 2 ya da 5 mi? Çarkta basamaklar bitti mi?","Her birinde bambaşka basamaklar tekrar eder.": "Deney defterindeki gösterimleri karşılaştırınız; basamaklar farklı mı, sırası mı farklı?"}],["kesrinin ondalık gösteriminde kaç basamak devreder",{"7": "Devreden grubun basamaklarını sayınız: 1, 4, 2, 8, 5, 7.","1": "Tek bir basamak mı tekrar ediyor? Çarktaki basamakları sayınız."}],["olduğuna göre",{"*": "Ondalık gösterimin ilk basamağı için pay : 7 bölmesine başlayınız; çarkı o basamaktan okuyunuz."}],["paydayı neden 1000 seçtiniz",{"Pay 3 basamaklı olduğu için": "0,05 sayısında pay tek basamaklı ama payda 100'dür; paydayı ne belirler?","1000 en büyük seçenek olduğu için": "Payda, son basamağın basamak değerine göre seçilir; son basamak hangi basamakta?"}],["0,50 ile 0,5 için",{"0,50 daha büyüktür.": "Sona eklenen 0 değeri değiştirir mi? 50/100 kesrini sadeleştiriniz.","0,5 daha büyüktür.": "Sona eklenen 0 değeri değiştirir mi? 50/100 kesrini sadeleştiriniz."}],["İddiadaki kesir",{"Evet; bölmesi ilk denemede hedefi verdi.": "İlk denemede bölme makinesinin sonucu hedefle aynı mıydı? Turuncu basamaklar vardı mı?","Hayır; kesri değiştirmem gerekti.": "Sayaçlar iddiadaki kesirle başladı; bölme sonucu hedefle hemen aynı çıktı mı?"}],["doğru olup olmadığını nasıl kontrol edersiniz",{"Pay ile paydayı toplarım.": "Toplama kesrin değerini vermez; kesrin değeri hangi işlemle bulunur?","Kesri ters çeviririm.": "Ters çevrilen kesir başka bir sayıdır; kesrin değeri hangi işlemle bulunur?"}],["hangi hatayı yapmıştır",{"Hiç hata yapmamıştır.": "16 : 99 bölmesini yapınız; 0,1666… çıkıyor mu?","Yalnız tam kısmı yanlış yazmıştır.": "Tam kısım 0'dır ve doğru; hata pay ya da paydada mı?"}],["Doğrusu hangisidir",{"*": "Seçtiğiniz kesri bölünüz; sonuç 0,666… mı? Kuralda devreden basamak kadar 9 yazılır."}],["sayısının ondalık gösterimini nasıl buldunuz",{"Sayıyı pozitif yaptım: 1,75": "Aynaya tutunca işaret değişti; negatif kesrin ondalık gösteriminde işaret ne oldu?","7 ile 4'ü virgülle yazdım: −7,4": "7 : 4 bölmesini yapınız; 7,4 mü çıkıyor?"}],["Bunu işaret mi belirler",{"Evet: Negatif sayıların hepsi devirlidir.": "−1/2 = −0,5; devirli mi?","Evet: Negatif kesirlerin ondalık gösterimi yoktur.": "Aynada negatif kesirlerin de ondalık gösterimini gördünüz."}],["virgülden önceki 2 nereden geldi",{"8'in yarısından": "Modelde kaç dolu bütün vardı?","3 : 8 bölmesinden": "3 : 8 bölmesi 1'den küçük bir sonuç verir; virgülden sonrasını verir."}],["sayısının ondalık gösterimi hangisidir",{"*": "Tam kısım virgülden önce yazılır; kesir kısmı pay paydaya bölünerek bulunur. Kesir kısmını bölünüz."}],["Peki 99 hangi sayıya eşittir",{"0,9": "9 : 9 bölmesini yapınız.","9": "9 : 9 bölmesini yapınız."}],["Pay hangisidir",{"*": "Kural: Pay = virgülsüz tüm sayı − devretmeyen kısım. 0,999… için devretmeyen kısım nedir?"}],["Payda hangisidir",{"90": "Devretmeyen basamak yoksa paydaya 0 yazılmaz; kaç tane 9 yazılır?","10": "Devirli sayılarda paydada devreden basamak sayısı kadar 9 yazılır."}],["1'e uzaklık ne olur",{"0,1 olur.": "Tabloda 9 sayısı arttıkça uzaklık küçüldü; 9'lar hiç bitmezse ne kalır?","0,00001 olur.": "Bu uzaklık yalnız beş tane 9 için doğru; 9'lar hiç bitmezse?"}],["Üç yol da hangi sonucu gösterdi",{"0,999…, 1'e eşit değildir.": "Üç yolun sonuçlarına bakınız: 9/9, kural ve uzaklık neyi gösterdi?","0,999… bir rasyonel sayı değildir.": "Kural 0,999…'u bir kesre çevirdi mi?"}],["kesre çevirme kuralı hangi sonucu verir",{"*": "Kural: Pay = virgülsüz tüm sayı − devretmeyen kısım; payda devreden basamak sayısı kadar 9. 0,9 için hesaplayınız."}],["hangi sayıya eşittir",{"*": "Kuralı uygulayınız: pay 49 − 4, payda 90. Sonra sadeleştiriniz."}],["tam olarak bu mudur",{"Evet, tam olarak budur.": "Ekrana en fazla 10 rakam sığar; 2 : 3 bölmesi bitiyor mu?","*": "Devir çizgisi yalnız tekrar eden basamağın üstüne bir kez çizilir; gösterime dikkatle bakınız."}],["Sonucu ekrana sığan bölmelerin bölenleri",{"Hepsi tek sayıdır.": "Sığan bölenler arasında 2, 4, 8 gibi çift sayılar yok muydu?","Hepsi 3'ün katıdır.": "3'e bölmede ekran doldu mu, sığdı mı?"}],["Devreden basamak grubu hangisidir",{"*": "Ekranda tekrar başlayan yere bakınız: grup 1'den başlayıp nerede yeniden başlıyor?"}],["Bu bölmenin ondalık gösterimi hangisidir",{"*": "Hangi basamaklar birlikte tekrar ediyor? Devir çizgisi tekrar eden grubun tamamının üstüne bir kez çizilir."}],["fişiyle eşleşir",{"*": "Kesri bölünüz ve fişteki gösterime (devir çizgisi var mı?) dikkat ediniz."}],["0,4 ile 0,4 için",{"Aynı sayıdır.": "Biri 0,4'te biter, öbüründe 4 sonsuza kadar sürer; aynı mı?","0,4 sonludur.": "Devir çizgisi olan 0,4 sonlu mu?"}],["Tartının ekranında hangi sayı görünür",{"*": "Kesir çizgisi bölme demektir: 5 : 8 bölmesini yapınız; pay ile paydayı virgülle yazmak yetmez."}],["74 sayısının yeri için",{"*": "7 : 4 bölmesini yapınız; sonuç hangi iki tam sayı arasında?"}],["35 ile 0,6",{"35 daha sağdadır.": "3 : 5 bölmesini yapınız ve 0,6 ile karşılaştırınız.","0,6 sayı doğrusunda gösterilemez.": "0,6 sayısı 0 ile 1 arasında bir noktadır."}],["hangisi yanlıştır",{"*": "Bu ifade doğru. Her ifadeyi bölerek ya da kuralla sınayınız; yanlış olanı arayınız."}]];
+/* IPS-SON */
 const ACT=[
  {ad:"Etiketteki Kesir",amac:"Ürün etiketlerinde kesirle yazılmış miktarları payı paydaya bölerek ondalık gösterime çevirmek.",adimlar:["<b>Aşama 1–2:</b> Sayaçlarla ondalık şeridi uzatıp kısaltınız; kesir şeridiyle tam çakışınca ondalık gösterimi bulmuş olursunuz.","<b>Aşama 3:</b> Şerit olmadan etiketteki miktarı ondalık gösterimle yazınız.",SON],sure:5,ciz:e_etiket},
  {ad:"Bölme Makinesi",amac:"Uzun bölmeyi adım adım yürüterek kesrin ondalık gösterimini bulmak; her adımda kalanı ve basamağı izlemek.",adimlar:["<b>Aşama 1–2:</b> Bölüme yazılacak rakamı sayaçla deneyiniz; gösterge sığdı mı taştı mı, kalan ne gösterir. Uygun rakamı bölüme yazınız; kalan 0 olunca bölme biter.",SON],sure:7,ciz:e_bolme},
