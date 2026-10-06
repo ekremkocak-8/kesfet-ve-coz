@@ -1,0 +1,906 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Çözümler · Keşfet ve Çöz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d2433;--muted:#5b6478;--line:#dfe5ef;--bg:#f5f7fb;--card:#fff;--ss:#6741d9;--kk:#0b7285;--b:#d0700f;--ok:#2b8a3e;--warn:#c92a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Nunito,system-ui,sans-serif}
+header{background:linear-gradient(135deg,#1c5fbf,#2f8fe0);color:#fff;padding:18px 16px 22px}
+header .ic{max-width:780px;margin:0 auto}header small{opacity:.9;font-weight:800;letter-spacing:.08em;font-size:12px}header h1{margin:4px 0 0;font-size:24px;line-height:1.2}
+main{max-width:780px;margin:14px auto 40px;padding:0 16px}
+nav.sec{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}nav.sec button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+nav.sec button[aria-pressed=true]{background:#1c5fbf;color:#fff;border-color:#1c5fbf}
+.kart{background:var(--card);border-radius:16px;box-shadow:0 2px 0 rgba(0,0,0,.04),0 6px 20px rgba(20,40,80,.06);padding:18px;margin:0 0 16px;border-top:5px solid var(--c,#1c5fbf)}
+.et{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.1em;color:#fff;background:var(--c);border-radius:6px;padding:3px 9px}
+h2{font-size:20px;margin:8px 0 4px;line-height:1.3}
+.soru{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+.soru svg{max-width:100%;height:auto}
+ol.sec{list-style:none;padding:0;margin:8px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px}
+ol.sec li{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff}ol.sec li.dogru{border-color:var(--ok);background:#ebfbee;font-weight:800}
+.adim{border-left:4px solid var(--c);padding:6px 12px;margin:8px 0;background:#fff;border-radius:0 10px 10px 0;animation:gel .35s ease-out}
+.adim b{color:var(--c)}@keyframes gel{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.dug{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.btn{border:0;border-radius:12px;padding:10px 16px;font:inherit;font-weight:900;cursor:pointer;background:var(--c);color:#fff;min-height:44px}
+button.btn.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+.dikkat{background:#fff4e6;border:2px solid #f59f00;border-radius:12px;padding:10px 14px;margin:12px 0 4px}.dikkat b{color:#d9480f}
+.tuzak{font-size:15px;color:var(--muted);margin-top:8px}
+.cevap{font-weight:900;color:var(--ok);margin-top:8px}
+table{width:100%;border-collapse:collapse;margin-top:8px}td,th{border:1px solid var(--line);padding:8px 10px;text-align:left}th{background:#e3fafc;color:#0b7285;font-size:13px;letter-spacing:.06em}
+.ses{display:flex;align-items:center;gap:10px;margin:10px 0;padding:10px 12px;border-radius:12px;background:#eef2ff}
+.ses button{border:0;width:44px;height:44px;border-radius:50%;background:var(--c);color:#fff;font-size:18px;cursor:pointer}
+.ses span{font-size:14px;color:var(--muted)}
+.gizli{display:none}
+.tum{margin:4px 0 14px;font-size:14px}.tum a{color:#1c5fbf;font-weight:800}
+@media (prefers-reduced-motion:reduce){.adim{animation:none}}
+/* Canlandır (05.10.2026) */
+.sek{display:flex;gap:6px;margin:12px 0 0;border-bottom:2px solid var(--line)}
+.sek button{border:0;background:none;font:inherit;font-weight:900;font-size:15px;padding:10px 14px;border-radius:10px 10px 0 0;cursor:pointer;color:var(--muted);min-height:44px;position:relative;top:2px;border-bottom:3px solid transparent}
+.sek button[aria-selected=true]{color:var(--c);border-bottom-color:var(--c);background:#fff8f0}
+.sek .yeni{display:inline-block;font-size:10px;background:#2b8a3e;color:#fff;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px;letter-spacing:.06em}
+.cn{padding-top:10px}
+.cn-yon{background:#eef6ff;border-radius:12px;padding:10px 14px;font-size:15px;margin-bottom:10px}
+.cn-sahne{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px;min-height:120px;overflow-x:auto}
+.cn-sahne svg{width:100%;height:auto;max-height:420px;display:block}
+.cn-den{margin-top:10px;display:grid;gap:8px}
+.cn-satir{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cn-adimci{display:inline-flex;align-items:center;gap:6px;font-weight:800;flex-wrap:wrap}
+.cn-adimci button{width:44px;height:44px;border-radius:12px;border:2px solid var(--c);background:#fff;color:var(--c);font:inherit;font-size:22px;font-weight:900;cursor:pointer}
+.cn-adimci input,.cn-test input{width:84px;height:44px;border:2px solid var(--line);border-radius:12px;font:inherit;font-weight:900;text-align:center;font-size:18px}
+.cn-test label{font-weight:800;display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cn-btn{border:0;border-radius:12px;padding:10px 16px;font:inherit;font-weight:900;cursor:pointer;background:var(--c);color:#fff;min-height:44px}
+.cn-btn.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+.cn-btn[aria-pressed=true]{background:var(--ac,var(--c));color:#fff;border-color:var(--ac,var(--c))}
+.cn-btn:disabled{opacity:.5}
+.cn-hazir{display:flex;flex-wrap:wrap;gap:6px}
+.cn-dur{margin-top:10px;border-left:6px solid var(--c);background:#fffaf3;border-radius:0 12px 12px 0;padding:10px 14px;min-height:48px}
+.cn-dur .iyi{color:var(--ok);font-weight:900}.cn-dur .kotu{color:var(--warn);font-weight:900}
+.cn-df{margin-top:10px;overflow-x:auto}@media(max-width:480px){.cn-adimci>span{flex-basis:100%}.cn-h{font-size:12px;padding:5px 0}.cn-izg{gap:3px}.cn-sahne{padding:6px}}@media(max-width:480px){.cn-df table{font-size:13px}.cn-df td,.cn-df th{padding:4px 5px}}.cn-df summary{font-weight:900;cursor:pointer;padding:6px 0}.cn-say{color:var(--muted);font-weight:700}
+.cn-df table{font-size:15px}.cn-df td{padding:5px 8px}.cn-df tr.cn-iyi td{background:#ebfbee}.cn-df tr.cn-kotu td{background:#fff5f5}.cn-df tr.cn-son td{outline:2px solid var(--c);outline-offset:-2px}
+.cn-p{animation:cnGel .35s ease-out both}@keyframes cnGel{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.cn-o{fill:#ffa94d;stroke:#d9480f;stroke-width:1}.cn-o2{fill:#e8590c}.cn-k{fill:#ffc9c9;stroke:#c92a2a;stroke-width:1.5;stroke-dasharray:3 2}
+.cn-cerceve{stroke:#2b8a3e;stroke-width:3}.cn-et{font-size:13px;font-weight:800;fill:#5b6478}.cn-et.b,.cn-et2b{font-weight:900;fill:#1d2433}.cn-et2{font-size:11px;fill:#5b6478;font-weight:700}.cn-et2b{font-size:13px;fill:#fff}
+.cn-ku{fill:#fff4e6;stroke:#ffa94d;stroke-width:1.5}.cn-kk{fill:#fff5f5;stroke:#c92a2a;stroke-width:1.5;stroke-dasharray:4 3}
+.cn-tahta0{fill:#f1f3f5;stroke:#ced4da}.cn-tahta{fill:#c08552;stroke:#8d5a2b}
+.cn-ek{stroke:#868e96;stroke-width:2}.cn-sinir{stroke:#c92a2a;stroke-width:3;stroke-dasharray:5 4}.cn-yay{fill:none;stroke:#f76707;stroke-width:2}
+.cn-v1{stroke:#2b8a3e;stroke-width:3}.cn-v2{stroke:#c92a2a;stroke-width:3}.cn-kis{font-size:20px}.cn-bus{font-size:16px}.cn-bek{stroke:#c92a2a;stroke-width:5;stroke-linecap:round;opacity:.6}
+.cn-kum{fill:#ffe8cc;stroke:#e8590c;stroke-width:3}.cn-kum2{fill:#495057}.cn-para{fill:#ffd43b;opacity:.85}.cn-buyuk{font-size:26px;font-weight:900;fill:#1d2433}
+.cn-zem{fill:#adb5bd}.cn-kat{fill:#f1f3f5;stroke:#ced4da}.cn-katon{fill:#d3f9d8;stroke:#2b8a3e}.cn-katoff{fill:#ffe3e3;stroke:#e03131}
+.cn-izg{display:grid;gap:4px}.cn-h,.cn-gb{border-radius:8px;text-align:center;font-weight:800;font-size:14px;padding:6px 0}.cn-h{background:#f1f3f5;transition:background .25s,transform .25s}
+.cn-gb{background:none;color:var(--muted);font-size:12px}.cn-h.on{background:#ffa94d;color:#1d2433}.cn-h.yeni{transform:scale(1.18);box-shadow:0 0 0 3px #e8590c}
+.cn-kartlar{display:flex;flex-wrap:wrap;gap:6px;padding:4px}.cn-kart{min-width:44px;padding:8px 10px;text-align:center;border-radius:10px;background:#fff4e6;border:2px solid #ffa94d;font-weight:900;animation:cnGel .3s}
+.cn-kart.kare{background:#e7f5ff;border-color:#1c7ed6}.cn-bosk{color:var(--muted)}
+.cn-cift{display:flex;flex-wrap:wrap;gap:6px 14px;padding:6px 4px;font-weight:800}.cn-cift i{font-weight:600;color:#1c7ed6}
+.cn-katlar{padding:4px}.cn-katsat{display:inline-flex;flex-wrap:wrap;gap:6px}.cn-kat2{background:#e6fcf5;border:1.5px solid #12b886;border-radius:8px;padding:3px 8px;font-weight:800;animation:cnGel .3s}.cn-sonsuz{font-weight:800;color:#0b7285}
+.cn-onr{background:#f8f0fc;border:2px solid #ae3ec9;border-radius:12px;padding:10px 14px}.cn-kanit{padding:10px 4px 2px}
+.cn-kay{display:inline-flex;align-items:center;gap:8px;font-weight:800;flex-wrap:wrap}.cn-kay{max-width:100%}.cn-kay input{width:min(220px,70vw);accent-color:#d0700f}.cn-satir>*{min-width:0;max-width:100%}
+@media (prefers-reduced-motion:reduce){.cn-p,.cn-kart,.cn-kat2{animation:none}.cn-h{transition:none}}
+/* 05.10.2026 · KOŞUL ve LABİRENT motorları (SB 6.1.1) */
+@media(max-width:560px){.soru [style*="grid-template-columns:repeat"]{grid-template-columns:1fr!important}}   /* çok sütunlu konuşma balonları telefonda alt alta */
+.cn-kl{list-style:none;padding:0;margin:0;display:grid;gap:4px}.cn-not{color:var(--muted);font-size:14px}.cn-sonuc{margin-top:6px;font-weight:800}
+.cn-secg{gap:6px}.cn-secad{font-weight:800;flex-basis:100%}.cn-secg .cn-btn{padding:8px 12px}
+.cn-mv{fill:#74c0fc;stroke:#1c7ed6;stroke-width:1}.cn-tl{fill:#69db7c;stroke:#2b8a3e;stroke-width:1.5}
+.cn-lab{display:grid;gap:4px;align-items:center;max-width:460px;margin:0 auto}
+.cn-lc{min-height:44px;border-radius:8px;border:1.5px solid #ced4da;background:#fff;font:inherit;font-weight:900;font-size:16px;cursor:pointer;padding:0;color:var(--ink)}
+.cn-lc.yol{background:#d3f9d8;border-color:#2b8a3e}.cn-lc.simdi{background:#2b8a3e;color:#fff;box-shadow:0 0 0 3px #b2f2bb}.cn-lc.kapali{background:#ffe3e3;border-color:#e03131;color:#c92a2a;text-decoration:line-through}
+.cn-lok{color:#2b8a3e;font-weight:900;text-align:center}.cn-lcik{min-height:44px;border:0;background:none;font:inherit;font-weight:900;color:#d9480f;cursor:pointer;padding:0;white-space:nowrap;font-size:14px}.cn-lcik:disabled{cursor:default}
+
+</style></head><body>
+<header><div class="ic"><small id="kod"></small><h1 id="bas">Çözümler</h1></div></header>
+<main><nav class="sec" id="nav" aria-label="Bölümler"></nav><p class="tum" id="tum" hidden><a href="?">Bütün çözümleri göster</a></p><div id="ic"></div></main>
+<script>
+/* ANA_KURALLAR §4.y-3: Etkinliklerde bütün kesirler kesir çizgisiyle (alt alta pay/payda) gösterilir. Düz yazılmış a/b biçimleri otomatik dönüştürülür. */
+(function(){
+  if (window.__kesirCizgi) return; window.__kesirCizgi = 1;
+  const RX = /(^|[^\w\/.,:%])([−-])?(?:(\d+) )?(\d{1,4})\/(\d{1,4})(?![\w\/.,]\d|\w)/g;
+  const ATLA = "script,style,svg,textarea,input,select,code,.ilr,.frac,[data-duz]";
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function donustur(kok){
+    if (!kok || !kok.nodeType) return;
+    if (kok.nodeType === 3) kok = kok.parentElement;
+    if (!kok || (kok.closest && kok.closest(ATLA))) return;
+    const w = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, { acceptNode: t => {
+      if (!/\d\/\d/.test(t.nodeValue)) return NodeFilter.FILTER_REJECT;
+      const p = t.parentElement; if (!p || p.closest(ATLA)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT; } });
+    const L = []; let t; while ((t = w.nextNode())) L.push(t);
+    L.forEach(t => {
+      let deg = false;
+      const h = esc(t.nodeValue).replace(RX, (m, a, s, tam, p, q) => { deg = true;
+        return a + (s ? "−" : "") + (tam ? tam + " " : "") + '<span class="frac"><span>' + p + "</span><span>" + q + "</span></span>"; });
+      if (!deg) return;
+      const k = document.createElement("span"); k.innerHTML = h; t.replaceWith(...k.childNodes);
+    });
+  }
+  let bekleyen = new Set(), plan = 0;
+  const calis = () => { plan = 0; const b = bekleyen; bekleyen = new Set(); b.forEach(donustur); };
+  const gozcu = new MutationObserver(ms => { ms.forEach(m => {
+      if (m.type === "characterData") bekleyen.add(m.target); else m.addedNodes.forEach(n => bekleyen.add(n)); });
+    if (!plan) plan = requestAnimationFrame(calis); });
+  const bas = () => { donustur(document.body); gozcu.observe(document.body, { childList: true, subtree: true, characterData: true }); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bas); else bas();
+  const st = document.createElement("style");
+  st.textContent = ".frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 2px}.frac>span{display:block;text-align:center;padding:0 3px}.frac>span:first-child{border-bottom:1.5px solid currentColor}";
+  document.head.appendChild(st);
+})();
+
+/* Canlandır · bağlam sorularına simülasyon motorları (05.10.2026, ANA_KURALLAR §4.k, §19)
+   Her motor: öğrenci düzeneği elle değiştirir → sonucu anında görür → deney defterine yazılır → tekrar dener.
+   Kullanım: CANL[no] = el => MOTOR(el, {...})
+   05.10.2026 (SB 6.1.1): KOŞUL ve LABİRENT motorları; GRUPLA'ya hazır değer düğmeleri (hazir) ve özel satır (satir),
+   ATLA'ya soruya özel sınama (test), nokta rengi (renk) ve çizelge adımları (tikAdim, etAdim, etYaz) eklendi (eski ayarlar aynen çalışır). */
+const CN = (() => {
+  const az = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const h = (t, c, html) => { const e = document.createElement(t); if (c) e.className = c; if (html != null) e.innerHTML = html; return e; };
+  const bekle = ms => new Promise(r => setTimeout(r, az ? 0 : ms));
+  const x = "×";
+  // Türkçe ek: E(40,"in") → 40'ın · E(58,"den") → 58'den  (ünlü uyumu sayının okunuşunun son sözcüğüne göre)
+  const EKT = {bir:["in","den","e"],iki:["nin","den","ye"],"üç":["ün","ten","e"],"dört":["ün","ten","e"],"beş":["in","ten","e"],"altı":["nın","dan","ya"],yedi:["nin","den","ye"],sekiz:["in","den","e"],dokuz:["un","dan","a"],
+    on:["un","dan","a"],yirmi:["nin","den","ye"],otuz:["un","dan","a"],"kırk":["ın","tan","a"],elli:["nin","den","ye"],"altmış":["ın","tan","a"],"yetmiş":["in","ten","e"],seksen:["in","den","e"],doksan:["ın","dan","a"],"yüz":["ün","den","e"],bin:["in","den","e"],"sıfır":["ın","dan","a"]};
+  const BIR = ["sıfır","bir","iki","üç","dört","beş","altı","yedi","sekiz","dokuz"], ON = ["","on","yirmi","otuz","kırk","elli","altmış","yetmiş","seksen","doksan"];
+  const sonSoz = n => n === 0 ? "sıfır" : n % 10 ? BIR[n % 10] : n % 100 ? ON[(n % 100) / 10] : n % 1000 ? "yüz" : "bin";
+  const E = (n, t) => { const e = EKT[sonSoz(Math.abs(n))]; const i = {in:0,nin:0,den:1,dan:1,e:2,a:2}[t]; let k = e[i];
+    if (t === "de" || t === "da") k = e[1].replace("n", ""); return `${n}'${k}`; };
+  // ortak iskelet: yönerge + sahne + denetimler + durum + deney defteri
+  function iskelet(el, o) {
+    el.innerHTML = "";
+    const y = h("div", "cn-yon", `<b>Ne yapacaksınız?</b> ${o.yon}<br><b>Ne zaman biter?</b> ${o.bitis}`);
+    const sah = h("div", "cn-sahne"); const den = h("div", "cn-den"); const dur = h("div", "cn-dur", o.ilk || "Bir deneme yapın.");
+    dur.setAttribute("aria-live", "polite");
+    const df = h("details", "cn-df"); df.open = true;
+    df.innerHTML = `<summary>Deney defteri <span class="cn-say">(0 deneme)</span></summary><table><thead><tr>${o.sutun.map(s => `<th>${s}</th>`).join("")}</tr></thead><tbody></tbody></table>`;
+    el.append(y, sah, den, dur, df);
+    const tb = df.querySelector("tbody"), say = df.querySelector(".cn-say"); const kayit = new Set();
+    const yaz = (anahtar, hucre, iyi) => {
+      if (kayit.has(anahtar)) { [...tb.rows].forEach(r => r.classList.toggle("cn-son", r.dataset.k === anahtar)); return; }
+      kayit.add(anahtar); const tr = h("tr", iyi === true ? "cn-iyi" : iyi === false ? "cn-kotu" : ""); tr.dataset.k = anahtar;
+      tr.innerHTML = hucre.map(c => `<td>${c}</td>`).join(""); [...tb.rows].forEach(r => r.classList.remove("cn-son")); tr.classList.add("cn-son");
+      tb.appendChild(tr); say.textContent = `(${kayit.size} deneme)`;
+    };
+    return { sah, den, dur, yaz, sayi: () => kayit.size };
+  }
+  function adimci(etiket, min, max, deger, deg) {   // − [n] + denetimi
+    const w = h("div", "cn-adimci"); w.innerHTML = `<span>${etiket}</span><button type="button" aria-label="azalt">−</button><input type="number" inputmode="numeric" min="${min}" max="${max}" value="${deger}"><button type="button" aria-label="artır">+</button>`;
+    const [a, b] = w.querySelectorAll("button"), i = w.querySelector("input");
+    const ayarla = v => { v = Math.max(min, Math.min(max, Math.round(+v || min))); i.value = v; deg(v); };
+    a.onclick = () => ayarla(+i.value - 1); b.onclick = () => ayarla(+i.value + 1); i.onchange = () => ayarla(i.value);
+    return { w, ayarla, get: () => +i.value };
+  }
+  const dug = (t, cls = "") => { const b = h("button", "cn-btn " + cls, t); b.type = "button"; return b; };
+
+  /* 1) DİZİLİM: N birim kare/sandalye eşit sıralara dizilir */
+  function DIZILIM(el, o) {
+    const N0 = o.N; let N = o.N;
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Bir sıradaki", "Sıra sayısı", "Artan", "Sonuç"] });
+    const kut = h("div", "cn-satir");
+    let sayiA = null;
+    if (o.sayiSec) { sayiA = adimci(o.sayiEtiket || "Sayı:", 2, 100, N, v => { N = v; ciz(g.get()); }); kut.appendChild(sayiA.w); }
+    const g = adimci(o.etiket || "Bir sıradaki kare sayısı:", 1, o.maxG || N, o.bas || 1, v => ciz(v));
+    kut.appendChild(g.w); s.den.appendChild(kut);
+    if (o.hazir) { const hz = h("div", "cn-hazir"); o.hazir.forEach(n => { const b = dug(n, "ghost"); b.onclick = () => { sayiA.ayarla(n); }; hz.appendChild(b); }); s.den.appendChild(hz); }
+    function ciz(gen) {
+      if (gen > N) { g.ayarla(N); return; }
+      const sira = Math.floor(N / gen), art = N % gen, tumSira = Math.ceil(N / gen);
+      const hc = Math.max(10, Math.min(30, Math.floor(560 / Math.max(gen, 1)), Math.floor(330 / tumSira)));
+      const W = gen * hc + 20, H = tumSira * hc + 20; let sv = "";
+      for (let k = 0; k < N; k++) {
+        const r = Math.floor(k / gen), c = k % gen, kalan = r >= sira;
+        const xx = 10 + c * hc, yy = 10 + r * hc, d = az ? 0 : Math.min(k * 12, 900);
+        sv += o.sandalye
+          ? `<g class="cn-p" style="animation-delay:${d}ms"><rect x="${xx + hc * .18}" y="${yy + hc * .1}" width="${hc * .64}" height="${hc * .5}" rx="${hc * .1}" class="${kalan ? "cn-k" : "cn-o"}"/><rect x="${xx + hc * .18}" y="${yy + hc * .62}" width="${hc * .64}" height="${hc * .18}" rx="${hc * .06}" class="${kalan ? "cn-k" : "cn-o2"}"/></g>`
+          : `<rect class="cn-p ${kalan ? "cn-k" : "cn-o"}" style="animation-delay:${d}ms" x="${xx + 1}" y="${yy + 1}" width="${hc - 2}" height="${hc - 2}" rx="3"/>`;
+      }
+      if (!art && !o.sandalye) sv += `<rect x="10" y="10" width="${gen * hc}" height="${sira * hc}" fill="none" class="cn-cerceve"/>
+        <text x="${10 + gen * hc / 2}" y="${H + 4}" class="cn-et" text-anchor="middle">${gen} ${o.birim || ""}</text>
+        <text x="${W + 4}" y="${10 + sira * hc / 2}" class="cn-et" dominant-baseline="middle">${sira} ${o.birim || ""}</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W + 70} ${H + 22}" role="img" aria-label="${N} ${o.ad || "kare"}, her sırada ${gen}">${sv}</svg>`;
+      const r = o.kural ? o.kural(gen, sira, art, N) : null;
+      let m;
+      if (art) m = `<span class="kotu">✘</span> ${N} ${o.ad || "kare"} her sırada ${gen} olacak biçimde dizilince ${sira} tam sıra oluşur, <b>${art} ${o.ad || "kare"} artar</b>. Dikdörtgen olmaz: ${N} : ${gen} işleminde kalan ${art}.`;
+      else m = `<span class="iyi">✔</span> <b>${N} = ${gen} ${x} ${sira}</b> · ${sira} sıra, her sırada ${gen} ${o.ad || "kare"}; hiç artmadı.` + (gen === sira ? ` <b>Kare oldu!</b> İki kenar aynı: ${gen}.` : "");
+      if (!art && o.cevre) m += ` Çevre = 2 ${x} (${gen} + ${sira}) = <b>${2 * (gen + sira)} m</b>.`;
+      if (r && r.msg) m += `<br>${r.msg}`;
+      s.dur.innerHTML = m;
+      const sutunlar = o.satir ? o.satir(gen, sira, art, N, r) : [gen, art ? `${sira} (+ ${art} artan)` : sira, art, art ? "olmaz" : (gen === sira ? "kare" : "dikdörtgen")];
+      s.yaz(N + ":" + gen, sutunlar, !art && (!r || r.ok !== false));
+    }
+    ciz(g.get());
+  }
+
+  /* 2) GRUPLA: N nesne k'şar gruplara ayrılır (nokta) ya da N cm çubuk p parçaya kesilir (cubuk) */
+  function GRUPLA(el, o) {
+    const N = o.N;
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || (o.cubuk ? ["Parça sayısı", "Bir parça", "Artan", "Sonuç"] : ["Bir gruptaki", "Grup sayısı", "Artan", "Sonuç"]) });
+    const g = adimci(o.etiket, 1, o.max || N, o.bas || 2, v => { sonK = v; });
+    let sonK = g.get(); const b = dug(o.dugme || "Dağıt ▶"); const kut = h("div", "cn-satir"); kut.append(g.w, b); s.den.appendChild(kut);
+    if (o.hazir) { const hz = h("div", "cn-hazir"); o.hazir.forEach(n => { const bb = dug(o.hazirAd ? o.hazirAd(n) : n, "ghost"); bb.onclick = () => { g.ayarla(n); b.click(); }; hz.appendChild(bb); }); s.den.appendChild(hz); }   // 05.10.2026 (SB 6.1.1)
+    let calis = false;
+    b.onclick = async () => { if (calis) return; calis = true; b.disabled = true; await (o.cubuk ? kes(g.get()) : dagit(g.get())); calis = false; b.disabled = false; };
+    async function dagit(k) {
+      const grup = Math.floor(N / k), art = N % k;
+      const sut = Math.min(grup + (art ? 1 : 0), Math.max(1, Math.floor(600 / (Math.min(k, 6) * 16 + 18))));
+      const kolon = Math.min(k, 6), satirK = Math.ceil(k / kolon), gw = kolon * 14 + 16, gh = satirK * 14 + 26;
+      const toplamKutu = grup + (art ? 1 : 0), sat = Math.ceil(toplamKutu / sut);
+      const W = sut * (gw + 8) + 10, H = sat * (gh + 8) + 10;
+      let sv = "";
+      for (let gi = 0; gi < toplamKutu; gi++) {
+        const gx = 10 + (gi % sut) * (gw + 8), gy = 10 + Math.floor(gi / sut) * (gh + 8), artan = gi === grup;
+        sv += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" rx="8" class="${artan ? "cn-kk" : "cn-ku"}"/><text x="${gx + gw / 2}" y="${gy + gh - 6}" text-anchor="middle" class="cn-et2">${artan ? "artan" : (gi + 1) + ". " + (o.grupAd || "grup")}</text>`;
+        const adet = artan ? art : k;
+        for (let j = 0; j < adet; j++) {
+          const cx = gx + 15 + (j % kolon) * 14, cy = gy + 12 + Math.floor(j / kolon) * 14;
+          const d = az ? 0 : Math.min((gi * k + j) * 8, 1200);
+          sv += `<circle class="cn-p ${artan ? "cn-k" : "cn-o"}" style="animation-delay:${d}ms" cx="${cx}" cy="${cy}" r="5.5"/>`;
+        }
+      }
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${N} ${o.ad} her grupta ${k}">${sv}</svg>`;
+      s.dur.innerHTML = "Dağıtılıyor…"; await bekle(Math.min(N * 8, 1200) + 200);
+      const r = o.kural ? o.kural(k, grup, art) : null;
+      s.dur.innerHTML = (art ? `<span class="kotu">✘</span> ${N} ${o.ad} her grupta ${k} olacak biçimde ayrılınca ${grup} ${o.grupAd || "grup"} oluşur, <b>${art} ${o.ad} açıkta kalır</b> (${N} : ${k} → kalan ${art}).`
+        : `<span class="iyi">✔</span> <b>${N} = ${k} ${x} ${grup}</b> · ${grup} ${o.grupAd || "grup"}, hiç artmadı. ${k}, ${E(N,"in")} çarpanıdır.`) + (r && r.msg ? "<br>" + r.msg : "");
+      s.yaz("" + k, o.satir ? o.satir(k, grup, art, r) : [k, grup, art, art ? "artıyor" : "tam bölünüyor"], !art && (!r || r.ok !== false));
+    }
+    async function kes(p) {
+      const par = Math.floor(N / p), art = N % p, W = 440, sk = (W - 40) / N;
+      let sv = `<rect x="20" y="30" width="${N * sk}" height="40" rx="4" class="cn-tahta0"/>`;
+      for (let i = 0; i < p; i++) {
+        const xx = 20 + i * par * sk, d = az ? 0 : i * 140;
+        sv += `<g class="cn-p" style="animation-delay:${d}ms"><rect x="${xx + 2}" y="30" width="${par * sk - 4}" height="40" rx="4" class="cn-tahta"/><text x="${xx + par * sk / 2}" y="56" text-anchor="middle" class="cn-et2b">${par}</text></g>`;
+      }
+      if (art) sv += `<g class="cn-p" style="animation-delay:${az ? 0 : p * 140}ms"><rect x="${20 + p * par * sk + 2}" y="30" width="${art * sk - 4}" height="40" rx="4" class="cn-k"/><text x="${20 + p * par * sk + art * sk / 2}" y="88" text-anchor="middle" class="cn-et">${art} cm artan</text></g>`;
+      sv += `<text x="20" y="20" class="cn-et">0</text><text x="${20 + N * sk}" y="20" text-anchor="end" class="cn-et">${N} cm</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} 96" style="max-height:200px" role="img" aria-label="${N} santimetrelik çubuk ${p} parçaya kesildi">${sv}</svg>`;
+      s.dur.innerHTML = "Kesiliyor…"; await bekle(p * 140 + 250);
+      const r = o.kural ? o.kural(p, par, art) : null;
+      s.dur.innerHTML = (art ? `<span class="kotu">✘</span> ${N} cm ${p} eş parçaya bölünemez: her parça ${par} cm olursa <b>${art} cm artar</b>.`
+        : `<span class="iyi">✔</span> <b>${N} = ${p} ${x} ${par}</b> · ${p} parça, her biri ${par} cm; hiç artmadı.`) + (r && r.msg ? "<br>" + r.msg : "");
+      s.yaz("" + p, [p, art ? "—" : par + " cm", art ? art + " cm" : 0, art ? "artıyor" : "tam"], !art && (!r || r.ok !== false));
+    }
+  }
+
+  /* 3) ATLA: 0'dan başlayıp k'şar ilerleme (merdiven, kumbara, yol, kâğıt) */
+  function ATLA(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Sayı", "Sonuç"] });
+    let k = o.k, L = o.son; const W = 660, sol = 22, sag = 22, sk = (W - sol - sag) / L;
+    const izle = []; let n = 0, tmr = null;
+    const kut = h("div", "cn-satir");
+    const bA = dug("▶ Oynat"), bB = dug("+1 " + (o.adimAd || "adım"), "ghost"), bS = dug("Baştan", "ghost");
+    kut.append(bA, bB, bS);
+    let kA = null;
+    if (o.kSec) { kA = adimci(o.kEtiket || "Adım:", 2, Math.floor(L / 2), k, v => { k = v; sifirla(); }); kut.prepend(kA.w); }
+    s.den.appendChild(kut);
+    const test = h("div", "cn-satir cn-test"); test.innerHTML = `<label>${o.testEtiket || "Bir sayı yazın:"} <input type="number" inputmode="numeric" min="1" max="${o.testMax || L * 2}"></label>`;
+    const bT = dug(o.testDugme || "Dene", "ghost"); test.appendChild(bT); s.den.appendChild(test);
+    const ti = test.querySelector("input");
+    function taban() {
+      let sv = `<line x1="${sol}" y1="62" x2="${sol + L * sk}" y2="62" class="cn-ek"/>`;
+      const adimT = o.tikAdim || (L <= 60 ? 1 : L <= 200 ? 5 : 25), et = o.etAdim || (L <= 60 ? 5 : L <= 200 ? 25 : 100);
+      for (let v = 0; v <= L; v += adimT) sv += `<line x1="${sol + v * sk}" y1="${v % et ? 58 : 54}" x2="${sol + v * sk}" y2="66" class="cn-ek"/>` + (v % et ? "" : `<text x="${sol + v * sk}" y="82" text-anchor="middle" class="cn-et">${o.etYaz ? o.etYaz(v) : v}</text>`);
+      sv += `<line x1="${sol + L * sk}" y1="30" x2="${sol + L * sk}" y2="70" class="cn-sinir"/><text x="${sol + L * sk}" y="24" text-anchor="end" class="cn-et">${o.sonEt || L}</text>`;
+      return sv;
+    }
+    function ciz(vurgu, iyi) {
+      let sv = taban();
+      izle.forEach((v, i) => {
+        const a = i ? izle[i - 1] : 0; const x1 = sol + a * sk, x2 = sol + v * sk, yy = 62 - Math.min(30, (x2 - x1) * .6 + 8);
+        sv += `<path d="M${x1} 62 Q${(x1 + x2) / 2} ${yy} ${x2} 62" class="cn-yay"/><circle cx="${x2}" cy="62" r="4.5" class="${o.renk ? o.renk(v, i + 1) : "cn-o"}"/>`;
+        if (izle.length <= 14 || i === izle.length - 1 || i % Math.ceil(izle.length / 10) === 0) sv += `<text x="${x2}" y="${98}" text-anchor="middle" class="cn-et2">${v}</text>`;
+      });
+      if (vurgu != null) { const xv = sol + Math.min(vurgu, L) * sk; sv += `<line x1="${xv}" y1="40" x2="${xv}" y2="70" class="${(iyi === undefined ? vurgu % k === 0 && vurgu <= L : iyi) ? "cn-v1" : "cn-v2"}"/><text x="${xv}" y="38" text-anchor="middle" class="cn-et b">${vurgu}</text>`; }
+      const son = izle.length ? izle[izle.length - 1] : 0, ix = sol + son * sk;
+      sv += `<text x="${ix}" y="50" text-anchor="middle" class="cn-kis">${o.simge || "●"}</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} 104" role="img" aria-label="${k} birimlik adımlarla ilerleme">${sv}</svg>`;
+    }
+    const ileri = () => {
+      const v = (n + 1) * k;
+      if (v > L) { durdur(); s.dur.innerHTML = `<span class="kotu">■</span> Sonraki ${o.adimAd || "adım"} ${k} ${x} ${n + 1} = <b>${v}</b> olurdu; bu ${E(L,"den")} büyük. ${o.bitti ? o.bitti(n, k, L) : `Toplam ${n} ${o.adimAd || "adım"}; son değer ${n * k}.`}`; if (!izle.length) ciz(); return false; }
+      n++; izle.push(v); ciz(); s.dur.innerHTML = o.durum ? o.durum(n, v, k) : `${n}. ${o.adimAd || "adım"}: ${k} ${x} ${n} = <b>${v}</b>`; return true;
+    };
+    function durdur() { clearInterval(tmr); tmr = null; bA.textContent = "▶ Oynat"; }
+    function sifirla() { durdur(); n = 0; izle.length = 0; ciz(); s.dur.innerHTML = o.ilk || "Oynat düğmesine basın ya da tek tek ilerleyin."; }
+    bA.onclick = () => { if (tmr) { durdur(); return; } bA.textContent = "❚❚ Durdur"; tmr = setInterval(() => { if (!ileri()) durdur(); }, az ? 60 : Math.max(120, 900 - L)); };
+    bB.onclick = () => { durdur(); ileri(); }; bS.onclick = sifirla;
+    bT.onclick = () => {
+      const v = Math.round(+ti.value); if (!v) return;
+      if (o.test) { const t = o.test(v, k, L); ciz(t.vurgu != null ? t.vurgu : v, t.ok); s.dur.innerHTML = t.msg; s.yaz("t" + v, t.hucre, t.ok); return; }   // 05.10.2026: soruya özel sınama
+      ciz(v);
+      const b = Math.floor(v / k), r = v % k, ic = v <= L;
+      let m = r === 0 ? `<span class="iyi">✔</span> <b>${v} = ${k} ${x} ${b}</b> · ${v}, ${E(k,"in")} katıdır; ${b}. ${o.adimDa || "adımda"} ${o.ulas || "ulaşılır"}.` : `<span class="kotu">✘</span> ${k} ${x} ${b} = ${k * b} ve ${k} ${x} ${b + 1} = ${k * (b + 1)}; ${v} arada kalır (${v} : ${k} → kalan ${r}). ${o.ulasmaz || "Bu sayıya basılmaz"}.`;
+      if (r === 0 && !ic) m += ` Ama ${v} > ${L}: sınırın dışında.`;
+      s.dur.innerHTML = m; s.yaz("t" + v, [v, r === 0 ? (ic ? `${k} ${x} ${b} ✔` : `${k} ${x} ${b} (sınır dışı)`) : `kalan ${r} ✘`], r === 0 && ic);
+    };
+    sifirla();
+  }
+
+  /* 4) TABLO: 1..son sayılar ızgarada; k'nın katları boyanır (yüzlük tablo, takvim, bilet) */
+  function TABLO(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || [o.kAd || "k", "Boyanan", "En büyük"] });
+    let k = o.k || 2, son = o.son;
+    const kut = h("div", "cn-satir");
+    const kA = adimci((o.kEtiket || "Katları boyanacak sayı:"), 2, o.kMax || 20, k, v => { k = v; temiz(); });
+    const bB = dug("Boya ▶"); kut.append(kA.w, bB);
+    if (o.sonSec) { const sw = h("div", "cn-hazir"); o.sonSec.forEach(v => { const b = dug(v + " gün", "ghost"); b.onclick = () => { son = v; kur(); temiz(); }; sw.appendChild(b); }); s.den.append(kut, sw); }
+    else s.den.appendChild(kut);
+    let hucre = [];
+    function kur() {
+      const g = h("div", "cn-izg" + (o.takvim ? " cn-tak" : "")); g.style.gridTemplateColumns = `repeat(${o.sutunSay},1fr)`;
+      if (o.takvim) o.takvim.gunler.forEach(d => g.appendChild(h("div", "cn-gb", d)));
+      for (let i = 0; i < (o.bosluk || 0); i++) g.appendChild(h("div", "cn-bos"));
+      hucre = [];
+      for (let v = o.bas || 1; v <= son; v++) { const c = h("div", "cn-h", v); g.appendChild(c); hucre[v] = c; }
+      s.sah.innerHTML = ""; s.sah.appendChild(g);
+    }
+    function temiz() { hucre.forEach(c => c && c.classList.remove("on", "yeni")); s.dur.innerHTML = o.ilk || "Sayıyı seçip Boya düğmesine basın."; }
+    let calis = false;
+    bB.onclick = async () => {
+      if (calis) return; calis = true; bB.disabled = true; temiz(); let say = 0, enb = 0;
+      for (let v = k; v <= son; v += k) {
+        hucre[v].classList.add("on", "yeni"); say++; enb = v;
+        s.dur.innerHTML = `${k} ${x} ${say} = <b>${v}</b>  ·  boyanan: ${say}`; await bekle(o.hiz || 260); hucre[v].classList.remove("yeni");
+      }
+      const sonraki = (Math.floor(son / k) + 1) * k;
+      s.dur.innerHTML = `<b>${say}</b> ${o.birimAd || "kare"} boyandı. En büyüğü ${enb} = ${k} ${x} ${say}. Sonraki kat ${k} ${x} ${say + 1} = ${sonraki}, ${E(son,"den")} büyük.` + (o.yorum ? "<br>" + o.yorum(k, say, enb, son) : "");
+      s.yaz(k + ":" + son, o.satir ? o.satir(k, say, enb, son) : [k, say, enb], o.iyi ? o.iyi(k, say, enb, son) : null);
+      calis = false; bB.disabled = false;
+    };
+    kur(); temiz();
+  }
+
+  /* 5) ASANSÖR: iki kural, katlar binada boyanır */
+  function ASANSOR(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Açık asansörler", "Gidilen kat", "Gidilemeyen kat"] });
+    const ac = o.asansor.map(() => false);
+    const kut = h("div", "cn-satir"); const bt = o.asansor.map((a, i) => { const b = dug(a.ad, "ghost"); b.style.setProperty("--ac", a.renk); b.setAttribute("aria-pressed", "false"); b.onclick = () => { ac[i] = !ac[i]; b.setAttribute("aria-pressed", ac[i]); ciz(); }; kut.appendChild(b); return b; });
+    s.den.appendChild(kut);
+    function ciz() {
+      let sv = ""; const H = o.kat * 17 + 40; let git = 0, gitme = [];
+      for (let f = o.kat; f >= 0; f--) {
+        const y = 10 + (o.kat - f) * 17; const dur = o.asansor.map((a, i) => ac[i] && f > 0 && a.kural(f));
+        const herhangi = dur.some(Boolean);
+        if (f > 0) { if (herhangi) git++; else gitme.push(f); }
+        sv += `<rect x="60" y="${y}" width="150" height="15" rx="2" class="${f === 0 ? "cn-zem" : herhangi ? "cn-katon" : (ac.some(Boolean) ? "cn-katoff" : "cn-kat")}"/><text x="52" y="${y + 12}" text-anchor="end" class="cn-et">${f === 0 ? "Z" : f}</text>`;
+        o.asansor.forEach((a, i) => { if (dur[i]) sv += `<circle cx="${230 + i * 22}" cy="${y + 7.5}" r="6" fill="${a.renk}"/>`; });
+      }
+      s.sah.innerHTML = `<svg viewBox="0 0 300 ${H}" style="max-height:440px" role="img" aria-label="${o.kat} katlı bina">${sv}</svg>`;
+      const acik = o.asansor.filter((a, i) => ac[i]).map(a => a.ad);
+      if (!acik.length) { s.dur.innerHTML = "Bir asansör düğmesine basın; durduğu katlar boyanır."; return; }
+      s.dur.innerHTML = `Açık: ${acik.join(" + ")} · Zemin kattan gidilen kat: <b>${git}</b> · Gidilemeyen kat: <b>${gitme.length}</b>` + (gitme.length && gitme.length <= 12 ? ` (${gitme.sort((a, b) => a - b).join(", ")})` : "");
+      s.yaz(acik.join("+"), [acik.join(" + "), git, gitme.length], null);
+    }
+    ciz();
+  }
+
+  /* 6) SAAT: eşit aralıklı seferler ve varış saati */
+  function SAAT(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Sefer aralığı", "Varış", "Önceki sefer", "Sonraki sefer", "Bekleme"] });
+    let ara = o.ara, var_ = o.varis; const bas = o.bas, bit = o.bit;
+    const sa = m => `${String(Math.floor(m / 60)).padStart(2, "0")}.${String(m % 60).padStart(2, "0")}`;
+    const saDa = m => sa(m) + "'" + E(m % 60 || Math.floor(m / 60), "da").split("'")[1];
+    const kut = h("div", "cn-satir");
+    const aA = adimci("Sefer aralığı (dk):", 5, 60, ara, v => { ara = v; ciz(); });
+    const vw = h("label", "cn-kay", `Varış saati: <b class="cn-vs"></b><input type="range" min="${bas}" max="${bit}" step="5" value="${var_}">`);
+    kut.append(aA.w, vw); s.den.appendChild(kut);
+    const r = vw.querySelector("input"), vs = vw.querySelector(".cn-vs");
+    r.oninput = () => { var_ = +r.value; ciz(); };
+    function ciz() {
+      vs.textContent = sa(var_); const W = 660, sk = (W - 40) / (bit - bas);
+      let sv = `<line x1="20" y1="50" x2="${W - 20}" y2="50" class="cn-ek"/>`;
+      for (let m = bas; m <= bit; m += 30) sv += `<line x1="${20 + (m - bas) * sk}" y1="46" x2="${20 + (m - bas) * sk}" y2="54" class="cn-ek"/><text x="${20 + (m - bas) * sk}" y="72" text-anchor="middle" class="cn-et">${sa(m)}</text>`;
+      let onc = null, snr = null;
+      for (let m = bas; m <= bit + ara; m += ara) { if (m <= var_) onc = m; if (m >= var_ && snr == null) snr = m; if (m <= bit) sv += `<text x="${20 + (m - bas) * sk}" y="40" text-anchor="middle" class="cn-bus">🚌</text>`; }
+      const vx = 20 + (var_ - bas) * sk; sv += `<line x1="${vx}" y1="20" x2="${vx}" y2="60" class="cn-v2"/><text x="${vx}" y="92" text-anchor="middle" class="cn-et b">${o.kisi} ${sa(var_)}</text>`;
+      if (snr != null && snr <= bit + ara) { const sx = 20 + (Math.min(snr, bit) - bas) * sk; sv += `<path d="M${vx} 56 L${sx} 56" class="cn-bek"/>`; }
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} 100" role="img" aria-label="Sefer çizelgesi">${sv}</svg>`;
+      const gec = var_ - bas;
+      s.dur.innerHTML = `${o.kisi} durağa ${saDa(var_)} geliyor: ilk seferden <b>${gec} dakika</b> sonra. Seferler ${E(ara,"in")} katı olan dakikalarda: ${ara} ${x} ${Math.floor(gec / ara)} = ${Math.floor(gec / ara) * ara}` + (gec % ara ? `, ${ara} ${x} ${Math.floor(gec / ara) + 1} = ${(Math.floor(gec / ara) + 1) * ara}. Sonraki otobüs ${saDa(snr)}; bekleme <b>${snr - var_} dakika</b>.` : `. Tam sefer saatinde geldi; bekleme <b>0 dakika</b>.`);
+      s.yaz(ara + ":" + var_, [ara + " dk", sa(var_), sa(onc), sa(snr), (snr - var_) + " dk"], null);
+    }
+    ciz();
+  }
+
+  /* 7) ÇARPAN AVCISI: bir sayının çarpanlarını bölerek bulma; isteğe bağlı katlar akışı */
+  function CARPAN(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Sayı", "Çarpanlar", "Çarpan sayısı"] });
+    let N = o.N || o.hazir[0]; let bul = new Set(), denendi = new Set();
+    const kut = h("div", "cn-satir");
+    const sA = adimci("Sayı:", 2, o.max || 200, N, v => { N = v; yeni(); });
+    kut.appendChild(sA.w);
+    if (o.hazir) { const hz = h("div", "cn-hazir"); o.hazir.forEach(n => { const b = dug(n, "ghost"); b.onclick = () => sA.ayarla(n); hz.appendChild(b); }); kut.appendChild(hz); }
+    s.den.appendChild(kut);
+    const bolen = h("div", "cn-satir cn-test"); bolen.innerHTML = `<label>Bölen deneyin: <input type="number" inputmode="numeric" min="1"></label>`;
+    const bD = dug("Böl"), bS = dug("Sıradakini dene", "ghost"); bolen.append(bD, bS); s.den.appendChild(bolen);
+    const bi = bolen.querySelector("input");
+    let bK = null; if (o.katlar) { bK = dug(o.katDugme || "Katlarını say ▶", "ghost"); s.den.appendChild(bK); }
+    const ciftler = h("div", "cn-cift"); const katlar = h("div", "cn-katlar");
+    function yeni() { bul = new Set(); denendi = new Set(); ciz(); s.dur.innerHTML = `${N} sayısını 1, 2, 3, … sayılarına bölerek çarpan çiftlerini bulun.`; katlar.textContent = ""; }
+    function ciz() {
+      const L = [...bul].sort((a, b) => a - b);
+      s.sah.innerHTML = ""; const kartlar = h("div", "cn-kartlar");
+      L.forEach(v => kartlar.appendChild(h("span", "cn-kart" + (v * v === N ? " kare" : ""), v)));
+      if (!L.length) kartlar.appendChild(h("span", "cn-bosk", "Henüz çarpan bulunmadı"));
+      s.sah.append(kartlar, ciftler, katlar);
+      ciftler.innerHTML = L.filter(v => v * v <= N).map(v => `<span>${v} ${x} ${N / v}${v * v === N ? " <i>(aynı sayı: bir kez yazılır)</i>" : ""}</span>`).join("");
+    }
+    const tamamMi = () => { for (let i = 1; i * i <= N; i++) if (!denendi.has(i)) return false; return true; };
+    const eksik = () => { const L = []; for (let i = 1; i * i <= N; i++) if (!denendi.has(i)) L.push(i); return ` <br>Henüz denenmeyen küçük bölenler var: <b>${L.join(", ")}</b>. Bunları da deneyin.`; };
+    function dene(d) {
+      if (!d || d < 1) return; denendi.add(d);
+      const b = Math.floor(N / d), r = N % d;
+      if (d > N) { s.dur.innerHTML = `${d} > ${N}: ${E(N,"den")} büyük sayı ${E(N,"in")} çarpanı olamaz.`; return; }
+      if (r === 0) { bul.add(d); bul.add(b); ciz(); s.dur.innerHTML = `<span class="iyi">✔</span> ${N} : ${d} = ${b}, kalan 0 → <b>${d} ${x} ${b} = ${N}</b>. ${d} ve ${b} çarpandır.` + (d * d >= N ? tamamMi() ? ` <br><b>Dikkat:</b> ${d} ${x} ${d} ${d * d === N ? "=" : ">"} ${N}. Artık yeni çift çıkmaz; bütün çarpanlar bulundu.` : eksik() : ""); }
+      else { s.dur.innerHTML = `<span class="kotu">✘</span> ${N} : ${d} işleminde bölüm ${b}, <b>kalan ${r}</b>. ${d}, ${E(N,"in")} çarpanı değildir.` + (d * d > N ? tamamMi() ? ` <br><b>Dikkat:</b> ${d} ${x} ${d} > ${N}. Daha büyük bölen denemeye gerek yok; çarpan listesi tamam.` : eksik() : ""); }
+      const tamam = [...Array(N).keys()].map(i => i + 1).every(v => N % v || bul.has(v));
+      if (tamam) s.yaz("n" + N, [N, [...bul].sort((a, b) => a - b).join(", "), bul.size], true);
+    }
+    bD.onclick = () => dene(Math.round(+bi.value));
+    bS.onclick = () => { let d = 1; while (denendi.has(d)) d++; bi.value = d; dene(d); };
+    if (bK) bK.onclick = async () => {
+      bK.disabled = true; katlar.textContent = ""; const sat = h("div", "cn-katsat"); katlar.append(h("b", "", `${E(N,"in")} katları: `), sat);
+      for (let i = 1; i <= (o.katSay || 12); i++) { sat.appendChild(h("span", "cn-kat2", `${N * i}`)); await bekle(220); }
+      sat.appendChild(h("span", "cn-sonsuz", "… ve sonsuza kadar sürer"));
+      bK.disabled = false;
+    };
+    yeni();
+  }
+
+  /* 8) KUMBARA: her hafta k TL eklenir; hedef para mümkün mü? (ATLA'nın kumbara görünümü) */
+  function KUMBARA(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Para", "Sonuç"] });
+    const k = o.k; let hafta = 0, tmr = null;
+    const kut = h("div", "cn-satir"); const bA = dug("Bir hafta geçsin +"), bO = dug("▶ Haftaları oynat", "ghost"), bS = dug("Baştan", "ghost");
+    kut.append(bA, bO, bS); s.den.appendChild(kut);
+    const test = h("div", "cn-satir cn-test"); test.innerHTML = `<label>Kumbarada şu para olabilir mi? <input type="number" inputmode="numeric" min="1" max="500"> TL</label>`;
+    const bT = dug("Dene", "ghost"); test.appendChild(bT); s.den.appendChild(test); const ti = test.querySelector("input");
+    function ciz() {
+      const top = hafta * k, sv = [];
+      const yuk = Math.min(150, top * 1.4);
+      sv.push(`<rect x="110" y="20" width="120" height="160" rx="22" class="cn-kum"/><rect x="150" y="14" width="40" height="8" rx="3" class="cn-kum2"/>`);
+      sv.push(`<rect x="116" y="${176 - yuk}" width="108" height="${yuk}" rx="10" class="cn-para"/>`);
+      sv.push(`<text x="170" y="110" text-anchor="middle" class="cn-buyuk">${top} TL</text><text x="170" y="134" text-anchor="middle" class="cn-et">${hafta}. hafta</text>`);
+      let cizgi = ""; for (let i = 1; i <= hafta && i <= 16; i++) cizgi += `<text x="${260 + ((i - 1) % 4) * 52}" y="${40 + Math.floor((i - 1) / 4) * 34}" class="cn-et2">${k}${x}${i}=${k * i}</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 480 190" role="img" aria-label="Kumbara">${sv.join("")}${cizgi}</svg>`;
+      s.dur.innerHTML = hafta ? `${hafta}. hafta sonunda kumbarada ${k} ${x} ${hafta} = <b>${top} TL</b> var.` : `Kumbara boş. Her hafta ${k} TL atılıyor.`;
+    }
+    bA.onclick = () => { hafta++; ciz(); };
+    bO.onclick = () => { if (tmr) { clearInterval(tmr); tmr = null; bO.textContent = "▶ Haftaları oynat"; return; } bO.textContent = "❚❚ Durdur"; tmr = setInterval(() => { if (hafta >= 15) { clearInterval(tmr); tmr = null; bO.textContent = "▶ Haftaları oynat"; return; } hafta++; ciz(); }, az ? 50 : 500); };
+    bS.onclick = () => { hafta = 0; ciz(); };
+    bT.onclick = () => {
+      const v = Math.round(+ti.value); if (!v) return; const b = Math.floor(v / k), r = v % k;
+      s.dur.innerHTML = r ? `<span class="kotu">✘</span> ${k} ${x} ${b} = ${k * b} TL, ${k} ${x} ${b + 1} = ${k * (b + 1)} TL. ${v} TL arada kalır (${v} : ${k} → kalan ${r}). Kumbarada hiçbir hafta ${v} TL olmaz.`
+        : `<span class="iyi">✔</span> ${v} = ${k} ${x} ${b} · ${b}. hafta sonunda kumbarada tam ${v} TL olur.`;
+      if (!r) { hafta = b; ciz(); s.dur.innerHTML = `<span class="iyi">✔</span> ${v} = ${k} ${x} ${b} · <b>${b}. hafta</b> sonunda kumbarada tam ${v} TL olur.`; }
+      s.yaz("t" + v, [v + " TL", r ? `kalan ${r} ✘` : `${k} ${x} ${b} ✔`], !r);
+    };
+    ciz();
+  }
+
+  /* 9) ÖNERME LABORATUVARI: önermeyi farklı sayılarla sınama */
+  function ONERME(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Önerme", "Sayı", "Sonuç"] });
+    let akt = 0; const kut = h("div", "cn-hazir");
+    const bt = o.onermeler.map((on, i) => { const b = dug(on.ad, "ghost"); b.setAttribute("aria-pressed", i === 0); b.onclick = () => { akt = i; bt.forEach((x, j) => x.setAttribute("aria-pressed", j === i)); goster(); }; kut.appendChild(b); return b; });
+    s.den.appendChild(kut);
+    const test = h("div", "cn-satir cn-test"); test.innerHTML = `<label>Sınanacak sayı: <input type="number" inputmode="numeric" min="1" max="200" value="12"></label>`;
+    const bT = dug("Sına"), bR = dug("Rastgele sayı", "ghost"); test.append(bT, bR); s.den.appendChild(test); const ti = test.querySelector("input");
+    function goster() { s.sah.innerHTML = `<div class="cn-onr"><b>${o.onermeler[akt].ad}:</b> “${o.onermeler[akt].metin}”</div>`; s.dur.innerHTML = "Bir sayı yazıp Sına düğmesine basın. Önerme her sayıda doğru mu?"; }
+    function sina(n) {
+      const on = o.onermeler[akt], r = on.sina(n);
+      s.sah.innerHTML = `<div class="cn-onr"><b>${on.ad}:</b> “${on.metin}”</div><div class="cn-kanit">${r.goster}</div>`;
+      s.dur.innerHTML = (r.ok ? `<span class="iyi">✔</span> ${n} için önerme doğru.` : `<span class="kotu">✘</span> ${n} için önerme yanlış! Bir karşı örnek bulundu.`) + (r.not ? " " + r.not : "");
+      s.yaz(akt + ":" + n, [on.ad, n, r.ok ? "doğru" : "yanlış (karşı örnek)"], r.ok);
+    }
+    bT.onclick = () => { const n = Math.round(+ti.value); if (n > 0) sina(n); };
+    bR.onclick = () => { const n = 2 + Math.floor(Math.random() * 59); ti.value = n; sina(n); };
+    goster();
+  }
+
+
+  /* 10) KOŞUL LABORATUVARI (05.10.2026, SB 6.1.1): girdileri (sayı ya da seçim) değiştir → sahne anında çizilir →
+     koşullar tek tek denetlenir (✔/✘) → deney defterine yazılır. Doğru cevap verilmez; öğrenci uygun girdiyi kendisi arar.
+     o.girdi: [{ad, min, max, bas} | {ad, sec:[…], bas, yaz?}] · o.ciz(v) → SVG/HTML · o.kosullar: [{ad, f(v) → bool | {ok, not}}]
+     o.dugme: düğme yazısı (false → her değişiklikte denetlenir) · o.sonuc(v, hepsi, L) · o.satir(v, hepsi, L) · o.iyi(v, L) · o.ek: [{ad, deger(v) → v}] */
+  function KOSUL(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun });
+    const v = o.girdi.map(g => g.bas), ayar = [];
+    o.girdi.forEach((g, i) => {
+      const w = h("div", "cn-satir");
+      if (g.sec) {
+        w.classList.add("cn-secg"); w.appendChild(h("span", "cn-secad", g.ad));
+        const bs = g.sec.map(x => { const b = dug(g.yaz ? g.yaz(x) : x, "ghost"); b.setAttribute("aria-pressed", x === v[i]); b.onclick = () => sec(x); w.appendChild(b); return b; });
+        const sec = x => { v[i] = x; bs.forEach((y, j) => y.setAttribute("aria-pressed", g.sec[j] === x)); degis(); };
+        ayar[i] = sec;
+      } else { const a = adimci(g.ad, g.min, g.max, g.bas, x => { v[i] = x; degis(); }); ayar[i] = a.ayarla; w.appendChild(a.w); }
+      s.den.appendChild(w);
+    });
+    const alt = h("div", "cn-satir"); let bS = null;
+    if (o.dugme !== false) { bS = dug(o.dugme || "Sına ✔"); bS.onclick = () => sina(); alt.appendChild(bS); }
+    (o.ek || []).forEach(e => { const b = dug(e.ad, "ghost"); b.onclick = () => { const y = e.deger(v.slice()); y.forEach((x, i) => { if (x !== v[i]) { v[i] = x; } }); y.forEach((x, i) => ayar[i](x)); }; alt.appendChild(b); });
+    if (alt.children.length) s.den.appendChild(alt);
+    let kur = false;
+    function ciz() { s.sah.innerHTML = o.ciz(v.slice()); }
+    function degis() { if (!kur) return; ciz(); if (!bS) sina(); else s.dur.innerHTML = o.bekle || "Değerleri değiştirdiniz. Sına düğmesine basın."; }
+    function sina() {
+      const L = o.kosullar.map(k => { const r = k.f(v.slice()); return typeof r === "object" ? r : { ok: !!r }; });
+      const hepsi = L.every(r => r.ok);
+      let m = `<ul class="cn-kl">` + o.kosullar.map((k, i) => `<li><span class="${L[i].ok ? "iyi" : "kotu"}">${L[i].ok ? "✔" : "✘"}</span> ${typeof k.ad === "function" ? k.ad(v.slice()) : k.ad}${L[i].not ? ` <span class="cn-not">${L[i].not}</span>` : ""}</li>`).join("") + `</ul>`;
+      if (o.sonuc) m += o.sonuc(v.slice(), hepsi, L);
+      s.dur.innerHTML = m;
+      s.yaz(v.join("|"), o.satir(v.slice(), hepsi, L), o.iyi ? o.iyi(v.slice(), L) : hepsi);
+    }
+    kur = true; ciz();
+    if (bS) s.dur.innerHTML = o.ilk || "Değerleri seçip Sına düğmesine basın."; else sina();
+  }
+
+  /* 11) LABİRENT (05.10.2026, SB 6.1.1): sayı ızgarasında kurala uyan karelere basarak ilerleme; çapraz geçiş yok.
+     o.izgara: [[…]] · o.kural(v) → {ok, msg} · o.cikis: {satır: "ad"} (sağ kenar) · giriş sol üst kare */
+  function LABIRENT(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Kare", "Sonuç"] });
+    const Rn = o.izgara.length, Cn = o.izgara[0].length;
+    let yol = [[0, 0]], kotu = new Set(), cikti = null;
+    const kut = h("div", "cn-satir"); const bG = dug("↶ Bir adım geri", "ghost"), bB = dug("Baştan", "ghost"); kut.append(bG, bB); s.den.appendChild(kut);
+    const g = h("div", "cn-lab"); g.style.gridTemplateColumns = `22px repeat(${Cn},minmax(0,1fr)) 44px`; s.sah.appendChild(g);
+    const hc = [];
+    for (let i = 0; i < Rn; i++) {
+      g.appendChild(h("div", "cn-lok", i === 0 ? "➜" : "")); hc[i] = [];
+      for (let j = 0; j < Cn; j++) { const b = h("button", "cn-lc", o.izgara[i][j]); b.type = "button"; b.onclick = () => bas(i, j); g.appendChild(b); hc[i][j] = b; }
+      const c = h("button", "cn-lcik", o.cikis[i] ? "→" + o.cikis[i] : ""); c.type = "button"; c.disabled = !o.cikis[i]; if (o.cikis[i]) c.onclick = () => cik(i); g.appendChild(c);
+    }
+    const anahtar = (i, j) => i + ":" + j, son = () => yol[yol.length - 1];
+    const yoldaMi = (i, j) => yol.some(([a, b]) => a === i && b === j);
+    function boya() {
+      for (let i = 0; i < Rn; i++) for (let j = 0; j < Cn; j++) {
+        const c = hc[i][j]; c.className = "cn-lc" + (yoldaMi(i, j) ? " yol" : "") + (kotu.has(anahtar(i, j)) ? " kapali" : "");
+      }
+      const [a, b] = son(); hc[a][b].classList.add("simdi");
+    }
+    function cikmaz() {
+      const [a, b] = son();
+      const ac = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([di, dj]) => { const x = a + di, y = b + dj; return x >= 0 && y >= 0 && x < Rn && y < Cn && !yoldaMi(x, y) && !kotu.has(anahtar(x, y)); });
+      return !ac && !(b === Cn - 1 && o.cikis[a]);
+    }
+    function bas(i, j) {
+      if (cikti) { s.dur.innerHTML = `Labirentten <b>${cikti}</b> çıkışından çıktınız. Yeniden denemek için Baştan düğmesine basın.`; return; }
+      const [a, b] = son();
+      if (yoldaMi(i, j)) { s.dur.innerHTML = "Bu kareden zaten geçtiniz. Geri dönmek için “Bir adım geri” düğmesini kullanın."; return; }
+      if (Math.abs(a - i) + Math.abs(b - j) !== 1) { s.dur.innerHTML = `Yalnız bulunduğunuz karenin (<b>${o.izgara[a][b]}</b>) sağındaki, solundaki, üstündeki ya da altındaki kareye geçebilirsiniz.`; return; }
+      const v = o.izgara[i][j], r = o.kural(v);
+      if (!r.ok) { kotu.add(anahtar(i, j)); boya(); s.dur.innerHTML = `<span class="kotu">✘</span> ${r.msg} Bu kareye basılmaz.`; s.yaz("k" + anahtar(i, j), [v, "basılmaz ✘"], false); return; }
+      yol.push([i, j]); boya();
+      s.dur.innerHTML = `<span class="iyi">✔</span> ${r.msg} Yol: ${yol.map(([x, y]) => o.izgara[x][y]).join(" → ")}` + (cikmaz() ? `<br><b>Çıkmaz yol!</b> Buradan gidilebilecek yeni kare yok; geri dönün.` : "");
+      s.yaz("k" + anahtar(i, j), [v, "basılır ✔"], true);
+    }
+    function cik(i) {
+      const [a, b] = son();
+      if (cikti) return;
+      if (a !== i || b !== Cn - 1) { s.dur.innerHTML = `${o.cikis[i]} çıkışından çıkmak için bu çıkışın hemen solundaki karede (<b>${o.izgara[i][Cn - 1]}</b>) olmalısınız.`; return; }
+      cikti = o.cikis[i]; s.dur.innerHTML = `<span class="iyi">✔</span> <b>${cikti} çıkışından çıktınız!</b> Yol: ${yol.map(([x, y]) => o.izgara[x][y]).join(" → ")} → ${cikti}`;
+      s.yaz("c" + cikti + yol.length, ["çıkış " + cikti, `${yol.length} karelik yol ✔`], true);
+    }
+    bG.onclick = () => { if (cikti) cikti = null; else if (yol.length > 1) yol.pop(); boya(); s.dur.innerHTML = `Şu an <b>${o.izgara[son()[0]][son()[1]]}</b> yazan karedesiniz.`; };
+    bB.onclick = () => { yol = [[0, 0]]; kotu = new Set(); cikti = null; boya(); s.dur.innerHTML = o.ilk || "Giriş karesindesiniz. Komşu bir kareye dokunun."; };
+    boya(); s.dur.innerHTML = o.ilk || "Giriş karesindesiniz. Komşu bir kareye dokunun.";
+  }
+
+  const carp = n => { const L = []; for (let i = 1; i <= n; i++) if (n % i === 0) L.push(i); return L; };
+  return { DIZILIM, GRUPLA, ATLA, TABLO, ASANSOR, SAAT, CARPAN, KUMBARA, ONERME, KOSUL, LABIRENT, carp, E };
+})();
+
+/* MAT.7.1.5 · Oran — bağlam sorularının "Canlandır" düzenekleri (06.10.2026) — ortak motor: canlandir.js (CN.KOSUL); yeni motor yok.
+   Her düzenek: öğrenci seçim düğmeleri ya da − / + sayaçlarıyla durumu değiştirir → sahne anında çizilir → koşullar denetlenir →
+   deneme deney defterine yazılır → yeniden dener. Doğru cevap bir düğmeyle verilmez; denemelerden çıkar (§4.k, §19-10).
+   Birimsiz oranlar "2 : 3" biçiminde; kesirler metinde a/b yazılır, kesir_cizgi.js üst üste çizer (SVG içinde kesir kullanılmaz). */
+window.CANL = (() => {
+  if (!document.getElementById("c715-stil")) { const st = document.createElement("style"); st.id = "c715-stil";
+    st.textContent = ".cn-btn{min-width:44px;min-height:44px}.cn-adimci button{min-width:44px;min-height:44px}.c715-k{text-align:center;font-size:17px;font-weight:800;margin:8px auto;max-width:640px;line-height:1.6}"; document.head.appendChild(st); }
+  const M = "−", gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; };
+  const O = (a, b) => `${a} : ${b}`, S = (a, b) => { const g = gcd(a, b); return O(a / g, b / g); };
+  const K = (p, q) => { const g = gcd(p, q); p /= g; q /= g; return q === 1 ? String(p) : `${p}/${q}`; };
+  const D = v => String(Math.round(v * 1000) / 1000).replace(".", ",");
+  const svg = (w, h, ic, ad) => `<svg viewBox="0 0 ${w} ${h}" style="width:100%;max-width:${w}px;height:auto;display:block;margin:0 auto" role="img" aria-label="${ad}">${ic}</svg>`;
+  const tx = (x, y, s, o = {}) => `<text x="${x}" y="${y}" text-anchor="${o.an || "middle"}" style="font-size:${o.fs || 14}px;font-weight:800;fill:${o.r || "#1d2433"}">${s}</text>`;
+  const kutu = h => `<div class="c715-k">${h}</div>`;
+  /* yatay çubuklar: [[ad, değer, renk]] (aynı ölçek) */
+  function cubuklar(L, W = 380, olc) { const mx = olc || Math.max(...L.map(x => x[1])), u = (W - 190) / mx; let s = "";
+    L.forEach(([ad, v, r], i) => { const y = 14 + i * 44; s += tx(8, y + 22, ad, { an: "start", fs: 13 }) + `<rect x="130" y="${y}" width="${Math.max(2, v * u)}" height="30" rx="5" fill="${r}" stroke="#495057" stroke-opacity=".5"/>` + tx(138 + v * u, y + 21, D(v), { an: "start", fs: 13 }); });
+    return svg(W, 22 + L.length * 44, s, "Çubuklar"); }
+  /* eş kutulu çubuk diyagramı: [[ad, kutu sayısı, renk]], kutunun değeri u */
+  function kutular(L, u, W = 400) { const kw = Math.min(46, (W - 170) / Math.max(...L.map(x => x[1]))); let s = "";
+    L.forEach(([ad, n, r], i) => { const y = 12 + i * 46; s += tx(8, y + 22, ad, { an: "start", fs: 13 });
+      for (let j = 0; j < n; j++) s += `<rect x="${118 + j * kw}" y="${y}" width="${kw}" height="32" fill="${r}" stroke="#495057"/>` + tx(118 + j * kw + kw / 2, y + 21, u, { fs: 13 });
+      s += tx(126 + n * kw, y + 21, `= ${n * u}`, { an: "start", fs: 13 }); });
+    return svg(W, 20 + L.length * 46, s, "Çubuk diyagramı"); }
+  /* grafik: başlangıç noktasından ışınlar [[x, y, renk, ad, kalın]] */
+  function isinlar(L, mx, my, xad, yad, W = 360) { const Hh = 300, l = 40, b = Hh - 34, u = Math.min((W - l - 70) / mx, (b - 30) / my), X = v => l + v * u, Y = v => b - v * u; let s = "";
+    for (let i = 0; i <= mx; i++) for (let j = 0; j <= my; j++) s += `<circle cx="${X(i)}" cy="${Y(j)}" r="1.8" fill="#adb5bd"/>`;
+    s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(mx) + 12}" y2="${Y(0)}" stroke="#495057" stroke-width="2"/><line x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(my) - 12}" stroke="#495057" stroke-width="2"/>`;
+    s += tx(X(mx) + 14, Y(0) + 20, xad, { an: "end", fs: 12 }) + tx(X(0) + 4, Y(my) - 16, yad, { an: "start", fs: 12 });
+    for (let i = 0; i <= mx; i++) s += tx(X(i), Y(0) + 16, i, { fs: 11 }); for (let j = 1; j <= my; j++) s += tx(X(0) - 8, Y(j) + 4, j, { an: "end", fs: 11 });
+    L.forEach(([x, y, r, ad, kal]) => { const t = Math.min(mx / x, my / y); s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(x * t)}" y2="${Y(y * t)}" stroke="${r}" stroke-width="${kal ? 4 : 2}" opacity="${kal ? 1 : .45}"/><circle cx="${X(x)}" cy="${Y(y)}" r="6" fill="${r}"/>` + tx(X(x * t) + 4, Y(y * t) - 6, ad, { an: "start", fs: 13, r }); });
+    return svg(W, Hh, s, "Işın grafiği"); }
+  /* çift sayı doğrusu */
+  function cift(ust, alt, ua, aa, isaret, W = 400) { const L = 96, R = W - 24, mx = Math.max(...ust), X = v => L + v / mx * (R - L); let s = tx(6, 40, ua, { an: "start", fs: 13 }) + tx(6, 104, aa, { an: "start", fs: 13 });
+    s += `<line x1="${L}" y1="36" x2="${R}" y2="36" stroke="#1c7ed6" stroke-width="2.5"/><line x1="${L}" y1="100" x2="${R}" y2="100" stroke="#e8590c" stroke-width="2.5"/>`;
+    ust.forEach((v, i) => { s += `<line x1="${X(v)}" y1="30" x2="${X(v)}" y2="42" stroke="#495057" stroke-width="2"/><line x1="${X(v)}" y1="94" x2="${X(v)}" y2="106" stroke="#495057" stroke-width="2"/>` + tx(X(v), 24, D(v), { fs: 13 }) + tx(X(v), 124, D(alt[i]), { fs: 13 }); });
+    if (isaret != null) s += `<line x1="${X(isaret)}" y1="36" x2="${X(isaret)}" y2="100" stroke="#2b8a3e" stroke-width="3" stroke-dasharray="6 4"/>`;
+    return svg(W, 134, s, "Çift sayı doğrusu"); }
+  const KO = (el, o) => CN.KOSUL(el, Object.assign({ dugme: false }, o));
+
+  return {
+    /* 1 · Fidanlar: fark mı, kat mı? */
+    1: el => { const F = { "A fidanı": [40, 60], "B fidanı": [90, 120] }, SO = ["Kaç cm uzadı?", "Boyu kaç katına çıktı?"];
+      const deg = (f, s) => { const [a, b] = F[f]; return s === SO[0] ? b - a : b / a; };
+      return KO(el, { girdi: [{ ad: "Fidan:", sec: Object.keys(F), bas: "A fidanı" }, { ad: "Soru:", sec: SO, bas: SO[0] }],
+        ciz: v => { const [a, b] = F[v[0]]; return cubuklar([["Geçen yıl", a, "#d3f9d8"], ["Bu yıl", b, "#69db7c"]], 380, 130) +
+          kutu(v[1] === SO[0] ? `${v[0]}: ${b} − ${a} = <b>${b - a} cm</b> uzadı.` : `${v[0]}: ${b} : ${a} = <b>${K(b, a)}</b> katına çıktı.`); },
+        kosullar: [{ ad: v => `Bu soruda ${v[0]} öbür fidandan daha büyük sonuç veriyor.`, f: v => { const o = v[0] === "A fidanı" ? "B fidanı" : "A fidanı"; return deg(v[0], v[1]) > deg(o, v[1]); } }],
+        sutun: ["Fidan", "Soru", "Sonuç"], satir: v => [v[0], v[1], v[1] === SO[0] ? `${deg(v[0], v[1])} cm` : `${K(F[v[0]][1], F[v[0]][0])} katı`],
+        yon: "Fidanı ve soruyu değiştirerek dört durumu da deneyin. Her denemede hangi fidanın daha büyük sonuç verdiğine bakın; toplamsal ve çarpımsal karşılaştırmanın farklı fidanları öne çıkardığını defterden görün.",
+        bitis: "Dört durumu da denediğinizde ve hangi soruda hangi fidanın öne çıktığını bulduğunuzda." }); },
+
+    /* 2 · Manav: parça–bütün */
+    2: el => { const C = ["Biber : Domates", "Biber : Patlıcan", "Biber : Domates ve patlıcan", "Biber : Bütün kasalar"], B = [9, 5, 14, 20];
+      return KO(el, { girdi: [{ ad: "Karşılaştırma:", sec: C, bas: C[0] }],
+        ciz: v => { const i = C.indexOf(v[0]); return cubuklar([["Domates", 9, "#ffa8a8"], ["Biber", 6, "#8ce99a"], ["Patlıcan", 5, "#d0bfff"]], 380, 10) + kutu(`Oran: 6 : ${B[i]} = <b>${S(6, B[i])}</b>`); },
+        kosullar: [{ ad: "Bu oran bir parça–bütün oranıdır (ikinci terim bütün kasalardır).", f: v => v[0] === C[3] }],
+        sutun: ["Karşılaştırma", "Oran", "En sade"], satir: v => { const i = C.indexOf(v[0]); return [v[0], O(6, B[i]), S(6, B[i])]; },
+        yon: "Biberleri farklı kasalarla karşılaştırın. Hangisinde ikinci terimin bütün kasalar olduğuna dikkat edin ve oranı en sade hâliyle okuyun.", bitis: "Parça–bütün oranını bulduğunuzda." }); },
+
+    /* 3 · Oran kartları: birimli mi? */
+    3: el => { const C = { "1. kart": ["14 kız", "16 erkek", false, "14 : 16 = 7 : 8"], "2. kart": ["18 L su", "3 dakika", true, "6 L/dk."], "3. kart": ["240 cm perde", "2 m pencere", false, "240 cm : 200 cm = 6 : 5"], "4. kart": ["940 TL", "20 L benzin", true, "47 TL/L"] };
+      return KO(el, { girdi: [{ ad: "Kart:", sec: Object.keys(C), bas: "1. kart" }],
+        ciz: v => { const c = C[v[0]]; return kutu(`${v[0]}: ${c[0]} ile ${c[1]}<br>${c[2] ? "Birimler farklı türdedir." : "Birimler aynı türdendir; gerekirse aynı birime çevrilir."}<br>Oran: <b>${c[3]}</b>`); },
+        kosullar: [{ ad: v => `${v[0]} birimli bir orandır.`, f: v => C[v[0]][2] }],
+        sutun: ["Kart", "Oran", "Birimli mi?"], satir: v => [v[0], C[v[0]][3], C[v[0]][2] ? "birimli" : "birimsiz"],
+        yon: "Kartları tek tek seçin; her kartın oranı ve birimli olup olmadığı deftere yazılır. Defterde kaç birimli oran olduğunu sayın.", bitis: "Dört kartı da incelediğinizde." }); },
+
+    /* 4 · Geri dönüşüm panosu */
+    4: el => { const Y = ["Her 1 kg cam atıktan 2,5 şişe üretilir.", "Her şişe için 2,5 kg cam atık gerekir.", "Toplam 2,5 kg cam atık toplanmıştır.", "Her şişe 2,5 kg gelir."];
+      return KO(el, { girdi: [{ ad: "Cam atık (kg):", sec: ["2", "100", "600", "1 000"], bas: "600" }, { ad: "Yorum:", sec: Y, bas: Y[1] }],
+        ciz: v => { const kg = +v[0].replace(" ", ""); return kutu(`${v[0]} kg cam atık → ${D(kg * 2.5)} şişe<br>Şişe : kg = ${D(kg * 2.5)} : ${v[0]} = <b>2,5 : 1</b> (2,5 şişe/kg)`); },
+        kosullar: [{ ad: "Seçilen yorum, şişe/kg oranının anlamına uyuyor.", f: v => v[1] === Y[0] }],
+        sutun: ["Cam atık", "Şişe", "Yorum", "Uygun mu?"], satir: (v, ok) => [`${v[0]} kg`, D(+v[0].replace(" ", "") * 2.5), v[1], ok ? "uygun" : "uygun değil"],
+        yon: "Cam atık miktarını değiştirin; kilogram başına şişe sayısının hep 2,5 kaldığını görün. Sonra yorumları tek tek seçip hangisinin bu oranı doğru anlattığını bulun.", bitis: "Doğru yorumu bulduğunuzda." }); },
+
+    /* 5 · Limonata tarifi */
+    5: el => KO(el, { girdi: [{ ad: "Su (su bardağı)", min: 5, max: 25, bas: 5 }],
+        ciz: v => { const k = v[0] / 5; return kutu(`Su ${v[0]} bardak → tarifin ${K(v[0], 5)} katı<br>Limon: 4 · ${K(v[0], 5)} = <b>${K(4 * v[0], 5)}</b> &nbsp; Şeker: 6 · ${K(v[0], 5)} = <b>${K(6 * v[0], 5)} kaşık</b>`); },
+        kosullar: [{ ad: "Sürahideki su 15 su bardağıdır.", f: v => v[0] === 15 }],
+        sutun: ["Su", "Kaç katı?", "Limon", "Şeker"], satir: v => [v[0], K(v[0], 5), K(4 * v[0], 5), K(6 * v[0], 5)],
+        yon: "Su miktarını − / + ile değiştirin; bütün malzemeler aynı katta artar. 15 bardak suya gelince gereken şekeri okuyun.", bitis: "15 su bardağı suyla hesap yaptığınızda." }),
+
+    /* 6 · Bisiklet dişlileri: en sade oran */
+    6: el => KO(el, { girdi: [{ ad: "İki terimi böl:", sec: ["2", "3", "4", "6", "12"], bas: "2" }],
+        ciz: v => { const n = +v[0]; return kutu(`48 : 36 → iki terim ${n}'${{ 2: "ye", 3: "e", 4: "e", 6: "ya", 12: "ye" }[n]} bölünür → <b>${O(48 / n, 36 / n)}</b><br>Terimlerin ortak böleni: ${gcd(48 / n, 36 / n) === 1 ? "yalnız 1" : `1 ve ${gcd(48 / n, 36 / n)}`}`); },
+        kosullar: [{ ad: "Elde edilen oranın terimleri aralarında asaldır (en sade hâl).", f: v => gcd(48 / +v[0], 36 / +v[0]) === 1 }],
+        sutun: ["Bölen", "Oran", "En sade mi?"], satir: (v, ok) => [v[0], O(48 / +v[0], 36 / +v[0]), ok ? "evet" : "hayır"],
+        yon: "48 : 36 oranının terimlerini farklı sayılara bölün. Hangi bölmede terimlerin 1'den başka ortak böleni kalmadığına bakın.", bitis: "En sade oranı bulduğunuzda." }),
+
+    /* 7 · Kermes: çubuk diyagramı */
+    7: el => KO(el, { girdi: [{ ad: "1 kutunun değeri", min: 1, max: 20, bas: 5 }],
+        ciz: v => kutular([["Kurabiye", 5, "#ffd8a8"], ["Pasta dilimi", 3, "#e5dbff"]], v[0]) + kutu(`Fark: 2 kutu = ${2 * v[0]} &nbsp; Toplam: 8 kutu = <b>${8 * v[0]}</b>`),
+        kosullar: [{ ad: v => `Kurabiye pasta diliminden 26 fazla (şimdi ${2 * v[0]} fazla).`, f: v => 2 * v[0] === 26 }],
+        sutun: ["1 kutu", "Kurabiye", "Pasta", "Fark", "Toplam"], satir: v => [v[0], 5 * v[0], 3 * v[0], 2 * v[0], 8 * v[0]],
+        yon: "Bir kutunun değerini değiştirin; iki çubuk ve aradaki fark birlikte değişir. Fark 26 olunca toplamı okuyun.", bitis: "Fark 26 olduğunda." }),
+
+    /* 8 · Fırın: çift sayı doğrusu */
+    8: el => KO(el, { girdi: [{ ad: "Un (kg):", sec: ["2", "4", "6", "8", "10", "12"], bas: "4" }],
+        ciz: v => { const u = +v[0]; return cift([0, 4, 8, 12], [0, 2.5, 5, 7.5], "Un (kg)", "Su (L)", u) + kutu(`${u} kg un için su: ${u} · 0,625 = <b>${D(u * 0.625)} L</b> (her 1 kg una 0,625 L)`); },
+        kosullar: [{ ad: "Fırıncının kullanacağı 10 kg un seçildi.", f: v => v[0] === "10" }],
+        sutun: ["Un (kg)", "Su (L)"], satir: v => [v[0], D(+v[0] * 0.625)],
+        yon: "Un miktarını seçin; yeşil çizgi iki doğruda birlikte kayar. Su miktarının her seferinde aynı oranla bulunduğunu görün ve 10 kg un için suyu okuyun.", bitis: "10 kg una karşılık gelen suyu bulduğunuzda." }),
+
+    /* 9 · Boyacı: oran tablosu */
+    9: el => { const H = { "9 kutu beyaz": [9, null], "5 kutu mavi": [null, 5], "21 kutu beyaz": [21, null] };
+      return KO(el, { girdi: [{ ad: "Boş hücre:", sec: Object.keys(H), bas: "9 kutu beyaz" }, { ad: "Yazılacak sayı", min: 1, max: 30, bas: 1 }],
+        ciz: v => { const [b, m] = H[v[0]]; const be = b ?? v[1], ma = m ?? v[1]; return kutu(`Sütun: <b>${be}</b> kutu beyaz, <b>${ma}</b> kutu mavi → ${O(be, ma)} ${be * 1 === ma * 3 ? "= 3 : 1 ✔" : "≠ 3 : 1"}`); },
+        kosullar: [{ ad: "Bu sütun 3 : 1 oranına denktir.", f: v => { const [b, m] = H[v[0]]; return (b ?? v[1]) === 3 * (m ?? v[1]); } }],
+        sutun: ["Hücre", "Sayı", "Sütun", "Denk mi?"], satir: (v, ok) => [v[0], v[1], (() => { const [b, m] = H[v[0]]; return O(b ?? v[1], m ?? v[1]); })(), ok ? "evet" : "hayır"],
+        yon: "Bir boş hücre seçin ve sayıyı − / + ile değiştirin. Sütun 3 : 1'e denk olunca defterde “evet” yazar. Üç hücreyi bulup sayılarını toplayın.", bitis: "Üç boş hücrenin de sayısını bulduğunuzda." }); },
+
+    /* 10 · Çay ocakları: ışın */
+    10: el => { const U = { "Ali Usta": [2, 2, "#e8590c"], "Bekir Usta": [4, 3, "#1c7ed6"], "Cemal Usta": [6, 5, "#2b8a3e"] };
+      return KO(el, { girdi: [{ ad: "Usta:", sec: Object.keys(U), bas: "Cemal Usta" }],
+        ciz: v => isinlar(Object.entries(U).map(([k, [s, c, r]]) => [s, c, r, k.split(" ")[0], k === v[0]]), 7, 6, "Su (bardak)", "Çay (kaşık)") +
+          kutu(`${v[0]}: 1 bardak suya ${K(U[v[0]][1], U[v[0]][0])} kaşık çay`),
+        kosullar: [{ ad: "Bu ustanın ışını dikey doğruya en yakındır (en koyu çay).", f: v => v[0] === "Ali Usta" }, { ad: "Bu ustanın ışını yatay doğruya en yakındır (en açık çay).", f: v => v[0] === "Bekir Usta" }],
+        sutun: ["Usta", "Su : Çay", "Bardak başına çay"], satir: v => [v[0], O(U[v[0]][0], U[v[0]][1]), K(U[v[0]][1], U[v[0]][0]) + " kaşık"],
+        yon: "Ustaları tek tek seçin; seçilen ustanın ışını kalın çizilir. Bardak başına düşen çayı karşılaştırarak en koyu ve en açık çayı bulun.", bitis: "En koyu ve en açık çayın ustalarını bulduğunuzda." }); },
+
+    /* 11 · Koşu bandı */
+    11: el => KO(el, { girdi: [{ ad: "Mesafe (km)", min: 1, max: 12, bas: 4 }],
+        ciz: v => cift([0, 1, 2, 4, 8, 12].filter(x => x <= 12), [0, 6.25, 12.5, 25, 50, 75], "Yol (km)", "Süre (dk.)", v[0]) + kutu(`${v[0]} km için süre: ${v[0]} · 6,25 = <b>${D(v[0] * 6.25)} dakika</b> (25 : 4 = 6,25 dk./km)`),
+        kosullar: [{ ad: "Zeynep'in hedefi olan 10 km seçildi.", f: v => v[0] === 10 }],
+        sutun: ["Mesafe", "Süre"], satir: v => [`${v[0]} km`, `${D(v[0] * 6.25)} dk.`],
+        yon: "Mesafeyi − / + ile değiştirin; süre her kilometre için 6,25 dakika artar. 10 km için süreyi okuyun.", bitis: "10 km'nin süresini bulduğunuzda." }),
+
+    /* 12 · Zeytinyağı rafı */
+    12: el => { const Z = { "0,5 L": [0.5, 160], "1 L": [1, 300], "2 L": [2, 580], "5 L": [5, 1500] };
+      return KO(el, { girdi: [{ ad: "Şişe:", sec: Object.keys(Z), bas: "0,5 L" }],
+        ciz: v => cubuklar(Object.entries(Z).map(([k, [h, f]]) => [`${k} şişe`, f / h, k === v[0] ? "#ffd43b" : "#e9ecef"]), 380, 340) + kutu(`${v[0]}: ${Z[v[0]][1]} : ${String(Z[v[0]][0]).replace(".", ",")} = <b>${D(Z[v[0]][1] / Z[v[0]][0])} TL/L</b>`),
+        kosullar: [{ ad: "Bu şişenin litresi en ucuzdur.", f: v => v[0] === "2 L" }],
+        sutun: ["Şişe", "Fiyat", "Birim fiyat"], satir: v => [v[0], `${Z[v[0]][1]} TL`, `${D(Z[v[0]][1] / Z[v[0]][0])} TL/L`],
+        yon: "Şişeleri tek tek seçin; çubuklar litre başına fiyatı gösterir. En kısa çubuk litresi en ucuz şişedir.", bitis: "Litresi en ucuz şişeyi bulduğunuzda." }); },
+
+    /* 13 · Damlayan musluk */
+    13: el => KO(el, { girdi: [{ ad: "Gün sayısı", min: 1, max: 30, bas: 1 }],
+        ciz: v => kutu(`1 saat: 0,6 L → 1 gün (24 saat): 24 · 0,6 = 14,4 L<br>${v[0]} gün: ${v[0]} · 14,4 = <b>${D(v[0] * 14.4)} L</b>`),
+        kosullar: [{ ad: "30 günlük israf hesaplandı.", f: v => v[0] === 30 }],
+        sutun: ["Gün", "Boşa akan su"], satir: v => [v[0], `${D(v[0] * 14.4)} L`],
+        yon: "Gün sayısını − / + ile değiştirin; boşa akan su her gün 14,4 L artar. 30 güne kadar ilerleyin.", bitis: "30 gündeki israfı bulduğunuzda." }),
+
+    /* 14 · Kulüpler */
+    14: el => { const KL = { "Satranç": [2, 3], "Resim": [5, 3] };
+      return KO(el, { girdi: [{ ad: "Kulüp:", sec: Object.keys(KL), bas: "Satranç" }, { ad: "Kız öğrenci sayısı", min: 0, max: 40, bas: 20 }],
+        ciz: v => { const [a, b] = KL[v[0]], n = a + b; return kutular([["Kız", a, "#ffc9c9"], ["Erkek", b, "#a5d8ff"]], 40 / n) + kutu(`40 öğrenci ${n} eş kutuya bölünür: 1 kutu = ${40 / n} öğrenci<br>Sizin denemeniz: ${v[1]} kız, ${40 - v[1]} erkek → ${O(v[1], 40 - v[1])}`); },
+        kosullar: [{ ad: v => `${v[0]} kulübünde kız : erkek oranı ${O(...KL[v[0]])} tutuyor.`, f: v => { const [a, b] = KL[v[0]]; return v[1] * b === (40 - v[1]) * a; } }],
+        sutun: ["Kulüp", "Kız", "Erkek", "Oran tutuyor mu?"], satir: (v, ok) => [v[0], v[1], 40 - v[1], ok ? "evet" : "hayır"],
+        yon: "Kulübü seçin ve kız öğrenci sayısını değiştirin. Oran tuttuğunda defterde “evet” yazar. İki kulübün kız sayılarını bulup toplayın.", bitis: "İki kulübün de kız sayısını bulduğunuzda." }); },
+
+    /* 15 · Fidan kampanyası: mutlak ve bağıl */
+    15: el => { const OK = { "A": [240, 180], "B": [160, 128], "C": [300, 210] };
+      return KO(el, { girdi: [{ ad: "Okul:", sec: Object.keys(OK), bas: "A" }],
+        ciz: v => cubuklar(Object.entries(OK).map(([k, [o, f]]) => [`${k} · fidan`, f, k === v[0] ? "#8ce99a" : "#e9ecef"]), 380, 230) +
+          kutu(`${v[0]} okulu: ${OK[v[0]][1]} fidan; öğrenci başına ${OK[v[0]][1]} : ${OK[v[0]][0]} = <b>${K(OK[v[0]][1], OK[v[0]][0])}</b> fidan`),
+        kosullar: [{ ad: "En çok fidanı bu okul dikti.", f: v => v[0] === "C" }, { ad: "Öğrenci başına en çok fidanı bu okul dikti.", f: v => v[0] === "B" }],
+        sutun: ["Okul", "Fidan", "Öğrenci başına"], satir: v => [v[0], OK[v[0]][1], K(OK[v[0]][1], OK[v[0]][0])],
+        yon: "Okulları tek tek seçin. Çubuklar dikilen fidan sayısını (mutlak), alttaki satır öğrenci başına fidanı (bağıl) gösterir. İki ödülün sahibini ayrı ayrı bulun.", bitis: "İki ödülün okulunu bulduğunuzda." }); },
+
+    /* 16 · Pano: ölçekli büyütme */
+    16: el => { const P = { P: [8, 14], R: [6, 10], S: [7, 11], T: [10, 16] };
+      return KO(el, { girdi: [{ ad: "Dikdörtgen:", sec: Object.keys(P), bas: "R" }],
+        ciz: v => { const [a, b] = P[v[0]], k = 12; let s = ""; for (let i = 0; i <= 30; i++) s += `<line x1="${10 + i * k}" y1="10" x2="${10 + i * k}" y2="${10 + 17 * k}" stroke="#e9ecef"/>`; for (let j = 0; j <= 17; j++) s += `<line x1="10" y1="${10 + j * k}" x2="${10 + 30 * k}" y2="${10 + j * k}" stroke="#e9ecef"/>`;
+          s += `<rect x="${10 + k}" y="${10 + k}" width="${4 * k}" height="${7 * k}" fill="#b2f2bb" stroke="#2b8a3e" stroke-width="2"/>` + tx(10 + 3 * k, 10 + 5 * k, "A") + `<rect x="${10 + 8 * k}" y="${10 + k}" width="${a * k}" height="${b * k}" fill="#d0ebff" stroke="#1c7ed6" stroke-width="2"/>` + tx(10 + (8 + a / 2) * k, 10 + (1 + b / 2) * k, v[0]);
+          return svg(380, 230, s, "Kareli zemin") + kutu(`A: 4 : 7 &nbsp; ${v[0]}: ${O(a, b)} = ${S(a, b)}`); },
+        kosullar: [{ ad: "Kenar oranı 4 : 7'ye denktir (A'nın büyütülmüş kopyası).", f: v => P[v[0]][0] * 7 === P[v[0]][1] * 4 }],
+        sutun: ["Dikdörtgen", "Kenarlar", "En sade oran"], satir: v => [v[0], O(...P[v[0]]), S(...P[v[0]])],
+        yon: "Dikdörtgenleri tek tek seçin ve A'nın yanında görün. Kenar oranı en sade hâliyle 4 : 7 olan dikdörtgeni bulun.", bitis: "Kopya olarak kullanılabilecek dikdörtgeni bulduğunuzda." }); },
+
+    /* 17 · Hızlı tren */
+    17: el => { const T = { "3/4 saat": 0.75, "1 saat": 1, "1 1/2 saat": 1.5, "2 saat": 2 };
+      return KO(el, { girdi: [{ ad: "Süre:", sec: Object.keys(T), bas: "3/4 saat" }],
+        ciz: v => cift([0, 0.75, 1, 1.5, 2], [0, 165, 220, 330, 440], "Süre (saat)", "Yol (km)", T[v[0]]) + kutu(`Birim oran: 165 : 3/4 = 220 km/sa.<br>${v[0]} → <b>${D(T[v[0]] * 220)} km</b>`),
+        kosullar: [{ ad: "Bir sonraki yolculuğun süresi (2 saat) seçildi.", f: v => v[0] === "2 saat" }],
+        sutun: ["Süre", "Yol"], satir: v => [v[0], `${D(T[v[0]] * 220)} km`],
+        yon: "Süreyi değiştirin; çift sayı doğrusunda yol birlikte değişir. Önce 1 saatte alınan yolu (birim oran), sonra 2 saatte alınan yolu okuyun.", bitis: "2 saatte alınan yolu bulduğunuzda." }); },
+
+    /* 18 · Ayran sürahileri */
+    18: el => { const SU = { "1.": [3, 2], "2.": [6, 4], "3.": [4, 4] }, B = ["1. ve 2. sürahi", "1. ve 3. sürahi", "2. ve 3. sürahi"];
+      const top = x => { const [a, b] = x.match(/\d\./g); return [SU[a][0] + SU[b][0], SU[a][1] + SU[b][1]]; };
+      return KO(el, { girdi: [{ ad: "Birleştir:", sec: B, bas: B[1] }],
+        ciz: v => { const [y, s] = top(v[0]); return kutu(`Yoğurt: ${y} bardak, su: ${s} bardak → ${O(y, s)} = <b>${S(y, s)}</b><br>1. sürahi: 3 : 2 ${y * 2 === s * 3 ? "= aynı tat ✔" : "≠ farklı tat"}`); },
+        kosullar: [{ ad: "Kazandaki ayran 1. sürahiyle aynı tattadır.", f: v => { const [y, s] = top(v[0]); return y * 2 === s * 3; } }],
+        sutun: ["Birleştirilen", "Yoğurt : Su", "En sade", "1. sürahiyle aynı mı?"], satir: (v, ok) => { const [y, s] = top(v[0]); return [v[0], O(y, s), S(y, s), ok ? "evet" : "hayır"]; },
+        yon: "Üç birleştirmeyi de deneyin. Hangisinde kazandaki oranın 3 : 2'ye denk kaldığına bakın; I, II ve III'ü defterle karşılaştırın.", bitis: "Üç birleştirmeyi de denediğinizde." }); },
+
+    /* 19 · Raf etiketi */
+    19: el => KO(el, { girdi: [{ ad: "400 g'lık paket sayısı", min: 1, max: 8, bas: 1 }],
+        ciz: v => kutu(`Paket fiyatı: 0,4 · 85 = 34 TL<br>${v[0]} paket = ${D(v[0] * 0.4)} kg → <b>${v[0] * 34} TL</b><br>1 kg'lık paketlerle ${D(v[0] * 0.4)} kg: ${D(v[0] * 0.4 * 80)} TL`),
+        kosullar: [{ ad: v => `Toplam tam 2 kg peynir alındı (şimdi ${D(v[0] * 0.4)} kg).`, f: v => v[0] === 5 }],
+        sutun: ["Paket", "Kütle", "400 g'lıklarla", "1 kg'lıklarla"], satir: v => [v[0], `${D(v[0] * 0.4)} kg`, `${v[0] * 34} TL`, `${D(v[0] * 0.4 * 80)} TL`],
+        yon: "400 g'lık paket sayısını değiştirin; toplam kütle ve iki seçenekteki tutar yan yana görünür. Tam 2 kg'a ulaşınca farkı hesaplayın.", bitis: "2 kg için iki tutarı karşılaştırdığınızda." }),
+
+    /* 20 · Musluk önermeleri */
+    20: el => KO(el, { girdi: [{ ad: "Süre (dk.):", sec: ["1/3", "1", "2", "3", "4"], bas: "1" }],
+        ciz: v => { const t = v[0] === "1/3" ? 1 / 3 : +v[0]; return kutu(`${v[0]} dakikada akan su: ${v[0]} · 3 = <b>${D(t * 3)} L</b><br>Su : süre = ${D(t * 3)} : ${v[0]} = 3 : 1 (3 L/dk.)`); },
+        kosullar: [{ ad: "Bu sürede tam 1 L su akıyor.", f: v => v[0] === "1/3" }],
+        sutun: ["Süre", "Akan su"], satir: v => [`${v[0]} dk.`, `${D((v[0] === "1/3" ? 1 / 3 : +v[0]) * 3)} L`],
+        yon: "Süreyi değiştirin. Süre kaç katına çıkarsa suyun da o katına çıktığını görün (Can). 1 L suyun kaç dakikada aktığını bulun ve Berk'in önermesini sınayın.", bitis: "1 L suyun aktığı süreyi bulduğunuzda." }),
+  };
+})();
+
+</script>
+<script>
+const V={"baslik": "Oran", "kod": "7. SINIF · MAT.7.1.5", "ses": "", "bet": "BAĞLAM TEMELLİ SORU", "bad": "Bağlam Soruları", "s": [{"no": 1, "bas": "Toplamsal ve çarpımsal karşılaştırma", "q": [{"k": "Elif'in 15, Can'ın 5 kitabı vardır. Bu durum için bir toplamsal ve bir çarpımsal soru yazınız ve sorularınızı cevaplayınız.", "a": ["Toplamsal soru: “Elif'in Can'dan kaç kitabı fazladır?” 15 − 5 = 10.", "Çarpımsal soru: “Elif'in kitap sayısı Can'ınkinin kaç katıdır?” 15 : 5 = 3.", "Ters yönden: Can'ın kitap sayısı Elif'inkinin 1/3'üdür."], "c": "10 kitap fazla; 3 katı"}, {"k": "Aşağıdaki sorulardan hangileri çarpımsal karşılaştırma ister?<br>I. Bir ağacın bu yılki boyu geçen yılki boyunun kaç katıdır?<br>II. Bir sınıftaki kızlar erkeklerden kaç kişi fazladır?<br>III. Bir çocuğun yaşı babasının yaşının kaçta kaçıdır?<br>IV. İki odanın sıcaklıkları arasında kaç derece fark vardır?", "a": ["“Kaç katı” ve “kaçta kaçı” soruları bölümü sorar; çarpımsaldır: I ve III.", "“Kaç fazla” ve “kaç fark” soruları farkı sorar; toplamsaldır: II ve IV."], "c": "I ve III"}]}, {"no": 2, "bas": "Oran", "q": [{"k": "Bir otoparkta 9 beyaz ve 4 gri araç vardır. Beyaz araçların sayısının gri araçların sayısına oranını ve gri araçların sayısının bütün araçların sayısına oranını yazınız. Oranların türünü belirtiniz.", "a": ["Beyaz : gri = 9 : 4. İki parça karşılaştırılmıştır: parça–parça oranı.", "Otoparkta 9 + 4 = 13 araç vardır.", "Gri : bütün = 4 : 13. Parça bütünle karşılaştırılmıştır: parça–bütün oranı; gri araçlar otoparktakilerin 4/13'üdür."], "c": "9 : 4 (parça–parça); 4 : 13 (parça–bütün)"}, {"k": "Bir okulda öğretmen sayısının öğrenci sayısına oranı 1 : 18'dir. Bu oranı kendi cümlelerinizle açıklayınız. Öğretmenler okuldaki bütün öğretmen ve öğrencilerin kaçta kaçıdır?", "a": ["1 : 18 oranı, her 1 öğretmene 18 öğrenci düştüğünü anlatır.", "Her 1 öğretmen ve 18 öğrenciden oluşan grupta 1 + 18 = 19 kişi vardır.", "Öğretmenlerin bütüne oranı 1 : 19'dur; öğretmenler okuldakilerin 1/19'udur."], "c": "Her öğretmene 18 öğrenci düşer; 1/19"}]}, {"no": 3, "bas": "Birimli ve birimsiz oran", "q": [{"k": "Aşağıdaki oranların birimli mi, birimsiz mi olduğunu belirleyiniz; birimli olanları birimiyle yazınız.<br>a) 240 km yolun 3 saate oranı &nbsp; b) 6 kg'ın 9 kg'a oranı &nbsp; c) 36 TL'nin 4 kaleme oranı", "a": ["a) Birimler farklıdır (km ve saat): birimli oran; 240 : 3 = 80, yani 80 km/sa.", "b) Birimler aynıdır (kg): birimsiz oran; 6 : 9 = 2 : 3.", "c) Birimler farklıdır (TL ve kalem): birimli oran; 36 : 4 = 9, yani 9 TL/kalem."], "c": "a) birimli, 80 km/sa. b) birimsiz, 2 : 3 c) birimli, 9 TL/kalem"}, {"k": "1,5 m uzunluğundaki bir ip ile 60 cm uzunluğundaki bir ipin uzunluklarının oranını en sade hâlde yazınız.", "a": ["Uzunlukları aynı birime çeviriniz: 1,5 m = 150 cm.", "Oranı yazınız: 150 : 60.", "Terimleri 30'a bölünüz: 150 : 60 = 5 : 2."], "c": "5 : 2"}]}, {"no": 4, "bas": "Denk oranlar", "q": [{"k": "5 : 7 oranına denk üç oran yazınız.", "a": ["Terimleri aynı sayıyla çarpınız: 2 ile çarpılırsa 10 : 14.", "3 ile çarpılırsa 15 : 21.", "10 ile çarpılırsa 50 : 70. (Terimleri aynı sayıyla çarpılan her oran kabul edilir.)"], "c": "10 : 14, 15 : 21, 50 : 70"}, {"k": "48 : 72 oranını en sade hâlde yazınız.", "a": ["48 ile 72'nin ortak bölenlerinden en büyüğü 24'tür.", "Terimleri 24'e bölünüz: 48 : 72 = 2 : 3.", "2 ile 3 aralarında asal olduğundan oran en sade hâldedir."], "c": "2 : 3"}]}, {"no": 5, "bas": "Temsiller", "q": [{"k": "Bir yazıcı 4 dakikada 52 sayfa basmaktadır. Yazıcının aynı hızla 1, 3 ve 8 dakikada kaç sayfa basacağını oran tablosuyla bulunuz.", "a": ["4 dakikadan 1 dakikaya inmek için iki satır 4'e bölünür: 1 dakikada 13 sayfa.", "1 dakikanın sütunu 3 ile çarpılır: 39 sayfa.", "1 dakikanın sütunu 8 ile çarpılır: 104 sayfa."], "c": "13, 39, 104 sayfa"}, {"k": "Bir bahçedeki kırmızı güllerin sayısının beyaz güllerin sayısına oranı 3 : 5'tir. Bahçede 40 beyaz gül olduğuna göre kaç kırmızı gül vardır? Çubuk diyagramıyla gösteriniz.", "a": ["Kırmızı güller 3, beyaz güller 5 eş kutuyla gösterilir.", "5 kutu 40 gül olduğundan 1 kutu 40 : 5 = 8 güldür.", "Kırmızı güller 3 · 8 = 24 tanedir."], "c": "24 kırmızı gül"}]}, {"no": 6, "bas": "Grafikte ışın", "q": [{"k": "Bir grafikte 3 : 2 oranının ışını çizilmiştir. 6 : 4, 9 : 5, 12 : 8 ve 4 : 3 oranlarından hangilerinin noktaları bu ışının üzerindedir?", "a": ["Işın üzerindeki noktalar 3 : 2'ye denk oranları gösterir.", "6 : 4 ve 12 : 8 oranlarının terimleri 2'ye ve 4'e bölünürse 3 : 2 bulunur.", "9 : 5 ve 4 : 3 oranları 3 : 2'ye denk değildir."], "c": "6 : 4 ve 12 : 8"}, {"k": "A karışımında 3 bardak suya 1 kaşık şurup, B karışımında 2 bardak suya 1 kaşık şurup konmuştur. Yatay doğruya su, dikey doğruya şurup yazılırsa hangi karışımın ışını dikey doğruya daha yakın olur? Gerekçelendiriniz.", "a": ["Aynı su miktarı için şurupları karşılaştırınız: 6 bardak suya A'da 2, B'de 3 kaşık şurup düşer.", "Aynı su miktarına daha çok şurup düşen karışımın ışını daha diktir.", "B karışımının ışını dikey doğruya daha yakındır; B daha yoğundur."], "c": "B karışımı"}]}, {"no": 7, "bas": "Birim oran", "q": [{"k": "Bir musluk 4 dakikada 18 L su akıtmaktadır. Bu durumun iki birim oranını birimleriyle yazınız.", "a": ["Dakika başına su: iki terim 4'e bölünür: 18 : 4 = 4,5. Birim oran 4,5 L/dk.", "Litre başına süre: iki terim 18'e bölünür: 4 : 18 = 2/9.", "Birim oran 2/9 dk./L; 1 litre su 2/9 dakikada akar."], "c": "4,5 L/dk. ve 2/9 dk./L"}, {"k": "Bir araç 2,5 saatte 200 km yol almaktadır. Araç aynı hızla 4 saatte kaç kilometre yol alır?", "a": ["Birim oranı bulunuz: 200 : 2,5 = 80; hız 80 km/sa.", "4 saatte alınan yol: 4 · 80 = 320 km.", "Kontrol: 320 : 4 = 80 km/sa."], "c": "320 km"}]}, {"no": 8, "bas": "Oranları karşılaştırma", "q": [{"k": "A karışımında 4 bardak süte 3 kaşık bal, B karışımında 6 bardak süte 5 kaşık bal konmuştur. Hangi karışım daha ballıdır?", "a": ["Süt miktarlarını 12 bardakta eşitleyiniz (4 ile 6'nın ortak katı).", "A: 4 : 3 = 12 : 9; B: 6 : 5 = 12 : 10.", "12 bardak süte B'de daha çok bal (10 kaşık) düşer."], "c": "B karışımı"}, {"k": "Bir deterjanın 2 kg'lık paketi 150 TL'ye, 3 kg'lık paketi 216 TL'ye satılmaktadır. Hangi paket daha ekonomiktir?", "a": ["2 kg'lık paketin birim fiyatı: 150 : 2 = 75 TL/kg.", "3 kg'lık paketin birim fiyatı: 216 : 3 = 72 TL/kg.", "Birim fiyatı az olan 3 kg'lık paket daha ekonomiktir."], "c": "3 kg'lık paket"}]}, {"no": 9, "bas": "Önermeler ve ölçekli çizim", "q": [{"k": "“Bir oranın iki terimine aynı sayı eklenirse oran değişmez.” önermesi doğru mudur? Bir örnekle gerekçelendiriniz.", "a": ["1 : 2 oranının terimlerine 1 eklenirse 2 : 3 bulunur.", "1/2 ile 2/3 eşit değildir; oran değişmiştir.", "Bir karşı örnek bulunduğu için önerme yanlıştır."], "c": "Yanlıştır; ör. 1 : 2 ile 2 : 3"}, {"k": "Kareli zeminde kısa kenarı 3, uzun kenarı 5 kare olan bir dikdörtgen vardır. Kenarlarının oranı aynı olan ve kısa kenarı 6 kare olan bir dikdörtgen çizilecektir. Bu dikdörtgenin uzun kenarı kaç kare olmalıdır?", "a": ["Kısa kenar 3'ten 6'ya, yani 2 katına çıkmıştır.", "Oranın korunması için uzun kenar da 2 katına çıkmalıdır: 5 · 2 = 10.", "Kontrol: 6 : 10 = 3 : 5."], "c": "10 kare"}]}], "k": [{"no": 1, "bas": "Denk oranları tamamlayınız", "yon": "Boş bırakılan terimi yazınız.", "r": [{"n": "2 : 7 = 6 : ▢", "c": "21"}, {"n": "4 : 9 = ▢ : 36", "c": "16"}, {"n": "15 : 25 = 3 : ▢", "c": "5"}, {"n": "▢ : 8 = 27 : 72", "c": "3"}, {"n": "12 : 30 = 2 : ▢", "c": "5"}, {"n": "7 : ▢ = 28 : 44", "c": "11"}]}, {"no": 2, "bas": "Birim oranı bulunuz", "yon": "Her durumun birim oranını birimiyle yazınız.", "r": [{"n": "150 km yol 3 saatte", "c": "50 km/sa."}, {"n": "8 kalem 72 TL", "c": "9 TL/kalem"}, {"n": "40 L su 5 dakikada", "c": "8 L/dk."}, {"n": "3 kg peynir 135 TL", "c": "45 TL/kg"}, {"n": "9 km yol 1/2 saatte", "c": "18 km/sa."}, {"n": "2,5 kg et 100 TL", "c": "40 TL/kg"}, {"n": "12 sayfa 3 dakikada", "c": "4 sayfa/dk."}, {"n": "0,4 L suya 2 kaşık şeker", "c": "5 kaşık/L"}]}, {"no": 3, "bas": "Hangisi daha …?", "yon": "Her satırda istenen özelliği daha çok taşıyanı (A ya da B) yazınız. Birim oran ya da ortak kat stratejisini kullanınız.", "r": [{"n": "Şuruplu: A 3 bardağa 2 kaşık · B 4 bardağa 3 kaşık", "c": "B"}, {"n": "Şekerli: A 5 bardağa 2 kaşık · B 8 bardağa 3 kaşık", "c": "A"}, {"n": "Ekonomik: A 2 kg 90 TL · B 5 kg 210 TL", "c": "B"}, {"n": "Ekonomik: A 6 tane 27 TL · B 10 tane 48 TL", "c": "A"}, {"n": "Hızlı: A 3 saatte 240 km · B 2 saatte 170 km", "c": "B"}, {"n": "Sarı tonlu: A 2 mavi 3 sarı · B 3 mavi 5 sarı", "c": "B"}]}], "b": [{"no": 1, "on": "<p>Bir okulun doğa kulübü, bahçedeki iki fidanın boylarını her yıl ölçüp ölçüm kartlarına yazmaktadır.</p>", "g": "<svg viewBox=\"0 0 416 116\" width=\"416\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"190\" height=\"100\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H190 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"103.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">A fidanı</text><text x=\"103.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Geçen yıl: 40 cm</text><text x=\"103.0\" y=\"88.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Bu yıl: 60 cm</text><rect x=\"212\" y=\"8\" width=\"190\" height=\"100\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M212 36 V16 q0 -8 8 -8 H394 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"307.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">B fidanı</text><text x=\"307.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Geçen yıl: 90 cm</text><text x=\"307.0\" y=\"88.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Bu yıl: 120 cm</text></svg>", "son": "<p>Kulüp üyeleri iki fidanın uzamasını hem “kaç santimetre uzadı?” hem de “boyu kaç katına çıktı?” sorularıyla karşılaştırmıştır.</p>", "k": "Buna göre, aşağıdakilerden hangisi doğrudur?", "sec": ["A fidanı hem daha çok santimetre uzamış hem de boyu daha çok katına çıkmıştır.", "B fidanı daha çok santimetre uzamış, A fidanının boyu ise daha çok katına çıkmıştır.", "B fidanı hem daha çok santimetre uzamış hem de boyu daha çok katına çıkmıştır.", "İki fidan aynı miktarda uzamış, boyları aynı katına çıkmıştır."], "secg": null, "c": "B", "a": ["Toplamsal karşılaştırma: A fidanı 60 − 40 = 20 cm, B fidanı 120 − 90 = 30 cm uzamıştır. B daha çok santimetre uzamıştır.", "Çarpımsal karşılaştırma: A'nın boyu 60 : 40 = 3/2 katına, B'nin boyu 120 : 90 = 4/3 katına çıkmıştır.", "3/2 = 9/6 ve 4/3 = 8/6 olduğundan A'nın boyu daha çok katına çıkmıştır."], "t": "A için iki karşılaştırma: A'nın 3/2 katı doğru ama B'nin daha çok santimetre uzadığı gözden kaçmış; B için iki karşılaştırma: daha çok uzayan fidanın boyunun da daha çok katına çıkacağı sanılmış; aynı miktar: iki fidanın da 1 basamak uzadığı düşünülmüş", "d": "“Kaç santimetre uzadı?” bir fark (toplamsal), “boyu kaç katına çıktı?” bir bölüm (çarpımsal) sorusudur. Daha çok uzayan fidanın boyu her zaman daha çok katına çıkmaz; iki karşılaştırmayı ayrı ayrı yapınız.", "ses": "b01"}, {"no": 2, "on": "<p>Bir manav, tezgâhındaki sebze kasalarını türlerine göre saymış ve kartlara yazmıştır.</p>", "g": "<svg viewBox=\"0 0 500 92\" width=\"500\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"150\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H150 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"83.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Domates</text><text x=\"83.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">9 kasa</text><rect x=\"172\" y=\"8\" width=\"150\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M172 36 V16 q0 -8 8 -8 H314 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"247.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Biber</text><text x=\"247.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">6 kasa</text><rect x=\"336\" y=\"8\" width=\"150\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M336 36 V16 q0 -8 8 -8 H478 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"411.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Patlıcan</text><text x=\"411.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">5 kasa</text></svg>", "son": "<p>Tezgâhta yalnız kartlarda yazan kasalar vardır.</p>", "k": "Buna göre, biber kasalarının sayısının tezgâhtaki bütün kasaların sayısına oranının en sade hâli aşağıdakilerden hangisidir?", "sec": ["2 : 3", "3 : 7", "6 : 5", "3 : 10"], "secg": null, "c": "D", "a": ["Tezgâhtaki bütün kasalar: 9 + 6 + 5 = 20.", "Biber kasaları : bütün kasalar = 6 : 20.", "Terimler 2'ye bölünür: 6 : 20 = 3 : 10."], "t": "2 : 3: biberler domateslerle karşılaştırılmış; 3 : 7: biberler öbür kasalarla karşılaştırılmış, 6 : 14; 6 : 5: biberler patlıcanlarla karşılaştırılmış", "d": "Parça–bütün oranında ikinci terim bütündür: biberleri bütün kasalarla karşılaştırınız. Önce bütün kasaları toplayınız, sonra oranı en sade hâle getiriniz.", "ses": "b02"}, {"no": 3, "on": "<p>Bir matematik öğretmeni sınıfa dört kart göstermiştir. Her kartta iki nicelik verilmiş ve bu iki niceliğin oranının yazılması istenmiştir.</p>", "g": "<svg viewBox=\"0 0 648 112\" width=\"648\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"150\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H150 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"83.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">1. kart</text><text x=\"83.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">14 kız</text><text x=\"83.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">16 erkek</text><rect x=\"168\" y=\"8\" width=\"150\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M168 36 V16 q0 -8 8 -8 H310 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"243.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">2. kart</text><text x=\"243.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">18 L su</text><text x=\"243.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">3 dakika</text><rect x=\"328\" y=\"8\" width=\"150\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M328 36 V16 q0 -8 8 -8 H470 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"403.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">3. kart</text><text x=\"403.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">240 cm perde</text><text x=\"403.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">2 m pencere</text><rect x=\"488\" y=\"8\" width=\"150\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M488 36 V16 q0 -8 8 -8 H630 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"563.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">4. kart</text><text x=\"563.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">940 TL</text><text x=\"563.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">20 L benzin</text></svg>", "son": "<p>Her kartta üstteki niceliğin alttaki niceliğe oranı yazılacaktır.</p>", "k": "Buna göre, kartlardaki oranlardan kaç tanesi birimli orandır?", "sec": ["2", "1", "3", "4"], "secg": null, "c": "A", "a": ["1. kart: iki nicelik de kişi sayısıdır; oran birimsizdir (14 : 16 = 7 : 8).", "2. kart: litre ve dakika farklı birimlerdir; oran birimlidir (6 L/dk.). 4. kart: lira ve litre farklıdır; oran birimlidir (47 TL/L).", "3. kart: santimetre ve metre aynı türden uzunluk birimleridir; 2 m = 200 cm yazılınca oran birimsizdir (240 : 200 = 6 : 5). Birimli oran 2 tanedir."], "t": "3: 3. karttaki farklı yazılmış uzunluk birimleri birimli oran sanılmış; 1: yalnız 2. kart sayılmış; 4: bütün oranların birimi olduğu sanılmış", "d": "Birimleri farklı yazılmış iki uzunluk (cm ve m) aynı türden niceliklerdir; aynı birime çevrilince oran birimsiz olur. Birimli oranda iki niceliğin türü farklıdır.", "ses": "b03"}, {"no": 4, "on": "<p>Bir cam geri dönüşüm tesisinin girişindeki bilgi panosunda geçen ayın verileri yazılıdır.</p>", "g": "<svg viewBox=\"0 0 352 116\" width=\"352\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"330\" height=\"100\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H330 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"173.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Bilgi Panosu</text><text x=\"173.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Toplanan cam atık: 600 kg</text><text x=\"173.0\" y=\"88.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Üretilen yeni şişe: 1 500</text></svg>", "son": "<p>Panonun altında “Bu ay her şey 2,5 şişe/kg oranıyla gerçekleşti.” yazmaktadır.</p>", "k": "Buna göre, panodaki 2,5 şişe/kg oranı aşağıdakilerden hangisini ifade eder?", "sec": ["Her şişe için 2,5 kg cam atık gerektiğini", "Tesiste toplam 2,5 kg cam atık toplandığını", "Her 1 kg cam atıktan 2,5 şişe üretildiğini", "Üretilen her şişenin 2,5 kg geldiğini"], "secg": null, "c": "C", "a": ["Oran, üretilen şişe sayısının toplanan atığa oranıdır: 1 500 şişe : 600 kg.", "İki terim 600'e bölünür: 2,5 şişe : 1 kg. Birim “şişe/kg” kilogram başına şişe diye okunur.", "Oran, onu oluşturan 1 500 ve 600 sayılarından farklı bir anlam taşır: her 1 kg cam atıktan 2,5 şişe üretilir."], "t": "şişe başına 2,5 kg: birimin sırası ters okunmuş; toplam 2,5 kg ve şişenin kütlesi: oran, onu oluşturan niceliklerden biri sanılmış", "d": "Birimli oranın birimini okuyunuz: “şişe/kg”, kilogram başına şişe demektir. Oran, onu oluşturan iki sayıdan farklı, yeni bir niceliktir.", "ses": "b04"}, {"no": 5, "on": "<p>Bir kafede limonata, mutfaktaki tarif kartına göre hazırlanmaktadır.</p>", "g": "<svg viewBox=\"0 0 282 140\" width=\"282\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"260\" height=\"124\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H260 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"138.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Limonata Tarifi</text><text x=\"138.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">4 limon</text><text x=\"138.0\" y=\"88.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">6 kaşık şeker</text><text x=\"138.0\" y=\"112.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">5 su bardağı su</text></svg>", "son": "<p>Kafede aynı tatta, 15 su bardağı su kullanılarak büyük bir sürahi limonata hazırlanacaktır.</p>", "k": "Buna göre, bu sürahi limonata için kaç kaşık şeker kullanılmalıdır?", "sec": ["18", "16", "12", "30"], "secg": null, "c": "A", "a": ["15 su bardağı su, tarifteki 5 su bardağının 3 katıdır.", "Tadın değişmemesi için bütün malzemeler 3 katına çıkar: 6 · 3 = 18 kaşık şeker.", "Kontrol: 18 : 15 = 6 : 5 oranı tarifteki şeker–su oranıyla aynıdır."], "t": "16: suya eklenen 10 bardak kadar şekere de 10 eklenmiş; 12: limon sayısı hesaplanmış; 30: şeker su sayısıyla çarpılmış", "d": "Tadın değişmemesi için bütün malzemeler aynı sayıyla çarpılır. Suya eklenen miktarı şekere de eklemek tadı bozar.", "ses": "b05"}, {"no": 6, "on": "<p>Vitesli bir bisikletin pedala bağlı ön dişlisinde 48, tekerleğe bağlı arka dişlisinde 36 diş vardır.</p>", "g": "<svg viewBox=\"0 0 356 92\" width=\"356\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"160\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H160 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"88.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Ön dişli</text><text x=\"88.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">48 diş</text><rect x=\"182\" y=\"8\" width=\"160\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M182 36 V16 q0 -8 8 -8 H334 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"262.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Arka dişli</text><text x=\"262.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">36 diş</text></svg>", "son": "<p>Bisiklet ustası, ön dişlinin diş sayısının arka dişlinin diş sayısına oranını en sade hâlde yazacaktır.</p>", "k": "Buna göre, ustanın yazacağı oran aşağıdakilerden hangisidir?", "sec": ["12 : 9", "3 : 4", "24 : 18", "4 : 3"], "secg": null, "c": "D", "a": ["Oran: ön dişli : arka dişli = 48 : 36.", "48 ile 36'nın en büyük ortak böleni 12'dir; terimler 12'ye bölünür: 4 : 3.", "4 ile 3 aralarında asal olduğu için oran en sade hâldedir."], "t": "12 : 9 ve 24 : 18: denk ama sadeleştirme bitmemiş; 3 : 4: oranın sırası ters yazılmış", "d": "En sade oranın terimleri aralarında asaldır. 12 : 9 ya da 24 : 18 denk oranlardır ama sadeleştirme bitmemiştir. Oranın sırasına (ön dişli : arka dişli) dikkat ediniz.", "ses": "b06"}, {"no": 7, "on": "<p>Bir okulun kermesinde satılan kurabiye sayısının satılan pasta dilimi sayısına oranı 5 : 3'tür. Kermes görevlisi bu durumu aşağıdaki çubuk diyagramıyla göstermiştir.</p>", "g": "<svg viewBox=\"0 0 340 96\" width=\"340\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><text x=\"110.0\" y=\"32.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Kurabiye</text><rect x=\"120\" y=\"12\" width=\"40\" height=\"30\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.3\"/><rect x=\"160\" y=\"12\" width=\"40\" height=\"30\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.3\"/><rect x=\"200\" y=\"12\" width=\"40\" height=\"30\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.3\"/><rect x=\"240\" y=\"12\" width=\"40\" height=\"30\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.3\"/><rect x=\"280\" y=\"12\" width=\"40\" height=\"30\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.3\"/><text x=\"110.0\" y=\"74.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Pasta dilimi</text><rect x=\"120\" y=\"54\" width=\"40\" height=\"30\" fill=\"#e5dbff\" stroke=\"#111111\" stroke-width=\"1.3\"/><rect x=\"160\" y=\"54\" width=\"40\" height=\"30\" fill=\"#e5dbff\" stroke=\"#111111\" stroke-width=\"1.3\"/><rect x=\"200\" y=\"54\" width=\"40\" height=\"30\" fill=\"#e5dbff\" stroke=\"#111111\" stroke-width=\"1.3\"/></svg>", "son": "<p>Diyagramdaki kutuların hepsi eş sayıda ürünü göstermektedir. Kermeste satılan kurabiye sayısı, pasta dilimi sayısından 26 fazladır.</p>", "k": "Buna göre, kermeste satılan kurabiye ve pasta dilimlerinin toplam sayısı kaçtır?", "sec": ["65", "104", "39", "52"], "secg": null, "c": "B", "a": ["Kurabiyeler 5, pasta dilimleri 3 eş kutudur; fark 5 − 3 = 2 kutudur.", "2 kutu 26 ürün olduğundan 1 kutu 26 : 2 = 13 üründür.", "Toplam 5 + 3 = 8 kutu: 8 · 13 = 104. Kontrol: 65 − 39 = 26."], "t": "65: yalnız kurabiye sayısı bulunmuş; 39: pasta dilimi sayısı; 52: farkın 2 katı alınmış", "d": "Çubuk diyagramında fark, iki çubuktaki kutu sayılarının farkıdır. Önce bir kutunun değerini bulunuz; sorulan toplam mı, bir nicelik mi, dikkat ediniz.", "ses": "b07"}, {"no": 8, "on": "<p>Bir fırında ekmek hamuru hazırlanırken her 4 kg una 2,5 L su katılmaktadır. Fırıncı, un ve su miktarlarını aşağıdaki çift sayı doğrusunda göstermiştir.</p>", "g": "<svg viewBox=\"0 0 476.0 144\" width=\"476\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><text x=\"68.0\" y=\"45.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Un (kg)</text><line x1=\"86\" y1=\"40\" x2=\"460.0\" y2=\"40\" stroke=\"#1c5fbf\" stroke-width=\"2.2\"/><polygon points=\"466.0,40 457.0,35.5 457.0,44.5\" fill=\"#1c5fbf\"/><text x=\"68.0\" y=\"109.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Su (L)</text><line x1=\"86\" y1=\"104\" x2=\"460.0\" y2=\"104\" stroke=\"#d9480f\" stroke-width=\"2.2\"/><polygon points=\"466.0,104 457.0,99.5 457.0,108.5\" fill=\"#d9480f\"/><line x1=\"86.0\" y1=\"33\" x2=\"86.0\" y2=\"47\" stroke=\"#111111\" stroke-width=\"1.6\"/><line x1=\"86.0\" y1=\"97\" x2=\"86.0\" y2=\"111\" stroke=\"#111111\" stroke-width=\"1.6\"/><text x=\"86.0\" y=\"24.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">0</text><text x=\"86.0\" y=\"130.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">0</text><line x1=\"222.0\" y1=\"33\" x2=\"222.0\" y2=\"47\" stroke=\"#111111\" stroke-width=\"1.6\"/><line x1=\"222.0\" y1=\"97\" x2=\"222.0\" y2=\"111\" stroke=\"#111111\" stroke-width=\"1.6\"/><text x=\"222.0\" y=\"24.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">4</text><text x=\"222.0\" y=\"130.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">2,5</text><line x1=\"358.0\" y1=\"33\" x2=\"358.0\" y2=\"47\" stroke=\"#111111\" stroke-width=\"1.6\"/><line x1=\"358.0\" y1=\"97\" x2=\"358.0\" y2=\"111\" stroke=\"#111111\" stroke-width=\"1.6\"/><text x=\"358.0\" y=\"24.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">8</text><text x=\"358.0\" y=\"130.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">5</text><line x1=\"426.0\" y1=\"33\" x2=\"426.0\" y2=\"47\" stroke=\"#111111\" stroke-width=\"1.6\"/><line x1=\"426.0\" y1=\"97\" x2=\"426.0\" y2=\"111\" stroke=\"#111111\" stroke-width=\"1.6\"/><text x=\"426.0\" y=\"24.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">10</text><rect x=\"413.0\" y=\"114\" width=\"26\" height=\"24\" rx=\"4\" fill=\"#fff\" stroke=\"#111111\" stroke-width=\"1.3\"/><text x=\"426.0\" y=\"131.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">?</text></svg>", "son": "<p>Fırıncı 10 kg unla hamur hazırlayacaktır.</p>", "k": "Buna göre, fırıncının kullanacağı su miktarı kaç litredir?", "sec": ["6", "7,5", "6,25", "6,5"], "secg": null, "c": "C", "a": ["4 kg una 2,5 L su düşer; 1 kg una 2,5 : 4 = 0,625 L su düşer.", "10 kg un için 10 · 0,625 = 6,25 L su gerekir.", "Kontrol: 8 kg una 5 L, 2 kg una 1,25 L su düşer; 5 + 1,25 = 6,25."], "t": "6: 8 kg'dan 10 kg'a 2 arttığı için suya 1 eklenmiş; 7,5: 2,5'in 3 katı alınmış; 6,5: 5'e 1,5 eklenmiş", "d": "Çift sayı doğrusunda karşılıklı değerler denk oranlardır. 8'den 10'a 2 artarken suya da 2 ekleyemezsiniz; birim oranı ya da 2 kg'a düşen suyu bulunuz.", "ses": "b08"}, {"no": 9, "on": "<p>Bir boyacı açık mavi boya hazırlarken her 3 kutu beyaz boyaya 1 kutu mavi boya karıştırmaktadır. Boyacı, aynı tonda farklı miktarlar için aşağıdaki oran tablosunu hazırlamaya başlamıştır.</p>", "g": "<svg viewBox=\"0 0 382 88\" width=\"382\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"10\" width=\"128\" height=\"34\" fill=\"#eaf7f1\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><text x=\"14.0\" y=\"32.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Beyaz (kutu)</text><rect x=\"136\" y=\"10\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><text x=\"165.0\" y=\"31.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">3</text><rect x=\"194\" y=\"10\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><text x=\"223.0\" y=\"31.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">9</text><rect x=\"252\" y=\"10\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><rect x=\"310\" y=\"10\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><text x=\"339.0\" y=\"31.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">21</text><rect x=\"8\" y=\"44\" width=\"128\" height=\"34\" fill=\"#eaf7f1\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><text x=\"14.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Mavi (kutu)</text><rect x=\"136\" y=\"44\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><text x=\"165.0\" y=\"65.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">1</text><rect x=\"194\" y=\"44\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><rect x=\"252\" y=\"44\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/><text x=\"281.0\" y=\"65.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">5</text><rect x=\"310\" y=\"44\" width=\"58\" height=\"34\" fill=\"#fff\" stroke=\"#5b6478\" stroke-width=\"1.2\"/></svg>", "son": "<p>Tablodaki boş hücrelere, aynı tonda boya için gereken kutu sayıları yazılacaktır.</p>", "k": "Buna göre, boş hücrelere yazılacak sayıların toplamı kaçtır?", "sec": ["25", "23", "27", "29"], "secg": null, "c": "A", "a": ["9 kutu beyaz, 3 kutunun 3 katıdır: mavi 1 · 3 = 3 kutu.", "5 kutu mavi, 1 kutunun 5 katıdır: beyaz 3 · 5 = 15 kutu.", "21 kutu beyaz, 3 kutunun 7 katıdır: mavi 7 kutu. Toplam 3 + 15 + 7 = 25."], "t": "23: 21 kutu beyaz için mavi 5 alınmış, 21 − 16; 27: beyaz için 15 yerine 17 yazılmış, 5 + 12; 29: tablo sütunları arasında 6'şar artış varsayılmış", "d": "Oran tablosunda her sütun aynı oranı gösterir. Her boş hücre için önce sütunun ilk satırdaki sütunun kaç katı olduğunu bulunuz.", "ses": "b09"}, {"no": 10, "on": "<p>Bir çarşıdaki üç çay ocağında demliğe konan su ve kuru çay miktarları aşağıdaki grafikte noktalarla gösterilmiştir.</p>", "g": "<svg viewBox=\"0 0 384.4 268.0\" width=\"384\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><circle cx=\"46.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"46.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"46.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"46.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"46.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"46.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"46.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"76.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"76.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"76.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"76.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"76.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"76.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"76.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"106.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"106.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"106.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"106.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"106.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"106.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"106.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"136.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"136.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"136.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"136.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"136.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"136.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"136.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"166.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"166.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"166.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"166.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"166.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"166.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"166.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"196.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"196.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"196.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"196.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"196.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"196.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"196.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"226.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"226.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"226.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"226.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"226.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"226.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"226.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"256.0\" cy=\"234.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"256.0\" cy=\"204.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"256.0\" cy=\"174.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"256.0\" cy=\"144.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"256.0\" cy=\"114.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"256.0\" cy=\"84.0\" r=\"1.6\" fill=\"#8a93a6\"/><circle cx=\"256.0\" cy=\"54.0\" r=\"1.6\" fill=\"#8a93a6\"/><line x1=\"46.0\" y1=\"234.0\" x2=\"270.0\" y2=\"234.0\" stroke=\"#111111\" stroke-width=\"1.8\"/><polygon points=\"278.0,234.0 269.0,229.5 269.0,238.5\" fill=\"#111111\"/><line x1=\"46.0\" y1=\"234.0\" x2=\"46.0\" y2=\"40.0\" stroke=\"#111111\" stroke-width=\"1.8\"/><polygon points=\"46.0,32.0 41.5,41.0 50.5,41.0\" fill=\"#111111\"/><text x=\"284.0\" y=\"239.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Su (bardak)</text><text x=\"42.0\" y=\"20.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Çay (kaşık)</text><text x=\"46.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">0</text><text x=\"76.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">1</text><text x=\"106.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">2</text><text x=\"136.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">3</text><text x=\"166.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">4</text><text x=\"196.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">5</text><text x=\"226.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">6</text><text x=\"256.0\" y=\"254.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">7</text><text x=\"38.0\" y=\"209.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">1</text><text x=\"38.0\" y=\"179.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">2</text><text x=\"38.0\" y=\"149.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">3</text><text x=\"38.0\" y=\"119.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">4</text><text x=\"38.0\" y=\"89.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">5</text><text x=\"38.0\" y=\"59.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">6</text><circle cx=\"106.0\" cy=\"174.0\" r=\"5\" fill=\"#6741d9\" stroke=\"#fff\" stroke-width=\"1.2\"/><text x=\"114.0\" y=\"167.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Ali</text><circle cx=\"166.0\" cy=\"144.0\" r=\"5\" fill=\"#6741d9\" stroke=\"#fff\" stroke-width=\"1.2\"/><text x=\"174.0\" y=\"137.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Bekir</text><circle cx=\"226.0\" cy=\"84.0\" r=\"5\" fill=\"#6741d9\" stroke=\"#fff\" stroke-width=\"1.2\"/><text x=\"234.0\" y=\"77.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Cemal</text></svg>", "son": "<p>Her ustanın noktasından başlangıç noktasına bir ışın çizildiğinde ışın dikey doğruya ne kadar yakınsa çay o kadar koyu olmaktadır.</p>", "k": "Buna göre, en koyu çayı demleyen usta ile en açık çayı demleyen usta aşağıdakilerin hangisinde birlikte verilmiştir?", "sec": ["Cemal Usta · Ali Usta", "Bekir Usta · Ali Usta", "Cemal Usta · Bekir Usta", "Ali Usta · Bekir Usta"], "secg": null, "c": "D", "a": ["Her ustanın bir bardak suya düşen çay miktarı: Ali 2 : 2 = 1, Bekir 3 : 4 = 3/4, Cemal 5 : 6 = 5/6 kaşık.", "Bir bardağa en çok çay Ali Usta'nın demliğinde düşer; ışını dikey doğruya en yakındır, çayı en koyudur.", "En az çay Bekir Usta'nınkinde düşer (3/4 = 9/12, 5/6 = 10/12); ışını yatay doğruya en yakındır, çayı en açıktır."], "t": "Cemal Usta en koyu: en çok çay kaşığı kullanan usta seçilmiş, miktar oran sanılmış; Bekir · Ali: koyu ve açık ters okunmuş", "d": "Koyuluk, kullanılan çay miktarına değil, bir bardak suya düşen çaya bağlıdır. En çok çay kullanan ustanın çayı en koyu olmayabilir.", "ses": "b10"}, {"no": 11, "on": "<p>Bir spor salonunda koşu bandında koşan Zeynep'in ekranında aşağıdaki değerler görünmektedir.</p>", "g": "<svg viewBox=\"0 0 336 92\" width=\"336\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"150\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H150 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"83.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Süre</text><text x=\"83.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">25 dk.</text><rect x=\"172\" y=\"8\" width=\"150\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M172 36 V16 q0 -8 8 -8 H314 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"247.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Mesafe</text><text x=\"247.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">4 km</text></svg>", "son": "<p>Zeynep, koşu bandında hiç durmadan aynı hızla koşmaya devam edecektir.</p>", "k": "Buna göre, Zeynep 10 km'yi koşmayı başlangıçtan itibaren kaç dakikada tamamlar?", "sec": ["40", "62,5", "31", "2,5"], "secg": null, "c": "B", "a": ["Kilometre başına süre: 25 : 4 = 6,25 dk./km.", "10 km için 10 · 6,25 = 62,5 dakika gerekir.", "Kontrol: 62,5 : 10 = 6,25 dk./km."], "t": "40: mesafe ile süre karıştırılıp 4 · 10 yapılmış; 31: 25'e 6 eklenmiş; 2,5: 10 : 4 yapılmış", "d": "Kilometre başına süreyi bulmak için süreyi kilometreye bölünüz. Sonucu istenen kilometreyle çarpınız; dakikaya ve kilometreye dikkat ediniz.", "ses": "b11"}, {"no": 12, "on": "<p>Bir markette aynı marka zeytinyağı dört farklı boyda şişede satılmaktadır. Raftaki şişelerin hacimleri ve fiyatları aşağıda verilmiştir.</p>", "g": "<svg viewBox=\"0 0 560 92\" width=\"560\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"128\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H128 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"72.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">0,5 L</text><text x=\"72.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">160 TL</text><rect x=\"146\" y=\"8\" width=\"128\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M146 36 V16 q0 -8 8 -8 H266 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"210.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">1 L</text><text x=\"210.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">300 TL</text><rect x=\"284\" y=\"8\" width=\"128\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M284 36 V16 q0 -8 8 -8 H404 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"348.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">2 L</text><text x=\"348.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">580 TL</text><rect x=\"422\" y=\"8\" width=\"128\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M422 36 V16 q0 -8 8 -8 H542 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"486.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">5 L</text><text x=\"486.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">1 500 TL</text></svg>", "son": "<p>Bir aile, litresi en ucuz olan şişeyi almak istemektedir.</p>", "k": "Buna göre, ailenin alacağı şişe hangisidir?", "sec": ["0,5 L", "5 L", "2 L", "1 L"], "secg": null, "c": "C", "a": ["Birim fiyatlar: 160 : 0,5 = 320 TL/L; 300 : 1 = 300 TL/L.", "580 : 2 = 290 TL/L; 1 500 : 5 = 300 TL/L.", "En küçük birim fiyat 290 TL/L'dir; 2 litrelik şişe alınır."], "t": "0,5 L: fiyatı en düşük şişe seçilmiş; 5 L: en büyük şişenin her zaman en ekonomik olduğu sanılmış; 1 L: 5 L ile aynı birim fiyatta olduğu için en ucuz sanılmış", "d": "En ekonomik şişe en ucuz şişe değil, litresi en ucuz olandır. 0,5 L'lik şişenin birim fiyatını bulurken fiyatı 0,5'e bölünüz.", "ses": "b12"}, {"no": 13, "on": "<p>Bir okulun lavabosundaki damlayan bir musluktan 1 saatte 0,6 L su boşa akmaktadır.</p>", "g": "<svg viewBox=\"0 0 252 92\" width=\"252\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"230\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H230 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"123.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Damlayan musluk</text><text x=\"123.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">1 saatte 0,6 L</text></svg>", "son": "<p>Musluk tamir edilene kadar gece gündüz aynı biçimde damlamaya devam edecektir.</p>", "k": "Buna göre, musluk 30 gün boyunca tamir edilmezse kaç litre su boşa akar?", "sec": ["432", "18", "43,2", "360"], "secg": null, "c": "A", "a": ["Bir günde 24 saat vardır: 24 · 0,6 = 14,4 L su boşa akar.", "30 günde 30 · 14,4 = 432 L su boşa akar.", "Bu, 30 gün boyunca saatte 0,6 L'lik bir birim oranın sonucudur."], "t": "18: gün sayısı saat sayısı gibi kullanılmış, 30 · 0,6; 43,2: ondalık basamak yanlış yazılmış; 360: saatte 0,5 L alınmış", "d": "Saat başına verilen birim oranı önce bir güne (24 saat), sonra 30 güne çeviriniz. Gün ile saati karıştırmayınız.", "ses": "b13"}, {"no": 14, "on": "<p>Bir okulun satranç ve resim kulüplerinin her birinde 40 öğrenci vardır. Kulüplerdeki kız ve erkek öğrencilerin sayılarının oranları kartlarda verilmiştir.</p>", "g": "<svg viewBox=\"0 0 456 116\" width=\"456\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"210\" height=\"100\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H210 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"113.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Satranç Kulübü</text><text x=\"113.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">40 öğrenci</text><text x=\"113.0\" y=\"88.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Kız : Erkek = 2 : 3</text><rect x=\"232\" y=\"8\" width=\"210\" height=\"100\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M232 36 V16 q0 -8 8 -8 H434 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"337.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Resim Kulübü</text><text x=\"337.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">40 öğrenci</text><text x=\"337.0\" y=\"88.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Kız : Erkek = 5 : 3</text></svg>", "son": "<p>Bir öğrenci yalnız bir kulübe üyedir.</p>", "k": "Buna göre, iki kulüpteki kız öğrencilerin toplam sayısı kaçtır?", "sec": ["7", "40", "39", "41"], "secg": null, "c": "D", "a": ["Satranç: her 2 + 3 = 5 öğrencinin 2'si kızdır; kızlar kulübün 2/5'idir: 40 · 2/5 = 16.", "Resim: her 5 + 3 = 8 öğrencinin 5'i kızdır; kızlar kulübün 5/8'idir: 40 · 5/8 = 25.", "Toplam kız öğrenci: 16 + 25 = 41."], "t": "7: oranların terimleri sayı sanılmış, 2 + 5; 40: kız öğrencilerin kulüplerin yarısı olduğu sanılmış; 39: erkek öğrencilerin toplamı bulunmuş", "d": "Oranın terimleri öğrenci sayısı değildir. Her kulüpte önce kızların kulübün kaçta kaçı olduğunu bulunuz, sonra 40 ile çarpınız.", "ses": "b14"}, {"no": 15, "on": "<p>Üç ortaokulun katıldığı bir fidan dikme kampanyasında okulların öğrenci sayıları ve diktikleri fidan sayıları aşağıdaki tabloda verilmiştir.</p>", "g": "<svg viewBox=\"0 0 450 176\" width=\"450\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><text x=\"225.0\" y=\"18.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#000000\" text-anchor=\"middle\">Tablo: Fidan Dikme Kampanyası</text><rect x=\"10.0\" y=\"30.0\" width=\"430.0\" height=\"36.0\" rx=\"0\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.3\"/><text x=\"55.0\" y=\"53.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#000000\" text-anchor=\"middle\">Okul</text><text x=\"185.0\" y=\"53.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#000000\" text-anchor=\"middle\">Öğrenci sayısı</text><text x=\"355.0\" y=\"53.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#000000\" text-anchor=\"middle\">Dikilen fidan</text><rect x=\"10.0\" y=\"66.0\" width=\"430.0\" height=\"34.0\" rx=\"0\" fill=\"#fff\" stroke=\"#495057\" stroke-width=\"1\"/><text x=\"55.0\" y=\"88.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">A</text><text x=\"185.0\" y=\"88.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">240</text><text x=\"355.0\" y=\"88.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">180</text><rect x=\"10.0\" y=\"100.0\" width=\"430.0\" height=\"34.0\" rx=\"0\" fill=\"#fff\" stroke=\"#495057\" stroke-width=\"1\"/><text x=\"55.0\" y=\"122.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">B</text><text x=\"185.0\" y=\"122.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">160</text><text x=\"355.0\" y=\"122.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">128</text><rect x=\"10.0\" y=\"134.0\" width=\"430.0\" height=\"34.0\" rx=\"0\" fill=\"#fff\" stroke=\"#495057\" stroke-width=\"1\"/><text x=\"55.0\" y=\"156.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">C</text><text x=\"185.0\" y=\"156.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">300</text><text x=\"355.0\" y=\"156.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">210</text><line x1=\"100.0\" y1=\"30.0\" x2=\"100.0\" y2=\"168.0\" stroke=\"#495057\" stroke-width=\"1\"/><line x1=\"270.0\" y1=\"30.0\" x2=\"270.0\" y2=\"168.0\" stroke=\"#495057\" stroke-width=\"1\"/></svg>", "son": "<p>Kampanyada en çok fidan diken okula “Çok Fidan” ödülü, öğrenci başına en çok fidan diken okula “Herkes Bir Fidan” ödülü verilecektir.</p>", "k": "Buna göre, “Çok Fidan” ve “Herkes Bir Fidan” ödüllerini alacak okullar sırasıyla aşağıdakilerin hangisinde verilmiştir?", "sec": ["C · C", "C · B", "B · C", "A · B"], "secg": null, "c": "B", "a": ["En çok fidan diken okul (mutlak karşılaştırma): 210 fidanla C okulu.", "Öğrenci başına fidan (bağıl karşılaştırma): A 180 : 240 = 3/4, B 128 : 160 = 4/5, C 210 : 300 = 7/10.", "3/4 = 15/20, 4/5 = 16/20, 7/10 = 14/20; öğrenci başına en çok fidanı B okulu dikmiştir."], "t": "C · C: en çok fidan diken okul iki ödülü de alır sanılmış; B · C: ödüllerin sırası karıştırılmış; A · B: fidan ile öğrenci sayısı arasındaki fark karşılaştırılmış", "d": "“En çok fidan” mutlak bir karşılaştırmadır; “öğrenci başına en çok fidan” ise bağıl bir karşılaştırmadır. İki ödül farklı okullara gidebilir.", "ses": "b15"}, {"no": 16, "on": "<p>Bir okulun duyuru panosunun kareli kâğıda çizilmiş modeli A dikdörtgeniyle gösterilmiştir. Panonun daha büyük bir kopyası yapılacaktır.</p>", "g": "<svg viewBox=\"0 0 460 200\" width=\"460\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"10\" width=\"440\" height=\"180\" fill=\"#fff\" stroke=\"#c9d2e3\" stroke-width=\"1\"/><line x1=\"20\" y1=\"10\" x2=\"20\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"30\" y1=\"10\" x2=\"30\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"40\" y1=\"10\" x2=\"40\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"50\" y1=\"10\" x2=\"50\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"60\" y1=\"10\" x2=\"60\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"70\" y1=\"10\" x2=\"70\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"80\" y1=\"10\" x2=\"80\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"90\" y1=\"10\" x2=\"90\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"110\" y1=\"10\" x2=\"110\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"120\" y1=\"10\" x2=\"120\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"130\" y1=\"10\" x2=\"130\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"140\" y1=\"10\" x2=\"140\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"150\" y1=\"10\" x2=\"150\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"160\" y1=\"10\" x2=\"160\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"170\" y1=\"10\" x2=\"170\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"180\" y1=\"10\" x2=\"180\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"190\" y1=\"10\" x2=\"190\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"200\" y1=\"10\" x2=\"200\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"210\" y1=\"10\" x2=\"210\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"220\" y1=\"10\" x2=\"220\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"230\" y1=\"10\" x2=\"230\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"240\" y1=\"10\" x2=\"240\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"250\" y1=\"10\" x2=\"250\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"260\" y1=\"10\" x2=\"260\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"270\" y1=\"10\" x2=\"270\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"280\" y1=\"10\" x2=\"280\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"290\" y1=\"10\" x2=\"290\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"300\" y1=\"10\" x2=\"300\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"310\" y1=\"10\" x2=\"310\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"320\" y1=\"10\" x2=\"320\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"330\" y1=\"10\" x2=\"330\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"340\" y1=\"10\" x2=\"340\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"350\" y1=\"10\" x2=\"350\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"360\" y1=\"10\" x2=\"360\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"370\" y1=\"10\" x2=\"370\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"380\" y1=\"10\" x2=\"380\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"390\" y1=\"10\" x2=\"390\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"400\" y1=\"10\" x2=\"400\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"410\" y1=\"10\" x2=\"410\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"420\" y1=\"10\" x2=\"420\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"430\" y1=\"10\" x2=\"430\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"440\" y1=\"10\" x2=\"440\" y2=\"190\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"20\" x2=\"450\" y2=\"20\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"30\" x2=\"450\" y2=\"30\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"40\" x2=\"450\" y2=\"40\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"50\" x2=\"450\" y2=\"50\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"60\" x2=\"450\" y2=\"60\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"70\" x2=\"450\" y2=\"70\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"80\" x2=\"450\" y2=\"80\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"90\" x2=\"450\" y2=\"90\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"100\" x2=\"450\" y2=\"100\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"110\" x2=\"450\" y2=\"110\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"120\" x2=\"450\" y2=\"120\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"130\" x2=\"450\" y2=\"130\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"140\" x2=\"450\" y2=\"140\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"150\" x2=\"450\" y2=\"150\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"160\" x2=\"450\" y2=\"160\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"170\" x2=\"450\" y2=\"170\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><line x1=\"10\" y1=\"180\" x2=\"450\" y2=\"180\" stroke=\"#c9d2e3\" stroke-width=\".8\"/><rect x=\"20\" y=\"20\" width=\"40\" height=\"70\" fill=\"#c9ecd8\" fill-opacity=\".75\" stroke=\"#111111\" stroke-width=\"2\"/><text x=\"40.0\" y=\"60.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">A</text><rect x=\"80\" y=\"20\" width=\"80\" height=\"140\" fill=\"#d0e3fb\" fill-opacity=\".75\" stroke=\"#111111\" stroke-width=\"2\"/><text x=\"120.0\" y=\"95.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">P</text><rect x=\"180\" y=\"20\" width=\"60\" height=\"100\" fill=\"#d0e3fb\" fill-opacity=\".75\" stroke=\"#111111\" stroke-width=\"2\"/><text x=\"210.0\" y=\"75.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">R</text><rect x=\"260\" y=\"20\" width=\"70\" height=\"110\" fill=\"#d0e3fb\" fill-opacity=\".75\" stroke=\"#111111\" stroke-width=\"2\"/><text x=\"295.0\" y=\"80.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">S</text><rect x=\"350\" y=\"20\" width=\"100\" height=\"160\" fill=\"#d0e3fb\" fill-opacity=\".75\" stroke=\"#111111\" stroke-width=\"2\"/><text x=\"400.0\" y=\"105.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">T</text></svg>", "son": "<p>Kopya, A dikdörtgeninin kenar uzunluklarının oranı korunarak çizilecektir.</p>", "k": "Buna göre, P, R, S ve T dikdörtgenlerinden hangisi panonun kopyası olarak kullanılabilir?", "sec": ["R", "S", "P", "T"], "secg": null, "c": "C", "a": ["A dikdörtgeninin kısa kenarı 4, uzun kenarı 7 karedir; oran 4 : 7.", "P: 8 : 14 = 4 : 7. R: 6 : 10 = 3 : 5. S: 7 : 11. T: 10 : 16 = 5 : 8.", "Yalnız P'nin kenar oranı A'nınkine denktir; P, A'nın 2 katına büyütülmüş hâlidir."], "t": "S: kenarlara aynı sayı (3) eklenmiş; R ve T: kenarlar arasındaki fark ya da yaklaşık görünüş esas alınmış", "d": "Ölçekli büyütmede iki kenar da aynı sayıyla çarpılır. Kenarlara aynı sayıyı eklemek oranı bozar; her dikdörtgenin oranını sadeleştirip karşılaştırınız.", "ses": "b16"}, {"no": 17, "on": "<p>Bir hızlı tren iki istasyon arasındaki 165 km'lik yolu 3/4 saatte almıştır. Trenin yolculuk bilgileri aşağıdaki kartlarda verilmiştir.</p>", "g": "<svg viewBox=\"0 0 356 102\" width=\"356\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"160\" height=\"86\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H160 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"88.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Süre (saat)</text><g class=\"frac\"><text x=\"88.0\" y=\"61.9\" text-anchor=\"middle\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\">3</text><line x1=\"81.6\" y1=\"65.0\" x2=\"94.4\" y2=\"65.0\" stroke=\"#111111\" stroke-width=\"1.05\"/><text x=\"88.0\" y=\"77.3\" text-anchor=\"middle\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\">4</text></g><rect x=\"182\" y=\"8\" width=\"160\" height=\"86\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M182 36 V16 q0 -8 8 -8 H334 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"262.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Yol</text><text x=\"262.0\" y=\"69.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">165 km</text></svg>", "son": "<p>Tren bir sonraki yolculuğunda aynı hızla 2 saat yol alacaktır.</p>", "k": "Buna göre, tren bu yolculukta kaç kilometre yol alır?", "sec": ["440", "330", "220", "247,5"], "secg": null, "c": "A", "a": ["Saat başına yol için iki terim 3/4'e bölünür: 165 : 3/4 = 165 · 4/3 = 220 km/sa.", "2 saatte 2 · 220 = 440 km yol alınır.", "Kontrol: 440 km, 165 km'nin 8/3 katıdır; 2 saat de 3/4 saatin 8/3 katıdır."], "t": "330: 3/4 saat 1 saat sanılıp 165 · 2 yapılmış; 220: birim oran cevap sanılmış; 247,5: 165 · 3/2 yapılmış", "d": "Süre kesirle verildiğinde birim oran için yolu 3/4'e bölünüz; 3/4 ile çarpmayınız. 3/4 saat 1 saatten kısadır; saatte alınan yol 165 km'den fazla olmalıdır.", "ses": "b17"}, {"no": 18, "on": "<p>Bir kafede üç sürahide ayran hazırlanmıştır. Sürahilerdeki yoğurt ve su miktarları kartlarda verilmiştir.</p>", "g": "<svg viewBox=\"0 0 554 112\" width=\"554\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"170\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H170 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"93.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">1. sürahi</text><text x=\"93.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">3 bardak yoğurt</text><text x=\"93.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">2 bardak su</text><rect x=\"190\" y=\"8\" width=\"170\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M190 36 V16 q0 -8 8 -8 H352 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"275.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">2. sürahi</text><text x=\"275.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">6 bardak yoğurt</text><text x=\"275.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">4 bardak su</text><rect x=\"372\" y=\"8\" width=\"170\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M372 36 V16 q0 -8 8 -8 H534 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"457.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">3. sürahi</text><text x=\"457.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">4 bardak yoğurt</text><text x=\"457.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">4 bardak su</text></svg>", "son": "<p>Kafede bazı sürahilerdeki ayranlar büyük bir kazanda birleştirilecektir. Bu durumla ilgili aşağıdaki ifadeler yazılmıştır.<div style=\"margin:1mm 0 1mm 2mm\"><div style=\"margin:.6mm 0\">I. 1. ve 2. sürahi birleştirilirse kazandaki ayran 1. sürahideki ayranla aynı tatta olur.</div><div style=\"margin:.6mm 0\">II. 1. ve 3. sürahi birleştirilirse kazandaki yoğurt miktarının su miktarına oranı 7 : 6 olur.</div><div style=\"margin:.6mm 0\">III. 2. ve 3. sürahi birleştirilirse kazandaki ayran 1. sürahideki ayranla aynı tatta olur.</div></div></p>", "k": "Buna göre, verilen ifadelerden hangileri doğrudur?", "sec": ["Yalnız I", "I ve II", "II ve III", "I, II ve III"], "secg": null, "c": "B", "a": ["1. sürahi 3 : 2, 2. sürahi 6 : 4 = 3 : 2; iki oran denktir. Birleşince 9 : 6 = 3 : 2 olur; tat aynıdır. I doğrudur.", "1. ve 3. sürahi: yoğurt 3 + 4 = 7, su 2 + 4 = 6; oran 7 : 6. II doğrudur.", "2. ve 3. sürahi: yoğurt 10, su 8; 10 : 8 = 5 : 4 ile 3 : 2 denk değildir. III yanlıştır; (a + c) : (b + d) kuralı yalnız denk oranlar için geçerlidir."], "t": "Yalnız I: II'deki toplamalar yapılmamış; III'ü içeren seçenekler: denk olmayan oranlar toplanınca da tadın korunacağı sanılmış", "d": "(a + c) : (b + d) kuralı yalnız denk oranlar için geçerlidir. Denk olmayan iki karışım birleşince yeni karışımın tadı ikisinden de farklı olur.", "ses": "b18"}, {"no": 19, "on": "<p>Bir markette raf etiketlerinde ürünlerin fiyatıyla birlikte birim fiyatları da yazılıdır. 400 g'lık peynir paketinin etiketinde paket fiyatının yazılı olduğu kısım yırtılmıştır.</p>", "g": "<svg viewBox=\"0 0 476 112\" width=\"476\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"220\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H220 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"118.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Peynir · 400 g</text><text x=\"118.0\" y=\"63.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Paket fiyatı: ?</text><text x=\"118.0\" y=\"86.2\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">1 kg'ın fiyatı: 85 TL</text><rect x=\"242\" y=\"8\" width=\"220\" height=\"96\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M242 36 V16 q0 -8 8 -8 H454 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"352.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Peynir · 1 kg</text><text x=\"352.0\" y=\"74.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Paket fiyatı: 80 TL</text></svg>", "son": "<p>Ece aynı peynirden tam 2 kg alacaktır. Ece ya yalnız 400 g'lık paketlerden ya da yalnız 1 kg'lık paketlerden alabilir.</p>", "k": "Buna göre, Ece 400 g'lık paketleri alırsa 1 kg'lık paketleri almasına göre kaç TL fazla öder?", "sec": ["5", "2", "25", "10"], "secg": null, "c": "D", "a": ["400 g = 0,4 kg; 400 g'lık paketin fiyatı 0,4 · 85 = 34 TL'dir.", "2 kg için 5 tane 400 g'lık paket gerekir: 5 · 34 = 170 TL.", "2 kg için 2 tane 1 kg'lık paket: 2 · 80 = 160 TL. Fark 170 − 160 = 10 TL. (Birim fiyat farkı 85 − 80 = 5 TL/kg; 2 kg için 10 TL.)"], "t": "5: birim fiyat farkı 1 kg için bırakılmış; 2: 0,4 · 5 yapılmış; 25: birim fiyat farkı paket sayısıyla çarpılmış", "d": "400 g = 0,4 kg'dır; paket fiyatı birim fiyatın 0,4 katıdır. 2 kg için kaç paket gerektiğini bulup iki seçeneğin toplam tutarlarını karşılaştırınız.", "ses": "b19"}, {"no": 20, "on": "<p>Bir musluk dakikada 3 L su akıtmaktadır. Üç öğrenci bu musluğun birim oranıyla ilgili birer önerme sunmuştur.</p>", "g": "<svg viewBox=\"0 0 242 92\" width=\"242\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"8\" y=\"8\" width=\"220\" height=\"76\" rx=\"8\" fill=\"#fffdf5\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M8 36 V16 q0 -8 8 -8 H220 q8 0 8 8 V36 Z\" fill=\"#eaf7f1\" stroke=\"#495057\" stroke-width=\"1.4\"/><text x=\"118.0\" y=\"27.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13.5\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Musluk</text><text x=\"118.0\" y=\"64.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"middle\">Dakikada 3 L su</text></svg>", "son": "<b>Ali:</b> “Bir birim oranda niceliklerden biri 1'e eşittir; 3 L su : 1 dakika bir birim orandır.”<br><b>Berk:</b> “Bu musluğun öbür birim oranı 3 dakika : 1 L sudur.”<br><b>Can:</b> “Musluk 4 dakikada 12 L su akıtır; süre kaç katına çıkarsa akan su da o katına çıkar.”", "k": "Buna göre, hangi öğrencilerin önermesi doğrudur?", "sec": ["Yalnız Ali", "Ali ve Berk", "Ali ve Can", "Berk ve Can"], "secg": null, "c": "C", "a": ["Ali: 3 L : 1 dk. oranında süre 1'dir; birim orandır. Doğrudur.", "Berk: 1 L su için iki terim 3'e bölünür: 1 dk. : 3 L = 1/3 dk. : 1 L. 1 L su 1/3 dakikada akar; 3 dakikada değil. Yanlıştır.", "Can: 4 dakikada 4 · 3 = 12 L; süre 4 katına çıkınca su da 4 katına çıkar. Doğrudur."], "t": "Ali ve Berk ile Berk ve Can: birim oranın tersi alınırken terimler ters bölünmüş; Yalnız Ali: Can'ın denk oran gerekçesi denenmemiş", "d": "Birim oranın tersini bulurken iki terim öbür niceliğe bölünür: 3 L : 1 dk. ise 1 L : 1/3 dk. olur. Her önermeyi ayrı ayrı sınayınız.", "ses": "b20"}]};
+const $=s=>document.querySelector(s);$("#kod").textContent=V.kod;$("#bas").textContent=V.baslik+" · Çözümler";
+const q=new URLSearchParams(location.search);const tek=["s","k","b"].find(x=>q.has(x));
+const esc=s=>String(s);
+function sesKutu(ad){return document.createComment("");}   /* 06.10.2026: ses kaldırıldı */
+function adimAdim(kap,list,son){let i=0;const dd=document.createElement("div");dd.className="dug";
+  const n=document.createElement("button");n.className="btn";n.type="button";const t=document.createElement("button");t.className="btn ghost";t.type="button";t.textContent="Bütün adımları göster";
+  const ciz=()=>{n.textContent=i<list.length?`${i+1}. adımı göster (${list.length} adım)`:"Çözüm tamamlandı";n.disabled=i>=list.length;t.hidden=i>=list.length;};
+  const ekle=()=>{const x=document.createElement("div");x.className="adim";x.innerHTML=`<b>${i+1}. adım</b> · ${list[i]}`;kap.insertBefore(x,dd);i++;if(i>=list.length&&son)son();ciz();};
+  n.onclick=ekle;t.onclick=()=>{while(i<list.length)ekle();};dd.append(n,t);kap.appendChild(dd);ciz();}
+function kartS(s){const k=document.createElement("section");k.className="kart";k.style.setProperty("--c","var(--ss)");k.id="s"+s.no;
+  k.innerHTML=`<span class="et">SIRA SENDE · ${s.no}</span><h2>${s.bas}</h2>`;
+  s.q.forEach((x,j)=>{const w=document.createElement("div");w.innerHTML=`<div class="soru"><b>${j+1}.</b> ${x.k}</div>`;k.appendChild(w);
+    k.appendChild(sesKutu(`s${s.no}-${j+1}`));adimAdim(w,x.a,()=>{const c=document.createElement("p");c.className="cevap";c.innerHTML="<b>Cevap:</b> "+x.c;w.appendChild(c);});});return k;}
+function kartK(s){const k=document.createElement("section");k.className="kart";k.style.setProperty("--c","var(--kk)");k.id="k"+s.no;
+  k.innerHTML=`<span class="et">KALEM KÂĞIT · ${s.no}</span><h2>${s.bas}</h2><p>${s.yon}</p><table><thead><tr><th>SAYI</th><th>CEVAP</th></tr></thead><tbody>${s.r.map(r=>`<tr><td><b>${r.n}</b></td><td>${r.c}</td></tr>`).join("")}</tbody></table>`;return k;}
+function kartB(s){const k=document.createElement("section");k.className="kart";k.style.setProperty("--c","var(--b)");k.id="b"+s.no;
+  const L="ABCD";const sec=s.sec?`<ol class="sec">${s.sec.map((x,i)=>`<li class="${L[i]===s.c?"":""}" data-h="${L[i]}"><b>${L[i]})</b> ${x}</li>`).join("")}</ol>`:"";
+  k.innerHTML=`<span class="et">${V.bet||"BAĞLAM TEMELLİ SORU"} · ${s.no}</span><h2>${window.CANL&&CANL[s.no]?"Canlandırın, deneyin, çözümü görün":"Adım adım çözüm"}</h2><div class="soru">${s.on||""}${s.g?`<div>${s.g}</div>`:""}${s.son||""}<p><b>${s.k}</b></p>${sec}${s.secg?'<p><i>Seçenekler kitaptaki görsellerdir.</i></p>':""}</div>`;
+  let cozKap=k;
+  if(window.CANL&&CANL[s.no]){const sek=document.createElement("div");sek.className="sek";sek.setAttribute("role","tablist");
+    sek.innerHTML=`<button type="button" role="tab" aria-selected="true">▶ Canlandır ve dene<span class="yeni">YENİ</span></button><button type="button" role="tab" aria-selected="false">Adım adım çözüm</button>`;
+    const p1=document.createElement("div");p1.className="cn";p1.setAttribute("role","tabpanel");const p2=document.createElement("div");p2.setAttribute("role","tabpanel");p2.hidden=true;
+    k.append(sesKutu(s.ses),sek,p1,p2);let kur=false;const ac=i=>{sek.querySelectorAll("button").forEach((b,j)=>b.setAttribute("aria-selected",i===j));p1.hidden=i!==0;p2.hidden=i!==1;if(i===0&&!kur){kur=true;CANL[s.no](p1);}};
+    sek.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>ac(i));ac(q.get("g")==="cozum"?1:0);cozKap=p2;}
+  if(cozKap===k)k.appendChild(sesKutu(s.ses));const w=document.createElement("div");cozKap.appendChild(w);
+  adimAdim(w,s.a,()=>{const c=document.createElement("p");c.className="cevap";c.innerHTML=`<b>Doğru cevap:</b> ${s.c}`;w.appendChild(c);
+    k.querySelectorAll("ol.sec li").forEach(li=>{if(li.dataset.h===s.c)li.classList.add("dogru");});
+    if(s.t){const t=document.createElement("p");t.className="tuzak";t.innerHTML="<b>Diğer seçenekler neden yanlış?</b> "+s.t;w.appendChild(t);}});
+  const d=document.createElement("div");d.className="dikkat";d.innerHTML=`<b>Dikkat!</b> ${s.d}`;cozKap.appendChild(d);return k;}
+const ic=$("#ic");
+const BOL=[["s","Sıra Sende",V.s,kartS],["k","Kalem Kâğıt",V.k,kartK],["b",V.bad||"Bağlam Soruları",V.b,kartB]].filter(x=>x[2].length);
+if(tek&&BOL.some(x=>x[0]===tek)){const n=+q.get(tek);const [,,L,f]=BOL.find(x=>x[0]===tek);const s=L.find(x=>x.no===n)||L[0];ic.appendChild(f(s));$("#tum").hidden=false;$("#nav").remove();}
+else{let akt=BOL[0][0];const nav=$("#nav");const ciz=()=>{ic.innerHTML="";nav.innerHTML=BOL.map(([k,a,L])=>`<button type="button" data-k="${k}" aria-pressed="${k===akt}">${a} (${L.length})</button>`).join("");
+  nav.querySelectorAll("button").forEach(b=>b.onclick=()=>{akt=b.dataset.k;ciz();});const [,,L,f]=BOL.find(x=>x[0]===akt);L.forEach(s=>ic.appendChild(f(s)));};ciz();}
+</script></body></html><script>
+/* İŞLEM BÖLÜNMEZ (01.10.2026, ANA_KURALLAR §5.x-5)
+   Bir işlem (7⁰ = 1, (−4)⁰ = 1, 2/5 · 3 …) satır sonunda asla ikiye bölünmez.
+   1) Metinde işlem işaretlerinin (= ≠ + − · : × < > ≤ ≥ ≈) iki yanındaki boşluklar bölünmez boşluğa çevrilir.
+   2) Üs (sup/sub), kesir (.frac) ve bunlara bitişik metin tek bir "nowrap" kutuya alınır.
+   Virgülden sonraki boşluk bölünebilir kalır; böylece uzun işlem dizileri satırlara işlem işlem dağılır (alt alta).
+   Kitap (PDF) ve çevrim içi sayfaların hepsinde aynı betik çalışır. */
+(function(){
+  const NB=" ";
+  const OP="=≠+−·×<>≤≥≈:";  // ":" yalnız iki yanında boşluk varken (düz yazıda iki noktadan önce boşluk olmaz)
+  const reOp=new RegExp("[ \\t]+(["+OP+"])[ \\t]+","g");
+  // ":" yalnız sayılar arasında bölme işaretidir (düz yazıdaki iki nokta etkilenmez)
+  const reBol=/([\d)])[ \t]+:[ \t]+(?=[\d(−])/g;
+  const ATOM=el=>el.nodeType===1&&(/^(SUP|SUB)$/.test(el.tagName)||el.classList.contains("frac")||el.classList.contains("kes")||el.classList.contains("krk")||el.classList.contains("nw")||el.classList.contains("nw-islem"));
+  const ATLA=/^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|SVG|CANVAS|CODE|PRE)$/i;
+  function metin(s){return s.replace(reOp,NB+"$1"+NB).replace(reBol,"$1"+NB+":"+NB).replace(/\|\u00a0/g,"|\u2060\u00a0").replace(/([“"(\[])([+−·×:=]) (?=[\d(])/g,"$1$2"+NB);}  // "|" sonrasında satır kırılabilir; WJ ile yapıştırılır (mutlak değer)
+  function isle(kok){
+    if(!kok||kok.nodeType!==1||ATLA.test(kok.tagName)||kok.closest&&kok.closest("svg,.nw-islem"))return;
+    // 1) metin düğümleri
+    const w=document.createTreeWalker(kok,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;return !p||p.closest("script,style,textarea,svg,code,pre")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+    const tl=[];while(w.nextNode())tl.push(w.currentNode);
+    for(const t of tl){const y=metin(t.data);if(y!==t.data)t.data=y;}
+    // 2) atomları bitişik metinle birleştir
+    const ebeveyn=new Set();
+    kok.querySelectorAll("sup,sub,.frac,.kes,.krk,.nw").forEach(a=>{if(!a.closest("svg,.nw-islem")&&a.parentElement&&!(a.parentElement.classList.contains("frac")||a.parentElement.parentElement&&a.parentElement.parentElement.classList.contains("frac")))ebeveyn.add(a.parentElement);});
+    if(ATOM(kok)&&kok.parentElement)ebeveyn.add(kok.parentElement);
+    ebeveyn.forEach(yapistir);
+    // 3) işaretle başlayan öğeden (<small>= 16</small>) önceki boşluk da bölünmez
+    kok.querySelectorAll("*").forEach(el=>{const o=el.previousSibling;if(!o||o.nodeType!==3||!/[ \t\n]+$/.test(o.data))return;
+      if(/^[ \t\n]+$/.test(o.data)&&!o.previousSibling)return;
+      const t=(el.textContent||"").trimStart();if(t&&"=≠+·×<>≤≥≈:".includes(t[0])&&/^[=≠+·×<>≤≥≈:][ \u00a0]/.test(t))o.data=o.data.replace(/[ \t\n]+$/,NB);});
+    // 5) yalnız boşluktan oluşan düğüm: önceki öğe işaretle bitiyorsa ("… 3 ·" + " " + "C = 12") bölünmez
+    kok.querySelectorAll("*").forEach(el=>{const o=el.nextSibling;if(!o||o.nodeType!==3||!/^[ \t\n]+$/.test(o.data)||!o.nextSibling)return;
+      const t=(el.textContent||"").replace(/[ \t\n]+$/,"");if(/[ \u00a0][=≠+−·×<>≤≥≈:]$/.test(t))o.data=NB;});
+    // 4) düğüm sınırında kalan işaret: "… 3 ·" + " C = 12" ya da "A = 3" + " · C"
+    tl.forEach(t=>{if(!t.isConnected)return;let y=t.data;
+      y=y.replace(/(^|[ \u00a0])([=≠+−·×<>≤≥≈:])[ \t\n]+$/,"$1$2"+NB);
+      y=y.replace(/^[ \t\n]+([=≠+·×<>≤≥≈:])(?=[ \u00a0]|$)/,NB+"$1");
+      if(y!==t.data)t.data=y;});
+  }
+  function yapistir(p){
+    if(p.closest(".nw-islem")||p.closest(".frac"))return;
+    const d=[...p.childNodes];let i=0;
+    while(i<d.length){
+      if(!ATOM(d[i])||d[i].classList&&d[i].classList.contains("nw-islem")){i++;continue;}
+      // sola: bitişik metin parçası (son boşluktan sonrası)
+      let bas=i, sagSon=i;
+      let solMetin=null, solKes=0;
+      if(i>0&&d[i-1].nodeType===3){const s=d[i-1].data;const m=s.match(/[^ \t\n\r]*$/);if(m&&m[0].length){solMetin=d[i-1];solKes=s.length-m[0].length;}}
+      // sağa: atom/metin zinciri
+      let j=i+1, sagMetin=null, sagKes=0;
+      while(j<d.length){
+        const n=d[j];
+        if(ATOM(n)){sagSon=j;j++;continue;}
+        if(n.nodeType===3){
+          const m=n.data.match(/^[^ \t\n\r]*/);const k=m?m[0].length:0;
+          if(k===n.data.length&&j+1<d.length&&ATOM(d[j+1])){sagSon=j;j++;continue;} // tamamı bitişik, arkasında yine atom
+          if(k>0){sagMetin=n;sagKes=k;}
+        }
+        break;
+      }
+      const sp=document.createElement("span");sp.className="nw-islem";
+      p.insertBefore(sp,d[bas]);
+      if(solMetin){const r=solMetin.splitText(solKes);sp.appendChild(r);}
+      for(let x=bas;x<=sagSon;x++)sp.appendChild(d[x]);
+      if(sagMetin){const kalan=sagMetin.splitText(sagKes);sp.appendChild(sagMetin);d[j]=kalan;}
+      i=sagSon+1;
+    }
+  }
+  const st=document.createElement("style");
+  st.textContent=".nw-islem{white-space:nowrap}";
+  (document.head||document.documentElement).appendChild(st);
+  window.islemTut=isle;
+  let bekle=false;const kuyruk=new Set();
+  function calis(){bekle=false;gozcu.disconnect();kuyruk.forEach(n=>{try{isle(n.nodeType===1?n:n.parentElement)}catch(e){}});kuyruk.clear();gozcu.observe(document.body,{childList:true,subtree:true,characterData:true});}
+  const gozcu=new MutationObserver(ms=>{for(const m of ms){if(m.type==="characterData")kuyruk.add(m.target.parentElement);else m.addedNodes.forEach(n=>kuyruk.add(n.nodeType===1?n:n.parentElement));}if(!bekle){bekle=true;Promise.resolve().then(calis);}});
+  function basla(){isle(document.body);gozcu.observe(document.body,{childList:true,subtree:true,characterData:true});}
+  if(document.body)basla();else document.addEventListener("DOMContentLoaded",basla);
+})();
+
+</script>
