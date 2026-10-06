@@ -650,10 +650,7 @@ const V={"baslik": "Çarpanlar ve Katlar", "kod": "6. SINIF · MAT.6.1.1", "ses"
 const $=s=>document.querySelector(s);$("#kod").textContent=V.kod;$("#bas").textContent=V.baslik+" · Çözümler";
 const q=new URLSearchParams(location.search);const tek=["s","k","b"].find(x=>q.has(x));
 const esc=s=>String(s);
-function sesKutu(ad){if(!V.ses)return document.createComment("ses askıda");const d=document.createElement("div");d.className="ses";d.innerHTML=`<button type="button" aria-label="Sesli anlatımı dinle">▶</button><span>Sesli anlatım · öğretmen bu soruyu adım adım anlatıyor</span>`;
-  const a=new Audio();a.preload="none";a.src=`${V.ses}/${ad}.mp3`;const b=d.querySelector("button"),y=d.querySelector("span");
-  const hata=()=>{b.textContent="▶";y.textContent="Bu sorunun sesli anlatımı henüz yüklenmedi.";};
-  a.onerror=hata;b.onclick=()=>{if(a.paused){const p=a.play();b.textContent="❚❚";if(p&&p.catch)p.catch(hata);}else{a.pause();b.textContent="▶";}};a.onended=()=>{b.textContent="▶";};return d;}
+function sesKutu(ad){return document.createComment("");}   /* 06.10.2026: ses kaldırıldı */
 function adimAdim(kap,list,son){let i=0;const dd=document.createElement("div");dd.className="dug";
   const n=document.createElement("button");n.className="btn";n.type="button";const t=document.createElement("button");t.className="btn ghost";t.type="button";t.textContent="Bütün adımları göster";
   const ciz=()=>{n.textContent=i<list.length?`${i+1}. adımı göster (${list.length} adım)`:"Çözüm tamamlandı";n.disabled=i>=list.length;t.hidden=i>=list.length;};
