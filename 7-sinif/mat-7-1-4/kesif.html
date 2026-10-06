@@ -944,8 +944,11 @@ function cevap(kap,ust,dogru,okMsg,ipucu,sonra,o={}){
     if(deg&&bic==="ondalik"&&!(r.tur==="ondalik"||r.tur==="tam")){fb(f,false,"Değer doğru. Şimdi aynı sayıyı <b>ondalık gösterimle</b> (virgülle) yazınız.");return;}
     if(deg&&bic==="sade"&&r.tur==="ondalik"){fb(f,false,"Değer doğru. Şimdi aynı sayıyı <b>kesir</b> olarak yazınız.");return;}
     if(deg&&bic==="sade"&&r.tur==="kesir"&&gcd(r.v[0],r.v[1])!==1){fb(f,false,`Değer doğru ama kesir en sade hâlde değil. ${YD}`);return;}
-    if(deg){ok=true;d.dataset.ok="1";inp.disabled=true;d.querySelectorAll(".tus").forEach(x=>x.disabled=true);fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,250);}
-    else{bip(220,.12);fb(f,false,den>=3?`${YD} Doğru cevap: <b>${bic==="ondalik"?dH(sa,sb):sb===1?T(sa):(sa<0?EKSI:"")+kH(Math.abs(sa),sb)}</b>`:YD);}};
+    if(deg){ok=true;sonOk=okMsg;d.dataset.ok="1";inp.disabled=true;d.querySelectorAll(".tus").forEach(x=>x.disabled=true);fb(f,true,okMsg);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,250);}
+    else{bip(220,.12);/* 07.10.2026 (E7): hatanın türünü söyleyen ipucu */
+      let h="";const ters=[-r.v[0],r.v[1]];if(dv[0]!==0&&esit(ters,dv))h="Sayının büyüklüğü doğru ama işareti yanlış; işaret kuralını yeniden düşününüz.";
+      else if(o.ozel)h=o.ozel(r.v)||"";if(!h)h=typeof ipucu==="function"?ipucu(r.v):(ipucu||"");
+      fb(f,false,(h?h+" ":"")+(den>=3?`${YD} Doğru cevap: <b>${bic==="ondalik"?dH(sa,sb):sb===1?T(sa):(sa<0?EKSI:"")+kH(Math.abs(sa),sb)}</b>`:YD));}};
   d.querySelector(".k").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};
   d.oto=()=>{if(!ok){inp.value=d.dataset.cvp;kontrol();}};
   return d;}
@@ -980,7 +983,7 @@ function soruY(kap,soru,secs,okMsg,ip,sonra){const s=karistir(secs.map((_,i)=>i)
   kap.appendChild(d);const f=d.querySelector(".fb");let bitti=false;
   d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;const i=+b.dataset.i;
     if(i===0){bitti=true;d.dataset.ok="1";b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,okMsg);bip(760,.12);sonra&&setTimeout(sonra,250);}
-    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);fb(f,false,"Bu seçenek doğru değil. "+YD);}});
+    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);const h=Array.isArray(ip)?ip[i-1]:ip;fb(f,false,"Bu seçenek doğru değil. "+(h?h+" ":"")+YD);}});
   return d;}
 /* Soruları sırayla sorar: [soru, seçenekler(ilki doğru), doğru açıklaması, ipuçları] */
 function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
@@ -994,6 +997,45 @@ function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
       b.onclick=()=>{b.remove();d.classList.add("sz-kapali");git();};});
     d.classList.add("sz-yeni");if(i>1)setTimeout(()=>{if(d.isConnected)d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"});},40);};
   git();}
+/* ================= 06.10.2026 · Çok turlu adım (KE denetimi E2) =================
+   Bir adımda birden çok soru, problem, tur ya da örnek varsa: üstte "Tur i / n" şeridi; her tur bitince
+   "Sıradaki … (i+1 / n) →" düğmesi (basılmadan yenisi açılmaz); çözülen tur küçülerek özetlenir, yenisi vurgulanır
+   ve ekrana kaydırılır; son turdan sonra adımın bittiği yazılır. kurTur(ic, i, a): a.tamam(özet) turu bitirir,
+   a.oto (varsa) erişilebilirlik ve test için turu kendiliğinden oynatır, a.durum(h) adım başlığındaki durumu yazar. */
+(()=>{if(document.getElementById("tz-stil"))return;const st=document.createElement("style");st.id="tz-stil";st.textContent=`
+.sz-ust{background:color-mix(in srgb,var(--acc) 10%,var(--card));color:var(--ink)}
+.tz-tur{border:2px solid var(--line);border-radius:14px;padding:8px 12px 10px;margin:8px 0;background:var(--card)}
+.tz-tur.tz-acik{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 16%,transparent)}
+.tz-bas{font:800 14px/1.2 Nunito,sans-serif;color:var(--acc);margin:0 0 6px}
+.tz-tur.tz-kapali{padding:6px 12px;background:var(--soft);border-style:dashed}
+.tz-tur.tz-kapali>.tz-ic,.tz-tur.tz-kapali>.tz-bas{display:none}
+.tz-oz{margin:0;font-size:15px;line-height:1.45;color:var(--muted)}.tz-oz b{color:var(--acc3,#2b8a3e)}
+.tz-son{margin:10px 0 4px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--acc3,#2b8a3e) 12%,var(--card));border-left:6px solid var(--acc3,#2b8a3e);font-weight:700}
+.tz-ileri{display:block;margin-top:10px}
+.k7-gz-ok{margin:6px 0 0;font-weight:700;color:var(--acc3,#2b8a3e)}
+.dkart.tz-bitti{border-color:var(--acc3,#2b8a3e)}
+#kesif .ta-ekran button{min-height:44px;min-width:44px}
+#kesif .etk-ust h2{min-width:0;overflow-wrap:anywhere}
+@media (prefers-reduced-motion:reduce){.tz-tur{animation:none}}
+`;document.head.appendChild(st);})();
+const tzKaydir=(e,b)=>setTimeout(()=>{if(!e||!e.isConnected||!e.offsetParent)return;const ust=document.querySelector(".etk-ust"),alt=document.querySelector(".ta-alt");
+  const of=(ust&&getComputedStyle(ust).position.includes("sticky")?ust.getBoundingClientRect().height:0)+10,ah=alt&&getComputedStyle(alt).position.includes("sticky")?alt.getBoundingClientRect().height:0;
+  const r=e.getBoundingClientRect(),vh=innerHeight-ah-of;const y=b==="start"||r.height>vh?r.top+scrollY-of:r.top+scrollY-of-(vh-r.height)/2;
+  scrollTo({top:Math.max(0,y),behavior:azHareket()?"auto":"smooth"});},60);
+function turZincir(kap,n,kurTur,bitince,o={}){const et=o.etiket||"Tur",sk=et.toLocaleLowerCase("tr");
+  const ust=document.createElement("div");ust.className="sz-ust tz-ust";const gv=document.createElement("div");gv.className="tz-govde";kap.append(ust,gv);
+  let i=0,cur=null,d=null;
+  const serit=b=>{ust.innerHTML=b?`<span class="sz-et">${n} ${sk} tamamlandı ✓</span>`:`<span class="sz-et">${et} ${i+1} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i?"ok":j===i?"su":""}"></i>`).join("")}</span>`;};
+  function ac(){serit(false);d=document.createElement("div");d.className="tz-tur tz-acik sz-yeni";d.innerHTML=`<div class="tz-bas">${et} ${i+1} / ${n}</div><div class="tz-ic"></div>`;gv.appendChild(d);
+    const a={bitti:false,oto:null,durum:h=>{o.durum&&o.durum(h);},tamam(oz){if(a.bitti)return;a.bitti=true;bit(oz);}};cur=a;
+    try{kurTur(d.querySelector(".tz-ic"),i,a);}catch(e){console.error(e);}
+    if(i>0)tzKaydir(d,"start");}
+  function bit(oz){const dd=d;dd.dataset.oz=oz||"";
+    if(i+1>=n){serit(true);dd.classList.remove("tz-acik");const s=document.createElement("p");s.className="tz-son";s.innerHTML=`✓ ${n} ${sk} tamamlandı. ${o.son||"Bu adım bitti; alttaki düğmeyle devam ediniz."}`;gv.appendChild(s);tzKaydir(s);bitince&&bitince(oz);return;}
+    const b=document.createElement("button");b.type="button";b.className="primary sz-ileri tz-ileri";b.textContent=`Sıradaki ${sk} (${i+2} / ${n}) →`;dd.appendChild(b);tzKaydir(b);
+    b.onclick=()=>{b.remove();dd.classList.remove("tz-acik","sz-yeni");dd.classList.add("tz-kapali");dd.insertAdjacentHTML("beforeend",`<p class="tz-oz">✓ <b>${et} ${i+1}:</b> ${oz||"tamamlandı"}</p>`);i++;bip(660,.06);ac();};}
+  ac();
+  return {oto(){if(cur&&!cur.bitti&&cur.oto){cur.oto();return true;}const b=gv.querySelector(".tz-ileri");if(b){b.click();return true;}return false;},get i(){return i;},get bitti(){return !!(cur&&cur.bitti&&i+1>=n);}};}
 const kuralA=(D,liste,ozet)=>({ad:"Kuralı bulun",yon:["Deney defterindeki sonuçlarınıza bakınız.","Soruları sırayla cevaplayınız. Yanlış seçerseniz başka bir seçenek deneyiniz."],bitis:"Soruların hepsini doğru cevaplayınca.",
   kur:(k,A)=>{if(D&&D.el&&D.n){k.appendChild(D.el);}soruZincir(k,liste,()=>A.tamam(ozet||"Kuralı buldunuz."));}});
 const kendiA=(fn,yon)=>({ad:"Kendinizi deneyin",yon:yon||["Öğrendiğinizi yeni bir soruda kullanınız.","Cevabınızı veriniz. Yanlışsa yeniden deneyiniz."],bitis:"Soruyu doğru cevaplayınca etkinlik biter.",kur:(k,A)=>fn(k,()=>A.tamam(""),A)});
@@ -1067,14 +1109,25 @@ function dogruH(W,min,max,bol,o={}){const L=o.L||28,Rr=W-(o.R||28),y=o.y||60,x=v
 /* Sayı doğrusu üstünde ok (yay): a'dan b'ye; kat: kaçıncı sıra (üst üste binmesin) */
 function okYay(d,a,b,renk,kat=0,et=""){const xa=d.x(a),xb=d.x(b),yy=d.y-14-kat*30,tepe=yy-22;if(Math.abs(xb-xa)<1)return "";
   return `<path d="M${xa} ${yy} C${xa} ${tepe} ${xb} ${tepe} ${xb} ${yy}" fill="none" stroke="${renk}" stroke-width="3"/><path d="M${xb-6} ${yy-9}L${xb} ${yy}L${xb+6} ${yy-9}" fill="none" stroke="${renk}" stroke-width="3" stroke-linejoin="round"/><circle cx="${xa}" cy="${yy}" r="4" fill="${renk}"/>${et?`<text x="${(xa+xb)/2}" y="${tepe-6}" text-anchor="middle" font-size="14" font-weight="800" fill="${renk}">${et}</text>`:""}`;}
-/* Görev kartı: sıradaki görev gösterilir; kontrol() o anki görevi denetler, doğruysa deftere yazar ve sıradakine geçer */
-function gorevli(k,A,D,list,ozet){const kart=document.createElement("div");kart.className="dkart k7-gorev";k.insertBefore(kart,k.firstChild);let i=0;
-  const ciz=()=>{kart.innerHTML=i<list.length?`<small>Görev ${i+1} / ${list.length}</small><p>${typeof list[i].m==="function"?list[i].m():list[i].m}</p>`:`<small>Görevler</small><p>Bütün görevler tamamlandı ✓</p>`;A.durum(`${Math.min(i,list.length)} / ${list.length}`);};
+/* Görev kartı (06.10.2026, E2): üstte "Görev i / n" şeridi; görev bitince kart "tamamlandı" olur ve
+   "Sıradaki görev (i+1 / n) →" düğmesi çıkar; düğmeye basılmadan yeni görev açılmaz. Biten görev küçülerek
+   kartın üstünde özetlenir, yeni görev vurgulanır ve ekrana kaydırılır; son görevden sonra adımın bittiği yazılır. */
+let sonOk="";
+function gorevli(k,A,D,list,ozet){const n=list.length;const kap=document.createElement("div");kap.className="k7-gz";k.insertBefore(kap,k.firstChild);
+  const ust=n>1?el(kap,"sz-ust tz-ust"):null,gec_=el(kap,"k7-gecmis"),kart=el(kap,"dkart k7-gorev");let i=0,bek=false;
+  const mt=j=>typeof list[j].m==="function"?list[j].m():list[j].m;
+  const ciz=()=>{if(ust)ust.innerHTML=i>=n?`<span class="sz-et">${n} görevin hepsi tamamlandı ✓</span>`:`<span class="sz-et">Görev ${i+1} / ${n}</span><span class="sz-nok">${list.map((_,j)=>`<i class="${j<i||(j===i&&bek)?"ok":j===i?"su":""}"></i>`).join("")}</span>`;
+    kart.innerHTML=i<n?`<small>${n>1?`Görev ${i+1} / ${n}`:"Görev"}${bek?" · tamamlandı ✓":""}</small><p>${mt(i)}</p>`:`<small>Görevler</small><p>Bütün görevler tamamlandı ✓ Bu adım bitti; alttaki düğmeyle devam ediniz.</p>`;
+    A.durum(`${Math.min(i+(bek?1:0),n)} / ${n}`);};
   ciz();
-  const G={get i(){return i;},get g(){return list[i];},bitti:()=>i>=list.length,ciz,kart,basla(){if(list[0]&&list[0].bas)list[0].bas();},
-    gec(){const g=list[i];if(!g)return;if(g.satir){const r=g.satir();if(r)D.ekle(r,"g"+k.dataset.no+"_"+i);}bip(760,.1);i++;ciz();
-      if(i>=list.length){A.tamam(ozet||"");}else if(list[i].bas)list[i].bas();},
-    kontrol(){if(i>=list.length)return false;if(list[i].ok&&list[i].ok()){if(list[i].sor){const g=list[i];g.sor(()=>G.gec());}else G.gec();return true;}return false;}};
+  const G={get i(){return i;},get g(){return list[i];},bitti:()=>i>=n||bek,get ara(){return bek;},ciz,kart,basla(){if(list[0]&&list[0].bas)list[0].bas();},
+    gec(){const g=list[i];if(!g||bek)return;if(g.satir){const r=g.satir();if(r)D.ekle(r,"g"+k.dataset.no+"_"+i);}bip(760,.1);const okm=sonOk;sonOk="";
+      if(i+1>=n){i++;ciz();if(okm)kart.insertAdjacentHTML("beforeend",`<p class="k7-gz-ok">${okm}</p>`);kart.classList.add("tz-bitti");A.tamam(ozet||"");return;}
+      bek=true;ciz();kart.classList.add("tz-bitti");if(okm)kart.insertAdjacentHTML("beforeend",`<p class="k7-gz-ok">${okm}</p>`);
+      const b=document.createElement("button");b.type="button";b.className="primary sz-ileri tz-ileri";b.textContent=`Sıradaki görev (${i+2} / ${n}) →`;kart.appendChild(b);tzKaydir(kart);
+      b.onclick=()=>{gec_.insertAdjacentHTML("beforeend",`<p class="tz-oz">✓ <b>Görev ${i+1}:</b> ${mt(i)}</p>`);bek=false;i++;kart.classList.remove("tz-bitti","sz-yeni");void kart.offsetWidth;kart.classList.add("sz-yeni");ciz();
+        if(list[i].bas)list[i].bas();bip(660,.06);tzKaydir(kap,"start");};},
+    kontrol(){if(i>=n||bek)return false;sonOk="";if(list[i].ok&&list[i].ok()){if(list[i].sor){const g=list[i];g.sor(()=>G.gec());}else G.gec();return true;}return false;}};
   return G;}
 let _stNo=0;
 /* Düğme oluştur */
@@ -1090,7 +1143,7 @@ function tepsiSVG(sv,pos,neg,o={}){const W=+sv.dataset.w,n=Math.max(pos,neg,1),r
 /* 1 · PUL TEPSİSİ */
 function pulTur(k,D,A,isler){k.dataset.no=++_stNo;let pos=0,neg=0,ekP=0,ekN=0,cik=0,bek=null;
   const G=gorevli(k,A,D,isler.map(g=>({m:()=>g.m,bas:()=>{pos=neg=ekP=ekN=cik=0;ciz();},ok:()=>g.ok({pos,neg,ekP,ekN,cik}),
-    sor:son=>{const so=el(k.querySelector(".k7-soru"),"");bek=cevap(so,`<p class="soru">${g.soru}</p>`,g.dogru,`Doğru! ${g.dm}`,"",()=>{bek=null;so.remove();son();},{eksi:true,sayi:true,ph:"ör. −3"});},
+    sor:son=>{const so=el(k.querySelector(".k7-soru"),"");bek=cevap(so,`<p class="soru">${g.soru}</p>`,g.dogru,`Doğru! ${g.dm}`,v=>"Tepside kalan pulları sayınız: sıfır çiftleri birbirini götürür, yalnız kalan pullar sayılır.",()=>{bek=null;so.remove();son();},{eksi:true,sayi:true,ph:"ör. −3"});},
     satir:()=>g.satir({ekP,ekN,cik})})),"Sıfır çiftleri çıkarılınca kalan pullar toplamı gösterdi.");
   const sv=svgEl(gW(560,300),120);sv.dataset.w=gW(560,300);el(k,"stage").appendChild(sv);
   const say=el(k,"k7-say");const db=el(k,"row k7-dug");el(k,"k7-soru");const f=el(k,"fb");f.hidden=true;
@@ -1118,9 +1171,9 @@ const e_pul=p=>{const D=defterY(["İşlem","Sıfır çifti","Kalan pullar","Sonu
       {ad:"Tepsiyi siz kurun",yon:["Bu kez hangi pullardan kaç tane koyacağınıza siz karar veriniz.","Pulları koyup sıfır çiftlerini çıkarınız; tepsi istenen toplamı gösterince görev biter."],bitis:"İki görev de bitince.",
        kur:(k,A)=>pulTur(k,D,A,[HED(3,5,-2,"Tepsiye <b>3 sarı</b> pul ve gereken sayıda kırmızı pul koyunuz; sıfır çiftleri çıkarılınca tepsi <b>−2</b>'yi göstersin."),
                                   HED(4,4,0,"Tepsiye <b>4 kırmızı</b> pul ve gereken sayıda sarı pul koyunuz; sıfır çiftleri çıkarılınca tepside <b>hiç pul</b> kalmasın.")])},
-      kuralA(D,[["Ters işaretli iki tam sayı toplanırken sonucun işareti nasıl belirlenir?",["Mutlak değeri büyük olan sayının işareti alınır.","Her zaman pozitif olur.","Her zaman birinci sayının işareti alınır."],"Doğru! Hangi renk pul fazlaysa kalan pullar o renktedir."],
-        ["Toplamı 0 olan iki sayı için ne söylenebilir?",["Birbirinin toplama işlemine göre tersidir: 4 ile −4 gibi.","İkisi de 0'dır.","İkisi de negatiftir."],"Doğru! Sarı ve kırmızı pul sayısı eşitse hepsi sıfır çifti olur."]]),
-      kendiA((m,son)=>{const a=ra(9,15),b=-ra(a+2,a+9);soruY(m,`${a} + ${tP(b)} işleminin sonucu kaçtır?`,[T(a+b),T(-(a+b)),T(a-b),T(b-a)],`Doğru! ${-b} − ${a} = ${-(a+b)}; kırmızı pullar fazla olduğundan sonuç negatiftir.`,"",son);})],
+      kuralA(D,[["Ters işaretli iki tam sayı toplanırken sonucun işareti nasıl belirlenir?",["Mutlak değeri büyük olan sayının işareti alınır.","Her zaman pozitif olur.","Her zaman birinci sayının işareti alınır."],"Doğru! Hangi renk pul fazlaysa kalan pullar o renktedir.",["Hep pozitif olmaz: tepside kırmızı pullar fazlaysa ne kalıyordu?", "Sayıların sırası sonucu belirlemez; hangi renk pul fazla kalıyordu, ona bakınız."]],
+        ["Toplamı 0 olan iki sayı için ne söylenebilir?",["Birbirinin toplama işlemine göre tersidir: 4 ile −4 gibi.","İkisi de 0'dır.","İkisi de negatiftir."],"Doğru! Sarı ve kırmızı pul sayısı eşitse hepsi sıfır çifti olur.",["0 + 0 = 0 olur ama 4 + (−4) de 0'dır; başka örnek düşününüz.", "İki negatif sayının toplamı negatif olur, 0 olmaz."]]]),
+      kendiA((m,son)=>{const a=ra(9,15),b=-ra(a+2,a+9);soruY(m,`${a} + ${tP(b)} işleminin sonucu kaçtır?`,[T(a+b),T(-(a+b)),T(a-b),T(b-a)],`Doğru! ${-b} − ${a} = ${-(a+b)}; kırmızı pullar fazla olduğundan sonuç negatiftir.`,["Sayıların mutlak değerini doğru buldunuz ama işareti kontrol ediniz: hangi renk pul fazla?", "Toplama yerine çıkarma yaptınız; ikinci sayı negatif, işlem toplamadır.", "İşlemi çıkarma gibi yaptınız ve işaret de ters oldu; sıfır çiftlerini düşününüz."],son);})],
     kural:"Ters işaretli iki tam sayı toplanırken <b>sıfır çiftleri</b> birbirini götürür: büyük mutlak değerden küçük olan çıkarılır, sonuç <b>mutlak değeri büyük olan sayının işaretini</b> alır. Aynı işaretli sayılarda mutlak değerler toplanır. Toplamı 0 olan iki sayı birbirinin <b>toplama işlemine göre tersidir</b>."});
 };
 
@@ -1132,10 +1185,10 @@ function okTur(k,D,A,gorevler,serbest){k.dataset.no=++_stNo;let a=0,b=0,bek=null
   function ciz(){const d=dogruH(W,-12,12,1,{y:118,her:W<420?4:W<700?2:1});sv.innerHTML=d.h+okYay(d,0,a,"#2b8a3e",1,a?tP(a):"")+okYay(d,a,a+b,"#c92a2a",0,b?tP(b):"");}
   let G=null;
   if(!serbest){G=gorevli(k,A,D,gorevler.map(([x,y])=>({m:`Sayaçlarla 1. sayıyı <b>${T(x)}</b>, 2. sayıyı <b>${T(y)}</b> yapınız. Oklar sayı doğrusunda çizilir.`,ok:()=>a===x&&b===y,
-      sor:son=>{bek=cevap(so,`<p class="soru">İkinci ok hangi noktada bitiyor? (${tP(x)} + ${tP(y)} = ?)</p>`,x+y,`Doğru! ${tP(x)} + ${tP(y)} = ${T(x+y)}.`,"",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true,ph:"ör. −3"});},
+      sor:son=>{bek=cevap(so,`<p class="soru">İkinci ok hangi noktada bitiyor? (${tP(x)} + ${tP(y)} = ?)</p>`,x+y,`Doğru! ${tP(x)} + ${tP(y)} = ${T(x+y)}.`,v=>v[0]/v[1]===x-y?"İkinci okun yönünü ters aldınız; ok hangi yöne gidiyor?":"İkinci ok, ilk okun bittiği yerden başlar; kırmızı okun ucundaki sayıyı okuyunuz.",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true,ph:"ör. −3"});},
       satir:()=>[`${tP(x)} + ${tP(y)}`,y>0?"sağa":"sola",T(x+y)]})),"Okları uç uca ekleyince ikinci okun bittiği nokta toplamı gösterdi.");}
   else{G=gorevli(k,A,D,[1,2,3].map(n=>({m:`Toplamı <b>${T(serbest)}</b> olan, daha önce yazmadığınız bir sayı ikilisi kurunuz ve <b>Deftere yazın</b> düğmesine basınız. (${n}. ikili)`,ok:()=>false})),"Toplamı aynı olan farklı ikililer buldunuz.");
-    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{const key=a+"_"+b;if(a+b!==serbest){bip(220,.12);fb(f,false,`${tP(a)} + ${tP(b)} = ${T(a+b)}. ${YD}`);return;}
+    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{if(G.bitti())return;const key=a+"_"+b;if(a+b!==serbest){bip(220,.12);fb(f,false,`${tP(a)} + ${tP(b)} = ${T(a+b)}. Toplam istenenden ${a+b>serbest?"büyük; sayılardan birini azaltınız":"küçük; sayılardan birini artırınız"}. ${YD}`);return;}
       if(bulunan.has(key)){bip(220,.12);fb(f,false,"Bu ikiliyi zaten yazdınız. Başka bir ikili deneyiniz.");return;}bulunan.add(key);f.hidden=true;D.ekle([`${tP(a)} + ${tP(b)}`,b>0?"sağa":b<0?"sola":"—",T(a+b)],"s"+key);G.gec();},"primary");}
   ciz();k.appendChild(D.el);
   A.oto=()=>{if(bek){bek.oto();return;}if(!serbest){const g=gorevler[G.i];if(!g)return;if(a!==g[0]){sa.el.querySelector(`[data-d="${a<g[0]?1:-1}"]`).click();return;}if(b!==g[1]){sb.el.querySelector(`[data-d="${b<g[1]?1:-1}"]`).click();return;}return;}
@@ -1148,9 +1201,9 @@ const e_ok=p=>{const D=defterY(["İşlem","2. okun yönü","Okun bittiği nokta"
     asamalar:[
       {ad:"Okları uç uca ekleyin",yon:["Sayaçlarla iki sayıyı görev kartındaki gibi ayarlayınız.","Yeşil ok birinci sayıyı, kırmızı ok ikinci sayıyı gösterir.","Kırmızı okun bittiği noktayı kutuya yazınız."],bitis:"Üç işlem de bitince.",kur:(k,A)=>okTur(k,D,A,g1)},
       {ad:"Aynı toplama giden yollar",yon:["Bu kez sayıları siz seçiniz.","Toplamı −3 olan üç farklı ikili bulup deftere yazınız."],bitis:"Üç farklı ikili yazınca.",kur:(k,A)=>okTur(k,D,A,null,-3)},
-      kuralA(D,[["Negatif bir sayı eklenince ok hangi yöne gider?",["Sola gider; toplam küçülür.","Sağa gider; toplam büyür.","Ok çizilmez."],"Doğru! Negatif sayı eklemek sola gitmektir."],
-        ["Toplamı −3 olan ikililer için hangisi doğrudur?",["Pek çok farklı ikili vardır; örneğin (−1) + (−2), 2 + (−5).","Yalnız bir ikili vardır.","İki sayı da negatif olmak zorundadır."],"Doğru! Deftere farklı ikililer yazdınız."]]),
-      kendiA((m,son)=>{const a=-ra(3,8),b=ra(9,14);soruY(m,`Sayı doğrusunda ${T(a)}'ten başlayan bir ok sağa ${b} birim gidiyor. Ok hangi sayıda biter?`,[T(a+b),T(a-b),T(-a+b),T(-a-b)],`Doğru! ${tP(a)} + ${b} = ${T(a+b)}.`,"",son);})],
+      kuralA(D,[["Negatif bir sayı eklenince ok hangi yöne gider?",["Sola gider; toplam küçülür.","Sağa gider; toplam büyür.","Ok çizilmez."],"Doğru! Negatif sayı eklemek sola gitmektir.",["Negatif sayı eklerken ok hangi yöne çizildi? Sayı doğrusunu hatırlayınız.", "Her sayı bir okla gösterilir; negatif sayının da oku vardır."]],
+        ["Toplamı −3 olan ikililer için hangisi doğrudur?",["Pek çok farklı ikili vardır; örneğin (−1) + (−2), 2 + (−5).","Yalnız bir ikili vardır.","İki sayı da negatif olmak zorundadır."],"Doğru! Deftere farklı ikililer yazdınız.",["Deftere birden çok ikili yazdınız; hepsinin toplamı −3 değil miydi?", "2 + (−5) ikilisinde sayılardan biri pozitif; yine toplam −3."]]]),
+      kendiA((m,son)=>{const a=-ra(3,8),b=ra(9,14);soruY(m,`Sayı doğrusunda ${T(a)}'ten başlayan bir ok sağa ${b} birim gidiyor. Ok hangi sayıda biter?`,[T(a+b),T(a-b),T(-a+b),T(-a-b)],`Doğru! ${tP(a)} + ${b} = ${T(a+b)}.`,["Ok sağa gittiği için sayı eklenir; çıkarma yaptınız.", "Başlangıç noktası negatif bir sayıdır; işaretini unuttunuz.", "Başlangıcın işaretini unuttunuz ve sola gittiniz."],son);})],
     kural:"Sayı doğrusunda toplama, okları <b>uç uca</b> ekleyerek gösterilir: pozitif sayı <b>sağa</b>, negatif sayı <b>sola</b> giden oktur. İkinci okun bittiği nokta toplamdır. Aynı toplama birçok farklı ikiliyle ulaşılabilir."});
 };
 
@@ -1166,7 +1219,7 @@ function asansorTur(k,D,A,bas,list,tahminli){k.dataset.no=++_stNo;let cur=bas,ne
   const sv=svgEl(230,13*26+30);k.querySelector(".s7-bina").appendChild(sv);const so=k.querySelector(".k7-soru"),f=k.querySelector(".fb"),pd=k.querySelector(".s7-dug");
   const G=gorevli(k,A,D,list.map(([b0,h])=>tahminli?{m:`Asansör <b>${T(b0)}. katta</b>. Hareketler: ${h.map(x=>x>0?`${x} kat yukarı`:`${-x} kat aşağı`).join(", ")}. Önce asansörün son katını tahmin edip yazınız; sonra “Hareketleri uygulayın” düğmesine basınız.`,
       bas:()=>{cur=b0;net=0;ciz(b0+h.reduce((s,x)=>s+x,0));so.innerHTML="";const son_=b0+h.reduce((s,x)=>s+x,0);
-        bek=cevap(so,`<p class="soru">Tahmininiz: Asansör hangi katta durur?</p>`,son_,"Hesabınız doğru. Şimdi hareketleri izleyiniz.","",()=>{bek=null;},{eksi:true,sayi:true,ph:"ör. −2"});},ok:()=>false}
+        bek=cevap(so,`<p class="soru">Tahmininiz: Asansör hangi katta durur?</p>`,son_,"Hesabınız doğru. Şimdi hareketleri izleyiniz.",v=>"Hareketleri sırayla ekleyiniz: yukarı hareket pozitif, aşağı hareket negatif sayıdır.",()=>{bek=null;},{eksi:true,sayi:true,ph:"ör. −2"});},ok:()=>false}
      :{m:`Asansör <b>${T(b0)}. katta</b>. Düğmelerle asansörü <b>${h>0?h+" kat yukarı":(-h)+" kat aşağı"}</b> götürünüz.`,bas:()=>{cur=b0;net=0;ciz(b0+h);},ok:()=>net===h,
       satir:()=>[`${tP(b0)} + ${tP(h)}`,h>0?"yukarı":"aşağı",T(cur)]}),"Yukarı hareketler pozitif, aşağı hareketler negatif sayıyla toplandı.");
   let hed=null;function ciz(hd){if(hd!==undefined)hed=hd;binaSVG(sv,cur,tahminli?null:hed);k.querySelector(".s7-kat").textContent=T(cur);k.querySelector(".s7-net").textContent=`Bu görevdeki hareket: ${net>0?"+":""}${T(net)} kat`;}
@@ -1184,9 +1237,9 @@ const e_asansor=p=>{const D=defterY(["İşlem","Yön","Varılan kat"]);
       {ad:"Asansörü sürün",yon:["Görev kartındaki hareketi ▲ ve ▼ düğmeleriyle yapınız.","Her hareket deney defterine toplama işlemi olarak yazılır."],bitis:"Üç hareketin hepsi bitince.",kur:(k,A)=>asansorTur(k,D,A,0,[[-2,5],[3,-7],[-4,4]],false)},
       {ad:"Önce hesaplayın, sonra izleyin",yon:["Görev kartındaki hareketlerden sonra asansörün hangi katta duracağını hesaplayıp yazınız.","Sonra “Hareketleri uygulayın” düğmesiyle hesabınızı izleyerek kontrol ediniz."],bitis:"İki görev bitince.",
        kur:(k,A)=>asansorTur(k,D,A,0,[[1,[6,-9]],[-3,[8,-2,-5]]],true)},
-      kuralA(D,[["Asansör −4. kattan 4 kat yukarı çıkınca giriş katına (0) gelir. Bu hangi eşitlikle gösterilir?",["(−4) + 4 = 0","(−4) − 4 = 0","4 − 4 = 8"],"Doğru! −4 ile 4 birbirinin toplama işlemine göre tersidir."],
-        ["Art arda hareketlerde asansörün son katı nasıl bulunur?",["Başlangıç katına bütün hareketler işaretleriyle eklenir.","Yalnız yukarı hareketler toplanır.","Hareketlerin mutlak değerleri toplanır."],"Doğru! Yukarı pozitif, aşağı negatif olarak toplanır."]]),
-      kendiA((m,son)=>{const b0=-ra(2,4),h=[ra(5,8),-ra(3,6)];const s=b0+h[0]+h[1];soruY(m,`Asansör ${T(b0)}. kattan ${h[0]} kat yukarı çıkıp ${-h[1]} kat aşağı iniyor. Asansör hangi katta durur?`,[T(s),T(s+2*(-h[1])),T(-s),T(b0+h[0])],`Doğru! ${tP(b0)} + ${h[0]} + ${tP(h[1])} = ${T(s)}.`,"",son);})],
+      kuralA(D,[["Asansör −4. kattan 4 kat yukarı çıkınca giriş katına (0) gelir. Bu hangi eşitlikle gösterilir?",["(−4) + 4 = 0","(−4) − 4 = 0","4 − 4 = 8"],"Doğru! −4 ile 4 birbirinin toplama işlemine göre tersidir.",["Asansör yukarı çıkıyor; yukarı hareket eklemedir, çıkarma değil.", "4 − 4 işleminin sonucunu yeniden hesaplayınız; ayrıca başlangıç katı negatifti."]],
+        ["Art arda hareketlerde asansörün son katı nasıl bulunur?",["Başlangıç katına bütün hareketler işaretleriyle eklenir.","Yalnız yukarı hareketler toplanır.","Hareketlerin mutlak değerleri toplanır."],"Doğru! Yukarı pozitif, aşağı negatif olarak toplanır.",["Aşağı inişleri de hesaba katmalısınız; onlar da katı değiştirir.", "Aşağı inişler eklenirse kat yükselir mi? Yönleri işaretle gösteriniz."]]]),
+      kendiA((m,son)=>{const b0=-ra(2,4),h=[ra(5,8),-ra(3,6)];const s=b0+h[0]+h[1];soruY(m,`Asansör ${T(b0)}. kattan ${h[0]} kat yukarı çıkıp ${-h[1]} kat aşağı iniyor. Asansör hangi katta durur?`,[T(s),T(s+2*(-h[1])),T(-s),T(b0+h[0])],`Doğru! ${tP(b0)} + ${h[0]} + ${tP(h[1])} = ${T(s)}.`,["Aşağı inişi eklediniz; aşağı hareket negatif sayıdır.", "Başlangıç katının işaretini kontrol ediniz.", "Aşağı inişi hesaba katmadınız."],son);})],
     kural:"Kat hareketleri tam sayılarla toplanır: <b>yukarı</b> hareket pozitif, <b>aşağı</b> hareket negatif sayıdır. Son kat, başlangıç katına bütün hareketlerin işaretleriyle eklenmesiyle bulunur: (−3) + 8 + (−2) + (−5) = −2."});
 };
 
@@ -1195,7 +1248,7 @@ function cikTur(k,D,A,isler){k.dataset.no=++_stNo;let pos=0,neg=0,ek=0,cik=0,bek
   const sv=svgEl(gW(560,300),120);sv.dataset.w=gW(560,300);el(k,"stage").appendChild(sv);
   const G=gorevli(k,A,D,isler.map(([a,b])=>({m:`${tP(a)} − ${tP(b)} işlemi: Tepside ${T(a)}'yi gösteren pullar var. Tepsiden <b>${Math.abs(b)} ${b>0?"sarı":"kırmızı"}</b> pul çıkarınız. Yeterli pul yoksa önce sıfır çifti ekleyiniz.`,
       bas:()=>{pos=a>0?a:0;neg=a<0?-a:0;ek=0;cik=0;ciz();},ok:()=>cik===Math.abs(b),
-      sor:son=>{const so=k.querySelector(".k7-soru");bek=cevap(so,`<p class="soru">Tepside kalan pullar hangi sayıyı gösteriyor? (${tP(a)} − ${tP(b)} = ?)</p>`,a-b,`Doğru! ${tP(a)} − ${tP(b)} = ${tP(a)} + ${tP(-b)} = ${T(a-b)}.`,"",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true,ph:"ör. −3"});},
+      sor:son=>{const so=k.querySelector(".k7-soru");bek=cevap(so,`<p class="soru">Tepside kalan pullar hangi sayıyı gösteriyor? (${tP(a)} − ${tP(b)} = ?)</p>`,a-b,`Doğru! ${tP(a)} − ${tP(b)} = ${tP(a)} + ${tP(-b)} = ${T(a-b)}.`,v=>v[0]/v[1]===a+b?"Çıkarılan pulları eklediniz; tepsiden pul çıkardınız.":"Tepside kalan pulları sayınız; sıfır çiftleri birbirini götürür.",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true,ph:"ör. −3"});},
       satir:()=>[`${tP(a)} − ${tP(b)}`,String(ek),T(a-b),`${tP(a)} + ${tP(-b)}`]})),"Bir sayıyı çıkarmak, ters işaretlisini eklemekle aynı sonucu verdi.");
   const say=el(k,"k7-say");const db=el(k,"row k7-dug");el(k,"k7-soru");const f=el(k,"fb");f.hidden=true;
   function ciz(){tepsiSVG(sv,pos,neg);say.innerHTML=`<span>Sarı pul: <b>${pos}</b></span><span>Kırmızı pul: <b>${neg}</b></span><span>Eklenen sıfır çifti: <b>${ek}</b></span><span>Çıkarılan: <b>${cik}</b></span>`;}
@@ -1214,9 +1267,9 @@ const e_cikar=p=>{const D=defterY(["İşlem","Eklenen sıfır çifti","Sonuç","
        kur:(k,A)=>cikTur(k,D,A,[[ra(1,3),ra(5,7)],[-ra(2,4),ra(2,3)]])},
       {ad:"Negatif sayı çıkarma",yon:["Bu kez kırmızı pul (negatif sayı) çıkaracaksınız.","Deftere yazılan toplama işlemlerine dikkat ediniz."],bitis:"İki işlem bitince.",
        kur:(k,A)=>cikTur(k,D,A,[[ra(3,5),-ra(2,4)],[-ra(1,2),-ra(4,5)]])},
-      kuralA(D,[["Deftere göre bir sayıdan başka bir sayıyı çıkarmak neye eşittir?",["Eksilene çıkanın ters işaretlisini eklemeye","Çıkanı eksilene eklemeye","İki sayının mutlak değerlerini çıkarmaya"],"Doğru! a − b = a + (−b)."],
-        ["5 − (−3) işlemi hangi işlemle aynı sonucu verir?",["5 + 3","5 + (−3)","5 − 3"],"Doğru! −3'ü çıkarmak 3'ü eklemektir: 5 − (−3) = 8."]]),
-      kendiA((m,son)=>{const a=-ra(4,9),b=-ra(10,15);soruY(m,`${tP(a)} − ${tP(b)} işleminin sonucu kaçtır?`,[T(a-b),T(a+b),T(b-a),T(-a-b)],`Doğru! ${tP(a)} − ${tP(b)} = ${tP(a)} + ${-b} = ${T(a-b)}.`,"",son);})],
+      kuralA(D,[["Deftere göre bir sayıdan başka bir sayıyı çıkarmak neye eşittir?",["Eksilene çıkanın ters işaretlisini eklemeye","Çıkanı eksilene eklemeye","İki sayının mutlak değerlerini çıkarmaya"],"Doğru! a − b = a + (−b).",["Çıkanı olduğu gibi eklediniz; defterdeki toplama işlemlerinde çıkanın işareti değişmişti.", "Mutlak değerlerle işlem yapınca işaret kayboluyor; defterdeki toplama işlemlerine bakınız."]],
+        ["5 − (−3) işlemi hangi işlemle aynı sonucu verir?",["5 + 3","5 + (−3)","5 − 3"],"Doğru! −3'ü çıkarmak 3'ü eklemektir: 5 − (−3) = 8.",["Bu, 5'ten 3 çıkarmakla aynıdır; çıkan sayı −3 idi.", "Çıkan sayının işaretini değiştirmeyi unuttunuz."]]]),
+      kendiA((m,son)=>{const a=-ra(4,9),b=-ra(10,15);soruY(m,`${tP(a)} − ${tP(b)} işleminin sonucu kaçtır?`,[T(a-b),T(a+b),T(b-a),T(-a-b)],`Doğru! ${tP(a)} − ${tP(b)} = ${tP(a)} + ${-b} = ${T(a-b)}.`,["Çıkan sayıyı eklediniz ama işaretini değiştirmediniz.", "Eksilen ile çıkanın yerini değiştirdiniz; çıkarmada sıra önemlidir.", "İki sayının işaretini birden değiştirdiniz; yalnız çıkanın işareti değişir."],son);})],
     kural:"Çıkarılacak pul yoksa tepsiye <b>sıfır çifti</b> eklenir; sayı değişmez. Bir sayıdan başka bir sayıyı çıkarmak, eksilene çıkanın <b>ters işaretlisini eklemektir</b>: a − b = a + (−b). Bir negatif sayıyı çıkarmak, pozitifini eklemektir."});
 };
 
@@ -1233,11 +1286,11 @@ function farkTur(k,D,A,list,serbest){k.dataset.no=++_stNo;let a=0,b=0,bek=null;c
   const ab=k.querySelector(".s7-ab"),bb=k.querySelector(".s7-bb");[["▲ 5","a",5],["▲ 1","a",1],["▼ 1","a",-1],["▼ 5","a",-5]].forEach(([t,n,d])=>dug(ab,t,()=>tas(n,d)));[["▲ 5","b",5],["▲ 1","b",1],["▼ 1","b",-1],["▼ 5","b",-5]].forEach(([t,n,d])=>dug(bb,t,()=>tas(n,d)));
   let G;
   if(!serbest)G=gorevli(k,A,D,list.map(([x,y])=>({m:`A noktasını <b>${T(x)}</b>, B noktasını <b>${T(y)}</b> konumuna getiriniz. Turuncu çizgi iki nokta arasındaki uzaklığı gösterir.`,ok:()=>a===x&&b===y,
-      sor:son=>{bek=cevap(so,`<p class="soru">A ile B arasında kaç birim var?</p>`,Math.abs(x-y),`Doğru! ${T(Math.max(x,y))} − ${tP(Math.min(x,y))} = ${Math.abs(x-y)}.`,"",()=>{bek=null;so.innerHTML="";son();},{sayi:true,ph:"ör. 12"});},
+      sor:son=>{bek=cevap(so,`<p class="soru">A ile B arasında kaç birim var?</p>`,Math.abs(x-y),`Doğru! ${T(Math.max(x,y))} − ${tP(Math.min(x,y))} = ${Math.abs(x-y)}.`,v=>v[0]/v[1]===Math.abs(Math.abs(x)-Math.abs(y))?"Yalnız sayıların mutlak değerlerinin farkını aldınız; noktalar 0'ın iki yanında. Turuncu çizgideki birimleri sayınız.":"Turuncu çizgi boyunca birimleri sayınız.",()=>{bek=null;so.innerHTML="";son();},{sayi:true,ph:"ör. 12"});},
       satir:()=>[T(x),T(y),`${T(Math.max(x,y))} − ${tP(Math.min(x,y))}`,String(Math.abs(x-y))]})),"Uzaklık, büyük sayıdan küçük sayı çıkarılarak bulundu.");
   else{G=gorevli(k,A,D,[1,2].map(n=>({m:`Biri pozitif, biri negatif ve aralarındaki uzaklık <b>${serbest}</b> birim olan iki konum bulunuz; <b>Deftere yazın</b> düğmesine basınız. (${n}. konum çifti)`,ok:()=>false})),"Uzaklığı aynı olan farklı konum çiftleri buldunuz.");
-    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{const u=Math.max(a,b),l=Math.min(a,b),key=u+"_"+l;if(!(u>0&&l<0)){bip(220,.12);fb(f,false,"Konumlardan biri pozitif, biri negatif olmalı.");return;}
-      if(u-l!==serbest){bip(220,.12);fb(f,false,`Uzaklık ${u-l} birim. ${YD}`);return;}if(bul.has(key)){bip(220,.12);fb(f,false,"Bu çifti zaten yazdınız.");return;}bul.add(key);f.hidden=true;D.ekle([T(u),T(l),`${T(u)} − ${tP(l)}`,String(u-l)],"s"+key);G.gec();},"primary");}
+    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{if(G.bitti())return;const u=Math.max(a,b),l=Math.min(a,b),key=u+"_"+l;if(!(u>0&&l<0)){bip(220,.12);fb(f,false,"Konumlardan biri pozitif, biri negatif olmalı.");return;}
+      if(u-l!==serbest){bip(220,.12);fb(f,false,`Uzaklık ${u-l} birim; noktalar ${u-l>serbest?"birbirinden fazla uzak, birini ötekine yaklaştırınız":"birbirine fazla yakın, birini ötekinden uzaklaştırınız"}. ${YD}`);return;}if(bul.has(key)){bip(220,.12);fb(f,false,"Bu çifti zaten yazdınız.");return;}bul.add(key);f.hidden=true;D.ekle([T(u),T(l),`${T(u)} − ${tP(l)}`,String(u-l)],"s"+key);G.gec();},"primary");}
   ciz();k.appendChild(D.el);
   A.oto=()=>{if(bek){bek.oto();return;}let hx,hy;if(!serbest){const g=list[G.i];if(!g)return;[hx,hy]=g;}else{const L=[[9,-6],[4,-11],[12,-3]].filter(([x,y])=>!bul.has(x+"_"+y));[hx,hy]=L[0];}
     if(a!==hx){const d=hx-a;tas("a",Math.abs(d)>=5?5*Math.sign(d):Math.sign(d));return;}if(b!==hy){const d=hy-b;tas("b",Math.abs(d)>=5?5*Math.sign(d):Math.sign(d));return;}if(serbest)k.querySelector(".row .primary").click();};}
@@ -1247,9 +1300,9 @@ const e_fark=p=>{const D=defterY(["A","B","İşlem","Uzaklık"]);
     asamalar:[
       {ad:"Uzaklığı ölçün",yon:["A ve B noktalarını düğmelerle görev kartındaki konumlara taşıyınız.","Turuncu çizginin kaç birim olduğunu sayınız ve yazınız."],bitis:"Üç ölçüm bitince.",kur:(k,A)=>farkTur(k,D,A,[[8,-6],[-3,-11],[12,4]])},
       {ad:"Aynı uzaklık, farklı konumlar",yon:["A ve B'yi siz yerleştiriniz.","Biri pozitif, biri negatif, uzaklığı 15 birim olan iki farklı konum çifti bulunuz."],bitis:"İki çift yazınca.",kur:(k,A)=>farkTur(k,D,A,null,15)},
-      kuralA(D,[["İki konum arasındaki uzaklık nasıl bulunur?",["Büyük sayıdan küçük sayı çıkarılır.","Küçük sayıdan büyük sayı çıkarılır.","İki sayı toplanır."],"Doğru! Örneğin 8 − (−6) = 14."],
-        ["−3 ile −11 arasındaki uzaklık hangi işlemle bulunur?",["(−3) − (−11) = 8","(−3) + (−11) = −14","(−11) − (−3) = −8"],"Doğru! Büyük sayı −3, küçük sayı −11'dir."]]),
-      kendiA((m,son)=>{const a=ra(6,14),b=-ra(5,12);soruY(m,`Bir günün en yüksek sıcaklığı ${a} °C, en düşük sıcaklığı ${T(b)} °C'dir. Aradaki fark kaç derecedir?`,[String(a-b),String(a+b),T(b-a),String(Math.abs(a+b)+1)],`Doğru! ${a} − ${tP(b)} = ${a} + ${-b} = ${a-b}.`,"",son);})],
+      kuralA(D,[["İki konum arasındaki uzaklık nasıl bulunur?",["Büyük sayıdan küçük sayı çıkarılır.","Küçük sayıdan büyük sayı çıkarılır.","İki sayı toplanır."],"Doğru! Örneğin 8 − (−6) = 14.",["Küçükten büyüğü çıkarınca sonuç negatif çıkar; uzaklık negatif olabilir mi?", "İki konumun toplamı uzaklığı vermez; cetvelde aradaki birimleri sayınız."]],
+        ["−3 ile −11 arasındaki uzaklık hangi işlemle bulunur?",["(−3) − (−11) = 8","(−3) + (−11) = −14","(−11) − (−3) = −8"],"Doğru! Büyük sayı −3, küçük sayı −11'dir.",["Toplama uzaklığı vermez; ayrıca uzaklık negatif olamaz.", "Küçük sayıdan büyük sayıyı çıkardınız; sonuç negatif çıktı."]]]),
+      kendiA((m,son)=>{const a=ra(6,14),b=-ra(5,12);soruY(m,`Bir günün en yüksek sıcaklığı ${a} °C, en düşük sıcaklığı ${T(b)} °C'dir. Aradaki fark kaç derecedir?`,[String(a-b),String(a+b),T(b-a),String(Math.abs(a+b)+1)],`Doğru! ${a} − ${tP(b)} = ${a} + ${-b} = ${a-b}.`,["Negatif sıcaklığın işaretini unutup topladınız mı? En düşük sıcaklık 0'ın altında.", "Fark negatif olamaz; büyük değerden küçük değeri çıkarınız.", "Yalnız mutlak değerlerin farkını aldınız; iki sıcaklık 0'ın iki yanında."],son);})],
     kural:"İki konum ya da iki sıcaklık arasındaki fark, <b>büyük değerden küçük değer çıkarılarak</b> bulunur: 8 − (−6) = 8 + 6 = 14. Negatif bir sayıyı çıkarmak, pozitifini eklemektir."});
 };
 
@@ -1261,18 +1314,22 @@ function oruntuTur(k,D,A,b,bas,son,dolu){k.dataset.no=++_stNo;let c=bas,bek=null
   function ciz(){const n=bas-son+1,bw=200/n;const mx=Math.max(...[bas,son].map(x=>Math.abs(x*b)));let h=`<line x1="20" y1="125" x2="230" y2="125" stroke="currentColor" stroke-width="1.6"/><text x="20" y="18" font-size="12" font-weight="800">Çarpım</text>`;
     satir.forEach((r,i)=>{const hh=r[1]/mx*95;h+=`<rect x="${24+i*bw}" y="${hh>0?125-hh:125}" width="${bw-6}" height="${Math.abs(hh)}" fill="${hh>=0?"#69db7c":"#ff8787"}" stroke="currentColor" stroke-opacity=".5"/><text x="${24+i*bw+(bw-6)/2}" y="${hh>=0?120-hh:140-hh}" text-anchor="middle" font-size="12" font-weight="800">${T(r[1])}</text><text x="${24+i*bw+(bw-6)/2}" y="${hh>=0?142:116+hh+0}" text-anchor="middle" font-size="11" font-weight="700">${T(r[0])}</text>`;});
     sv.innerHTML=h;tb.innerHTML=`<table class="t"><thead><tr><th>Çarpma</th><th>Sonuç</th></tr></thead><tbody>${satir.map(r=>`<tr><td>${tP(r[0])} · ${tP(b)}</td><td><b>${T(r[1])}</b></td></tr>`).join("")}</tbody></table>`;}
-  function sonraki(){if(c<son){G.gec();return;}const x=c;if(x>bas-dolu){satir.push([x,x*b]);D.ekle([`${tP(x)} · ${tP(b)}`,T(x*b),satir.length>1?`${T(x*b-satir[satir.length-2][1])}`:"—"],"o"+b+"_"+x);c--;ciz();yas(120,sonraki);return;}
-    bek=cevap(so,`<p class="soru">Basamak: ${tP(x)} · ${tP(b)} = ?</p>`,x*b,`Doğru! ${tP(x)} · ${tP(b)} = ${T(x*b)}.`,"",()=>{bek=null;so.innerHTML="";satir.push([x,x*b]);D.ekle([`${tP(x)} · ${tP(b)}`,T(x*b),`${T(x*b-satir[satir.length-2][1])}`],"o"+b+"_"+x);c--;ciz();sonraki();},{eksi:true,sayi:true,ph:"ör. 6"});}
-  ciz();sonraki();k.appendChild(D.el);A.oto=()=>{if(bek)bek.oto();};}
+  /* 06.10.2026 (E2): hazır basamaklar yazılır; kalan basamaklar sırayla sorulur ("Basamak i / n" şeridi, "Sıradaki basamak →") */
+  c=bas;while(c>=son&&c>bas-dolu){satir.push([c,c*b]);D.ekle([`${tP(c)} · ${tP(b)}`,T(c*b),satir.length>1?`${T(c*b-satir[satir.length-2][1])}`:"—"],"o"+b+"_"+c);c--;}
+  ciz();const c0=c;
+  const Z=turZincir(so,c0-son+1,(ic,j,a)=>{const x=c0-j;
+    const d=cevap(ic,`<p class="soru">Basamak: ${tP(x)} · ${tP(b)} = ?</p>`,x*b,`Doğru! ${tP(x)} · ${tP(b)} = ${T(x*b)}.`,v=>"Bir önceki basamaktan farka bakınız; çarpım her basamakta aynı miktarda değişiyor.",()=>{satir.push([x,x*b]);D.ekle([`${tP(x)} · ${tP(b)}`,T(x*b),`${T(x*b-satir[satir.length-2][1])}`],"o"+b+"_"+x);ciz();a.tamam(`${tP(x)} · ${tP(b)} = ${T(x*b)}`);},{eksi:true,sayi:true,ph:"ör. 6"});
+    a.oto=()=>d.oto();},()=>G.gec(),{etiket:"Basamak"});
+  k.appendChild(D.el);A.oto=()=>Z.oto();}
 const e_oruntu=p=>{const D=defterY(["Çarpma","Sonuç","Bir önceki basamaktan fark"]);
   asamali(p,{tahmin:{giris:["Bir dondurucunun sıcaklığı her saat 3 °C düşmektedir: her saatteki değişim −3'tür.","4 · (−3) = −12, 3 · (−3) = −9, 2 · (−3) = −6 …"],
       soru:"(−1) · (−3) işleminin sonucu sizce kaçtır?",secs:[["a","3"],["b","−3"],["c","0"],["d","−4"]],dogru:"a",neden:"Birinci çarpan 1 azaldıkça çarpım 3 artar: … 0, 3, 6."},
     asamalar:[
-      {ad:"Merdivenden inin",yon:["İlk basamaklar hazır. Birinci çarpan 1 azaldıkça çarpımın nasıl değiştiğine bakınız.","Sıradaki basamağın çarpımını yazınız. Doğru yazdıkça merdiven iner."],bitis:"(−3) · (−3) basamağı bitince.",kur:(k,A)=>oruntuTur(k,D,A,-3,4,-3,4)},
-      {ad:"Yeni bir merdiven",yon:["Bu kez ikinci çarpan −5.","Basamakları siz doldurunuz."],bitis:"(−3) · (−5) basamağı bitince.",kur:(k,A)=>oruntuTur(k,D,A,-5,2,-3,1)},
-      kuralA(D,[["Birinci çarpan 1 azaldıkça (−3) ile çarpımlar nasıl değişti?",["Her basamakta 3 arttı.","Her basamakta 3 azaldı.","Değişmedi."],"Doğru! Deftere bakınız: −12, −9, −6, −3, 0, 3, …"],
-        ["İki negatif sayının çarpımı için hangisi doğrudur?",["Pozitiftir.","Negatiftir.","0'dır."],"Doğru! (−3) · (−3) = 9, (−3) · (−5) = 15."]]),
-      kendiA((m,son)=>{const a=-ra(4,9),b=-ra(4,9);soruY(m,`${tP(a)} · ${tP(b)} işleminin sonucu kaçtır?`,[T(a*b),T(-a*b),T(a+b),T(-(a+b))],`Doğru! Aynı işaretli iki sayının çarpımı pozitiftir: ${T(a*b)}.`,"",son);})],
+      {ad:"Merdivenden inin",yon:["İlk basamaklar hazır. Birinci çarpan 1 azaldıkça çarpımın nasıl değiştiğine bakınız.","Sıradaki basamağın çarpımını yazınız. Bu adımda <b>4 basamak</b> sizi bekliyor; her doğru cevaptan sonra <b>Sıradaki basamak →</b> düğmesine basınız."],bitis:"(−3) · (−3) basamağı bitince.",kur:(k,A)=>oruntuTur(k,D,A,-3,4,-3,4)},
+      {ad:"Yeni bir merdiven",yon:["Bu kez ikinci çarpan −5.","Basamakları siz doldurunuz: Bu adımda <b>5 basamak</b> var; her doğru cevaptan sonra <b>Sıradaki basamak →</b> düğmesine basınız."],bitis:"(−3) · (−5) basamağı bitince.",kur:(k,A)=>oruntuTur(k,D,A,-5,2,-3,1)},
+      kuralA(D,[["Birinci çarpan 1 azaldıkça (−3) ile çarpımlar nasıl değişti?",["Her basamakta 3 arttı.","Her basamakta 3 azaldı.","Değişmedi."],"Doğru! Deftere bakınız: −12, −9, −6, −3, 0, 3, …",["Çarpımlar −12, −9, −6 … diye gidiyordu; sayılar büyüyor mu küçülüyor mu?", "Defterdeki çarpımlar aynı değil; ardışık iki satırı karşılaştırınız."]],
+        ["İki negatif sayının çarpımı için hangisi doğrudur?",["Pozitiftir.","Negatiftir.","0'dır."],"Doğru! (−3) · (−3) = 9, (−3) · (−5) = 15.",["Merdivende (−1) · (−3) basamağında çarpım kaç çıkmıştı?", "Çarpanlardan hiçbiri 0 değil."]]]),
+      kendiA((m,son)=>{const a=-ra(4,9),b=-ra(4,9);soruY(m,`${tP(a)} · ${tP(b)} işleminin sonucu kaçtır?`,[T(a*b),T(-a*b),T(a+b),T(-(a+b))],`Doğru! Aynı işaretli iki sayının çarpımı pozitiftir: ${T(a*b)}.`,["İki çarpanın işaretini sayınız: aynı işaretli iki sayının çarpımı hangi işaretlidir?", "Çarpma yerine toplama yaptınız.", "Toplama yaptınız ve işaret de ters."],son);})],
     kural:"Örüntüde birinci çarpan 1 azaldıkça çarpım düzenli değişir; örüntü sürdürülünce <b>iki negatif sayının çarpımı pozitif</b> çıkar: (−1) · (−3) = 3. Bir pozitif ile bir negatif sayının çarpımı negatiftir."});
 };
 
@@ -1296,9 +1353,9 @@ const e_isaret=p=>{const D=defterY(["Negatif çarpan","0 var mı?","Çarpımın 
        kur:(k,A)=>isaretTur(k,D,A,B,[N(1),N(2),N(3),N(4),N(5)])},
       {ad:"Bir çarpan 0 olursa",yon:["“Bir kartı 0 yapın” düğmesiyle son kartı 0 yapınız.","Sonra diğer kartların işaretlerini değiştirip lambayı izleyiniz."],bitis:"İki görev bitince.",
        kur:(k,A)=>isaretTur(k,D,A,B,[{sifir:true,n:0,m:"Son kartı 0 yapınız.",ok:(x,c)=>c===0},{n:3,m:"0 kartı dururken <b>3 tane</b> negatif çarpan yapınız ve çarpıma bakınız.",ok:(x,c)=>x===3&&c===0}],true)},
-      kuralA(D,[["Negatif çarpan sayısı çift olunca çarpım nasıl olur?",["Pozitif","Negatif","0"],"Doğru! Deftere bakınız: 2 ve 4 negatif çarpanda çarpım pozitif."],
-        ["Çarpanlardan biri 0 ise çarpım nedir?",["0","Pozitif","Negatif"],"Doğru! 0 ile çarpılan her sayı 0'dır."]]),
-      kendiA((m,son)=>{soruY(m,"(−1) · (−2) · (−3) · (−4) · (−5) · (−6) çarpımının işareti nedir?",["Pozitif","Negatif","0"],"Doğru! 6 negatif çarpan vardır; 6 çift sayıdır.","",son);})],
+      kuralA(D,[["Negatif çarpan sayısı çift olunca çarpım nasıl olur?",["Pozitif","Negatif","0"],"Doğru! Deftere bakınız: 2 ve 4 negatif çarpanda çarpım pozitif.",["Lambaya bakınız: 2 ve 4 negatif çarpanda lamba hangi işareti gösterdi?", "Çarpanlardan hiçbiri 0 değilse çarpım 0 olmaz."]],
+        ["Çarpanlardan biri 0 ise çarpım nedir?",["0","Pozitif","Negatif"],"Doğru! 0 ile çarpılan her sayı 0'dır.",["0 kartı dururken lamba neyi gösterdi? Diğer kartların işaretleri bir şey değiştirdi mi?", "0 kartı dururken lamba neyi gösterdi? Diğer kartların işaretleri bir şey değiştirdi mi?"]]]),
+      kendiA((m,son)=>{soruY(m,"(−1) · (−2) · (−3) · (−4) · (−5) · (−6) çarpımının işareti nedir?",["Pozitif","Negatif","0"],"Doğru! 6 negatif çarpan vardır; 6 çift sayıdır.",["Negatif çarpanları sayınız: sayı tek mi, çift mi?", "Çarpanların hiçbiri 0 değil."],son);})],
     kural:"Bir çarpımda <b>negatif çarpanların sayısı çift</b> ise çarpım pozitif, <b>tek</b> ise negatiftir. Çarpanlardan biri 0 ise çarpım 0'dır. Aynı kural bölmede de geçerlidir: (−12) : (−4) = 3, (−12) : 4 = −3."});
 };
 
@@ -1322,10 +1379,10 @@ function serit2Tur(k,D,A,list,serbest){k.dataset.no=++_stNo;const st=[{y:1,p:0,q
   let G;const deg=()=>{if(!bek&&G&&!serbest)G.kontrol();};
   const yaz=(a,b)=>`${fP(a)} + ${fP(b)}`;
   if(!serbest)G=gorevli(k,A,D,list.map(([a,b])=>({m:`1. şeridi <b>${fH(a)}</b>, 2. şeridi <b>${fH(b)}</b> olacak biçimde kurunuz. (Yön, pay ve payda düğmelerini kullanınız.)`,ok:()=>esit(v(0),a)&&esit(v(1),b),
-      sor:son=>{bek=cevap(so,`<p class="soru">2. şerit sayı doğrusunda hangi sayıda bitiyor? (${yaz(a,b)} = ?) Kesir ya da tam sayı olarak yazınız.</p>`,fT(a,b),`Doğru! ${yaz(a,b)} = ${fH(fT(a,b))}.`,"",()=>{bek=null;so.innerHTML="";son();},{eksi:true,kesir:true});},
+      sor:son=>{bek=cevap(so,`<p class="soru">2. şerit sayı doğrusunda hangi sayıda bitiyor? (${yaz(a,b)} = ?) Kesir ya da tam sayı olarak yazınız.</p>`,fT(a,b),`Doğru! ${yaz(a,b)} = ${fH(fT(a,b))}.`,v=>esit(v,Fq(a[0]+b[0],a[1]+b[1]))?"Payları ve paydaları ayrı ayrı topladınız; önce paydaları eşitleyiniz.":"Kırmızı şeridin bittiği çentiğe bakınız; çentikler ortak paydaya göre bölünmüştür.",()=>{bek=null;so.innerHTML="";son();},{eksi:true,kesir:true});},
       satir:()=>[yaz(a,b),fH(fT(a,b))]})),"İki şerit uç uca eklenince toplam okundu.");
   else{G=gorevli(k,A,D,[1,2].map(n=>({m:`Uç uca eklendiğinde toplamı <b>${fH(serbest)}</b> olan iki şerit kurunuz ve <b>Deftere yazın</b> düğmesine basınız. (${n}. deneme)`,ok:()=>false})),"Aynı toplamı veren farklı şerit çiftleri buldunuz.");
-    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{const s=fT(v(0),v(1)),key=v(0).join("/")+"_"+v(1).join("/");if(!esit(s,serbest)){bip(220,.12);fb(f,false,`Toplam ${fH(s)}. ${YD}`);return;}
+    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{if(G.bitti())return;const s=fT(v(0),v(1)),key=v(0).join("/")+"_"+v(1).join("/");if(!esit(s,serbest)){bip(220,.12);fb(f,false,`Toplam ${fH(s)}; istenenden ${kars(s,serbest)>0?"büyük, şeritlerden birini kısaltınız ya da sola çeviriniz":"küçük, şeritlerden birini kısaltınız ya da sağa çeviriniz"}. ${YD}`);return;}
       if(!st[0].p||!st[1].p){bip(220,.12);fb(f,false,"İki şeridin de uzunluğu olmalı.");return;}if(bul.has(key)){bip(220,.12);fb(f,false,"Bu şeritleri zaten yazdınız.");return;}bul.add(key);f.hidden=true;D.ekle([yaz(v(0),v(1)),fH(s)],"s"+key);G.gec();},"primary");}
   ciz();k.appendChild(D.el);
   const ayarla=(i,x)=>{st[i].y=x[0]<0?-1:1;st[i].p=Math.abs(x[0]);st[i].q=x[1];K[i].sp.v=st[i].p;K[i].sq.v=st[i].q;ciz();};
@@ -1338,9 +1395,9 @@ const e_kesirdogru=p=>{const D=defterY(["İşlem","Sonuç"]);
       {ad:"Şeritleri uç uca koyun",yon:["Her şeridin yönünü, payını ve paydasını kendi kutusundaki düğmelerle ayarlayınız.","Sayı doğrusundaki çentikler iki paydanın ortak katına göre bölünür.","İkinci şeridin bittiği sayıyı yazınız."],bitis:"Üç işlem bitince.",
        kur:(k,A)=>serit2Tur(k,D,A,[[[2,3],[-5,6]],[[-1,4],[-3,8]],[[4,3],[-2,1]]])},
       {ad:"Toplamı −1/2 olan şeritler",yon:["Şeritleri siz kurunuz.","Toplamı −1/2 olan iki farklı şerit çifti bulup deftere yazınız."],bitis:"İki çift yazınca.",kur:(k,A)=>serit2Tur(k,D,A,null,[-1,2])},
-      kuralA(D,[["Paydaları farklı iki kesir toplanırken önce ne yapılır?",["Paydalar eşitlenir.","Paydalar toplanır.","Paylar çarpılır."],"Doğru! Sayı doğrusu da ortak paydaya göre bölündü."],
-        ["(−1/4) + (−3/8) işleminin sonucunun işareti nedir?",["Negatif","Pozitif","0"],"Doğru! İki şerit de sola gider; toplam −5/8 olur."]]),
-      kendiA((m,son)=>{const a=[ra(1,3),4],b=[-ra(5,7),8];const s=fT(a,b);soruY(m,`${fP(a)} + ${fP(b)} işleminin sonucu kaçtır?`,[fH(s),fH([-s[0],s[1]]),fH(Fq(a[0]+b[0],a[1]+b[1])),fH(fT(a,[-b[0],b[1]]))],`Doğru! Ortak payda 8: ${fH(fT(a,b))}.`,"",son);})],
+      kuralA(D,[["Paydaları farklı iki kesir toplanırken önce ne yapılır?",["Paydalar eşitlenir.","Paydalar toplanır.","Paylar çarpılır."],"Doğru! Sayı doğrusu da ortak paydaya göre bölündü.",["Paydalar toplanmaz; sayı doğrusu hangi paydaya göre bölünmüştü?", "Toplamada paylar çarpılmaz; önce parçaların aynı büyüklükte olması gerekir."]],
+        ["(−1/4) + (−3/8) işleminin sonucunun işareti nedir?",["Negatif","Pozitif","0"],"Doğru! İki şerit de sola gider; toplam −5/8 olur.",["İki şerit de sola gidiyor; toplam sağda olabilir mi?", "İki sayı da negatif; birbirini götürmezler."]]]),
+      kendiA((m,son)=>{const a=[ra(1,3),4],b=[-ra(5,7),8];const s=fT(a,b);soruY(m,`${fP(a)} + ${fP(b)} işleminin sonucu kaçtır?`,[fH(s),fH([-s[0],s[1]]),fH(Fq(a[0]+b[0],a[1]+b[1])),fH(fT(a,[-b[0],b[1]]))],`Doğru! Ortak payda 8: ${fH(fT(a,b))}.`,["Sonucun büyüklüğü doğru ama işareti yanlış; hangi kesrin mutlak değeri büyük?", "Payları ve paydaları ayrı ayrı topladınız; önce paydaları eşitleyiniz.", "İkinci kesrin işaretini değiştirdiniz; işlem toplamadır."],son);})],
     kural:"Rasyonel sayılar sayı doğrusunda <b>şeritleri uç uca ekleyerek</b> toplanır: pozitif sayı sağa, negatif sayı sola gider. Hesaplarken önce <b>paydalar eşitlenir</b>, paylar işaretleriyle toplanır: 2/3 + (−5/6) = 4/6 + (−5/6) = −1/6."});
 };
 
@@ -1353,7 +1410,7 @@ function termoOTur(k,D,A,list){k.dataset.no=++_stNo;let cur=0,bas=0,bek=null;
     for(let v=-50;v<=50;v++){const tm=v%10===0,ya=v%5===0;h+=`<line x1="80" y1="${Y(v)}" x2="${80+(tm?12:ya?8:4)}" y2="${Y(v)}" stroke="currentColor" stroke-width="${tm?1.6:.9}"/>`;if(tm)h+=`<text x="96" y="${Y(v)+4.5}" font-size="12.5" font-weight="${v?700:900}">${T(v/10)}</text>`;}
     sv.innerHTML=h;k.querySelector(".s7-sic").textContent=d10(cur)+" °C";const dd=cur-bas;k.querySelector(".s7-deg").textContent=`Bu görevdeki değişim: ${dd>0?"+":""}${d10(dd)} °C`;}
   const G=gorevli(k,A,D,list.map(g=>({m:g.m,bas:()=>{cur=bas=g.b;ciz();},ok:()=>g.ok(cur,bas),
-      sor:son=>{bek=cevap(so,`<p class="soru">${g.soru}</p>`,[g.cvp(cur,bas),10],`Doğru! ${g.dm(cur,bas)}`,"",()=>{bek=null;so.innerHTML="";son();},{bicim:"ondalik",eksi:true});},
+      sor:son=>{bek=cevap(so,`<p class="soru">${g.soru}</p>`,[g.cvp(cur,bas),10],`Doğru! ${g.dm(cur,bas)}`,v=>"Göstergedeki sıcaklığı ve değişimi okuyunuz; virgülden sonraki basamağı kontrol ediniz.",()=>{bek=null;so.innerHTML="";son();},{bicim:"ondalik",eksi:true});},
       satir:()=>g.satir(cur,bas)})),"Sıcaklıktaki değişim ondalık gösterimle toplandı ya da çıkarıldı.");
   const pd=k.querySelector(".s7-dug");const git=d=>{if(bek||G.bitti())return;const n=cur+d;if(n<-50||n>50){bip(220,.12);fb(f,false,"Termometrenin ölçeği dışına çıkılamaz.");return;}cur=n;f.hidden=true;bip(500+cur*3,.04);ciz();G.kontrol();};
   [["+1 °C",10],["+0,1 °C",1],["−0,1 °C",-1],["−1 °C",-10]].forEach(([t,d])=>dug(pd,t,()=>git(d)));
@@ -1368,9 +1425,9 @@ const e_termo=p=>{const D=defterY(["İşlem","Sonuç (°C)"]);
     asamalar:[
       {ad:"Artır ve düşür",yon:["Düğmelerle sıcaklığı görev kartında yazan miktar kadar değiştiriniz.","Göstergede o görevdeki toplam değişim yazar.","Yeni sıcaklığı ondalık gösterimle yazınız."],bitis:"İki görev bitince.",kur:(k,A)=>termoOTur(k,D,A,[DEG(-25,37),DEG(12,-48)])},
       {ad:"Değişimi ölçün",yon:["Termometreyi görev kartındaki sıcaklığa götürünüz.","Ne kadar değiştiğini yazınız: artış pozitif, düşüş negatiftir."],bitis:"İki görev bitince.",kur:(k,A)=>termoOTur(k,D,A,[HED(-18,23),HED(6,-29)])},
-      kuralA(D,[["Bir sıcaklık değişimi nasıl bulunur?",["Son sıcaklıktan ilk sıcaklık çıkarılır.","İlk sıcaklıktan son sıcaklık çıkarılır.","İki sıcaklık toplanır."],"Doğru! 2,3 − (−1,8) = 4,1."],
-        ["Ondalık gösterimlerle toplama ve çıkarmada işaretler için hangisi doğrudur?",["Tam sayılardaki işaret kuralları aynen kullanılır.","İşaretler dikkate alınmaz.","Sonuç her zaman pozitiftir."],"Doğru! Virgüller hizalanır, işaret kuralları değişmez."]]),
-      kendiA((m,son)=>{const a=-ra(31,49),b=ra(12,28);soruY(m,`Sıcaklık ${d10(a)} °C iken ${d10(b)} °C artıyor. Yeni sıcaklık kaç °C olur?`,[d10(a+b),d10(-(a+b)),d10(a-b),d10(b-a)],`Doğru! ${d10P(a)} + ${d10(b)} = ${d10(a+b)}.`,"",son);})],
+      kuralA(D,[["Bir sıcaklık değişimi nasıl bulunur?",["Son sıcaklıktan ilk sıcaklık çıkarılır.","İlk sıcaklıktan son sıcaklık çıkarılır.","İki sıcaklık toplanır."],"Doğru! 2,3 − (−1,8) = 4,1.",["İlk sıcaklıktan son sıcaklığı çıkarınca artış negatif çıkar; sırayı kontrol ediniz.", "Değişimi bulmak için sıcaklıklar toplanmaz."]],
+        ["Ondalık gösterimlerle toplama ve çıkarmada işaretler için hangisi doğrudur?",["Tam sayılardaki işaret kuralları aynen kullanılır.","İşaretler dikkate alınmaz.","Sonuç her zaman pozitiftir."],"Doğru! Virgüller hizalanır, işaret kuralları değişmez.",["İşaretler dikkate alınmazsa −2,5 ile 2,5 aynı olurdu; termometrede aynı mıydı?", "Defterde negatif sonuçlar da vardı."]]]),
+      kendiA((m,son)=>{const a=-ra(31,49),b=ra(12,28);soruY(m,`Sıcaklık ${d10(a)} °C iken ${d10(b)} °C artıyor. Yeni sıcaklık kaç °C olur?`,[d10(a+b),d10(-(a+b)),d10(a-b),d10(b-a)],`Doğru! ${d10P(a)} + ${d10(b)} = ${d10(a+b)}.`,["Büyüklük doğru ama işaret ters; artıştan sonra sıcaklık 0'ın hangi tarafında?", "Sıcaklık artıyor; artışı çıkardınız.", "Artışı çıkardınız ve işareti de ters aldınız."],son);})],
     kural:"Ondalık gösterimlerle toplama ve çıkarmada <b>virgüller alt alta</b> getirilir ve tam sayılardaki <b>işaret kuralları</b> aynen kullanılır. Bir değişim, son değerden ilk değer çıkarılarak bulunur: 2,3 − (−1,8) = 4,1."});
 };
 
@@ -1386,10 +1443,10 @@ function alanTur(k,D,A,list,serbest){k.dataset.no=++_stNo;const s={a:0,b:2,c:0,d
     bilgi.innerHTML=`<span>Mavi: <b>${fH([s.a,s.b],false)}</b></span><span>Sarı: <b>${fH([s.c,s.d],false)}</b></span><span>Yeşil parça: <b>${s.a*s.c}</b> / ${s.b*s.d}</span>`;}
   let G;const deg=()=>{if(!bek&&G&&!serbest)G.kontrol();};
   if(!serbest)G=gorevli(k,A,D,list.map(([a,b,c,d])=>({m:`Sütunların <b>${fH([a,b],false)}</b>'ini maviye, satırların <b>${fH([c,d],false)}</b>'ini sarıya boyayınız.`,ok:()=>s.a===a&&s.b===b&&s.c===c&&s.d===d,
-      sor:son=>{bek=cevap(so,`<p class="soru">Yeşil bölge karenin kaçta kaçıdır? (${fH([a,b],false)} · ${fH([c,d],false)} = ?) En sade kesir olarak yazınız.</p>`,[a*c,b*d],`Doğru! ${fH([a,b],false)} · ${fH([c,d],false)} = ${kH(a*c,b*d)} = ${fH(Fq(a*c,b*d))}.`,"",()=>{bek=null;so.innerHTML="";son();},{bicim:"sade",kesir:true});},
+      sor:son=>{bek=cevap(so,`<p class="soru">Yeşil bölge karenin kaçta kaçıdır? (${fH([a,b],false)} · ${fH([c,d],false)} = ?) En sade kesir olarak yazınız.</p>`,[a*c,b*d],`Doğru! ${fH([a,b],false)} · ${fH([c,d],false)} = ${kH(a*c,b*d)} = ${fH(Fq(a*c,b*d))}.`,v=>esit(v,Fq(a+c,b+d))?"Payları ve paydaları topladınız; yeşil parçaları ve bütün parçaları sayınız.":"Yeşil parçaları ve karenin bütün parçalarını sayınız.",()=>{bek=null;so.innerHTML="";son();},{bicim:"sade",kesir:true});},
       satir:()=>[`${fH([a,b],false)} · ${fH([c,d],false)}`,`${a*c} / ${b*d}`,fH(Fq(a*c,b*d))]})),"Yeşil bölge iki kesrin çarpımını gösterdi.");
   else{G=gorevli(k,A,D,[1,2].map(n=>({m:`Yeşil bölge karenin <b>${fH(serbest)}</b>'ü olacak biçimde boyayınız ve <b>Deftere yazın</b> düğmesine basınız. (${n}. yol)`,ok:()=>false})),"Aynı çarpımı veren farklı kesir çiftleri buldunuz.");
-    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{const v=Fq(s.a*s.c,s.b*s.d),key=[s.a,s.b,s.c,s.d].join("_");if(!esit(v,serbest)){bip(220,.12);fb(f,false,`Yeşil bölge ${fH(v)}. ${YD}`);return;}
+    const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{if(G.bitti())return;const v=Fq(s.a*s.c,s.b*s.d),key=[s.a,s.b,s.c,s.d].join("_");if(!esit(v,serbest)){bip(220,.12);fb(f,false,`Yeşil bölge ${fH(v)}; istenenden ${kars(v,serbest)>0?"büyük, boyalı sütun ya da satır sayısını azaltınız":"küçük, boyalı sütun ya da satır sayısını artırınız"}. ${YD}`);return;}
       if(bul.has(key)){bip(220,.12);fb(f,false,"Bu boyamayı zaten yazdınız.");return;}bul.add(key);f.hidden=true;D.ekle([`${fH([s.a,s.b],false)} · ${fH([s.c,s.d],false)}`,`${s.a*s.c} / ${s.b*s.d}`,fH(v)],"s"+key);G.gec();},"primary");}
   ciz();k.appendChild(D.el);
   const kur=(a,b,c,d)=>{Object.assign(s,{a,b,c,d});S1[1].v=b;S2[1].v=d;ciz();};
@@ -1401,9 +1458,9 @@ const e_alan=p=>{const D=defterY(["Çarpım","Yeşil / bütün","Sonuç"]);
       {ad:"Kesirleri boyayın",yon:["Sütun ve satır sayaçlarıyla görev kartındaki kesirleri kurunuz.","Yeşil parçaları ve bütün parçaları sayınız.","Yeşil bölgenin kesrini en sade biçimde yazınız."],bitis:"Üç çarpım bitince.",
        kur:(k,A)=>alanTur(k,D,A,[[2,3,3,4],[1,2,4,5],[3,4,2,5]])},
       {ad:"Aynı yeşil, farklı kesirler",yon:["Sayaçları siz ayarlayınız.","Yeşil bölge karenin 1/3'ü olacak biçimde iki farklı boyama bulunuz."],bitis:"İki boyama yazınca.",kur:(k,A)=>alanTur(k,D,A,null,[1,3])},
-      kuralA(D,[["İki kesrin çarpımı nasıl bulunur?",["Paylar çarpılıp paya, paydalar çarpılıp paydaya yazılır.","Paylar ve paydalar toplanır.","Paydalar eşitlenip paylar çarpılır."],"Doğru! Yeşil parça sayısı payların, bütün parça sayısı paydaların çarpımıdır."],
-        ["1'den küçük iki pozitif kesrin çarpımı için hangisi doğrudur?",["Her iki kesirden de küçüktür.","Her iki kesirden de büyüktür.","Kesirlerin toplamına eşittir."],"Doğru! Yeşil bölge mavi ve sarı bölgelerin içinde kalır."]]),
-      kendiA((m,son)=>{const a=[ra(2,4),5],b=[ra(5,6),7];const c=fX(a,b);soruY(m,`${fP([-a[0],a[1]])} · ${fH(b)} işleminin sonucu kaçtır?`,[fH([-c[0],c[1]]),fH(c),fH(Fq(-(a[0]+b[0]),a[1]+b[1])),fH(fB([-a[0],a[1]],b))],`Doğru! Ters işaretli iki sayının çarpımı negatiftir.`,"",son);})],
+      kuralA(D,[["İki kesrin çarpımı nasıl bulunur?",["Paylar çarpılıp paya, paydalar çarpılıp paydaya yazılır.","Paylar ve paydalar toplanır.","Paydalar eşitlenip paylar çarpılır."],"Doğru! Yeşil parça sayısı payların, bütün parça sayısı paydaların çarpımıdır.",["Kesirleri çarparken paylar ve paydalar toplanmaz; yeşil parçaları sayınız.", "Payda eşitleme toplamada gerekir; alan modelinde paydalar nasıl birleşti?"]],
+        ["1'den küçük iki pozitif kesrin çarpımı için hangisi doğrudur?",["Her iki kesirden de küçüktür.","Her iki kesirden de büyüktür.","Kesirlerin toplamına eşittir."],"Doğru! Yeşil bölge mavi ve sarı bölgelerin içinde kalır.",["Yeşil bölge mavi bölgenin içinde mi, dışında mı kalıyordu?", "Çarpım toplamla aynı değildir; yeşil bölgenin büyüklüğüne bakınız."]]]),
+      kendiA((m,son)=>{const a=[ra(2,4),5],b=[ra(5,6),7];const c=fX(a,b);soruY(m,`${fP([-a[0],a[1]])} · ${fH(b)} işleminin sonucu kaçtır?`,[fH([-c[0],c[1]]),fH(c),fH(Fq(-(a[0]+b[0]),a[1]+b[1])),fH(fB([-a[0],a[1]],b))],`Doğru! Ters işaretli iki sayının çarpımı negatiftir.`,["Ters işaretli iki sayının çarpımının işaretini kontrol ediniz.", "Payları ve paydaları topladınız; çarpmada paylar ve paydalar çarpılır.", "Böldünüz; işlem çarpmadır."],son);})],
     kural:"Kesirler çarpılırken <b>paylar çarpılıp paya, paydalar çarpılıp paydaya</b> yazılır; alan modelinde yeşil bölge çarpımı gösterir. Çarpımın işareti tam sayılardaki işaret kuralıyla belirlenir: (−2/5) · 3/4 = −6/20 = −3/10."});
 };
 
@@ -1417,7 +1474,7 @@ function sigarTur(k,D,A,list,secenekli){k.dataset.no=++_stNo;let n=0,pc=null,bek
     if(fN(L)%1)h+=`<line x1="${x(fN(L))}" y1="54" x2="${x(fN(L))}" y2="66" stroke="currentColor" stroke-width="1.8"/>`+sKs(x(fN(L)),88,L,{fs:12});
     sv.innerHTML=h;}
   const G=gorevli(k,A,D,list.map(g=>({m:g.m,bas:()=>{L=g.L;P=secenekli?[1,1]:g.p;n=0;pc=null;ciz();},ok:()=>secenekli?(esit(fX(P,[n,1]),L)&&n===g.n&&esit(P,g.p)):esit(fX(P,[n,1]),L),
-      sor:son=>{bek=cevap(so,`<p class="soru">${secenekli?`Parça uzunluğu kaç metredir?`:`${fH(L)} : ${fH(P)} = ?`}</p>`,secenekli?P:fB(L,P),`Doğru! ${fH(L)} : ${fH(P)} = ${fH(fB(L,P))} ve ${fH(L)} · ${fH(fB([1,1],P))} = ${fH(fX(L,fB([1,1],P)))}.`,"",()=>{bek=null;so.innerHTML="";son();},secenekli?{kesir:true}:{sayi:true});},
+      sor:son=>{bek=cevap(so,`<p class="soru">${secenekli?`Parça uzunluğu kaç metredir?`:`${fH(L)} : ${fH(P)} = ?`}</p>`,secenekli?P:fB(L,P),`Doğru! ${fH(L)} : ${fH(P)} = ${fH(fB(L,P))} ve ${fH(L)} · ${fH(fB([1,1],P))} = ${fH(fX(L,fB([1,1],P)))}.`,v=>secenekli?"Bu uzunluktan 4 parça kurdeleyi tam dolduruyor mu? Kurdelenin boyuna bakınız.":esit(v,fX(L,P))?"Bölmek yerine çarptınız; kurdeleye kaç parça sığdığını sayınız.":"Kurdeleye yerleştirdiğiniz parçaları sayınız.",()=>{bek=null;so.innerHTML="";son();},secenekli?{kesir:true}:{sayi:true});},
       satir:()=>[`${fH(L)} m`,`${fH(P)} m`,String(n),`${fH(L)} · ${fH(fB([1,1],P))} = ${fH(fX(L,fB([1,1],P)))}`]})),"Bölüm, bütünün içinde kaç parça olduğunu gösterdi.");
   if(secenekli){sec.innerHTML=`<span class="lab2">Parça uzunluğu:</span>`;[[1,4],[3,8],[1,3],[1,2]].forEach(x=>{const b=dug(sec,kH(...x)+" m",()=>{if(bek)return;P=x;n=0;sec.querySelectorAll("button").forEach(y=>y.setAttribute("aria-pressed",y===b));f.hidden=true;ciz();});b.dataset.p=x.join("/");});}
   dug(db,"+ Parça ekleyin",()=>{if(bek||G.bitti())return;if(secenekli&&esit(P,[1,1])){bip(220,.12);fb(f,false,"Önce bir parça uzunluğu seçiniz.");return;}if(fN(fX(P,[n,1]))>=fN(L)-1e-9){bip(220,.12);fb(f,false,"Kurdele doldu; yeni parça taşar.");return;}n++;f.hidden=true;bip(560,.05);ciz();G.kontrol();});
@@ -1431,9 +1488,9 @@ const e_sigar=p=>{const D=defterY(["Uzunluk","Parça","Parça sayısı","Bütün
       {ad:"Parçaları yerleştirin",yon:["“Parça ekleyin” düğmesiyle kurdeleye parça koyunuz.","Kurdele tam dolunca kaç parça sığdığını yazınız."],bitis:"Üç kurdele bitince.",kur:(k,A)=>sigarTur(k,D,A,[L3([3,1],[3,4]),L3([2,1],[2,5]),L3([9,4],[3,8])])},
       {ad:"Parçayı siz seçin",yon:["1 1/2 m'lik kurdeleden tam 4 eş parça çıkacak.","Parça uzunluğunu seçip parçaları yerleştiriniz; uymazsa başka bir uzunluk deneyiniz."],bitis:"Doğru parçayı bulunca.",
        kur:(k,A)=>sigarTur(k,D,A,[{L:[3,2],p:[3,8],n:4,m:"<b>1 1/2 m</b>'lik kurdeleden <b>tam 4</b> eş parça çıkaracak parça uzunluğunu bulunuz."}],true)},
-      kuralA(D,[["Deftere göre bölmenin sonucu hangi işlemle de bulunur?",["Bölünen, bölenin çarpmaya göre tersiyle çarpılarak","Bölen, bölünenle çarpılarak","Paylar ve paydalar bölünerek"],"Doğru! 3 : 3/4 = 3 · 4/3 = 4."],
-        ["3/4'ün çarpma işlemine göre tersi nedir?",["4/3","−3/4","3/4"],"Doğru! 3/4 · 4/3 = 1."]]),
-      kendiA((m,son)=>{const a=ra(2,4),b=[ra(1,2),5];soruY(m,`${a} : ${fH(b)} işleminin sonucu kaçtır?`,[fH(fB([a,1],b)),fH(fX([a,1],b)),fH(fB(b,[a,1])),fH([a*b[0],b[1]+1])],"Doğru! Bölünen, bölenin çarpmaya göre tersiyle çarpılır.","",son);})],
+      kuralA(D,[["Deftere göre bölmenin sonucu hangi işlemle de bulunur?",["Bölünen, bölenin çarpmaya göre tersiyle çarpılarak","Bölen, bölünenle çarpılarak","Paylar ve paydalar bölünerek"],"Doğru! 3 : 3/4 = 3 · 4/3 = 4.",["Bölen ile bölüneni çarpmak sonucu büyütür; defterdeki parça sayıları böyle mi bulundu?", "Payları paylara, paydaları paydalara bölmek her zaman sonuç vermez; defterdeki çarpma satırına bakınız."]],
+        ["3/4'ün çarpma işlemine göre tersi nedir?",["4/3","−3/4","3/4"],"Doğru! 3/4 · 4/3 = 1.",["Çarpma işlemine göre ters, işaret değiştirmek değildir; çarpımları 1 olmalı.", "Bir sayının kendisiyle çarpımı 1 olur mu? 3/4 · 3/4 kaçtır?"]]]),
+      kendiA((m,son)=>{const a=ra(2,4),b=[ra(1,2),5];soruY(m,`${a} : ${fH(b)} işleminin sonucu kaçtır?`,[fH(fB([a,1],b)),fH(fX([a,1],b)),fH(fB(b,[a,1])),fH([a*b[0],b[1]+1])],"Doğru! Bölünen, bölenin çarpmaya göre tersiyle çarpılır.",["Bölmek yerine çarptınız.", "Bölünen ile böleni yer değiştirdiniz.", "Payı çarptınız, paydaya 1 eklediniz; bölmede bölenin tersiyle çarpılır."],son);})],
     kural:"Bölmenin bir anlamı <b>ölçmedir</b>: 3 : 3/4 işlemi 3'ün içinde kaç tane 3/4 olduğunu bulur. Bir sayıyı bir rasyonel sayıya bölmek, onu bölenin <b>çarpma işlemine göre tersiyle</b> çarpmaktır: 3 : 3/4 = 3 · 4/3 = 4."});
 };
 
@@ -1446,7 +1503,7 @@ function grupTur(k,D,A,kartlar,islem,gorevler,toplam){k.dataset.no=++_stNo;const
     hv.querySelectorAll(".k7-kart").forEach(b=>b.onclick=()=>{if(bek)return;sec=+b.dataset.i;ciz();});
     gr.querySelectorAll(".k7-grup").forEach(b=>b.onclick=e=>{if(bek||G.bitti())return;if(sec===null){bip(220,.12);fb(f,false,"Önce bir karta, sonra bir gruba dokununuz.");return;}yer[sec]=+b.dataset.g;sec=null;f.hidden=true;bip(560,.05);ciz();G.kontrol();});}
   const G=gorevli(k,A,D,gorevler.map(g=>({m:g.m,ok:()=>g.ok(sonuc,yer),satir:()=>g.satir(sonuc,yer)})).concat([{m:`Bütün kartları gruplara yerleştiriniz. Sonra grupların ${islem==="+"?"toplamlarını toplayarak":"çarpımlarını çarparak"} bütün kartların ${islem==="+"?"toplamını":"çarpımını"} bulunuz.`,ok:()=>yer.every(x=>x>=0),
-      sor:son=>{bek=cevap(so,`<p class="soru">Bütün kartların ${islem==="+"?"toplamı":"çarpımı"} kaçtır?</p>`,toplam,"Doğru! Gruplar işlemi kolaylaştırdı.","",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true});},
+      sor:son=>{bek=cevap(so,`<p class="soru">Bütün kartların ${islem==="+"?"toplamı":"çarpımı"} kaçtır?</p>`,toplam,"Doğru! Gruplar işlemi kolaylaştırdı.",v=>islem==="+"?"Grupların toplamlarını toplayınız; işaretleri kontrol ediniz.":"Grupların çarpımlarını çarpınız; işaretleri kontrol ediniz.",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true});},
       satir:()=>["Bütün kartlar",["A","B","C"].map((a,g)=>sonuc(g)===null?null:`${a}: ${T(sonuc(g))}`).filter(Boolean).join(", "),T(toplam)]}]),"Toplamı 0 ya da çarpımı yuvarlak olan gruplar işlemi kısalttı.");
   ciz();k.appendChild(D.el);
   A.oto=()=>{if(bek){bek.oto();return;}const g=gorevler[G.i];const hedef=g?g.yerles:kartlar.map((_,i)=>i).filter(i=>yer[i]<0);const i=hedef.find(x=>yer[x]<0);if(i===undefined){G.kontrol();return;}
@@ -1461,9 +1518,9 @@ const e_grup=p=>{const D=defterY(["Grup","Sonuçlar","Bütün"]);
       {ad:"Çarpma grupları",yon:["Bu kez grupların çarpımı yazar.","Çarpımı kolay sayılar veren gruplar oluşturunuz."],bitis:"Bütün kartların çarpımını yazınca.",
        kur:(k,A)=>grupTur(k,D,A,K2,"·",[{m:"Grup A'da çarpımı <b>−100</b> olan iki kart olsun.",yerles:[0,2],grup:0,ok:s=>s(0)===-100,satir:s=>["A (çarpımı −100)","(−25) · 4",T(s(0))]},
                                          {m:"Grup B'de çarpımı <b>−10</b> olan iki kart olsun.",yerles:[3,4],grup:1,ok:s=>s(1)===-10,satir:s=>["B (çarpımı −10)","(−2) · 5",T(s(1))]}],9000)},
-      kuralA(D,[["Kartların sırasını değiştirip gruplamak sonucu değiştirir mi?",["Değiştirmez; toplama ve çarpmada değişme ve birleşme özellikleri vardır.","Her zaman değiştirir.","Yalnız çarpmada değiştirir."],"Doğru! Gruplar yalnız işlemi kolaylaştırdı."],
-        ["Toplamda önce hangi sayıları bir araya getirmek işlemi kısaltır?",["Toplamı 0 olan sayıları","En büyük sayıları","Negatif sayıları"],"Doğru! −38 + 38 = 0."]]),
-      kendiA((m,son)=>{const a=ra(31,59),b=ra(12,19);soruY(m,`${tP(-a)} + ${b} + ${a} + ${tP(-b-5)} işleminin sonucu kaçtır?`,[T(-5),T(5),T(-2*a-5),T(2*b+5)],`Doğru! ${tP(-a)} + ${a} = 0 ve ${b} + ${tP(-b-5)} = −5.`,"",son);})],
+      kuralA(D,[["Kartların sırasını değiştirip gruplamak sonucu değiştirir mi?",["Değiştirmez; toplama ve çarpmada değişme ve birleşme özellikleri vardır.","Her zaman değiştirir.","Yalnız çarpmada değiştirir."],"Doğru! Gruplar yalnız işlemi kolaylaştırdı.",["Kartları farklı gruplarda topladığınızda toplam değişti mi? Grupların sonuçlarına bakınız.", "Toplamada da sıra değiştirmek sonucu değiştirmedi; deftere bakınız."]],
+        ["Toplamda önce hangi sayıları bir araya getirmek işlemi kısaltır?",["Toplamı 0 olan sayıları","En büyük sayıları","Negatif sayıları"],"Doğru! −38 + 38 = 0.",["En büyük sayıları önce toplamak işi kısaltmaz; birbirini götüren sayılar var mı?", "Negatifleri önce toplamak kolaylık sağlamaz; toplamı 0 olan çiftleri arayınız."]]]),
+      kendiA((m,son)=>{const a=ra(31,59),b=ra(12,19);soruY(m,`${tP(-a)} + ${b} + ${a} + ${tP(-b-5)} işleminin sonucu kaçtır?`,[T(-5),T(5),T(-2*a-5),T(2*b+5)],`Doğru! ${tP(-a)} + ${a} = 0 ve ${b} + ${tP(-b-5)} = −5.`,["Toplamı 0 olan çifti buldunuz ama kalan iki sayının toplamının işaretini kontrol ediniz.", "Birbirini götüren sayıları götürmeyip topladınız.", "Birbirini götüren sayıları götürmediniz; işaretlere bakınız."],son);})],
     kural:"Toplama ve çarpmada <b>değişme</b> ve <b>birleşme</b> özellikleri vardır: sayıların yeri ve gruplanışı değişse de sonuç değişmez. Toplamı 0 olan ya da çarpımı 10, 100 gibi yuvarlak olan sayıları önce bir araya getirmek işlemi kısaltır: (−25) · 9 · 4 = (−100) · 9 = −900."});
 };
 
@@ -1481,7 +1538,7 @@ function degTur(k,D,A,sayilar,gorevler,uclu){k.dataset.no=++_stNo;const s={a:0,b
     ops.querySelectorAll(".k7-cip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.o===s.op));
     const [x,y,t1,t2]=hesap(),e=esit(x,y);ek.innerHTML=`<div class="k7-es"><span>${t1} = <b>${fH(x)}</b></span><span class="k7-isrt ${e?"ok":"no"}">${e?"=":"≠"}</span><span>${t2} = <b>${fH(y)}</b></span></div>`;}
   const G=gorevli(k,A,D,gorevler.map(g=>({m:g.m,ok:()=>(say[g.op]||0)>=2})),"Hangi işlemlerde sonucun değişmediğini deftere yazdınız.");
-  const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{const g=gorevler[G.i];if(!g)return;if(s.op!==g.op){bip(220,.12);fb(f,false,`Bu görevde “${g.op}” işlemini deneyiniz.`);return;}
+  const bt=el(k,"row");dug(bt,"Deftere yazın",()=>{if(G.bitti())return;const g=gorevler[G.i];if(!g)return;if(s.op!==g.op){bip(220,.12);fb(f,false,`Bu görevde “${g.op}” işlemini deneyiniz.`);return;}
     if(s.a===s.b||(uclu&&(s.b===s.c||s.a===s.c))){bip(220,.12);fb(f,false,"Farklı sayılar seçiniz.");return;}const [x,y,t1,t2]=hesap();
     if(!D.ekle([g.ad,`${t1} = ${fH(x)}`,`${t2} = ${fH(y)}`,esit(x,y)?"değişmedi":"değişti"],`d${k.dataset.no}_${s.op}_${s.a}_${s.b}_${s.c}`)){bip(220,.12);fb(f,false,"Bu denemeyi zaten yazdınız; başka sayılar seçiniz.");return;}
     say[s.op]=(say[s.op]||0)+1;f.hidden=true;bip(700,.06);G.kontrol();},"primary");
@@ -1496,9 +1553,9 @@ const e_degisir=p=>{const D=defterY(["Özellik","1. sıra","2. sıra","Sonuç"])
        kur:(k,A)=>degTur(k,D,A,SY,[GD("+","Değişme +"),GD("·","Değişme ·"),GD("−","Değişme −"),GD(":","Değişme :")],false)},
       {ad:"Gruplama",yon:["Bu kez üç sayı seçiniz: (a işlem b) işlem c ile a işlem (b işlem c) karşılaştırılır.","Her denemeyi deftere yazınız."],bitis:"Üç işlemin her biri için iki deneme yazınca.",
        kur:(k,A)=>degTur(k,D,A,SY,[GB("+","Birleşme +"),GB("·","Birleşme ·"),GB("−","Birleşme −")],true)},
-      kuralA(D,[["Hangi işlemlerde sayıların yeri değişince sonuç değişmez?",["Toplama ve çarpma","Çıkarma ve bölme","Dört işlemin hepsinde"],"Doğru! Toplama ve çarpmada değişme özelliği vardır."],
-        ["Çıkarmada değişme özelliği olmadığını göstermek için ne yeter?",["Tek bir karşı örnek","Yüz tane örnek","Hiçbir örnek yetmez"],"Doğru! 5 − 3 ≠ 3 − 5 örneği yeter."]]),
-      kendiA((m,son)=>{soruY(m,"Aşağıdaki eşitliklerden hangisi her zaman doğrudur?",["(−4) · 2,5 = 2,5 · (−4)","8 − (−2) = (−2) − 8","12 : (−3) = (−3) : 12","(9 − 4) − 2 = 9 − (4 − 2)"],"Doğru! Çarpmada değişme özelliği vardır.","",son);})],
+      kuralA(D,[["Hangi işlemlerde sayıların yeri değişince sonuç değişmez?",["Toplama ve çarpma","Çıkarma ve bölme","Dört işlemin hepsinde"],"Doğru! Toplama ve çarpmada değişme özelliği vardır.",["Çıkarmada 5 − 3 ile 3 − 5 aynı mı çıktı? Deftere bakınız.", "Deftere bakınız: Bazı işlemlerde sonuç değişti."]],
+        ["Çıkarmada değişme özelliği olmadığını göstermek için ne yeter?",["Tek bir karşı örnek","Yüz tane örnek","Hiçbir örnek yetmez"],"Doğru! 5 − 3 ≠ 3 − 5 örneği yeter.",["Bir örnek bile eşitliği bozuyorsa özellik her zaman geçerli olamaz; yüz örnek gerekir mi?", "Deftere yazdığınız 5 − 3 ve 3 − 5 örneği bir şey göstermedi mi?"]]]),
+      kendiA((m,son)=>{soruY(m,"Aşağıdaki eşitliklerden hangisi her zaman doğrudur?",["(−4) · 2,5 = 2,5 · (−4)","8 − (−2) = (−2) − 8","12 : (−3) = (−3) : 12","(9 − 4) − 2 = 9 − (4 − 2)"],"Doğru! Çarpmada değişme özelliği vardır.",["Çıkarmada sayıların yeri değişince sonuç aynı kalır mı?", "Bölmede sayıların yeri değişince sonuç aynı kalır mı?", "Çıkarmada gruplamayı değiştirince sonuç değişebilir; iki tarafı hesaplayınız."],son);})],
     kural:"Toplama ve çarpmada <b>değişme</b> (a + b = b + a, a · b = b · a) ve <b>birleşme</b> özellikleri vardır. Çıkarma ve bölmede bu özellikler <b>yoktur</b>; bunu göstermek için tek bir karşı örnek yeter: 5 − 3 = 2, ama 3 − 5 = −2."});
 };
 
@@ -1517,7 +1574,7 @@ function karekupTur(k,D,A,list,kesirli){k.dataset.no=++_stNo;const s={kip:"kare"
     sv.innerHTML=h;}
   let G;const deg=()=>{if(!bek&&G)G.kontrol();};
   G=gorevli(k,A,D,list.map(g=>({m:g.m,ok:()=>kesirli?(s.n===g.n&&s.m===g.pay):(s.kip===g.kip&&s.n===g.n),
-      sor:son=>{bek=cevap(so,`<p class="soru">${g.soru}</p>`,g.dogru,`Doğru! ${g.dm}`,"",()=>{bek=null;so.innerHTML="";son();},kesirli?{bicim:"sade",kesir:true}:{sayi:true});},satir:()=>g.satir})),"Tekrarlı çarpım birim kare ya da birim küplerle sayıldı.");
+      sor:son=>{bek=cevap(so,`<p class="soru">${g.soru}</p>`,g.dogru,`Doğru! ${g.dm}`,v=>kesirli?"Yeşil küçük kareleri ve birim karedeki bütün küçük kareleri sayınız.":"Birimleri katman katman sayınız; kenarı 2 ya da 3 ile çarpmak yetmez.",()=>{bek=null;so.innerHTML="";son();},kesirli?{bicim:"sade",kesir:true}:{sayi:true});},satir:()=>g.satir})),"Tekrarlı çarpım birim kare ya da birim küplerle sayıldı.");
   ciz();k.appendChild(D.el);
   A.oto=()=>{if(bek){bek.oto();return;}const g=list[G.i];if(!g)return;if(kesirli){s.n=g.n;s.m=g.pay;sn.v=g.n;sm.v=g.pay;}else{s.kip=g.kip;s.n=g.n;sn.v=g.n;sg&&sg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===g.kip));}ciz();G.kontrol();};}
 const e_karekup=p=>{const D=defterY(["Üslü yazım","Tekrarlı çarpım","Sonuç"]);
@@ -1531,9 +1588,9 @@ const e_karekup=p=>{const D=defterY(["Üslü yazım","Tekrarlı çarpım","Sonu�
       {ad:"Kare ve küp kurun",yon:["Kare ya da küp seçiniz, kenarı sayaçla ayarlayınız.","Kullanılan birim kare ya da birim küpleri sayıp yazınız."],bitis:"Üç görev bitince.",kur:(k,A)=>karekupTur(k,D,A,[KR("kare",4),KR("kup",2),KR("kup",3)])},
       {ad:"Kesrin karesi",yon:["Birim kare küçük karelere bölünür; yeşil karenin kenarı bir kesirdir.","Sayaçlarla görev kartındaki kareyi kurup alanını kesir olarak yazınız."],bitis:"Üç görev bitince.",
        kur:(k,A)=>karekupTur(k,D,A,[ks(1,2),ks(2,3),ks(3,4)],true)},
-      kuralA(D,[["Bir sayının küpü nasıl bulunur?",["Sayı kendisiyle üç kez çarpılır.","Sayı 3 ile çarpılır.","Sayıya 3 eklenir."],"Doğru! 3³ = 3 · 3 · 3 = 27."],
-        ["Bir kesrin karesi bulunurken hangisi yapılır?",["Pay ve payda ayrı ayrı kendileriyle çarpılır.","Kesir 2 ile çarpılır.","Yalnız pay kendisiyle çarpılır."],"Doğru! (2/3)² = 4/9."]]),
-      kendiA((m,son)=>{const n=ra(4,6);soruY(m,`${n}<sup>3</sup> sayısının değeri kaçtır?`,[String(n**3),String(n*3),String(n*n),String(n**3+n)],`Doğru! ${n} · ${n} · ${n} = ${n**3}.`,"",son);})],
+      kuralA(D,[["Bir sayının küpü nasıl bulunur?",["Sayı kendisiyle üç kez çarpılır.","Sayı 3 ile çarpılır.","Sayıya 3 eklenir."],"Doğru! 3³ = 3 · 3 · 3 = 27.",["Üs bir çarpan değildir; küp kurarken kaç birim küp saydınız?", "Küpte sayıya 3 eklenmez; birim küpleri sayınız."]],
+        ["Bir kesrin karesi bulunurken hangisi yapılır?",["Pay ve payda ayrı ayrı kendileriyle çarpılır.","Kesir 2 ile çarpılır.","Yalnız pay kendisiyle çarpılır."],"Doğru! (2/3)² = 4/9.",["Kesrin karesi kesrin 2 katı değildir; yeşil karenin alanını hatırlayınız.", "Paydayı da kendisiyle çarpmalısınız; karenin bölündüğü parça sayısına bakınız."]]]),
+      kendiA((m,son)=>{const n=ra(4,6);soruY(m,`${n}<sup>3</sup> sayısının değeri kaçtır?`,[String(n**3),String(n*3),String(n*n),String(n**3+n)],`Doğru! ${n} · ${n} · ${n} = ${n**3}.`,["Üssü çarpan gibi kullandınız: küp, sayının kendisiyle üç kez çarpımıdır.", "Bu sayının karesi; bir kez daha çarpmalısınız.", "Fazladan bir ekleme yaptınız; yalnız çarpınız."],son);})],
     kural:"Bir sayının kendisiyle tekrarlı çarpımı üslü yazılır: a · a = <b>a²</b> (kare), a · a · a = <b>a³</b> (küp). Üs çarpan değildir: 2³ = 8, 2 · 3 = 6. Kesrin karesi pay ve payda ayrı ayrı çarpılarak bulunur: (2/3)² = 4/9."});
 };
 
@@ -1568,9 +1625,9 @@ const e_kuvvet=p=>{const D=defterY(["Kuvvet","Tekrarlı çarpım","Tahmin","Sonu
       {ad:"Ayraç ne değiştirir?",yon:["Taban −3. “Ayraçlı” ve “Ayraçsız” yazılışları seçiniz.","Üs 2 ve 3 için iki yazılışı da hesaplayınız."],bitis:"Dört deneme bitince.",
        kur:(k,A)=>kuvvetTur(k,D,A,[[-3,1]],[{m:"Üs 2 ve üs 3 için ayraçlı ve ayraçsız yazılışların hepsini hesaplayınız (4 deneme).",ok:y=>(y.ayr||0)>=2&&(y.ays||0)>=2,
          oner:(s,kay)=>{for(const n of [2,3])for(const a of [true,false])if(!kay.has([0,n,a].join("_")))return {t:0,n,ayr:a};return {};}}],true)},
-      kuralA(D,[["Negatif bir tabanın kuvvetinin işareti neye bağlıdır?",["Üs çiftse pozitif, tekse negatiftir.","Her zaman negatiftir.","Her zaman pozitiftir."],"Doğru! (−2)<sup>4</sup> = 16, (−2)<sup>5</sup> = −32."],
-        ["(−3)<sup>2</sup> ile −3<sup>2</sup> için hangisi doğrudur?",["(−3)<sup>2</sup> = 9, −3<sup>2</sup> = −9","İkisi de 9'dur.","İkisi de −9'dur."],"Doğru! Ayraç yoksa üs yalnız 3'e aittir."]]),
-      kendiA((m,son)=>{const n=rastgele([4,6]);soruY(m,`(−1/2)<sup>${n}</sup> sayısı aşağıdakilerden hangisidir?`,[fH([1,2**n]),fH([-1,2**n]),fH([-n,2]),fH([n,2])],"Doğru! Çift sayıda negatif çarpanın çarpımı pozitiftir.","",son);})],
+      kuralA(D,[["Negatif bir tabanın kuvvetinin işareti neye bağlıdır?",["Üs çiftse pozitif, tekse negatiftir.","Her zaman negatiftir.","Her zaman pozitiftir."],"Doğru! (−2)<sup>4</sup> = 16, (−2)<sup>5</sup> = −32.",["Deftere bakınız: Negatif tabanın kuvveti pozitif çıktığı denemeler de vardı.", "Deftere bakınız: Negatif tabanın kuvveti negatif çıktığı denemeler de vardı."]],
+        ["(−3)<sup>2</sup> ile −3<sup>2</sup> için hangisi doğrudur?",["(−3)<sup>2</sup> = 9, −3<sup>2</sup> = −9","İkisi de 9'dur.","İkisi de −9'dur."],"Doğru! Ayraç yoksa üs yalnız 3'e aittir.",["Ayraç yoksa üs eksi işaretine de uygulanır mı? Ayraçsız yazılışın sonucuna bakınız.", "Ayraçlı yazılışta iki negatif çarpan var; sonuç negatif olur mu?"]]]),
+      kendiA((m,son)=>{const n=rastgele([4,6]);soruY(m,`(−1/2)<sup>${n}</sup> sayısı aşağıdakilerden hangisidir?`,[fH([1,2**n]),fH([-1,2**n]),fH([-n,2]),fH([n,2])],"Doğru! Çift sayıda negatif çarpanın çarpımı pozitiftir.",["Çift sayıda negatif çarpan var; çarpımın işaretini kontrol ediniz.", "Üssü tabanla çarptınız; kuvvet tekrarlı çarpmadır.", "Üssü tabanla çarptınız ve işareti değiştirdiniz; kuvvet tekrarlı çarpmadır."],son);})],
     kural:"Negatif bir sayının kuvvetinde <b>üs çiftse sonuç pozitif</b>, <b>üs tekse sonuç negatiftir</b>: (−2)<sup>4</sup> = 16, (−2)<sup>3</sup> = −8. Ayraç önemlidir: (−3)<sup>2</sup> = 9, ama −3<sup>2</sup> = −(3 · 3) = −9."});
 };
 
@@ -1606,9 +1663,9 @@ const e_ayrac=p=>{const D=defterY(["İfade","Sonuç"]);
       {ad:"Negatif sayılarla",yon:["Yeni ifadede negatif sayılar var.","Ayracı gezdirip sonuçları karşılaştırınız."],bitis:"İki görev bitince.",
        kur:(k,A)=>ayracTur(k,D,A,N2,O2,[{m:"Sonucu <b>pozitif</b> olan bir ayraç yeri bulup deftere yazınız.",ok:b=>[...b.values()].some(v=>fN(v)>0),oner:()=>[1,2]},
          {m:"Sonucu <b>en büyük</b> yapan ayraç yerini bulup deftere yazınız.",ok:b=>[...b.values()].some(v=>esit(v,E2.m)),oner:()=>E2.mk}])},
-      kuralA(D,[["Ayraç konmadığında 2 + 6 · 3 − 1 ifadesinde ilk hangi işlem yapılır?",["Çarpma","Toplama","Çıkarma"],"Doğru! Önce çarpma ve bölme, sonra toplama ve çıkarma yapılır."],
-        ["Ayraç ne işe yarar?",["Hangi işlemin önce yapılacağını gösterir.","Sonucu her zaman büyütür.","İşlemi değiştirmez."],"Doğru! Ayracın yeri değişince sonuç değişebilir."]]),
-      kendiA((m,son)=>{soruY(m,"12 − 4 · (3 − 5) işleminin sonucu kaçtır?",["20","−16","4","−4"],"Doğru! Ayraç içi: 3 − 5 = −2; 4 · (−2) = −8; 12 − (−8) = 20.","",son);})],
+      kuralA(D,[["Ayraç konmadığında 2 + 6 · 3 − 1 ifadesinde ilk hangi işlem yapılır?",["Çarpma","Toplama","Çıkarma"],"Doğru! Önce çarpma ve bölme, sonra toplama ve çıkarma yapılır.",["Toplama ve çıkarmadan önce yapılan işlem hangisidir?", "Soldan başlamak her zaman doğru değildir; işlem önceliğini düşününüz."]],
+        ["Ayraç ne işe yarar?",["Hangi işlemin önce yapılacağını gösterir.","Sonucu her zaman büyütür.","İşlemi değiştirmez."],"Doğru! Ayracın yeri değişince sonuç değişebilir.",["Deftere bakınız: Ayraçla sonucun küçüldüğü denemeler de vardı.", "Ayraç işlemin sırasını değiştirdi; sonuçlar aynı mı kaldı?"]]]),
+      kendiA((m,son)=>{soruY(m,"12 − 4 · (3 − 5) işleminin sonucu kaçtır?",["20","−16","4","−4"],"Doğru! Ayraç içi: 3 − 5 = −2; 4 · (−2) = −8; 12 − (−8) = 20.",["Ayracın içinin işaretini kontrol ediniz: 3 − 5 negatif çıkar.", "Ayraç içini yapmadan soldan sağa işlem yaptınız.", "Negatif sayıyı çıkarmanın eklemek olduğunu unuttunuz."],son);})],
     kural:"İşlemler şu sırayla yapılır: <b>ayraç içi</b>, kuvvet, <b>çarpma ve bölme</b> (soldan sağa), <b>toplama ve çıkarma</b> (soldan sağa). Ayracın yeri değişince işlemlerin sırası, dolayısıyla sonuç değişebilir: (2 + 6) · 3 − 1 = 23, ama 2 + 6 · 3 − 1 = 19."});
 };
 
@@ -1627,7 +1684,7 @@ function agacTur(k,D,A,list){k.dataset.no=++_stNo;let ag=null,bek=null,ifh="";
   const hesapD=d=>d.op==="^2"?fX(d.l.v,d.l.v):OPF[d.op](d.l.v,d.r.v);
   function tikla(i){if(bek||G.bitti())return;const d=dugumler[i];if(!d||hazir(d))return;if(!(hazir(d.l)&&(!d.r||hazir(d.r)))){bip(220,.12);fb(f,false,"Bu kutunun altındaki işlemler henüz yapılmadı. Yeniden deneyiniz.");return;}
     f.hidden=true;const v=hesapD(d);const yz=d.op==="^2"?`${fP(d.l.v)}<sup>2</sup>`:`${fP(d.l.v)} ${d.op} ${fP(d.r.v)}`;
-    bek=cevap(so,`<p class="soru">${yz} = ?</p>`,v,`Doğru! ${yz} = ${fH(v)}.`,"",()=>{bek=null;so.innerHTML="";d.v=v;bip(700,.06);ciz();if(hazir(ag))G.kontrol();},{eksi:true,kesir:true});}
+    bek=cevap(so,`<p class="soru">${yz} = ?</p>`,v,`Doğru! ${yz} = ${fH(v)}.`,v=>d.op==="−"&&esit(v,fT(d.l.v,d.r.v))?"Çıkarma yerine toplama yaptınız.":d.op==="·"&&esit(v,fT(d.l.v,d.r.v))?"Çarpma yerine toplama yaptınız.":"Kutudaki işlemi yeniden hesaplayınız; işaretlere dikkat ediniz.",()=>{bek=null;so.innerHTML="";d.v=v;bip(700,.06);ciz();if(hazir(ag))G.kontrol();},{eksi:true,kesir:true});}
   sv.addEventListener("click",e=>{const g=e.target.closest("g[data-i]");if(g)tikla(+g.dataset.i);});
   const G=gorevli(k,A,D,list.map(g=>({m:`İşlem: ${g.h}. Turuncu çerçeveli kutulara dokunarak işlemleri aşağıdan yukarıya doğru yapınız.`,bas:()=>{ag=JSON.parse(JSON.stringify(g.ag));ifh=g.h;ifade.innerHTML=`<div class="k7-es"><span class="buyuk">${g.h}</span></div>`;ciz();},
       ok:()=>hazir(ag),satir:()=>[g.h,fH(ag.v)]})),"İşlem ağacı işlemlerin hangi sırayla yapılacağını gösterdi.");
@@ -1645,9 +1702,9 @@ const e_agac=p=>{const D=defterY(["İşlem","Sonuç"]);
        kur:(k,A)=>agacTur(k,D,A,[{h:"(−3 + 7) · 2 − 5",ag:A1},{h:`(${kH(1,2)} ${EKSI} 2) : ${kH(3,4)}`,ag:A2}])},
       {ad:"Soldan sağa ve kuvvet",yon:["Ağaçta çarpma–bölmenin soldan sağa yapıldığını ve kuvvetin önce hesaplandığını görünüz."],bitis:"İki ağaç bitince.",
        kur:(k,A)=>agacTur(k,D,A,[{h:"12 : (−3) · 2 + 7",ag:A3},{h:"5 − 2 · (−3)<sup>2</sup>",ag:A4}])},
-      kuralA(D,[["12 : (−3) · 2 işleminde önce hangisi yapılır?",["12 : (−3), çünkü bölme ile çarpma soldan sağa yapılır.","(−3) · 2, çünkü çarpma önce yapılır.","İkisi aynı anda yapılır."],"Doğru! Ağaçta bölme en altta kaldı."],
-        ["(1/2 − 2) : 3/4 işleminde ağacın en altında hangi işlem vardır?",["1/2 − 2","2 : 3/4","1/2 : 3/4"],"Doğru! Ayraç içi önce hesaplandı: 1/2 − 2 = −3/2; sonra −3/2 : 3/4 = −2."]]),
-      kendiA((m,son)=>{soruY(m,"20 − 3 · (−2)<sup>2</sup> işleminin sonucu kaçtır?",["8","−16","68","32"],"Doğru! (−2)² = 4; 3 · 4 = 12; 20 − 12 = 8.","",son);})],
+      kuralA(D,[["12 : (−3) · 2 işleminde önce hangisi yapılır?",["12 : (−3), çünkü bölme ile çarpma soldan sağa yapılır.","(−3) · 2, çünkü çarpma önce yapılır.","İkisi aynı anda yapılır."],"Doğru! Ağaçta bölme en altta kaldı.",["Çarpma ile bölme aynı önceliktedir; aynı öncelikte işlemler hangi sırayla yapılır?", "İki işlem aynı anda yapılamaz; ağaçta hangisi daha alttaydı?"]],
+        ["(1/2 − 2) : 3/4 işleminde ağacın en altında hangi işlem vardır?",["1/2 − 2","2 : 3/4","1/2 : 3/4"],"Doğru! Ayraç içi önce hesaplandı: 1/2 − 2 = −3/2; sonra −3/2 : 3/4 = −2.",["Ayraç içindeki işlem önce yapılır; ayraç içinde hangi sayılar var?", "Ayraç içindeki işlem önce yapılır; ayraç içinde hangi sayılar var?"]]]),
+      kendiA((m,son)=>{soruY(m,"20 − 3 · (−2)<sup>2</sup> işleminin sonucu kaçtır?",["8","−16","68","32"],"Doğru! (−2)² = 4; 3 · 4 = 12; 20 − 12 = 8.",["Kuvveti negatif aldınız: (−2)² işaretini kontrol ediniz.", "Önce çıkarma yaptınız; çarpma ve kuvvet daha önce yapılır.", "Kuvveti çarpmadan önce yaptınız ama çıkarma yerine toplama yaptınız."],son);})],
     kural:"Çok adımlı bir işlem <b>işlem ağacı</b> ile gösterilebilir: en alttaki işlemler önce yapılır. Sıra: ayraç, kuvvet, çarpma–bölme (soldan sağa), toplama–çıkarma (soldan sağa)."});
 };
 
@@ -1664,9 +1721,9 @@ function butceTur(k,D,A,bas,kalemler,mod){k.dataset.no=++_stNo;let sira=0,bek=nu
     if(kalemler[i][1]>0){bip(220,.12);fb(f,false,"Gelirler değiştirilmiyor; giderlerden vazgeçebilirsiniz.");return;}acik[i]=!acik[i];f.hidden=true;bip(520,.05);ciz();}
   let G;
   if(mod==="sira")G=gorevli(k,A,D,[{m:`Başlangıç bakiyesi ${bas} TL. Kalemlere tarih sırasıyla dokunarak deftere ekleyiniz; grafikte bakiyenin nasıl değiştiğini izleyiniz.`,ok:()=>sira===kalemler.length,
-      sor:son=>{const L=[bas];for(let i=1;i<=kalemler.length;i++)L.push(bakiye(i));const mn=Math.min(...L);bek=cevap(so,`<p class="soru">Ay içinde bakiye en düşük kaç TL oldu?</p>`,mn,`Doğru! En düşük bakiye ${T(mn)} TL; bu, ${-mn} TL borç demektir.`,"",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true});}}],"Gelirler pozitif, giderler negatif olarak toplanınca bakiye bulundu.");
+      sor:son=>{const L=[bas];for(let i=1;i<=kalemler.length;i++)L.push(bakiye(i));const mn=Math.min(...L);bek=cevap(so,`<p class="soru">Ay içinde bakiye en düşük kaç TL oldu?</p>`,mn,`Doğru! En düşük bakiye ${T(mn)} TL; bu, ${-mn} TL borç demektir.`,v=>"Grafikte 0'ın en çok altına inen sütunu bulunuz ve üstündeki sayıyı okuyunuz.",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true});}}],"Gelirler pozitif, giderler negatif olarak toplanınca bakiye bulundu.");
   else{G=gorevli(k,A,D,[1,2].map(n=>({m:`Ay sonunda <b>en az ${mod} TL</b> kalacak biçimde bazı giderlerden vazgeçiniz (gider kartlarına dokunarak kapatınız) ve <b>Planı kaydedin</b> düğmesine basınız. (${n}. plan)`,ok:()=>false})),"Giderlerden vazgeçerek ay sonu bakiyesini artırdınız.");
-    const bt=el(k,"row");dug(bt,"Planı kaydedin",()=>{const son_=bakiye(kalemler.length),key=acik.join("");if(son_<mod){bip(220,.12);fb(f,false,`Ay sonu bakiye ${T(son_)} TL. ${YD}`);return;}if(plan.has(key)){bip(220,.12);fb(f,false,"Bu planı zaten kaydettiniz.");return;}
+    const bt=el(k,"row");dug(bt,"Planı kaydedin",()=>{if(G.bitti())return;const son_=bakiye(kalemler.length),key=acik.join("");if(son_<mod){bip(220,.12);fb(f,false,`Ay sonu bakiye ${T(son_)} TL; ${mod} TL'ye ulaşmadı. Kapattığınız giderler yetmedi; başka bir gideri de kapatınız. ${YD}`);return;}if(plan.has(key)){bip(220,.12);fb(f,false,"Bu planı zaten kaydettiniz.");return;}
       plan.add(key);f.hidden=true;D.ekle(["Plan "+plan.size,"vazgeçilen: "+kalemler.filter((_,i)=>!acik[i]).map(x=>x[0]).join(", "),T(son_)],"p"+k.dataset.no+key);G.gec();},"primary");}
   ciz();k.appendChild(D.el);
   A.oto=()=>{if(bek){bek.oto();return;}if(mod==="sira"){tik(sira);return;}const P=[[3],[1,2,5],[3,1]].map(x=>kalemler.map((_,i)=>!x.includes(i)||kalemler[i][1]>0));
@@ -1677,9 +1734,9 @@ const e_butce=p=>{const D=defterY(["Kalem","Tutar (TL)","Bakiye (TL)"]);const KL
     asamalar:[
       {ad:"Deftere işleyin",yon:["Kalem kartlarına tarih sırasıyla dokununuz.","Grafikte her işlemden sonraki bakiye görünür; negatif bakiye borçtur."],bitis:"Bütün kalemler işlenip en düşük bakiye yazılınca.",kur:(k,A)=>butceTur(k,D,A,120,KL,"sira")},
       {ad:"Bilinçli harcama",yon:["Bazı giderlerden vazgeçerek ay sonu bakiyesini artırabilirsiniz.","Ay sonunda en az 40 TL kalan iki farklı plan bulup kaydediniz."],bitis:"İki plan kaydedince.",kur:(k,A)=>butceTur(k,D,A,120,KL,40)},
-      kuralA(D,[["Bakiye nasıl bulunur?",["Başlangıç parasına gelirler pozitif, giderler negatif olarak eklenir.","Gelirler ile giderler toplanır, başlangıç parası çıkarılır.","Yalnız gelirler toplanır."],"Doğru! 120 + 200 + (−85) + … biçiminde."],
-        ["Bakiyenin −65 TL olması ne anlama gelir?",["65 TL borç vardır.","65 TL para vardır.","Hiç para yoktur."],"Doğru! Negatif bakiye borçtur."]]),
-      kendiA((m,son)=>{const b=ra(60,90),g=-ra(130,150),e=ra(20,35);soruY(m,`Bir hesapta ${b} TL var. ${-g} TL'lik ödeme yapıldı, sonra ${e} TL yatırıldı. Hesabın son durumu kaç TL'dir?`,[T(b+g+e),T(b-g+e),T(-(b+g+e)),T(b+g-e)],`Doğru! ${b} + ${tP(g)} + ${e} = ${T(b+g+e)}.`,"",son);})],
+      kuralA(D,[["Bakiye nasıl bulunur?",["Başlangıç parasına gelirler pozitif, giderler negatif olarak eklenir.","Gelirler ile giderler toplanır, başlangıç parası çıkarılır.","Yalnız gelirler toplanır."],"Doğru! 120 + 200 + (−85) + … biçiminde.",["Başlangıç parası çıkarılmaz; o da elinizdeki paradır.", "Giderler bakiyeyi azaltır; onları da hesaba katınız."]],
+        ["Bakiyenin −65 TL olması ne anlama gelir?",["65 TL borç vardır.","65 TL para vardır.","Hiç para yoktur."],"Doğru! Negatif bakiye borçtur.",["Negatif bakiye elde para olduğunu mu gösterir? Grafikte 0'ın altına bakınız.", "Bakiye 0 olsaydı hiç para olmazdı; −65 ise 0'dan küçük."]]]),
+      kendiA((m,son)=>{const b=ra(60,90),g=-ra(130,150),e=ra(20,35);soruY(m,`Bir hesapta ${b} TL var. ${-g} TL'lik ödeme yapıldı, sonra ${e} TL yatırıldı. Hesabın son durumu kaç TL'dir?`,[T(b+g+e),T(b-g+e),T(-(b+g+e)),T(b+g-e)],`Doğru! ${b} + ${tP(g)} + ${e} = ${T(b+g+e)}.`,["Ödemeyi eklediniz; ödeme hesaptan çıkan paradır.", "Büyüklük doğru ama işaret ters; hesapta ödemeden sonra para kaldı mı?", "Yatırılan parayı çıkardınız; yatırılan para eklenir."],son);})],
     kural:"Gelir ve giderler <b>tam sayılarla</b> gösterilir: gelir pozitif, gider negatiftir. Bakiye, başlangıç parasına bunların <b>işaretleriyle eklenmesiyle</b> bulunur; negatif bakiye <b>borç</b> demektir. Gereksiz giderlerden vazgeçmek ay sonu bakiyesini artırır."});
 };
 
@@ -1705,7 +1762,7 @@ function gizliDepoTur(k,D,A){k.dataset.no=++_stNo;let H=12;const den=new Set();
   const G=gorevli(k,A,D,[{m:"Hacmi değiştirip “Deneyin” düğmesine basınız. Kalan su 15 L olunca görev biter.",ok:()=>false}],"Deneme–yanılmayla deponun hacmi bulundu.");
   dug(r,"Deneyin",()=>{if(G.bitti())return;const a=fX([H,1],[2,3]),b=fX(a,[3,4]);sonuc.innerHTML=`<div class="k7-es"><span>${H} L → ${kH(1,3)}'ü boşalınca ${fH(a)} L → kalanın ${kH(1,4)}'ü boşalınca <b>${fH(b)} L</b></span></div>`;
     if(!den.has(H)){den.add(H);D.ekle([`Hacim ${H} L`,`${fH(a)} L, sonra ${fH(b)} L`,esit(b,[15,1])?"15 L ✔":"15 L değil"],"g"+H);}
-    if(esit(b,[15,1])){fb(f,true,`Doğru! ${H} L'lik deponun yarısı (15 L) kalıyor.`);G.gec();}else{bip(220,.12);fb(f,false,`Kalan ${fH(b)} L. ${YD}`);}},"primary");
+    if(esit(b,[15,1])){fb(f,true,`Doğru! ${H} L'lik deponun yarısı (15 L) kalıyor.`);G.gec();}else{bip(220,.12);fb(f,false,`Kalan ${fH(b)} L; 15 L'den ${fN(b)<15?"az, deponun hacmini büyütünüz":"çok, deponun hacmini küçültünüz"}. ${YD}`);}},"primary");
   k.appendChild(D.el);
   A.oto=()=>{if(H<30){sy.querySelector('[data-d="3"]').click();if(H%9===0)r.querySelector(".primary").click();return;}r.querySelector(".primary").click();};}
 const e_depo=p=>{const D=defterY(["Boşaltmalar","Kalan su","Deponun kesri"]);
@@ -1714,9 +1771,9 @@ const e_depo=p=>{const D=defterY(["Boşaltmalar","Kalan su","Deponun kesri"]);
       {ad:"Hedef miktara boşaltın",yon:["Düğmelerle depoyu boşaltınız: “kalanın” kesri o anda depoda olan suya göre, “deponun” kesri deponun tamamına göre hesaplanır.","Depoda istenen miktar kalınca görev biter."],bitis:"İki görev bitince.",
        kur:(k,A)=>depoTur(k,D,A,[[9,[2,0]],[10,[3,0]]])},
       {ad:"Gizli depo",yon:["Deponun hacmini 3'er litre değiştirip deneyiniz.","Her deneme deftere yazılır."],bitis:"Kalan su 15 L olunca.",kur:(k,A)=>gizliDepoTur(k,D,A)},
-      kuralA(D,[["“Kalanın 1/3'ü boşaltıldı” ifadesinde 1/3 neye göre alınır?",["O anda depoda kalan suya göre","Deponun tamamına göre","Boşaltılan suya göre"],"Doğru! Kalan su değiştikçe boşaltılan miktar da değişir."],
-        ["Önce kalanın 1/3'ü, sonra kalanın 1/4'ü boşaltılınca depoda ilk suyun ne kadarı kalır?",["1/2'si","5/12'si","7/12'si"],"Doğru! 2/3 · 3/4 = 1/2."]]),
-      kendiA((m,son)=>{soruY(m,"Bir kitabın önce 1/4'ü, sonra kalan sayfaların 2/3'ü okunmuştur. Kitabın kaçta kaçı okunmamıştır?",["1/4","1/12","5/12","3/4"],"Doğru! 3/4 · 1/3 = 1/4 okunmamıştır.","",son);})],
+      kuralA(D,[["“Kalanın 1/3'ü boşaltıldı” ifadesinde 1/3 neye göre alınır?",["O anda depoda kalan suya göre","Deponun tamamına göre","Boşaltılan suya göre"],"Doğru! Kalan su değiştikçe boşaltılan miktar da değişir.",["“Kalanın” ifadesine dikkat ediniz; deponun tamamı mı, o anda kalan su mu?", "Kesir, boşaltılmadan önceki suya göre alınır."]],
+        ["Önce kalanın 1/3'ü, sonra kalanın 1/4'ü boşaltılınca depoda ilk suyun ne kadarı kalır?",["1/2'si","5/12'si","7/12'si"],"Doğru! 2/3 · 3/4 = 1/2.",["Kesirleri topladınız; ikinci kesir kalanın kesridir, bütününki değil.", "Boşaltılan kısmı buldunuz; soru kalan kısmı soruyor."]]]),
+      kendiA((m,son)=>{soruY(m,"Bir kitabın önce 1/4'ü, sonra kalan sayfaların 2/3'ü okunmuştur. Kitabın kaçta kaçı okunmamıştır?",["1/4","1/12","5/12","3/4"],"Doğru! 3/4 · 1/3 = 1/4 okunmamıştır.",["Okunmayan kısmın kesrini bulunuz; ikinci kesir kalan sayfaların kesridir.", "Okunan kısmı buldunuz; soru okunmayan kısmı soruyor.", "Yalnız ilk kesri düşündünüz; ikinci kez de okuma yapıldı."],son);})],
     kural:"“Kalanın” kesri, o anda kalan miktara göre hesaplanır: önce 1/3'ü, sonra kalanın 1/4'ü boşaltılan depoda 2/3 · 3/4 = <b>1/2</b> kalır. Kalan miktar bilinince bütün, <b>sondan başa</b> ters işlemlerle ya da şekil modeliyle bulunur."});
 };
 
@@ -1741,10 +1798,10 @@ const e_genel=p=>{const D=defterY(["No","Deneme","Sonuç"]);
   asamali(p,{tahmin:{giris:["Can: “Bir sayıyı başka bir sayıyla çarpınca sonuç büyür.”","Can bu genellemeyi 3 · 4 = 12 ve 5 · 2 = 10 örnekleriyle denemiştir."],soru:"Can'ın genellemesi her zaman doğru mudur?",secs:[["a","Hayır, karşı örneği vardır."],["b","Evet, her zaman doğrudur."]],dogru:"a",neden:"4 · 1/3 = 4/3 küçülür; 4 · (−1) = −4 küçülür."},
     asamalar:[
       {ad:"Karşı örnek avı",yon:["Bir genelleme ve iki sayı seçip “Deneyin” düğmesine basınız.","Sonuç genellemeye uymuyorsa bir karşı örnek buldunuz.","Görev kartındaki üç görevi yapınız."],bitis:"Üç görev bitince.",kur:(k,A)=>genelTur(k,D,A)},
-      kuralA(D,[["Bir genellemenin yanlış olduğunu göstermek için ne yeterlidir?",["Tek bir karşı örnek","Genellemeye uyan üç örnek","Hiçbir şey yetmez"],"Doğru! Deftere yazdığınız bir karşı örnek yeter."],
-        ["Pozitif bir sayı hangi sayılarla çarpılınca büyür?",["1'den büyük sayılarla","0 ile 1 arasındaki sayılarla","Negatif sayılarla"],"Doğru! 4 · 1/3 ve 4 · (−1) sonucu küçülttü."],
-        ["“İki negatif sayının toplamı negatiftir.” genellemesi için hangisi doğrudur?",["Denemelerin hepsi uydu; genelleme doğrudur.","Bir karşı örnek bulundu.","Yalnız tam sayılar için doğrudur."],"Doğru! Mutlak değerler toplanır, işaret negatif kalır."]]),
-      kendiA((m,son)=>{soruY(m,"“Bir sayıyı bölünce sonuç küçülür.” genellemesinin yanlış olduğunu gösteren örnek hangisidir?",["6 : 1/2 = 12","6 : 2 = 3","6 : 3 = 2","12 : 4 = 3"],"Doğru! 12 &gt; 6 olduğundan bu bir karşı örnektir.","",son);})],
+      kuralA(D,[["Bir genellemenin yanlış olduğunu göstermek için ne yeterlidir?",["Tek bir karşı örnek","Genellemeye uyan üç örnek","Hiçbir şey yetmez"],"Doğru! Deftere yazdığınız bir karşı örnek yeter.",["Uyan örnekler bir genellemeyi doğrulamaz ama yanlışlamak için ne gerekir?", "Tek bir karşı örnek genellemeyi çürütür; defterde buldunuz mu?"]],
+        ["Pozitif bir sayı hangi sayılarla çarpılınca büyür?",["1'den büyük sayılarla","0 ile 1 arasındaki sayılarla","Negatif sayılarla"],"Doğru! 4 · 1/3 ve 4 · (−1) sonucu küçülttü.",["4 · 1/3 sonucu büyüdü mü? Deftere bakınız.", "4 · (−1) sonucu büyüdü mü? Deftere bakınız."]],
+        ["“İki negatif sayının toplamı negatiftir.” genellemesi için hangisi doğrudur?",["Denemelerin hepsi uydu; genelleme doğrudur.","Bir karşı örnek bulundu.","Yalnız tam sayılar için doğrudur."],"Doğru! Mutlak değerler toplanır, işaret negatif kalır.",["Defterde 2. genelleme için karşı örnek çıktı mı?", "Kesirlerle ve ondalıklarla da denediniz; sonuç değişti mi?"]]]),
+      kendiA((m,son)=>{soruY(m,"“Bir sayıyı bölünce sonuç küçülür.” genellemesinin yanlış olduğunu gösteren örnek hangisidir?",["6 : 1/2 = 12","6 : 2 = 3","6 : 3 = 2","12 : 4 = 3"],"Doğru! 12 &gt; 6 olduğundan bu bir karşı örnektir.",["Bölüm bölünenden küçük; bu örnek genellemeye uyuyor.", "Bölüm bölünenden küçük; bu örnek genellemeye uyuyor.", "Bölüm bölünenden küçük; bu örnek genellemeye uyuyor."],son);})],
     kural:"Bir genelleme birkaç örnekte doğru çıksa da <b>her zaman</b> doğru olmayabilir. Yanlış olduğunu göstermek için <b>tek bir karşı örnek</b> yeter: 4 · 1/3 = 4/3 olduğundan “Çarpma sonucu büyütür.” genellemesi yanlıştır. Doğru genellemeler (iki negatif sayının toplamı negatiftir) farklı örneklerle sınanır."});
 };
 
