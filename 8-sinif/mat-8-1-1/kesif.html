@@ -865,20 +865,27 @@ const sS=e=>`<tspan dy="-.55em" font-size=".7em">${M(e)}</tspan><tspan dy=".385e
 const svgKes=(x,y,p,q,fs=16,renk)=>{const w=Math.max(String(p).length,String(q).length)*fs*.62+6;const f=renk?` fill="${renk}"`:"";
   return `<text x="${x}" y="${y-4}" text-anchor="middle" font-size="${fs}" font-weight="700"${f}>${p}</text><line x1="${x-w/2}" y1="${y}" x2="${x+w/2}" y2="${y}" stroke="${renk||"currentColor"}" stroke-width="1.6"/><text x="${x}" y="${y+fs}" text-anchor="middle" font-size="${fs}" font-weight="700"${f}>${q}</text>`;};
 const bekle=(f,ms)=>setTimeout(f,azHareket()?0:ms);
-/* §5.ip İpucu verilmez (02.10.2026): ortak motordaki "İpucu" metni bu atölyede kullanılmaz. Yanlış seçenekte ve yanlış
-   sayıda yalnız nötr "Yeniden deneyiniz." yazılır; sayı cevaplı soruda 3. yanlıştan sonra yalnız doğru cevap gösterilir. */
+/* 07.10.2026 (E7, §4-5): yanlış cevaptan sonra hatanın türünü söyleyen ipucu verilir (cevabı söylemeden). Seçmeli sorularda her
+   yanlış seçeneğin kendi ipucu, sayı cevaplı sorularda yaygın hatalara özel ipucu (ozel) ya da genel ipucu; 3. yanlıştan sonra doğru cevap da yazılır.
+   Ortak motor ipucunu göstermediği için ipucu bu atölyede eklenir. Soru metninde ipucu notu yoktur (§5.ip). */
 const YD="Yeniden deneyiniz.";
+const ipNorm=h=>{const t=document.createElement("div");t.innerHTML=h;return t.innerHTML.trim();};
 const notr=S=>{const so=S.soru,sa=S.sayi,ku=S.kural;let kN=0,kI=0;
   /* 05.10.2026 (§4.k-5): "Kuralı bulun" adımında birden çok soru varsa her soru ekranında "Soru i / n" şeridi; doğru cevaptan sonra
      ekranda ve alttaki şeritte "Sıradaki soru (i+1 / n) →" düğmesi görünür (ortak kabuğa dokunmadan, yalnız bu atölyede). */
   S.kural=(k,o)=>{kN=k||1;kI=0;const r=ku(k,o);return r;};
   S.soru=(kap,soru,secs,ok,sonra)=>{const km=!!(kap&&kap.kural===true);if(km)kI++;const i=kI,n=kN;let d=null;
     const sonra2=km&&n>1&&i<n?()=>{sonra&&sonra();szIleri(d,i,n);}:sonra;
-    d=so(kap,soru,secs.map((x,j)=>j===0?x:[Array.isArray(x)?x[0]:x,YD]),ok,sonra2);
+    d=so(kap,soru,secs,ok,sonra2);
+    if(d&&d.querySelector){const ipler=new Map();secs.forEach((x,j)=>{if(j&&Array.isArray(x))ipler.set(ipNorm(x[0]),x[1]);});
+      d.querySelectorAll(".sec").forEach(b=>{const h=ipler.get(ipNorm(b.innerHTML));/* eşleme hemen yapılır: kesir çizgisi dönüşümü düğme içeriğini sonra değiştirir */
+        b.addEventListener("click",()=>{if(!b.classList.contains("yanlis"))return;const f=b.closest(".sor")&&b.closest(".sor").querySelector(".fb");
+        if(f&&h)fb(f,false,`<b>Bu seçenek doğru değil.</b> ${h} ${YD}`);});});}
     if(km&&n>1&&d&&d.querySelector)szSerit(d,i,n);return d;};
-  S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
+  S.sayi=(kap,ust,dogru,ok,ip,sonra,ozel)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
     const kontrol=()=>{const h=inp.value.replace(/[\s.]/g,"");if(!h||+h===dogru||inp.disabled)return asil();yn++;
-      fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
+      const ipc=(ozel&&ozel(+h))||(+h===-dogru?"Sayının büyüklüğü doğru ama işareti yanlış.":"")||ip||"";
+      fb(f,false,`<b>${h} doğru değil.</b> ${ipc} ${yn>=3?`${YD} Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
   return S;};
 function szSerit(d,i,n){const ic=d.querySelector(".ta-ic")||d;const u=document.createElement("div");u.className="sz-ust";
@@ -892,6 +899,45 @@ function szAlt(){const t=document.querySelector(".ta-ileri");if(!t)return;
   if(!t.dataset.szGoz){t.dataset.szGoz="1";new MutationObserver(()=>szAlt()).observe(t,{childList:true,characterData:true,subtree:true});}
   const e=[...document.querySelectorAll(".ta-ekran")].find(x=>!x.hidden);
   if(e&&e.dataset.szBitti&&+e.dataset.szI<+e.dataset.szN&&!t.disabled){const y=`Sıradaki soru (${+e.dataset.szI+1} / ${e.dataset.szN}) →`;if(t.textContent!==y)t.textContent=y;}}
+/* ================= 06.10.2026 · Çok turlu adım (KE denetimi E2) =================
+   Bir adımda birden çok soru, problem, tur ya da örnek varsa: üstte "Tur i / n" şeridi; her tur bitince
+   "Sıradaki … (i+1 / n) →" düğmesi (basılmadan yenisi açılmaz); çözülen tur küçülerek özetlenir, yenisi vurgulanır
+   ve ekrana kaydırılır; son turdan sonra adımın bittiği yazılır. kurTur(ic, i, a): a.tamam(özet) turu bitirir,
+   a.oto (varsa) erişilebilirlik ve test için turu kendiliğinden oynatır, a.durum(h) adım başlığındaki durumu yazar. */
+(()=>{if(document.getElementById("tz-stil"))return;const st=document.createElement("style");st.id="tz-stil";st.textContent=`
+.sz-ust{background:color-mix(in srgb,var(--acc) 10%,var(--card));color:var(--ink)}
+.tz-tur{border:2px solid var(--line);border-radius:14px;padding:8px 12px 10px;margin:8px 0;background:var(--card)}
+.tz-tur.tz-acik{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 16%,transparent)}
+.tz-bas{font:800 14px/1.2 Nunito,sans-serif;color:var(--acc);margin:0 0 6px}
+.tz-tur.tz-kapali{padding:6px 12px;background:var(--soft);border-style:dashed}
+.tz-tur.tz-kapali>.tz-ic,.tz-tur.tz-kapali>.tz-bas{display:none}
+.tz-oz{margin:0;font-size:15px;line-height:1.45;color:var(--muted)}.tz-oz b{color:var(--acc3,#2b8a3e)}
+.tz-son{margin:10px 0 4px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--acc3,#2b8a3e) 12%,var(--card));border-left:6px solid var(--acc3,#2b8a3e);font-weight:700}
+.tz-ileri{display:block;margin-top:10px}
+.k7-gz-ok{margin:6px 0 0;font-weight:700;color:var(--acc3,#2b8a3e)}
+.dkart.tz-bitti{border-color:var(--acc3,#2b8a3e)}
+#kesif .ta-ekran button{min-height:44px;min-width:44px}
+#kesif .etk-ust h2{min-width:0;overflow-wrap:anywhere}
+@media (prefers-reduced-motion:reduce){.tz-tur{animation:none}}
+`;document.head.appendChild(st);})();
+const tzKaydir=(e,b)=>setTimeout(()=>{if(!e||!e.isConnected||!e.offsetParent)return;const ust=document.querySelector(".etk-ust"),alt=document.querySelector(".ta-alt");
+  const of=(ust&&getComputedStyle(ust).position.includes("sticky")?ust.getBoundingClientRect().height:0)+10,ah=alt&&getComputedStyle(alt).position.includes("sticky")?alt.getBoundingClientRect().height:0;
+  const r=e.getBoundingClientRect(),vh=innerHeight-ah-of;const y=b==="start"||r.height>vh?r.top+scrollY-of:r.top+scrollY-of-(vh-r.height)/2;
+  scrollTo({top:Math.max(0,y),behavior:azHareket()?"auto":"smooth"});},60);
+function turZincir(kap,n,kurTur,bitince,o={}){const et=o.etiket||"Tur",sk=et.toLocaleLowerCase("tr");
+  const ust=document.createElement("div");ust.className="sz-ust tz-ust";const gv=document.createElement("div");gv.className="tz-govde";kap.append(ust,gv);
+  let i=0,cur=null,d=null;
+  const serit=b=>{ust.innerHTML=b?`<span class="sz-et">${n} ${sk} tamamlandı ✓</span>`:`<span class="sz-et">${et} ${i+1} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i?"ok":j===i?"su":""}"></i>`).join("")}</span>`;};
+  function ac(){serit(false);d=document.createElement("div");d.className="tz-tur tz-acik sz-yeni";d.innerHTML=`<div class="tz-bas">${et} ${i+1} / ${n}</div><div class="tz-ic"></div>`;gv.appendChild(d);
+    const a={bitti:false,oto:null,durum:h=>{o.durum&&o.durum(h);},tamam(oz){if(a.bitti)return;a.bitti=true;bit(oz);}};cur=a;
+    try{kurTur(d.querySelector(".tz-ic"),i,a);}catch(e){console.error(e);}
+    if(i>0)tzKaydir(d,"start");}
+  function bit(oz){const dd=d;dd.dataset.oz=oz||"";
+    if(i+1>=n){serit(true);dd.classList.remove("tz-acik");const s=document.createElement("p");s.className="tz-son";s.innerHTML=`✓ ${n} ${sk} tamamlandı. ${o.son||"Bu adım bitti; alttaki düğmeyle devam ediniz."}`;gv.appendChild(s);tzKaydir(s);bitince&&bitince(oz);return;}
+    const b=document.createElement("button");b.type="button";b.className="primary sz-ileri tz-ileri";b.textContent=`Sıradaki ${sk} (${i+2} / ${n}) →`;dd.appendChild(b);tzKaydir(b);
+    b.onclick=()=>{b.remove();dd.classList.remove("tz-acik","sz-yeni");dd.classList.add("tz-kapali");dd.insertAdjacentHTML("beforeend",`<p class="tz-oz">✓ <b>${et} ${i+1}:</b> ${oz||"tamamlandı"}</p>`);i++;bip(660,.06);ac();};}
+  ac();
+  return {oto(){if(cur&&!cur.bitti&&cur.oto){cur.oto();return true;}const b=gv.querySelector(".tz-ileri");if(b){b.click();return true;}return false;},get i(){return i;},get bitti(){return !!(cur&&cur.bitti&&i+1>=n);}};}
 /* Bu atölyeye özgü görünüm */
 (function(){const st=document.createElement("style");st.textContent=`
 .u-mak{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:58px;padding:8px;border-radius:12px;background:var(--soft);margin-top:10px}
@@ -946,6 +992,8 @@ function szAlt(){const t=document.querySelector(".ta-ileri");if(!t)return;
 .u-terim{font-size:18px;font-weight:600;min-height:30px;line-height:1.7}
 .u-duz{font-size:14px;color:var(--muted)}
 .u-gizli{display:none!important}
+.u-tz.u-yeni{animation:szGel .45s ease-out}
+@media (max-width:420px){.u-tz .tz-ic .u-terim,.u-tz .tz-ic .fb{font-size:15px}.u-tz .tz-ic{overflow-x:auto}}.u-dgec:empty{display:none}.u-dgec{margin:0 0 8px}
 @media (max-width:560px){.u-ifade{font-size:23px}.u-btab th,.u-btab td{font-size:11.5px}.u-btab td.rk{font-size:20px}.u-kart{font-size:16px;padding:6px 9px}}
 `;document.head.appendChild(st);})();
 
@@ -1600,10 +1648,11 @@ const e_cozumle=p=>{const S=notr(asamali(p));
   const yazS=t=>{const i=Math.floor(t/1000),r=String(t%1000).padStart(3,"0").replace(/0+$/,"");return r?`${i},${r}`:String(i);};
   const k=S.ac(1,{ne:"Ondalık gösterimle verilen sayıları, rakamların 10'un kuvvetleriyle çarpımlarının toplamı olarak oluşturacaksınız.",
     durum:"Bir sayı, basamaklarındaki rakamların basamak değerleriyle çarpımlarının toplamı olarak yazılabilir; buna <b>çözümleme</b> denir. Basamak değerleri 10'un kuvvetleridir: yüzler 10<sup>2</sup>, onlar 10<sup>1</sup>, birler 10<sup>0</sup>, onda birler 10<sup>−1</sup>, yüzde birler 10<sup>−2</sup>, binde birler 10<sup>−3</sup>. Örnek: 52,3 = 5 · 10<sup>1</sup> + 2 · 10<sup>0</sup> + 3 · 10<sup>−1</sup>. Rakamı 0 olan basamaklar yazılmaz.",
-    nasil:["Hedef sayıya bakınız. “Rakam” ve “10'un kuvveti” satırlarından birer seçim yapınız.","“Terim ekleyiniz” düğmesine basınız. Seçtiğiniz rakam hedef sayıda o basamakta ise terim toplama eklenir.","Toplam hedef sayıya eşit olunca “Sıradaki sayı” düğmesiyle devam ediniz."],biter:bitG(3)});
+    nasil:["Hedef sayıya bakınız. “Rakam” ve “10'un kuvveti” satırlarından birer seçim yapınız.","“Terim ekleyiniz” düğmesine basınız. Seçtiğiniz rakam hedef sayıda o basamakta ise terim toplama eklenir.","Bu deneyde 3 hedef sayı vardır. Toplam hedef sayıya eşit olunca “Sıradaki sayı (2 / 3) →” düğmesiyle devam ediniz."],biter:bitG(3)});
   S.tahmin(k,"4,037 = 4 · 10<sup>0</sup> + 3 · 10<sup>?</sup> + 7 · 10<sup>−3</sup> eşitliğinde soru işaretinin yerine hangi sayı gelir?",[["-1","−1"],["-2","−2"],["2","2"],["3","3"]],"-2","3 rakamı yüzde birler basamağındadır: 3 · 10<sup>−2</sup> = 0,03.");
-  k.insertAdjacentHTML("beforeend",`<p style="margin:0">Hedef sayı: <span class="u-hedef"></span></p><div class="u-den"></div><div class="row"><button class="primary u-ekle">Terim ekleyiniz</button><button class="ghost u-sil">Terimleri siliniz</button><button class="ghost u-sira" hidden>Sıradaki sayı →</button></div><p class="u-terim"></p><p class="u-sonuc"></p><div class="fb" hidden></div>`);
-  const hd=k.querySelector(".u-hedef"),dn=k.querySelector(".u-den"),tr=k.querySelector(".u-terim"),son=k.querySelector(".u-sonuc"),f=k.querySelector(".fb"),bsr=k.querySelector(".u-sira"),be=k.querySelector(".u-ekle");
+  /* 06.10.2026 (E2): üç hedef sayı sırayla; "Sayı i / 3" şeridi, sayı bitince "Sıradaki sayı (i+1 / 3) →" */
+  k.insertAdjacentHTML("beforeend",`<div class="u-tz"></div><div class="u-den"></div><div class="row"><button class="primary u-ekle">Terim ekleyiniz</button><button class="ghost u-sil">Terimleri siliniz</button></div>`);
+  let hd=null,tr=null,son=null,f=null,ta=null;const dn=k.querySelector(".u-den"),be=k.querySelector(".u-ekle");
   sayiDugme(dn,"Rakam:",[1,2,3,4,5,6,7,8,9],d,v=>{d=+v;});
   sayiDugme(dn,"10'un kuvveti:",PW.map(x=>[x,up(10,x)]),e,v=>{e=+v;});
   const G=gorevler(k,[{m:"<b>4,037</b> sayısını oluşturunuz.",ok:()=>bitti.has(0),s:()=>"4,037 = 4 · 10<sup>0</sup> + 3 · 10<sup>−2</sup> + 7 · 10<sup>−3</sup>"},
@@ -1614,15 +1663,16 @@ const e_cozumle=p=>{const S=notr(asamali(p));
   function ciz(){const H=HED[hi],top=terim.reduce((s,t)=>s+t.d*10**(t.e+3),0);hd.textContent=H.s;
     tr.innerHTML=terim.length?`${H.s} = ${tYaz()}${top===H.v?"":" + …"}`:`<span class="u-duz">Henüz terim eklenmedi.</span>`;
     son.innerHTML=dz(`Şimdiki toplam: <b>${yazS(top)}</b>`,`Hedef: <b>${H.s}</b>`);
-    if(top===H.v&&!bitti.has(hi)){bitti.add(hi);D.ekle([H.s,tYaz()],H.s);fb(f,true,`Tamam: ${H.s} = ${tYaz()}.`);bip(880,.15);be.disabled=true;bsr.hidden=hi>=HED.length-1;G.kontrol();}}
-  be.onclick=()=>{const H=HED[hi];if(terim.some(t=>t.e===e)){fb(f,false,`${BAS[e]} basamağı için zaten bir terim eklediniz. Başka bir kuvvet seçiniz.`);return;}
+    if(top===H.v&&!bitti.has(hi)){bitti.add(hi);D.ekle([H.s,tYaz()],H.s);fb(f,true,`Tamam: ${H.s} = ${tYaz()}.`);bip(880,.15);be.disabled=true;G.kontrol();ta.tamam(`${H.s} = ${tYaz()}`);}}
+  be.onclick=()=>{const H=HED[hi];if(bitti.has(hi))return;if(terim.some(t=>t.e===e)){fb(f,false,`${BAS[e]} basamağı için zaten bir terim eklediniz. Başka bir kuvvet seçiniz.`);return;}
     const r=rakam(H.v,e);
     if(r===d){terim.push({d,e});f.hidden=true;bip(640,.08);ciz();}
     else{
-      fb(f,false,`${d} · ${up(10,e)} terimi ${H.s} sayısının çözümlemesinde yok. ${YD}`);bip(220,.15,"triangle");}};
+      fb(f,false,`${d} · ${up(10,e)} terimi ${H.s} sayısının çözümlemesinde yok: ${r===0?`hedef sayıda ${BAS[e]} basamağında 0 var; o basamak çözümlemede yazılmaz`:`hedef sayının ${BAS[e]} basamağındaki rakam ${d} değil`}. ${YD}`);bip(220,.15,"triangle");}};
   k.querySelector(".u-sil").onclick=()=>{if(bitti.has(hi))return;terim=[];f.hidden=true;ciz();};
-  bsr.onclick=()=>{if(hi<HED.length-1){hi++;terim=[];f.hidden=true;be.disabled=false;bsr.hidden=true;ciz();}};
-  ciz();
+  turZincir(k.querySelector(".u-tz"),HED.length,(ic,i,a)=>{hi=i;terim=[];ta=a;be.disabled=false;
+    ic.insertAdjacentHTML("beforeend",`<p style="margin:0">Hedef sayı: <span class="u-hedef"></span></p><p class="u-terim"></p><p class="u-sonuc"></p><div class="fb" hidden></div>`);
+    hd=ic.querySelector(".u-hedef");tr=ic.querySelector(".u-terim");son=ic.querySelector(".u-sonuc");f=ic.querySelector(".fb");ciz();},null,{etiket:"Sayı",son:"Görev listesine bakınız; deney adımı bitti."});
   function acikla(){const c=S.kural(2);
     S.soru(c,"4,037 sayısının çözümlemesinde 10<sup>−2</sup> hangi rakamla çarpılır?",
       ["3",["0","0, onda birler (10<sup>−1</sup>) basamağındaki rakamdır."],["7","7, binde birler (10<sup>−3</sup>) basamağındadır."]],
@@ -1641,10 +1691,11 @@ const e_cozumle=p=>{const S=notr(asamali(p));
 const e_fabrika=p=>{const S=notr(asamali(p));const SAY=[72,360,700];let si=0,kalan=72,top={};const bitti=new Set();
   const k=S.ac(1,{ne:"Bir fabrikada sayıları asal sayılara bölerek asal çarpanlarına ayıracak ve üslü ifadeyle yazacaksınız.",
     durum:"Fabrikadaki makineye bir sayı giriyor. Makinenin 2, 3, 5 ve 7 yazan asal bölme düğmeleri var. Seçilen asal sayı makinedeki sayıyı <b>kalansız bölüyorsa</b> sayı bölünür ve o asal, kendi kutusuna bir top olarak düşer. Sayı 1 olunca iş biter. Örnek: 12 → 2'ye bölünür → 6 → 2'ye bölünür → 3 → 3'e bölünür → 1. Kutularda iki tane 2, bir tane 3 var: 12 = 2 · 2 · 3 = 2<sup>2</sup> · 3.",
-    nasil:["Makinedeki sayıya bakınız ve bir asal bölme düğmesine basınız.","Kalansız bölünüyorsa top kutuya düşer; bölünmüyorsa uyarı çıkar.","Sayı 1 olunca asal çarpanlar üslü ifadeyle yazılır; “Sıradaki sayı” ile devam ediniz."],biter:bitG(3)});
+    nasil:["Makinedeki sayıya bakınız ve bir asal bölme düğmesine basınız.","Kalansız bölünüyorsa top kutuya düşer; bölünmüyorsa uyarı çıkar.","Bu deneyde 3 sayı vardır. Sayı 1 olunca asal çarpanlar üslü ifadeyle yazılır; “Sıradaki sayı (2 / 3) →” düğmesiyle devam ediniz."],biter:bitG(3)});
   S.tahmin(k,"72 sayısının asal çarpanlarına ayrılmış hâli hangisidir?",[["a","2<sup>3</sup> · 3<sup>2</sup>"],["b","2<sup>2</sup> · 3<sup>3</sup>"],["c","2 · 3<sup>4</sup>"],["d","8 · 9"]],"a","72 = 2 · 2 · 2 · 3 · 3 = 2<sup>3</sup> · 3<sup>2</sup>.");
-  k.insertAdjacentHTML("beforeend",`<div class="stage"></div><div class="row u-asal"></div><div class="row"><button class="ghost u-sira" hidden>Sıradaki sayı →</button></div><p class="u-sonuc"></p><div class="fb" hidden></div>`);
-  const st=k.querySelector(".stage"),as=k.querySelector(".u-asal"),son=k.querySelector(".u-sonuc"),f=k.querySelector(".fb"),bsr=k.querySelector(".u-sira");
+  /* 06.10.2026 (E2): üç sayı sırayla; "Sayı i / 3" şeridi, sayı bitince "Sıradaki sayı (i+1 / 3) →" */
+  k.insertAdjacentHTML("beforeend",`<div class="u-tz"></div><div class="row u-asal"></div>`);
+  let st=null,son=null,f=null,ta=null;const as=k.querySelector(".u-asal");
   const G=gorevler(k,[{m:"<b>72</b>'yi asal çarpanlarına ayırınız.",ok:()=>bitti.has(72),s:()=>"72 = 2<sup>3</sup> · 3<sup>2</sup>"},
     {m:"<b>360</b>'ı asal çarpanlarına ayırınız.",ok:()=>bitti.has(360),s:()=>"360 = 2<sup>3</sup> · 3<sup>2</sup> · 5"},
     {m:"<b>700</b>'ü asal çarpanlarına ayırınız.",ok:()=>bitti.has(700),s:()=>"700 = 2<sup>2</sup> · 5<sup>2</sup> · 7: her asal, kaç kez çarpan olduysa o kadar kuvvetiyle yazıldı."}],acikla);
@@ -1660,10 +1711,10 @@ const e_fabrika=p=>{const S=notr(asamali(p));const SAY=[72,360,700];let si=0,kal
   as.innerHTML=[2,3,5,7].map(p_=>`<button class="primary" data-p="${p_}">${p_}'${p_===2||p_===7?"ye":"e"} bölünüz</button>`).join("");
   as.querySelectorAll("button").forEach(b=>b.onclick=()=>{const p_=+b.dataset.p;if(kalan===1)return;
     if(kalan%p_===0){kalan/=p_;top[p_]=(top[p_]||0)+1;f.hidden=true;bip(500+p_*40,.08);ciz();
-      if(kalan===1){const N=SAY[si];bitti.add(N);D.ekle([N,liste(),usY()],String(N));fb(f,true,`Bitti: ${N} = ${usY()}.`);bip(880,.15);bsr.hidden=si>=SAY.length-1;G.kontrol();}}
+      if(kalan===1){const N=SAY[si];bitti.add(N);D.ekle([N,liste(),usY()],String(N));fb(f,true,`Bitti: ${N} = ${usY()}.`);bip(880,.15);G.kontrol();ta.tamam(`${N} = ${usY()}`);}}
     else{fb(f,false,`${kalan}, ${ek(p_,"e")} kalansız bölünmez (${kalan} : ${p_} işleminde kalan ${kalan%p_}). Başka bir asal deneyiniz.`);bip(220,.15,"triangle");}});
-  bsr.onclick=()=>{if(si<SAY.length-1){si++;kalan=SAY[si];top={};bsr.hidden=true;f.hidden=true;ciz();}};
-  ciz();
+  turZincir(k.querySelector(".u-tz"),SAY.length,(ic,i,a)=>{si=i;kalan=SAY[i];top={};ta=a;
+    ic.insertAdjacentHTML("beforeend",`<div class="stage"></div><p class="u-sonuc"></p><div class="fb" hidden></div>`);st=ic.querySelector(".stage");son=ic.querySelector(".u-sonuc");f=ic.querySelector(".fb");ciz();},null,{etiket:"Sayı",son:"Görev listesine bakınız; deney adımı bitti."});
   function acikla(){const c=S.kural(2);
     S.soru(c,"360 = 2<sup>3</sup> · 3<sup>2</sup> · 5 yazılışında 2'nin üssü olan 3 neyi anlatır?",
       ["360'ın asal çarpanlarında 3 tane 2 bulunduğunu",["360'ın 3'e bölündüğünü","Üs, o asal çarpanın kaç kez tekrarlandığını söyler; 2 kutusunda 3 top vardı."],["2 · 3 = 6 olduğunu","Taban ile üs çarpılmaz; 2<sup>3</sup> = 2 · 2 · 2."]],
@@ -1725,9 +1776,10 @@ const e_duello=p=>{const S=notr(asamali(p));const SURE=30;
   let tur=0,siz=0,pc=0,enIyi=0,oyun=0,tl=null,basT=0,bekliyor=false,L=[],e=1,den=0;
   const k=S.ac(1,{ne:"Bilgisayara karşı 6 turluk bir terazi düellosunda, sağ kefedeki üslü ifadenin üssünü değiştirerek teraziyi dengeleyeceksiniz.",
     durum:"Bilgisayara karşı 6 turluk bir oyun oynanacak. <b>Kurallar:</b><br>1) Her turda sol kefeye bir üslü ifade konur. Sağ kefede tabanı verilmiş bir ifade vardır; üssünü siz değiştirirsiniz.<br>2) Üssü − / + düğmeleriyle değiştirdikçe terazi hemen ağır kefeye doğru eğilir.<br>3) 30 saniye dolmadan terazi dengeye gelirse turu siz alırsınız; süre biterse turu bilgisayar alır.<br>4) 6 turda en az 4 tur kazanan düelloyu kazanır.<br>Örnek tur: Solda 3<sup>2</sup> · 3 varsa sağdaki 3<sup>?</sup> ifadesinin üssü 3 olunca terazi dengeye gelir.",
-    nasil:["“Düelloyu başlatınız” düğmesine basınız; süre çubuğu dolmaya başlar.","Sağ kefedeki üssü − / + ile değiştiriniz ve teraziye bakınız. Ağır kefe aşağı iner.","Terazi dengeye gelince tur biter. “Sonraki tur” düğmesiyle devam ediniz. Puanlar ayrı kutularda görünür."],biter:bitG(3)});
+    nasil:["“Düelloyu başlatınız” düğmesine basınız; süre çubuğu dolmaya başlar.","Sağ kefedeki üssü − / + ile değiştiriniz ve teraziye bakınız. Ağır kefe aşağı iner.","Terazi dengeye gelince tur biter. “Sıradaki tur →” düğmesiyle sıradaki tura geçiniz; düğmeye basmadan yeni tur başlamaz. Puanlar ayrı kutularda görünür."],biter:bitG(3)});
   S.tahmin(k,"Sol kefede (2<sup>2</sup>)<sup>3</sup> var. Sağ kefedeki 2'nin kuvvetinin üssü kaç olursa terazi dengede kalır?",[["5","5"],["6","6"],["8","8"]],"6","(2<sup>2</sup>)<sup>3</sup> = 2<sup>2 · 3</sup> = 2<sup>6</sup>: üs 6 olunca terazi dengeye gelir.");
-  k.insertAdjacentHTML("beforeend",`<div class="u-skor"><div>Tur<b class="u-tur">0 / 6</b></div><div>Siz<b class="u-siz">0</b></div><div>Bilgisayar<b class="u-pc">0</b></div></div><div class="u-sure"><i></i></div>
+  /* 06.10.2026 (E2): "Tur i / 6" şeridi; biten tur küçük satır olarak özetlenir; "Sıradaki tur (i+1 / 6) →"; yeni tur vurgulanır ve ekrana kaydırılır */
+  k.insertAdjacentHTML("beforeend",`<div class="sz-ust tz-ust u-dserit" hidden></div><div class="u-dgec"></div><div class="u-skor"><div>Tur<b class="u-tur">0 / 6</b></div><div>Siz<b class="u-siz">0</b></div><div>Bilgisayar<b class="u-pc">0</b></div></div><div class="u-sure"><i></i></div>
     <div class="stage u-tz"></div>
     <div class="row u-usr" style="justify-content:center"><span class="u-lbl">Sağ kefedeki üs:</span><span style="display:inline-flex;align-items:center;gap:10px;white-space:nowrap"><button class="ghost u-az" aria-label="Üssü azaltınız" disabled>−</button><b class="u-ifade u-sagif" style="min-width:80px;text-align:center">?</b><button class="ghost u-ar" aria-label="Üssü artırınız" disabled>+</button></span></div>
     <div class="row" style="justify-content:center"><button class="primary u-bas">Düelloyu başlatınız</button></div><div class="fb" hidden></div>`);
@@ -1737,6 +1789,8 @@ const e_duello=p=>{const S=notr(asamali(p));const SURE=30;
   const D=defter(k,["Tur","Sol kefe","Sizin ifadeniz","Deneme","Turu alan"]);
   const degY=v=>Number.isInteger(v)?M(v):kesD(1,Math.round(1/v));
   const skor=()=>{$(".u-tur").textContent=`${tur} / 6`;$(".u-siz").textContent=siz;$(".u-pc").textContent=pc;};
+  const dS=$(".u-dserit"),dG=$(".u-dgec");
+  const serit=()=>{if(!L.length){dS.hidden=true;return;}dS.hidden=false;dS.innerHTML=tur>=6&&!bekliyor?`<span class="sz-et">6 tur tamamlandı ✓</span>`:`<span class="sz-et">Tur ${tur+1} / 6</span><span class="sz-nok">${[0,1,2,3,4,5].map(j=>`<i class="${j<tur?"ok":j===tur?"su":""}"></i>`).join("")}</span>`;};
   function terazi(){const r=L[tur]||L[tur-1];const sol=r?r[1]:1,sag=r?r[2]**e:1;const lg=Math.log2(sag/sol);const aci=Math.max(-16,Math.min(16,lg*3));
     const sv=svgEl(460,190);const yL=-Math.sin(aci*Math.PI/180)*150,yR=-yL;
     sv.innerHTML=`<polygon points="230,70 212,176 248,176" fill="${css('--muted')}"/><rect x="170" y="172" width="120" height="10" rx="4" fill="${css('--muted')}"/>
@@ -1749,18 +1803,20 @@ const e_duello=p=>{const S=notr(asamali(p));const SURE=30;
     const ust=document.createElement("div");ust.className="u-duel";ust.innerHTML=`<div class="u-ifade">${r?r[0]:"?"}</div><div class="u-vs">${!r?"ile":Math.abs(lg)<1e-9?"=":lg>0?"&lt;":"&gt;"}</div><div class="u-ifade">${r?up(r[2],e):"?"}</div>`;tz.prepend(ust);
     $(".u-sagif").innerHTML=r?up(r[2],e):"?";}
   function durdur(){if(tl){clearInterval(tl);tl=null;}}
-  function yeniOyun(){durdur();L=karistir(HAVUZ).slice(0,6);tur=0;siz=0;pc=0;skor();f.hidden=true;sonrakiTur();}
-  function sonrakiTur(){e=1;den=0;bb.hidden=true;bekliyor=true;basT=Date.now();bar.style.width="0";durdur();bAz.disabled=false;bAr.disabled=false;f.hidden=true;terazi();
+  function yeniOyun(){durdur();L=karistir(HAVUZ).slice(0,6);tur=0;siz=0;pc=0;dG.innerHTML="";skor();f.hidden=true;sonrakiTur();}
+  function sonrakiTur(){e=1;den=0;bb.hidden=true;bekliyor=true;basT=Date.now();bar.style.width="0";durdur();bAz.disabled=false;bAr.disabled=false;f.hidden=true;terazi();serit();
+    tz.classList.remove("u-yeni");void tz.offsetWidth;tz.classList.add("u-yeni");if(tur>0)tzKaydir(dS,"start");
     tl=setInterval(()=>{if(!k.isConnected){durdur();return;}const g=(Date.now()-basT)/1000;bar.style.width=Math.min(100,g/SURE*100)+"%";if(g>=SURE)bitirTur(false);},100);}
   function degis(d){if(!bekliyor)return;e=Math.max(-8,Math.min(12,e+d));den++;terazi();bip(520+e*25,.05);const r=L[tur];if(Math.abs(Math.log2(r[2]**e/r[1]))<1e-9)bitirTur(true);}
   function bitirTur(ok){if(!bekliyor)return;bekliyor=false;durdur();bAz.disabled=true;bAr.disabled=true;const r=L[tur];tur++;if(ok)siz++;else pc++;skor();
     const n0=Math.round(Math.log(r[1])/Math.log(r[2]));
     fb(f,ok,ok?`Terazi dengede! ${r[0]} = ${up(r[2],e)} = ${degY(r[1])}. Turu siz aldınız (${den} deneme).`:`Süre doldu; turu bilgisayar aldı. ${r[0]} = ${up(r[2],n0)} = ${degY(r[1])}.`);bip(ok?880:220,.15,ok?"sine":"triangle");
     D.ekle([`${oyun+1}. düello, ${tur}. tur`,r[0],ok?up(r[2],e):"—",den,ok?"Siz":"Bilgisayar"],oyun+"-"+tur);
+    dG.insertAdjacentHTML("beforeend",`<p class="tz-oz">✓ <b>Tur ${tur}:</b> ${r[0]} = ${up(r[2],n0)} (turu ${ok?"siz":"bilgisayar"} aldı)</p>`);serit();
     if(tur>=6){oyun++;enIyi=Math.max(enIyi,siz);bb.hidden=false;bb.textContent="Yeni düello başlatınız";
       f.innerHTML+=siz>=4?` <br><b>Düelloyu kazandınız: ${siz} – ${pc}.</b>`:` <br><b>Bu düelloyu bilgisayar kazandı: ${siz} – ${pc}.</b> Yeniden deneyebilirsiniz.`;}
-    else{bb.hidden=false;bb.textContent="Sonraki tur →";}
-    G.kontrol();}
+    else{bb.hidden=false;bb.textContent=`Sıradaki tur (${tur+1} / 6) →`;}
+    tzKaydir(bb);G.kontrol();}
   bAz.onclick=()=>degis(-1);bAr.onclick=()=>degis(1);
   bb.onclick=()=>{if(tur>=6||tur===0&&!L.length)yeniOyun();else sonrakiTur();};
   skor();terazi();
@@ -1796,8 +1852,8 @@ const ACT=[
  {ad:"Üssün Üssü",amac:"Bir üslü ifadenin kuvvetinde üslerin çarpıldığını bloklarla keşfetmek: (a<sup>m</sup>)<sup>n</sup> = a<sup>m·n</sup>.",adimlar:ynr("İçinde bloklar olan kutuları açıp blokları sayacaksınız.","Bir kutudaki blok sayısını ve kutu sayısını seçiniz; “Kutuları açınız” düğmesine basınız."),ciz:e_blok},
  {ad:"Kural Dedektifi",amac:"Önerilen kuralları sayılarla sınayıp yanlış olanları karşı örnekle çürütmek.",adimlar:ynr("Beş iddiayı sayılarla sınayacak, yanlış olanları karşı örnekle çürüteceksiniz.","Bir iddia ve sayılar seçip “Bu örnekle sınayınız” düğmesine basınız; iki tarafı karşılaştırınız."),ciz:e_dedektif},
  {ad:"10'un Kuvvetleri Basamak Tablosu",amac:"Basamak değerlerinin 10<sup>3</sup>'ten 10<sup>−3</sup>'e kadar 10'un kuvvetleri olduğunu keşfetmek.",adimlar:ynr("Basamak tablosunda bir 1 rakamını kaydırıp basamak değerlerini 10'un kuvveti olarak yazacaksınız.","“◀ Sola kaydırınız” ve “Sağa kaydırınız ▶” düğmelerini kullanınız; her basamağın değerine bakınız."),ciz:e_basamak},
- {ad:"Çözümleme Atölyesi",amac:"Ondalık gösterimdeki sayıları 10'un kuvvetleriyle çözümlemek ve çözümlenmiş hâlden sayıya dönmek.",adimlar:ynr("Hedef sayıları rakam · 10'un kuvveti biçimindeki terimleri toplayarak oluşturacaksınız.","Bir rakam ve 10'un bir kuvvetini seçip “Terim ekleyiniz” düğmesine basınız; toplam hedefe eşit olunca sıradaki sayıya geçiniz."),ciz:e_cozumle},
- {ad:"Asal Kuvvet Fabrikası",amac:"Bir sayıyı asal çarpanlarının kuvvetleriyle yazmak ve bu yazılıştan sayıyı geri elde etmek.",adimlar:ynr("Makinedeki sayıları asal sayılara bölerek asal çarpanlarına ayıracaksınız.","Sayıyı kalansız bölen bir asalın düğmesine basınız; kutulardaki toplar üsleri gösterir."),ciz:e_fabrika},
+ {ad:"Çözümleme Atölyesi",amac:"Ondalık gösterimdeki sayıları 10'un kuvvetleriyle çözümlemek ve çözümlenmiş hâlden sayıya dönmek.",adimlar:ynr("Hedef sayıları rakam · 10'un kuvveti biçimindeki terimleri toplayarak oluşturacaksınız.","Bu deneyde <b>3 hedef sayı</b> vardır. Bir rakam ve 10'un bir kuvvetini seçip “Terim ekleyiniz” düğmesine basınız; toplam hedefe eşit olunca <b>Sıradaki sayı →</b> düğmesiyle sıradaki sayıya geçiniz."),ciz:e_cozumle},
+ {ad:"Asal Kuvvet Fabrikası",amac:"Bir sayıyı asal çarpanlarının kuvvetleriyle yazmak ve bu yazılıştan sayıyı geri elde etmek.",adimlar:ynr("Makinedeki sayıları asal sayılara bölerek asal çarpanlarına ayıracaksınız.","Bu deneyde <b>3 sayı</b> vardır. Sayıyı kalansız bölen bir asalın düğmesine basınız; kutulardaki toplar üsleri gösterir. Bir sayı bitince <b>Sıradaki sayı →</b> düğmesine basınız."),ciz:e_fabrika},
  {ad:"Veri Boyutu Merdiveni",amac:"1 KB = 2<sup>10</sup> bayt kabulüyle birim çevirirken üslerin toplandığını ve çıkarıldığını keşfetmek.",adimlar:ynr("Dosya boyutlarını bayt, KB ve MB arasında çevireceksiniz.","Bir dosya seçiniz; “▼ Küçük birime” ve “▲ Büyük birime” düğmeleriyle üssün değişimini izleyiniz."),ciz:e_veri},
  {ad:"Üslü İfade Düellosu",amac:"Üslü ifadelerin kurallarını kullanarak bilgisayara karşı süreli bir terazi düellosunda ifadeleri dengelemek.",adimlar:ynr("Bilgisayara karşı 6 turluk bir terazi düellosu yapacaksınız.","Kurallar: Her turda sol kefeye bir üslü ifade konur. Sağ kefedeki ifadenin üssünü − / + ile değiştiriniz; terazi hemen eğilir. 30 saniye dolmadan terazi dengeye gelirse turu siz alırsınız, süre biterse turu bilgisayar alır. 6 turda en az 4 tur kazanan düelloyu kazanır."),ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"Üslü İfadeler Keşif Atölyesi",kisa:"Üslü İfadeler Keşif Atölyesi",kod:"MAT.8.1.1",ust:"8. Sınıf · Sayılar ve Nicelikler · MAT.8.1.1 · Fasikül 1",
