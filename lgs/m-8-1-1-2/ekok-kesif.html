@@ -850,27 +850,85 @@ function asamaliTek(p,o){document.body.classList.add("ta-mod");
 /* ================= M.8.1.1.2 · Fasikül 3 · Ortak Katlar ve EKOK · 20 Keşfetme Etkinliği =================
    29.09.2026 revizyonu: aşamalı düzen (kesif_8_asama.js), açık yönerge, içeriği gizlemeyen tahmin, etiketli sürgü,
    yönlendirici geri bildirim, madde madde oyun kuralları, üsler HTML'de <sup> ile. */
-/* §5.ip İpucu verilmez (02.10.2026): ortak motordaki "İpucu" metni bu atölyede kullanılmaz. Yanlış seçenekte ve yanlış
-   sayıda yalnız nötr "Yeniden deneyiniz." yazılır; sayı cevaplı soruda 3. yanlıştan sonra yalnız doğru cevap gösterilir. */
+/* (kesif_813.js ile aynı yardımcılar; yalnız bu dosyada) 07.10.2026 (§4-5, §4-9; keşif denetimi E7, Ekrem KOÇAK: "Yanlış cevapta tabii ki ipucu verilecek"): yanlış cevaptan sonra
+   HATANIN TÜRÜNÜ söyleyen ipucu verilir; seçmeli sorularda her yanlış seçeneğin kendi ipucu, sayı cevaplı soruda yaygın hatalar için
+   ayrı ipucu (ozel), yoksa genel ipucu. İpucu cevabı söylemez; 3. yanlıştan sonra doğru cevap da gösterilir. Soru metnine ipucu yazılmaz (§5.ip). */
 const YD="Yeniden deneyiniz.";
-const notr=S=>{const so=S.soru,sa=S.sayi;
-  S.soru=(kap,soru,secs,ok,sonra)=>so(kap,soru,secs.map((s,i)=>i===0?s:[Array.isArray(s)?s[0]:s,YD]),ok,sonra);
-  S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
+window.__ipEksik=window.__ipEksik||[];
+const ipNrm=h=>{const t=document.createElement("div");t.innerHTML=h;return t.innerHTML;};
+const notr=S=>{const so=S.soru,sa=S.sayi,ku=S.kural;let kN=0,kI=0;
+  /* 05.10.2026 (§4.k-5): "Kuralı bulun" adımında birden çok soru varsa her soru ekranında "Soru i / n" şeridi; doğru cevaptan sonra
+     ekranda ve alttaki şeritte "Sıradaki soru (i+1 / n) →" düğmesi görünür (ortak kabuğa dokunmadan, yalnız bu atölyede). */
+  S.kural=(k,o)=>{kN=k||1;kI=0;const r=ku(k,o);return r;};
+  S.soru=(kap,soru,secs,ok,sonra)=>{const km=!!(kap&&kap.kural===true);if(km)kI++;const i=kI,n=kN;let d=null;
+    const sonra2=km&&n>1&&i<n?()=>{sonra&&sonra();szIleri(d,i,n);}:sonra;
+    const IP=secs.slice(1).map(x=>[ipNrm(Array.isArray(x)?x[0]:x),Array.isArray(x)?x[1]:""]);
+    IP.forEach(([t,ip])=>{if(!ip)window.__ipEksik.push("soru: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50)+" → "+t.replace(/<[^>]+>/g,""));});
+    d=so(kap,soru,secs,ok,sonra2);
+    if(d&&d.querySelectorAll)d.querySelectorAll(".sec").forEach(b=>{const m=IP.find(([t])=>t===b.innerHTML);if(!m)return;b._ip=m[1];
+      b.addEventListener("click",()=>{if(!b.classList.contains("yanlis"))return;const sr=b.closest(".sor")||d,f=sr.querySelector(".fb");
+        if(f&&b._ip)fb(f,false,`<b>Bu seçenek doğru değil.</b> ${b._ip} ${YD}`);});});
+    if(d&&d.querySelectorAll&&[...d.querySelectorAll(".sec")].filter(b=>b._ip!==undefined).length<IP.length)window.__ipEksik.push("eşleşmedi: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50));
+    if(km&&n>1&&d&&d.querySelector)szSerit(d,i,n);return d;};
+  S.sayi=(kap,ust,dogru,ok,ip,sonra,ozel)=>{if(!ip&&!ozel)window.__ipEksik.push("sayi: "+String(ust).replace(/<[^>]+>/g,"").slice(0,60));
+    const ipG=Array.isArray(ip)?ip[0]:ip,ipO=Array.isArray(ip)?ip[1]:null;
+    const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
     const kontrol=()=>{const h=inp.value.replace(/[\s.]/g,"");if(!h||+h===dogru||inp.disabled)return asil();yn++;
-      fb(f,false,`<b>${h} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
+      const v=+h.replace(",","."),oz=(ozel&&ozel(v))||(ipO&&ipO(v));
+      fb(f,false,`<b>${h} doğru değil.</b> ${oz||ipG||""} ${yn>=3?`Doğru cevap: <b>${String(dogru).replace(".",",")}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
   return S;};
-/* §4.k-5 (05.10.2026): "Sıradaki soru" düğmesi. 8. sınıf tek adım düzeninde (adimli) "Kuralı bulun" soruları ayrı ekranlardadır;
-   bir soru doğru cevaplanınca alttaki düğme, sıradaki ekran yine bir kural sorusuysa "Sıradaki soru (i / n) →" olur.
-   Ortak dosyaya (kesif_tekadim.js) dokunmadan adimli sarmalanır; kur.py dosyanın sonunda asamali=adimli atar. */
-adimli=(A0=>function(p){const S=A0(p),il=p.querySelector(".ta-ileri");if(!il)return S;let n=1;const k0=S.kural;S.kural=x=>{n=x||1;return k0(x);};
-  const kuralMi=e=>!!e&&(e.querySelector(".ta-evre")||{}).textContent==="Kuralı bulun";
-  const duz=()=>{const E=[...p.querySelectorAll(".ta-ekran")],c=E.find(e=>!e.hidden);if(!c)return;const i=E.indexOf(c);
-    if(kuralMi(c)&&kuralMi(E[i+1])&&!il.disabled){const j=E.slice(0,i+2).filter(kuralMi).length,t=`Sıradaki soru (${j} / ${Math.max(n,j)}) →`;if(il.textContent!==t)il.textContent=t;}};
-  new MutationObserver(duz).observe(il,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:["disabled","class"]});
-  return S;})(adimli);
+function szSerit(d,i,n){const ic=d.querySelector(".ta-ic")||d;const u=document.createElement("div");u.className="sz-ust";
+  u.innerHTML=`<span class="sz-et">Soru ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span>`;ic.prepend(u);d.dataset.szI=i;d.dataset.szN=n;}
+function szIleri(d,i,n){if(!d||!d.querySelector)return;const ic=d.querySelector(".ta-ic")||d;d.dataset.szBitti="1";
+  const b=document.createElement("button");b.type="button";b.className="primary sz-ileri";b.textContent=`Sıradaki soru (${i+1} / ${n}) →`;
+  b.onclick=()=>{const t=document.querySelector(".ta-ileri");if(t&&!t.disabled)t.click();};ic.appendChild(b);
+  setTimeout(()=>{if(b.isConnected&&b.offsetParent)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},60);szAlt();}
+/* alttaki şeritteki ileri düğmesi: açık ekran çözülmüş bir kural sorusuysa "Sıradaki soru" yazar */
+function szAlt(){const t=document.querySelector(".ta-ileri");if(!t)return;
+  if(!t.dataset.szGoz){t.dataset.szGoz="1";new MutationObserver(()=>szAlt()).observe(t,{childList:true,characterData:true,subtree:true});}
+  const e=[...document.querySelectorAll(".ta-ekran")].find(x=>!x.hidden);
+  if(e&&e.dataset.szBitti&&+e.dataset.szI<+e.dataset.szN&&!t.disabled){const y=`Sıradaki soru (${+e.dataset.szI+1} / ${e.dataset.szN}) →`;if(t.textContent!==y)t.textContent=y;}}
+/* 06.10.2026 (§4.k-5 · keşif denetimi E2): deney düzeneğinde sırayla gelen kartlar/trenler/turlar/kasalar için
+   "Kart i / n" ilerleme şeridi, her tur bitince "Sıradaki kart (i+1 / n) →" düğmesi; öğrenci düğmeye basmadan yeni tur açılmaz.
+   Çözülen tur kısa bir satırla özetlenir; yeni tur vurgulanır ve ekrana kaydırılır; son turdan sonra adımın bittiği yazılır.
+   (soruZincir ile aynı görünüm: .sz-ust şeridi, .sz-ileri düğmesi; ortak dosyalara dokunmadan yalnız bu atölyede.) */
+(function(){const st=document.createElement("style");st.textContent=`
+.tz-ust{scroll-margin-top:96px}
+.tz-ozet{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px}
+.tz-ozet:empty{display:none}
+.tz-ozet li{font-size:14.5px;line-height:1.45;color:var(--muted);padding:4px 10px;border-left:4px solid #2b8a3e;background:color-mix(in srgb,#2b8a3e 7%,var(--card));border-radius:6px}
+.tz-ozet li::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.tz-yeni{animation:tzGel .9s ease-out}
+@keyframes tzGel{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc,#1c5fbf) 60%,transparent);background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+.tz-son{font-weight:700;color:#2b8a3e;margin:10px 0 4px;line-height:1.45}
+.tz-dug{scroll-margin-bottom:120px}
+.r-tusl[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.tz-yeni{animation:none}}`;document.head.appendChild(st);})();
+/* once: şeridin önüne konacağı öğe · o: {n (0 = sınırsız), ad:"Kart", tamlayan:"kartın", kur:i=>…(i. turu kurar; 0'dan),
+   vurgu:()=>öğe (yeni turda vurgulanacak alan), dugme: öğe (düğmenin ekleneceği yer), son:"son turdan sonraki cümle"} */
+function turZincir(once,o){const n=o.n||0,ad=o.ad,kucuk=ad.toLocaleLowerCase("tr");let i=0,bitti=false,btn=null,sonP=null;
+  const ust=document.createElement("div");ust.className="sz-ust tz-ust";ust.setAttribute("aria-live","polite");once.before(ust);
+  const oz=document.createElement("ol");oz.className="tz-ozet";oz.setAttribute("aria-label","Biten turlar");ust.after(oz);
+  const ciz=()=>{const hepsi=n&&bitti&&i===n-1;
+    ust.innerHTML=`<span class="sz-et">${hepsi?`${n} ${o.tamlayan} hepsi tamamlandı ✓`:n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}</span>`+(n?`<span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i||(bitti&&j===i)?"ok":j===i?"su":""}"></i>`).join("")}</span>`:"");};
+  const kaydir=(el,b)=>setTimeout(()=>{if(!(el&&el.isConnected&&el.offsetParent))return;const sm=azHareket()?"auto":"smooth";
+    if(b!=="start"){el.scrollIntoView({behavior:sm,block:b});return;}
+    const u=document.querySelector(".etk-ust"),ofs=(u&&getComputedStyle(u).position.includes("sticky")?u.getBoundingClientRect().height:0)+12;
+    window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-ofs),behavior:sm});},80);
+  const yer=()=>o.dugme||once.parentNode;
+  const T={get i(){return i;},get bitti(){return bitti;},
+    tamam(ozet){if(bitti)return;bitti=true;ciz();
+      if(ozet){const li=document.createElement("li");li.innerHTML=`${n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}: ${ozet}`;oz.appendChild(li);}
+      if(!n||i<n-1){btn=document.createElement("button");btn.type="button";btn.className="primary sz-ileri tz-dug";
+        btn.textContent=n?`Sıradaki ${kucuk} (${i+2} / ${n}) →`:`Sıradaki ${kucuk} (${i+2}. ${kucuk}) →`;yer().appendChild(btn);kaydir(btn,"center");
+        btn.onclick=()=>{btn.remove();btn=null;i++;bitti=false;ciz();o.kur(i);const v=o.vurgu?o.vurgu():once.parentNode;
+          if(v){v.classList.remove("tz-yeni");void v.offsetWidth;v.classList.add("tz-yeni");}bip(660,.08);kaydir(ust,"start");};}
+      else{sonP=document.createElement("p");sonP.className="tz-son";sonP.innerHTML=o.son||`${n} ${o.tamlayan} hepsi bitti. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız.`;yer().appendChild(sonP);kaydir(sonP,"center");}},
+    sifirla(){i=0;bitti=false;oz.innerHTML="";if(btn){btn.remove();btn=null;}if(sonP){sonP.remove();sonP=null;}ciz();}};
+  ciz();return T;}
 /* 05.10.2026: sayı düğmeleri (çift / vapur seçimi) telefonda da en az 44 px (§19-11, §4.x-11) */
-(()=>{const st=document.createElement("style");st.textContent=".a8-sd .seg button{min-height:44px}";document.head.appendChild(st);})();
+(()=>{const st=document.createElement("style");st.textContent=".a8-sd .seg button{min-height:44px}.izgara10 button.hz,.pir .pk,.sk .chip,.lbr .lh{min-height:44px}";document.head.appendChild(st);})();
 /* Yardımcılar (yalnız bu dosya) */
 const ekok=(a,b)=>a/gcd(a,b)*b;
 const UST=e=>String(e).split("").map(c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[+c]).join("");
@@ -961,14 +1019,15 @@ const e_boyama=p=>{const S=notr(asamali(p));const N=100;
   temiz();
   function acikla(){const c=S.kural(2);
     S.soru(c,"6 ile 14'te ortak katlar 42 ve 84 oldu. Bu iki sayı arasında nasıl bir ilişki var?",
-      ["84, 42'nin 2 katıdır; ortak katlar en küçük ortak katın katlarıdır",["84, 42'nin yarısıdır",""],["Aralarında bir ilişki yoktur",""]],
+      ["84, 42'nin 2 katıdır; ortak katlar en küçük ortak katın katlarıdır",["84, 42'nin yarısıdır","84, 42'den büyüktür; onun yarısı olamaz. 84 : 42 işlemini yapınız."],["Aralarında bir ilişki yoktur","Tabloya bakınız: yıldızlar eşit aralıklarla diziliyor. 84'ü 42'ye bölmeyi deneyiniz."]],
       "EKOK(6, 14) = 42 ve ortak katlar 42, 84, 126 … biçiminde devam eder. Dikkat: 6 · 14 = 84 olsa da EKOK 42'dir.",()=>
     S.soru(c,"Tablo 1000'e kadar uzasaydı ortak katlar ne olurdu?",
-      ["Artmaya devam ederdi; ortak katlar sonsuzdur, bu yüzden sorularda bir sınır verilir",["84'te biterdi",""],["Hiç değişmezdi",""]],
+      ["Artmaya devam ederdi; ortak katlar sonsuzdur, bu yüzden sorularda bir sınır verilir",["84'te biterdi","84'ten sonra da 42'nin katları gelir: 126, 168 … Bu sayılar 6'ya da 14'e de kalansız bölünür."],["Hiç değişmezdi","Tablo uzayınca yeni katlar eklenir; iki renge boyanan kareler de çoğalır."]],
       "Katlar sonsuza kadar sürer; ortak katlar da sonsuzdur. Sorularda “100'den küçük” gibi bir <b>sınır</b> verilir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("İki sayının EKOK'u 15'tir. Bu iki sayının 100'den küçük kaç ortak katı vardır?"),6,"Ortak katlar 15'in katlarıdır: 15, 30, 45, 60, 75, 90.","",
-      ()=>S.bitir("<b>Listeleme yönteminde</b> iki sayının katları yazılır, ikisinde de bulunanlar işaretlenir. Bunlar <b>ortak katlardır</b>; en küçüğü <b>EKOK</b>'tur. Ortak katlar EKOK'un katlarıdır ve sonsuzdur; bu yüzden sorularda bir sınır verilir."));}
+    S.sayi(m,soruKut("İki sayının EKOK'u 15'tir. Bu iki sayının 100'den küçük kaç ortak katı vardır?"),6,"Ortak katlar 15'in katlarıdır: 15, 30, 45, 60, 75, 90.","Tablodaki yıldızlar EKOK'un katlarıydı. 15'in 100'den küçük katlarını sayınız.",
+      ()=>S.bitir("<b>Listeleme yönteminde</b> iki sayının katları yazılır, ikisinde de bulunanlar işaretlenir. Bunlar <b>ortak katlardır</b>; en küçüğü <b>EKOK</b>'tur. Ortak katlar EKOK'un katlarıdır ve sonsuzdur; bu yüzden sorularda bir sınır verilir."),
+      v=>v===7?"105, 100'den büyüktür; onu saymayınız.":v<6&&v>0?"Bazı katları atladınız: 15'ten başlayıp 15'er 15'er sayınız.":null);}
 };
 
 /* 3 · ALGORİTMA MAKİNESİ (kalanlar sağa taşınır) */
@@ -1015,7 +1074,7 @@ const e_algoritma=p=>{const S=notr(asamali(p));const P=[2,3,5,7,11];
       ["EBOB'u",["EKOK'u","14, 28'in katı değildir; EKOK olamaz."],["Sayıların çarpımını","28 · 42 = 1176'dır."]],
       "Aynı tabloda ortak bölenlerin çarpımı EBOB'u, kalanlar da taşınınca bütün sağ sütunun çarpımı EKOK'u verir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["İki sayının EKOK'u algoritma yöntemiyle bulunmaktadır. Ortak bölenler 2 ve 5'tir.","Ortak bölen kalmadığında alt satırda 3 ve 7 kalmaktadır."])+soruKut("EKOK kaçtır?"),210,"EKOK = 2 · 5 · 3 · 7 = 210.","Kalan 3 ve 7'yi de sağa taşıyınız. Sağdaki bütün sayıları çarpınız.",
+    S.sayi(m,yaz(["İki sayının EKOK'u algoritma yöntemiyle bulunmaktadır. Ortak bölenler 2 ve 5'tir.","Ortak bölen kalmadığında alt satırda 3 ve 7 kalmaktadır."])+soruKut("EKOK kaçtır?"),210,"EKOK = 2 · 5 · 3 · 7 = 210.","EKOK'ta ortak bölen kalmayınca alt satırda kalan sayılar ne oluyordu? Deneyde yaptığınızı hatırlayınız.",
       ()=>S.bitir("<b>Algoritma yönteminde</b> önce iki sayı <b>ikisini birden bölen</b> asallarla bölünür. Ortak bölen kalmayınca kalan iki sayı <b>çizginin sağına taşınır</b>. Sağdaki bütün sayıların çarpımı EKOK'tur; yalnız ortak bölenlerin çarpımı ise EBOB'dur."),
       v=>v===10?"10 EBOB'dur; kalanları da çarpmalısınız.":v===21?"Ortak bölenleri de çarpıma katmalısınız.":null);}
 };
@@ -1070,7 +1129,7 @@ const e_kuvvet=p=>{const S=notr(asamali(p));
       ["Evet. Büyük kuvvet B'deki 7<sup>1</sup>'dir; 7 EKOK'a girer",["Hayır, yalnız ortak asallar girer","Yalnız ortak asalları almak EBOB'un kuralıdır. 7 olmadan sayı B'nin katı olmaz; B lambası söner."],["Evet, 7<sup>2</sup> girer","B'de yalnız bir tane 7 var; 7<sup>2</sup> gereksizdir."]],
       "Bir sayıda bulunmayan asalın gizli p<sup>0</sup> kuvveti vardır; büyük kuvvet diğer sayıdaki kuvvettir.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["A = 2<sup>2</sup> · 3 · 7","B = 2 · 3<sup>2</sup> · 5"])+soruKut("EKOK(A, B) kaçtır?"),1260,"EKOK = 2<sup>2</sup> · 3<sup>2</sup> · 5 · 7 = 4 · 9 · 35 = 1260.","Her tabanın büyük kuvvetini alınız: 2<sup>2</sup>, 3<sup>2</sup>, 5 ve 7. Sonra çarpınız.",
+    S.sayi(m,yaz(["A = 2<sup>2</sup> · 3 · 7","B = 2 · 3<sup>2</sup> · 5"])+soruKut("EKOK(A, B) kaçtır?"),1260,"EKOK = 2<sup>2</sup> · 3<sup>2</sup> · 5 · 7 = 4 · 9 · 35 = 1260.","Her taban için iki sayıdaki kuvvetleri karşılaştırınız; iki lambayı da yakan en küçük kuvvetleri seçip çarpınız.",
       ()=>S.bitir("Sayılar üslü biçimde, <b>aynı tabanlar alt alta</b> gelecek şekilde yazılır. Her tabanın <b>kuvveti büyük olanı</b> EKOK'a girer. Bir sayıda bulunmayan asal için o sayıda gizli <b>p<sup>0</sup></b> vardır; bu asal diğer sayıdaki kuvvetiyle EKOK'a girer."),
       v=>v===6?"Bu EBOB'dur; EKOK'a büyük kuvvetler girer.":v===180||v===252?"Bir sayıda olup diğerinde olmayan asalı da almalısınız.":null);}
 };
@@ -1250,14 +1309,15 @@ const e_cizelge=p=>{const S=notr(asamali(p));const SON=300;
   ciz();
   function acikla(){const c=S.kural(2);
     S.soru(c,"15 ve 25 dakikalık vapurlar kaç dakikada bir birlikte kalkıyor?",
-      ["75 dakikada bir: EKOK(15, 25) = 75",["40 dakikada bir (15 + 25)",""],["375 dakikada bir (15 · 25)",""]],
+      ["75 dakikada bir: EKOK(15, 25) = 75",["40 dakikada bir (15 + 25)","40, 15'in katı değildir; A vapuru 40. dakikada kalkmaz. Çizelgedeki yıldızların arasına bakınız."],["375 dakikada bir (15 · 25)","375 dakika çizelgeden (300 dakika) uzundur, ama çizelgede birden çok yıldız vardı; birlikte kalkışlar daha sık."]],
       "Ortak kalkışlar 75., 150., 225. ve 300. dakikalardadır.",()=>
     S.soru(c,"08.00 ile 13.00 arası 300 dakikadır. 08.00'den sonraki ortak kalkış sayısı nasıl bulunur?",
-      ["300 : 75 = 4",["300 : 15 = 20",""],["300 : 25 = 12",""]],
+      ["300 : 75 = 4",["300 : 15 = 20","Bu, yalnız A vapurunun kalkış sayısıdır; birlikte kalkışlar daha seyrektir."],["300 : 25 = 12","Bu, yalnız B vapurunun kalkış sayısıdır; birlikte kalkışlar daha seyrektir."]],
       "Süre EKOK'a bölünür: 4 ortak kalkış.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["Bir duraktan A otobüsü 12 dakikada bir, B otobüsü 30 dakikada bir kalkmaktadır. İki otobüs saat 07.00'de birlikte kalkmıştır."])+soruKut("07.00'den sonra 12.00'ye kadar (12.00 dâhil) iki otobüs kaç kez birlikte kalkar?"),5,"EKOK(12, 30) = 60 dakika. 07.00 ile 12.00 arası 300 dakika; 300 : 60 = 5.","",
-      ()=>S.bitir("İki araç birlikte kalktıktan sonra <b>EKOK</b> kadar dakikada bir yeniden birlikte kalkar. Belli bir saate kadar kaç kez birlikte kalktıklarını bulmak için aradaki süre dakikaya çevrilir ve EKOK'a bölünür."));}
+    S.sayi(m,yaz(["Bir duraktan A otobüsü 12 dakikada bir, B otobüsü 30 dakikada bir kalkmaktadır. İki otobüs saat 07.00'de birlikte kalkmıştır."])+soruKut("07.00'den sonra 12.00'ye kadar (12.00 dâhil) iki otobüs kaç kez birlikte kalkar?"),5,"EKOK(12, 30) = 60 dakika. 07.00 ile 12.00 arası 300 dakika; 300 : 60 = 5.","İki otobüsün kaç dakikada bir birlikte kalktığını bulunuz; 07.00 ile 12.00 arasındaki süreyi dakikaya çevirip bu sayıya bölünüz.",
+      ()=>S.bitir("İki araç birlikte kalktıktan sonra <b>EKOK</b> kadar dakikada bir yeniden birlikte kalkar. Belli bir saate kadar kaç kez birlikte kalktıklarını bulmak için aradaki süre dakikaya çevrilir ve EKOK'a bölünür."),
+      v=>v===6?"07.00'deki kalkışı da saydınız; 07.00'den sonrakileri sayınız.":v===25||v===10?"Bu, yalnız bir otobüsün kalkış sayısıdır.":v===1?"Süreyi saat olarak aldınız; 5 saati dakikaya çeviriniz.":null);}
 };
 
 /* 9 · BONCUK KOLYE (iki parçadan oluşan birim) */
@@ -1308,7 +1368,7 @@ const e_kolye=p=>{const S=notr(asamali(p));const M=50;
 
 /* 10 · SÜRAHİ VE VARİL (sıvıyı eş kaplara doldurma, sınır) */
 const e_varil=p=>{const S=notr(asamali(p));const A=6,B=16,KAP=120;
-  const k=S.ac(1,{ne:"Biri 6 L'lik, diğeri 16 L'lik sürahiyle doldurulan iki varile eşit su koyacak ve verilen sınıra uyan miktarı bulacaksınız.",
+  const k=S.ac(1,{durum:"Bir varile yalnız <b>6 L'lik</b>, öteki varile yalnız <b>16 L'lik</b> sürahiyle su dökülüyor. Sürahiler her seferinde tamamen boşaltılıyor.",ne:"Biri 6 L'lik, diğeri 16 L'lik sürahiyle doldurulan iki varile eşit su koyacak ve verilen sınıra uyan miktarı bulacaksınız.",
     nasil:["Sürahiler her seferinde tamamen boşaltılır. İki sürgüyle her varile kaç sürahi su döküleceğini seçiniz.","Yeşil kesikli çizgiler 50 L ve 100 L düzeylerini gösterir.","İki varildeki su eşit olunca miktar deftere yazılır."],
     biter:bitG(3)});
   S.tahmin(k,"İki varildeki su eşit ve 50 L ile 100 L arasında olacaksa bir varilde kaç litre su olur?",[[48,"48 L"],[64,"64 L"],[96,"96 L"],[100,"100 L"]],96,"Eşit miktarlar 6 ile 16'nın ortak katlarıdır: 48, 96 …; 50 ile 100 arasında yalnız 96 var.");
@@ -1437,7 +1497,8 @@ const e_aralik=p=>{const S=notr(asamali(p));const A=12,B=15,E=ekok(A,B),U=600;
   const ortak=()=>{const r=[];for(let x=E;x<U;x+=E)if(x>alt&&x<ust)r.push(x);return r;};
   const kontrol=()=>{if(!inp.value){fb(f,false,"Önce saydığınız ortak kat sayısını kutuya yazınız.");return;}if(ust<=alt){fb(f,false,"Üst sınır alt sınırdan büyük olmalı.");return;}const O=ortak(),v=+inp.value;
     if(v===O.length){D.ekle([`${alt} ile ${ust} arası`,O.join(", ")||"yok",O.length],alt+"-"+ust);fb(f,true,`Doğru! ${alt} ile ${ust} arasında ${O.length} ortak kat var${O.length?": "+O.join(", "):""}.`);bip(880,.2);G.kontrol();}
-    else{fb(f,false,`Olmadı. ${v>O.length?"Fazla saydınız.":"Eksik saydınız."} Yeniden deneyiniz.`);bip(220,.15,"triangle");}};
+    else{const sn=[alt,ust].filter(x=>x>0&&x%E===0).length;
+      fb(f,false,`Olmadı. ${sn&&v===O.length+sn?"Sınırdaki sayıyı da saydınız; sınırlar hariçtir.":v>O.length?"Fazla saydınız: yalnız kırmızı ve mavi çizginin aynı yerde olduğu noktaları sayınız.":"Eksik saydınız: sarı alanın içindeki bütün ortak noktaları sayınız; ortak katlar eşit aralıklarla gelir."} Yeniden deneyiniz.`);bip(220,.15,"triangle");}};
   k.querySelector(".kont").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};
   function ciz(){const x0=20,s=600/U,X=v=>x0+v*s,y=80;const sv=svgEl(640,146);
     let h=`<rect x="${X(alt)}" y="${y-38}" width="${Math.max(0,(ust-alt)*s)}" height="76" fill="#ffe066" fill-opacity=".45" stroke="#f08c00" stroke-dasharray="4 3"/>`;
@@ -1548,7 +1609,7 @@ const e_pist=p=>{const S=notr(asamali(p));const A=45,B=60,T=900,E=ekok(A,B);
 
 /* 16 · MARKET ALIŞVERİŞİ (paket boyları, bütçe) */
 const e_market=p=>{const S=notr(asamali(p));const A=6,B=15,FA=12,FB=20,BUT=250;
-  const k=S.ac(1,{ne:"6'lı bardak paketlerinden ve 15'li kapak paketlerinden, eşit sayıda bardak ve kapak olacak şekilde alışveriş yapacaksınız.",
+  const k=S.ac(1,{durum:"Bardaklar <b>6'lı</b>, kapaklar <b>15'li</b> paketlerde satılıyor. Her bardağa bir kapak takılacak; bardak ve kapak sayısı eşit olacak.",ne:"6'lı bardak paketlerinden ve 15'li kapak paketlerinden, eşit sayıda bardak ve kapak olacak şekilde alışveriş yapacaksınız.",
     nasil:[`Her bardağa bir kapak takılacak; bardak ve kapak sayısı eşit olmalı. Bardak paketi ${FA} TL, kapak paketi ${FB} TL.`,"+ ve − düğmeleriyle sepete paket ekleyiniz ya da çıkarınız.","Çizimin altındaki çubuk tutarı ve bütçeyi gösterir. Bardak ve kapak sayısı eşit olunca alışveriş deftere yazılır."],
     biter:bitG(3)});
   S.tahmin(k,"Bardak ve kapak sayısı eşit olacaksa en az kaç paket alınmalıdır?",[[2,"2"],[7,"7"],[21,"21"],[30,"30"]],7,"30 bardak ve 30 kapak: 5 bardak paketi + 2 kapak paketi = 7 paket.");
@@ -1610,14 +1671,14 @@ const e_takvim=p=>{const S=notr(asamali(p));const G0=(new Date(2026,9,1).getDay(
   ciz();
   function acikla(){const c=S.kural(2);
     S.soru(c,"Deniz 3, Arda 5 günde bir nöbet tutarken 1 Ekim'den sonra kaç günde bir birlikte nöbet tutuyorlar?",
-      ["15 günde bir: EKOK(3, 5) = 15",["8 günde bir (3 + 5)",""],["3 günde bir",""]],
+      ["15 günde bir: EKOK(3, 5) = 15",["8 günde bir (3 + 5)","Takvime bakınız: 9 Ekim'de yalnız Deniz nöbetçi. Aralıkların toplamı ortak nöbet aralığını vermez."],["3 günde bir","3 günde bir yalnız Deniz nöbet tutar; Arda 4 Ekim'de nöbetçi değildir."]],
       "Birlikte nöbetler 1, 16 ve 31 Ekim'de: 15'er gün arayla.",()=>
     S.soru(c,"Ekim ayı 31 gündür. 31 Ekim'den sonraki ilk birlikte nöbet hangi tarihtedir?",
-      ["15 Kasım",["16 Kasım",""],["1 Kasım",""]],
+      ["15 Kasım",["16 Kasım","Ay değişirken bir gün fazla saydınız: 31 Ekim'den 1 gün sonrası 1 Kasım'dır."],["1 Kasım","1 Kasım, 31 Ekim'den yalnız 1 gün sonradır; birlikte nöbet 15 günde bir gelir."]],
       "31 Ekim'den 15 gün sonrası: Ekim'in son günü 31 olduğu için 15 Kasım.",meydan));}
-  function meydan(){const m=S.son({nasil:["Soruyu dikkatle okuyunuz.","Doğru olduğunu düşündüğünüz seçeneğe dokununuz. Yanlışsa “Yeniden deneyiniz.” yazısı çıkar."],biter:"Doğru seçeneği bulunca etkinlik biter ve “Ne öğrendim?” kartı açılır."});
+  function meydan(){const m=S.son({nasil:["Soruyu dikkatle okuyunuz.","Doğru olduğunu düşündüğünüz seçeneğe dokununuz. Yanlışsa hatanızı gösteren bir ipucu çıkar; başka bir seçenek deneyiniz."],biter:"Doğru seçeneği bulunca etkinlik biter ve “Ne öğrendim?” kartı açılır."});
     S.soru(m,yaz(["Can 6 günde bir, Efe 10 günde bir nöbet tutmaktadır. İkisi 3 Mart'ta birlikte nöbet tutmuştur. Mart ayı 31 gündür."])+soruKut("İkisinin bir sonraki ortak nöbeti hangi tarihtedir?"),
-      ["2 Nisan",["3 Nisan",""],["1 Nisan",""],["18 Mart",""]],
+      ["2 Nisan",["3 Nisan","3 Nisan, 3 Mart'tan 31 gün sonradır; Mart 31 gün çeker. İki nöbetin kaç günde bir çakıştığını bulunuz."],["1 Nisan","1 Nisan, 3 Mart'tan 29 gün sonradır; 29, 6'nın ve 10'un katı değildir."],["18 Mart","18 Mart, 3 Mart'tan 15 gün sonradır; 15, 6'nın katı değildir, Can o gün nöbetçi olmaz."]],
       "EKOK(6, 10) = 30 gün. 3 Mart'tan 30 gün sonrası: Mart'ın kalan 28 günü + 2 gün = 2 Nisan.",
       ()=>S.bitir("Belirli aralıklarla tekrar eden iki görev <b>EKOK</b> kadar günde bir aynı güne denk gelir. Tarih bulunurken ayın kaç gün çektiğine dikkat edilir."));}
 };
@@ -1625,13 +1686,14 @@ const e_takvim=p=>{const S=notr(asamali(p));const G0=(new Date(2026,9,1).getDay(
 /* 18 · GİZLİ SAYI DEDEKTİFİ (EKOK ipuçları) */
 const e_dedektif=p=>{const S=notr(asamali(p));const KART=[2,3,4,5,6,7,8,9],UST_=40;
   const k=S.ac(1,{ne:`EKOK ipuçlarını kullanarak 2 ile ${UST_} arasındaki gizli sayıyı (B) bulacaksınız.`,
-    nasil:[`Oyun kuralları:<ol class='a8-kurallar'><li>Bir sorgu kartına dokununuz: kartın sayısı ile B'nin EKOK'u ipucu olarak yazılır. Örnek: EKOK(4, B) = 12 ise B, 12'nin bölenidir ama 4'ün böleni değildir.</li><li>İpucuna uymayan sayılar tablodan silinir.</li><li>Gizli sayıyı bulduğunuzu düşünürseniz tablodaki sayıya dokununuz. Yanlış tahmin edilen sayı da silinir.</li></ol>`,"Yeni oyun için “Yeni gizli sayı” düğmesine basınız."],
+    nasil:[`Oyun kuralları:<ol class='a8-kurallar'><li>Bir sorgu kartına dokununuz: kartın sayısı ile B'nin EKOK'u ipucu olarak yazılır. Örnek: EKOK(4, B) = 12 ise B, 12'nin bölenidir ama 4'ün böleni değildir.</li><li>İpucuna uymayan sayılar tablodan silinir.</li><li>Gizli sayıyı bulduğunuzu düşünürseniz tablodaki sayıya dokununuz. Yanlış tahmin edilen sayı da silinir.</li></ol>`,"Gizli sayıyı bulunca “Sıradaki oyun →” düğmesine basınız; yeni gizli sayı ancak bu düğmeyle gelir. Üstteki şerit kaçıncı oyunda olduğunuzu gösterir; görevler için en az 2 oyun oynayacaksınız."],
     biter:bitG(3)});
   S.tahmin(k,"EKOK(4, B) = 4 ise B hangi sayılar olabilir?",[["a","1, 2 ya da 4"],["b","4'ün katları"],["c","Yalnız 4"]],"a","EKOK(4, B) = 4 ise 4, B'nin katıdır; yani B, 4'ün bölenidir: 1, 2 ya da 4.");
-  k.insertAdjacentHTML("beforeend",`<div class="a8-et">Sorgu kartları</div><div class="row sk" style="margin-top:0"></div><div class="list ipl"></div><div class="stage"><div class="izgara10 ada"></div></div><p class="durum"></p><div class="row"><button class="ghost yeni">Yeni gizli sayı</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="a8-et">Sorgu kartları</div><div class="row sk" style="margin-top:0"></div><div class="list ipl"></div><div class="stage"><div class="izgara10 ada"></div></div><p class="durum"></p><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const sk=k.querySelector(".sk"),ip=k.querySelector(".ipl"),ad=k.querySelector(".ada"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
   let B,sorgu,yanlis,bitti,kazan=0,topSorgu=0;
   const D=defter(k,["Gizli sayı","Sorgular","Yanlış tahmin"]);
+  const TZ=turZincir(sk.previousElementSibling,{n:0,ad:"Oyun",dugme:k.querySelector(".r-tzd"),vurgu:()=>ad,kur:()=>yeni()});
   const G=gorevler(k,[{m:"Bir <b>sorgu kartına</b> dokununuz.",ok:()=>topSorgu>=1},{m:"Gizli sayıyı bulunuz.",ok:()=>kazan>=1},{m:"Bir gizli sayı daha bulunuz.",ok:()=>kazan>=2}],acikla);
   const uyar=x=>sorgu.every(([q,g])=>ekok(q,x)===g)&&!yanlis.has(x);
   const acik=(q,g)=>g===q?`EKOK(${q}, B) = ${q}: B, ${ek(q,"in")} bölenidir.`:`EKOK(${q}, B) = ${g}: B, ${ek(g,"in")} bölenidir ama ${ek(q,"in")} böleni değildir.`;
@@ -1641,10 +1703,10 @@ const e_dedektif=p=>{const S=notr(asamali(p));const KART=[2,3,4,5,6,7,8,9],UST_=
       ip.insertAdjacentHTML("beforeend",`<span>EKOK(${q}, B) = <b>${g}</b></span>`);fb(f,true,acik(q,g));bip(520,.08);ciz();G.kontrol();});
     ad.innerHTML=Array.from({length:UST_},(_,i)=>i+1).map(x=>{const u=x>=2&&uyar(x);return `<button class="hz ${bitti&&x===B?"as":u?"":"el"}" data-x="${x}" ${u&&!bitti?"":"disabled"}>${x}</button>`;}).join("");
     ad.querySelectorAll("button:not([disabled])").forEach(b=>b.onclick=()=>{const x=+b.dataset.x;
-      if(x===B){bitti=true;kazan++;D.ekle([B,sorgu.map(s=>`EKOK(${s[0]}, B) = ${s[1]}`).join("; ")||"—",yanlis.size],"k"+kazan);fb(f,true,`Buldunuz! Gizli sayı <b>${B}</b>. ${sorgu.length} sorgu ve ${yanlis.size} yanlış tahmin kullandınız.`);bip(990,.3);}
+      if(x===B){bitti=true;kazan++;D.ekle([B,sorgu.map(s=>`EKOK(${s[0]}, B) = ${s[1]}`).join("; ")||"—",yanlis.size],"k"+kazan);fb(f,true,`Buldunuz! Gizli sayı <b>${B}</b>. ${sorgu.length} sorgu ve ${yanlis.size} yanlış tahmin kullandınız.`);bip(990,.3);TZ.tamam(`gizli sayı ${B}, ${sorgu.length} sorgu`);}
       else{yanlis.add(x);fb(f,false,`${x} değil. Adayları azaltmak için bir sorgu kartı daha kullanabilir ya da kalan sayılardan birini deneyebilirsiniz.`);bip(220,.15,"triangle");}ciz();G.kontrol();});
     let n=0;for(let x=2;x<=UST_;x++)if(uyar(x))n++;du.innerHTML=dz(`Kalan aday: <b>${bitti?1:n}</b>`,`Sorgu: <b>${sorgu.length}</b>`);}
-  k.querySelector(".yeni").onclick=yeni;yeni();
+  yeni();
   function acikla(){const c=S.kural(2);
     S.soru(c,"EKOK(q, B) = q ise B için ne söylenebilir?",
       ["B, q'nun bölenidir",["B, q'nun katıdır","EKOK(4, 8) = 8'dir, 4 değil. EKOK q'ya eşitse B, q'dan büyük olamaz."],["B, q'dan büyüktür","EKOK, B'nin de katıdır; EKOK = q ise B en fazla q olabilir."]],
@@ -1660,14 +1722,15 @@ const e_dedektif=p=>{const S=notr(asamali(p));const KART=[2,3,4,5,6,7,8,9],UST_=
 
 /* 19 · EKOK LABİRENTİ (EKOK büyük sayıya eşitse kapı açılır) */
 const e_labirent=p=>{const S=notr(asamali(p));const N=5;
-  const k=S.ac(1,{ne:"Kapıları EKOK kuralına göre açılan bir labirentte girişten çıkışa ulaşacaksınız.",
-    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Sol üstteki <b>Giriş</b> kutusundan başlarsınız; sağ alttaki <b>Çıkış</b> kutusuna ulaşmalısınız.</li><li>Yalnız yan yana (sağ, sol, üst, alt) kutulara geçebilirsiniz.</li><li>İki kutu arasındaki kapı, iki sayının EKOK'u büyük sayıya eşitse açılır. Örnek: 4'ten 12'ye geçilir, çünkü EKOK(4, 12) = 12; 4'ten 6'ya geçilmez, çünkü EKOK(4, 6) = 12.</li></ol>","Her denemenin EKOK'u günlüğe yazılır. “Girişe dönün” başa döndürür; “Yeni labirent” yeni bir labirent kurar."],
+  const k=S.ac(1,{durum:"Labirentin her kutusunda bir sayı var. Yan yana iki kutu arasındaki kapı, iki sayının EKOK'u <b>büyük sayıya eşitse</b> açılır. Örnek: EKOK(4, 12) = 12 olduğu için 4'ten 12'ye geçilir; EKOK(4, 6) = 12 olduğu için 4'ten 6'ya geçilmez.",ne:"Kapıları EKOK kuralına göre açılan bir labirentte girişten çıkışa ulaşacaksınız.",
+    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>Sol üstteki <b>Giriş</b> kutusundan başlarsınız; sağ alttaki <b>Çıkış</b> kutusuna ulaşmalısınız.</li><li>Yalnız yan yana (sağ, sol, üst, alt) kutulara geçebilirsiniz.</li><li>İki kutu arasındaki kapı, iki sayının EKOK'u büyük sayıya eşitse açılır. Örnek: 4'ten 12'ye geçilir, çünkü EKOK(4, 12) = 12; 4'ten 6'ya geçilmez, çünkü EKOK(4, 6) = 12.</li></ol>","Her denemenin EKOK'u günlüğe yazılır. “Girişe dönün” başa döndürür.","Çıkışa ulaşınca “Sıradaki labirent →” düğmesine basınız; yeni labirent ancak bu düğmeyle gelir. Üstteki şerit kaçıncı labirentte olduğunuzu gösterir; görevler için en az 2 labirent bitireceksiniz."],
     biter:bitG(3)});
   S.tahmin(k,"12'den 36'ya geçilebilir mi?",[["e","Evet, EKOK(12, 36) = 36"],["h","Hayır, EKOK(12, 36) = 432"],["b","Hayır, EKOK(12, 36) = 72"]],"e","Geçilebilir: 36, 12'nin katıdır; EKOK(12, 36) = 36, yani büyük sayı.");
-  k.insertAdjacentHTML("beforeend",`<div class="lbr" style="display:grid;grid-template-columns:repeat(${N},minmax(0,1fr));gap:6px;max-width:420px;margin:4px auto 10px"></div><div class="a8-et">Deneme günlüğü (en yeni üstte)</div><div class="list gl" style="margin-top:0"></div><div class="row"><button class="ghost bas">Girişe dönün</button><button class="ghost yeni">Yeni labirent</button></div><p class="durum"></p><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="lbr" style="display:grid;grid-template-columns:repeat(${N},minmax(0,1fr));gap:6px;max-width:420px;margin:4px auto 10px"></div><div class="a8-et">Deneme günlüğü (en yeni üstte)</div><div class="list gl" style="margin-top:0"></div><div class="row"><button class="ghost bas">Girişe dönün</button></div><p class="durum"></p><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const lb=k.querySelector(".lbr"),gl=k.querySelector(".gl"),du=k.querySelector(".durum"),f=k.querySelector(".fb");
   let M,poz,gez,kapali,adim,hamle=0,cikis=0,yanlisH=null;
   const D=defter(k,["Labirent","Adım","Kapalı kapı denemesi"]);
+  const TZ=turZincir(lb,{n:0,ad:"Labirent",dugme:k.querySelector(".r-tzd"),vurgu:()=>lb,kur:()=>yeni()});
   const G=gorevler(k,[{m:"<b>İlk</b> kapıyı açınız.",ok:()=>hamle>=1},{m:"Çıkışa ulaşınız.",ok:()=>cikis>=1},{m:"<b>Yeni</b> bir labirentte de çıkışa ulaşınız.",ok:()=>cikis>=2}],acikla);
   const acikMi=(x,y)=>ekok(x,y)===Math.max(x,y);
   const komsu=u=>{const r=Math.floor(u/N),c=u%N,v=[];if(r>0)v.push(u-N);if(r<N-1)v.push(u+N);if(c>0)v.push(u-1);if(c<N-1)v.push(u+1);return v;};
@@ -1689,12 +1752,12 @@ const e_labirent=p=>{const S=notr(asamali(p));const N=5;
     if(gl.querySelector(".bosk"))gl.innerHTML="";
     const x=M[poz],y=M[i],g=ekok(x,y),bu=Math.max(x,y);
     if(g===bu){poz=i;gez.add(i);adim++;hamle++;gl.insertAdjacentHTML("afterbegin",`<span>EKOK(${x}, ${y}) = ${g} ✓</span>`);bip(660,.08);
-      if(i===N*N-1){cikis++;D.ekle([`${cikis}. labirent`,adim,kapali],"l"+cikis);fb(f,true,`Çıkışa ulaştınız! ${adim} adım, ${kapali} kapalı kapı denemesi.`);bip(990,.3);}
+      if(i===N*N-1){cikis++;D.ekle([`${cikis}. labirent`,adim,kapali],"l"+cikis);fb(f,true,`Çıkışa ulaştınız! ${adim} adım, ${kapali} kapalı kapı denemesi.`);bip(990,.3);TZ.tamam(`${adim} adım, ${kapali} kapalı kapı denemesi`);}
       else fb(f,true,`EKOK(${x}, ${y}) = ${g}, büyük sayıya eşit. Kapı açıldı! ${bu} = ${Math.min(x,y)} · ${bu/Math.min(x,y)}`);}
     else{kapali++;yanlisH=i;gl.insertAdjacentHTML("afterbegin",`<span>EKOK(${x}, ${y}) = ${g} ✗</span>`);fb(f,false,`EKOK(${x}, ${y}) = ${g}; büyük sayı olan ${ek(bu,"e")} eşit değil, kapı kapalı. Yeniden deneyiniz.`);bip(220,.15,"triangle");}
     ciz();G.kontrol();}
   k.querySelector(".bas").onclick=()=>{poz=0;gez=new Set([0]);adim=0;yanlisH=null;ciz();};
-  k.querySelector(".yeni").onclick=yeni;yeni();
+  yeni();
   function acikla(){const c=S.kural(2);
     S.soru(c,"Kapılar hangi durumda açıldı?",
       ["Büyük sayı küçük sayının katı olduğunda",["İki sayı da çift olduğunda","4 ile 6 ikisi de çift ama EKOK(4, 6) = 12; kapı açılmaz."],["Sayılar birbirine yakın olduğunda","8 ile 9 çok yakın ama EKOK(8, 9) = 72; kapı açılmaz."]],
@@ -1703,7 +1766,7 @@ const e_labirent=p=>{const S=notr(asamali(p));const N=5;
       ["Hayır. EKOK iki sayının da katıdır; büyük sayıdan küçük olamaz",["Evet, olabilir","Günlüğe bakınız: hiçbir EKOK büyük sayıdan küçük değil. Bir sayının katı o sayıdan küçük olabilir mi?"],["Yalnız tek sayılarda olabilir","Tek sayılarda da EKOK büyük sayının katıdır."]],
       "EKOK, büyük sayıya eşit ya da ondan büyüktür.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("EKOK(13, 91) kaçtır?"),91,"91 = 13 · 7; 91, 13'ün katıdır. EKOK büyük sayıdır: 91.","91'i 13'e bölmeyi deneyiniz.",
+    S.sayi(m,soruKut("EKOK(13, 91) kaçtır?"),91,"91 = 13 · 7; 91, 13'ün katıdır. EKOK büyük sayıdır: 91.","Büyük sayı küçük sayının katı mı? Bakınız.",
       ()=>S.bitir("İki sayının EKOK'u <b>büyük sayıdan küçük olamaz</b>. Büyük sayı küçük sayının katıysa EKOK <b>büyük sayının kendisidir</b>."),
       v=>v===1183?"13 · 91'i hesapladınız; 91 zaten 13'ün katıdır.":v===13?"EKOK büyük sayıdan küçük olamaz.":null);}
 };
@@ -1712,13 +1775,15 @@ const e_labirent=p=>{const S=notr(asamali(p));const N=5;
    noktada buluşturmak; konumlar sayı doğrusunda anında görünür. Süre dolmadan ilk buluşma noktasında “Buluştu!” denirse tur kazanılır. */
 const e_duello=p=>{const S=notr(asamali(p));
   const k=S.ac(1,{ne:"Bilgisayara karşı bir kurbağa yarışı yapacak ve iki kurbağayı ilk ortak noktada hızla buluşturmanın yollarını keşfedeceksiniz.",
-    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Yarışı başlatın” düğmesine basınız. Bir yarış 5 turdur.</li><li>Her turda iki kurbağa 0'dan başlar; kırmızı kurbağa kendi adımıyla, mavi kurbağa kendi adımıyla zıplar. Her kurbağanın zıplama sayısını − ve + düğmeleriyle ayarlayınız; kurbağalar sayı doğrusunda anında yer değiştirir.</li><li>İki kurbağayı 0'dan sonraki <b>ilk</b> ortak noktada buluşturunca süre dolmadan “Buluştu!” düğmesine basınız. Örnek: 4 ve 6 adımlı kurbağalar ilk kez 12'de buluşur.</li><li>Kurbağalar aynı noktada değilse, buluştukları nokta ilk ortak nokta değilse ya da süre dolarsa turu bilgisayar alır.</li><li>En az 3 tur kazanırsanız yarışı kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır."],
+    nasil:["Oyun kuralları:<ol class='a8-kurallar'><li>“Yarışı başlatın” düğmesine basınız. Bir yarış 5 turdur.</li><li>Her turda iki kurbağa 0'dan başlar; kırmızı kurbağa kendi adımıyla, mavi kurbağa kendi adımıyla zıplar. Her kurbağanın zıplama sayısını − ve + düğmeleriyle ayarlayınız; kurbağalar sayı doğrusunda anında yer değiştirir.</li><li>İki kurbağayı 0'dan sonraki <b>ilk</b> ortak noktada buluşturunca süre dolmadan “Buluştu!” düğmesine basınız. Örnek: 4 ve 6 adımlı kurbağalar ilk kez 12'de buluşur.</li><li>Kurbağalar aynı noktada değilse, buluştukları nokta ilk ortak nokta değilse ya da süre dolarsa turu bilgisayar alır.</li><li>En az 3 tur kazanırsanız yarışı kazanırsınız.</li></ol>","Her turun sonucu deftere yazılır. Üstteki “Tur 1 / 5” şeridi kaçıncı turda olduğunuzu gösterir. Bir tur bitince “Sıradaki tur (2 / 5) →” düğmesine basınız; yeni kurbağalar ve süre ancak bu düğmeyle başlar."],
     biter:bitG(3)});
   S.tahmin(k,"Isınma sorusu: 8 ve 24 adımlı iki kurbağa 0'dan sonra ilk kez hangi noktada buluşur?",[[8,"8"],[24,"24"],[48,"48"],[192,"192"]],24,"24'te: 24, 8'in katıdır (8 · 3 = 24).");
-  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skor"></div><div class="dsoru"></div><div class="yaris"><i></i></div><div class="stage"></div><div class="row zs" style="justify-content:center;gap:14px"></div><div class="row"><button class="primary bul" disabled>Buluştu! ✓</button></div></div><div class="row"><button class="primary basl">Yarışı başlatın</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="duel"><div class="skor"></div><div class="dsoru"></div><div class="yaris"><i></i></div><div class="stage"></div><div class="row zs" style="justify-content:center;gap:14px"></div><div class="row"><button class="primary bul" disabled>Buluştu! ✓</button></div></div><div class="row"><button class="primary basl">Yarışı başlatın</button></div><div class="fb" hidden></div><div class="r-tzd"></div>`);
   const sk=k.querySelector(".skor"),ds=k.querySelector(".dsoru"),bar=k.querySelector(".yaris i"),st=k.querySelector(".stage"),zs=k.querySelector(".zs"),bu=k.querySelector(".bul"),bb=k.querySelector(".basl"),f=k.querySelector(".fb");
   let tur=0,sen=0,bil=0,zam=null,acik=false,turK=0,bitenD=0,yendi=false,Q=null,na=0,nb=0;
   const D=defter(k,["Adımlar","Buluşturduğunuz nokta","İlk ortak nokta","Turu alan"]);
+  const TZ=turZincir(sk,{n:5,ad:"Tur",tamlayan:"turun",dugme:k.querySelector(".r-tzd"),vurgu:()=>k.querySelector(".duel"),kur:()=>{f.hidden=true;yeniTur();},
+    son:"5 turun hepsi bitti. Görevler tamamlanmadıysa “Yeni yarış” düğmesiyle yeniden oynayınız; tamamlandıysa alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   const G=gorevler(k,[{m:"Bir tur <b>kazanınız</b>.",ok:()=>turK>=1},{m:"Bir yarışı sonuna kadar oynayınız (5 tur).",ok:()=>bitenD>=1},{m:"Bilgisayarı <b>yeniniz</b>: bir yarışta en az 3 tur kazanınız.",ok:()=>yendi}],acikla);
   function uret(){let g,m,n,a,b;do{g=rastgele([1,2,3,4,5,6]);m=1+Math.floor(Math.random()*6);n=2+Math.floor(Math.random()*6);a=g*m;b=g*n;}while(m===n||gcd(m,n)!==1||a<2||b<2||g*m*n>90||KONU_CIFT.has(ciftAnahtar(a,b)));
     if(Math.random()<.5)[a,b]=[b,a];return {a,b,l:ekok(a,b)};}
@@ -1738,7 +1803,7 @@ const e_duello=p=>{const S=notr(asamali(p));
   function durdur(){if(zam){clearInterval(zam);zam=null;}}
   function turBitti(kazanan,nokta){acik=false;bu.disabled=true;durdur();if(kazanan==="sen"){sen++;turK++;}else bil++;D.ekle([`${Q.a} ve ${Q.b}`,nokta,Q.l,kazanan==="sen"?"Siz":"Bilgisayar"],"t"+Date.now()+Math.random());skor();G.kontrol();
     if(tur>=5){bitenD++;if(sen>=3)yendi=true;fb(f,sen>=3,sen>=3?`Yarışı kazandınız! ${sen} – ${bil}`:`Bilgisayar kazandı: ${bil} – ${sen}. Yeniden deneyiniz.`);bip(sen>=3?990:220,.3);bb.hidden=false;bb.textContent="Yeni yarış";G.kontrol();}
-    else setTimeout(()=>{if(k.isConnected)yeniTur();},1800);}
+    TZ.tamam(`${Q.a} ve ${Q.b} adım: ${kazanan==="sen"?"turu siz aldınız":"turu bilgisayar aldı"}`);}
   function yeniTur(){tur++;skor();Q=uret();na=0;nb=0;acik=true;bu.disabled=false;ds.innerHTML=`<span style="font-size:20px;display:block">Kırmızı kurbağa: <b style="color:#e03131">${Q.a}</b> adım</span><span style="font-size:20px;display:block">Mavi kurbağa: <b style="color:#1c7ed6">${Q.b}</b> adım</span>`;ciz();
     const sure=Math.max(10000,18000-tur*1600),t0=Date.now();bar.style.width="0%";durdur();
     zam=setInterval(()=>{if(!k.isConnected){durdur();return;}const o=(Date.now()-t0)/sure;bar.style.width=Math.min(100,o*100)+"%";
@@ -1747,17 +1812,18 @@ const e_duello=p=>{const S=notr(asamali(p));
     if(pa!==pb||pa===0){fb(f,false,`Kurbağalar aynı noktada değil (${pa} ve ${pb}). Turu bilgisayar aldı; ilk ortak nokta ${Q.l} idi.`);bip(220,.2,"triangle");turBitti("bil",`${pa} / ${pb}`);}
     else if(pa!==Q.l){fb(f,false,`${pa}'da buluştular ama bu ilk ortak nokta değil. Turu bilgisayar aldı; ilk ortak nokta ${Q.l} idi.`);bip(260,.2,"triangle");turBitti("bil",pa);}
     else{fb(f,true,`Doğru! ${Q.a} · ${na} = ${Q.b} · ${nb} = ${Q.l}: ilk ortak nokta.`);bip(880,.12);turBitti("sen",pa);}};
-  bb.onclick=()=>{tur=0;sen=0;bil=0;bb.hidden=true;f.hidden=true;yeniTur();};skor();ciz();ds.innerHTML=`<span style="font-size:17px;font-weight:600">Hazır olunca “Yarışı başlatın” düğmesine basınız.</span>`;
+  bb.onclick=()=>{tur=0;sen=0;bil=0;bb.hidden=true;f.hidden=true;TZ.sifirla();yeniTur();};skor();ciz();ds.innerHTML=`<span style="font-size:17px;font-weight:600">Hazır olunca “Yarışı başlatın” düğmesine basınız.</span>`;
   function acikla(){const c=S.kural(2);
     S.soru(c,"Kurbağalar 0'dan sonra ilk kez hangi noktada buluştu?",
-      ["İki adım uzunluğunun EKOK'unda",["İki adım uzunluğunun çarpımında",""],["İki adım uzunluğunun toplamında",""]],
+      ["İki adım uzunluğunun EKOK'unda",["İki adım uzunluğunun çarpımında","8 ve 24 adımlı kurbağalar 192'den çok önce, 24'te buluştu; çarpım her zaman ilk ortak nokta değildir."],["İki adım uzunluğunun toplamında","4 ve 6 adımlı kurbağalar 10'da buluşmaz: 10, 4'ün katı değildir."]],
       "Örneğin 8 ve 24 adımlı kurbağalar 24'te buluşur: EKOK(8, 24) = 24; 8 · 24 = 192 değil.",()=>
     S.soru(c,"Kurbağalar büyük adımdan daha önceki bir noktada buluşabilir mi?",
-      ["Hayır; EKOK büyük sayıdan küçük olamaz",["Evet, küçük adımda buluşabilirler",""],["Evet, adımların farkında buluşurlar",""]],
+      ["Hayır; EKOK büyük sayıdan küçük olamaz",["Evet, küçük adımda buluşabilirler","Büyük adımlı kurbağa ilk zıplayışta büyük adım kadar gider; küçük adımın noktasına hiç basmaz."],["Evet, adımların farkında buluşurlar","Fark büyük adımdan küçüktür; büyük adımlı kurbağa o noktaya hiç basmaz."]],
       "Mavi kurbağa ilk zıplamada büyük adım kadar gider; daha önceki noktalara hiç konmaz. Büyük adım küçüğün katıysa ilk ortak nokta büyük adımdır.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,soruKut("EKOK(26, 39) kaçtır?"),78,"EBOB(26, 39) = 13. EKOK = 26 · 39 : 13 = 78.","",
-      ()=>S.bitir("EKOK'u hızlı bulmak için kısa yollar: EKOK <b>büyük sayıdan küçük olamaz</b>; büyük sayı küçüğün katıysa EKOK <b>büyük sayıdır</b>; EKOK = <b>a · b : EBOB</b>."));}
+    S.sayi(m,soruKut("EKOK(26, 39) kaçtır?"),78,"EBOB(26, 39) = 13. EKOK = 26 · 39 : 13 = 78.","EKOK büyük sayının katıdır. 39'un katlarını sırayla yazıp 26'ya da kalansız bölünen ilkini arayınız.",
+      ()=>S.bitir("EKOK'u hızlı bulmak için kısa yollar: EKOK <b>büyük sayıdan küçük olamaz</b>; büyük sayı küçüğün katıysa EKOK <b>büyük sayıdır</b>; EKOK = <b>a · b : EBOB</b>."),
+      v=>v===1014?"26 · 39'u hesapladınız; bu bir ortak kat ama en küçüğü değil.":v===39?"39, 26'nın katı değildir.":v===13?"13 EBOB'dur; EKOK iki sayının da katı olmalı.":v===26?"EKOK büyük sayıdan küçük olamaz.":null);}
 };
 
 /* ================= liste ================= */
