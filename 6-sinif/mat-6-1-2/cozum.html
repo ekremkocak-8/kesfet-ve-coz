@@ -640,7 +640,7 @@ window.CANL = {
 
   /* 8 · bilgi yarışmasında 9'un katları ve varsayımlar */
   8: el => CN.ONERME(el, { onermeler: [
-      { ad: "Varsayım 1", metin: "9'a bölünen sayılar çift sayıdır.", sina: n => !bol(n, 9) ? { ok: true, goster: `${n}, 9'un katı değil.`, not: "9'un bir katını deneyin (ör. 108, 279)." } : { ok: n % 2 === 0, goster: `${n} = 9 × ${n / 9} · ${n % 2 ? "tek" : "çift"}` } },
+      { ad: "Varsayım 1", metin: "9'a bölünen sayılar çift sayıdır.", sina: n => !bol(n, 9) ? { ok: true, goster: `${n}, 9'un katı değil.`, not: "9'un bir katını deneyin (ör. 108, 279)." } : { ok: n % 2 === 0, goster: `${n} = 9 x ${n / 9} → ${n % 2 ? "tek" : "çift"}` } },
       { ad: "Varsayım 2", metin: "9'a bölünen sayıların rakamlarının toplamı 9'dur.", sina: n => !bol(n, 9) ? { ok: true, goster: `${n}, 9'un katı değil.`, not: "9'un bir katını deneyin." } : { ok: rt(n) === 9, goster: `rakamların toplamı ${rt(n)}` } },
       { ad: "Varsayım 3", metin: "9'a bölünen sayılar 6'ya da bölünür.", sina: n => !bol(n, 9) ? { ok: true, goster: `${n}, 9'un katı değil.`, not: "9'un bir katını deneyin." } : { ok: bol(n, 6), goster: bk(n, 6) } },
       { ad: "Varsayım 4", metin: "9'a bölünen sayılar 3'e de bölünür.", sina: n => !bol(n, 9) ? { ok: true, goster: `${n}, 9'un katı değil.`, not: "9'un bir katını deneyin." } : { ok: bol(n, 3), goster: bk(n, 3) } }],
@@ -651,7 +651,7 @@ window.CANL = {
   9: el => CN.KOSUL(el, { girdi: [sec("Oturum sayısı:", [4, 5, 6, 9], 4)], dugme: "Oturumlara böl ▶",
     ciz: ([k]) => { const T = 240, w = 400 / k; let o = "";
       for (let i = 0; i < k; i++) o += `<rect x="${10 + i * w}" y="20" width="${w - 3}" height="34" rx="5" fill="${bol(T, k) ? "#d0bfff" : "#ffe3e3"}" stroke="#7048e8" stroke-width="1.5"/>` + tx(10 + i * w + w / 2, 42, bol(T, k) ? T / k : (T / k).toFixed(1).replace(".", ","), "cn-et");
-      return svg(420, 90, o + tx(210, 80, "4 saat = 4 × 60 = 240 dakika", "cn-et b"), "oturumlar"); },
+      return svg(420, 90, o + tx(210, 80, "4 saat = 4 x 60 = 240 dakika", "cn-et b"), "oturumlar"); },
     kosullar: [{ ad: "Her oturum tam dakika (doğal sayı)", f: ([k]) => ({ ok: bol(240, k), not: bk(240, k) }) }],
     sutun: ["Oturum", "Bir oturum (dk)", "Kalan", "Sonuç"], satir: ([k], h) => [k, Math.floor(240 / k), 240 % k, h ? "olur" : "olmaz"],
     yon: "Kursun 240 dakikasını eşit oturumlara bölün. Hangi oturum sayısında oturum süresi doğal sayı olmuyor?",
@@ -708,7 +708,7 @@ window.CANL = {
   15: el => CN.KOSUL(el, { girdi: [{ ad: "Başka okula verilen fidan:", min: 0, max: 12, bas: 0 }],
     ciz: ([x]) => { const n = 803 - x; return kartlar(String(n).split(""), [0, 1, 2], `Dikilen fidan: ${n} · rakamların toplamı ${rt(n)}`, "#2f9e44"); },
     kosullar: [{ ad: "Dikilen fidanlar 9'arlı sıralara tam giriyor", f: ([x]) => ({ ok: bol(803 - x, 9), not: bk(803 - x, 9) }) }],
-    sonuc: ([x], h) => h ? `<p class="cn-sonuc">${803 - x} = 9 × ${(803 - x) / 9}: ${(803 - x) / 9} tam sıra. Daha az fidan vererek de olur mu?</p>` : "",
+    sonuc: ([x], h) => h ? `<p class="cn-sonuc">${803 - x} = 9 x ${(803 - x) / 9}: ${(803 - x) / 9} tam sıra. Daha az fidan vererek de olur mu?</p>` : "",
     sutun: ["Verilen", "Dikilen", "Rakam toplamı", "Sonuç"], satir: ([x], h) => [x, 803 - x, rt(803 - x), h ? "tam sıralar" : "eksik sıra"],
     yon: "Başka okula verilecek fidan sayısını 0'dan başlayarak birer birer artırın ve sınayın. Sıraların hepsi tam olduğunda en az kaç fidan verilmiş oluyor?",
     bitis: "Sıraların tam olduğu en küçük sayıyı bulduğunuzda." }),
