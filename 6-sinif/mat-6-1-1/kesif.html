@@ -995,9 +995,15 @@ function soruY(kap,soru,secs,okMsg,ip,sonra){const s=karistir(secs.map((_,i)=>i)
   kap.appendChild(d);const f=d.querySelector(".fb");let bitti=false;
   d.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{if(bitti)return;const i=+b.dataset.i;
     if(i===0){bitti=true;d.dataset.ok="1";b.classList.add("dogru");d.querySelectorAll(".sec").forEach(x=>x.disabled=true);fb(f,true,okMsg);bip(760,.12);sonra&&setTimeout(sonra,250);}
-    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);fb(f,false,"Bu seçenek doğru değil. Yeniden deneyiniz.");}});
+    else{b.classList.add("yanlis");b.disabled=true;bip(220,.12);const h=typeof ip==="function"?ip(i,secs[i]):Array.isArray(ip)?ip[i-1]:ip;fb(f,false,`Bu seçenek doğru değil. ${h||"Deney defterindeki sonuçlarla karşılaştırınız."} Yeniden deneyiniz.`);}});
+  /* 07.10.2026 (E7): her yanlış seçeneğin kendi ipucu olmalı; eksikse test sırasında uyarı */
+  if(secs.length>1&&!(typeof ip==="function"||Array.isArray(ip)&&secs.slice(1).every((_,j)=>ip[j])))console.warn("IPUCU-YOK soruY: "+duzYazi(soru).slice(0,90));
   return d;}
 /* Soruları sırayla sorar: [soru, seçenekler(ilki doğru), doğru açıklaması, ipuçları] */
+/* 06.10.2026: kaydırırken üstteki yapışkan başlık ve alttaki sabit şerit hesaba katılır (düğme şeridin altında kalmaz) */
+function gorunur(e,orta){if(!e||!e.isConnected)return;const yap=x=>x&&/sticky|fixed/.test(getComputedStyle(x).position)?x.getBoundingClientRect().height:0;
+  const h=yap(document.querySelector(".etk-ust"))+10,ah=yap(document.querySelector(".ta-alt"))+10,r=e.getBoundingClientRect(),vis=window.innerHeight-h-ah;
+  const hedef=orta&&r.height<vis?h+(vis-r.height)/2:h;window.scrollTo({top:Math.max(0,window.scrollY+r.top-hedef),behavior:azHareket()?"auto":"smooth"});}
 function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
   /* 04.10.2026: sıradaki soru belirgin — ilerleme şeridi, "Sıradaki soru →" düğmesi, çözülen soru küçülür, yeni soru görünür alana gelir */
   const ust=n>1?yeniEl("div","sz-ust"):null;if(ust)kap.appendChild(ust);
@@ -1005,9 +1011,24 @@ function soruZincir(kap,liste,bitince){let i=0;const n=liste.length;
   const git=()=>{if(i>=n){if(ust)ust.innerHTML=`<span class="sz-et">${n} sorunun hepsi tamamlandı ✓</span>`;bitince&&bitince();return;}const q=liste[i++];ciz();
     const d=soruY(kap,q[0],q[1],q[2],q[3],()=>{if(i>=n){git();return;}
       const b=yeniEl("button","primary sz-ileri",`Sıradaki soru (${i+1} / ${n}) →`);b.type="button";d.appendChild(b);
-      setTimeout(()=>{if(b.isConnected)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},40);
+      setTimeout(()=>{if(b.isConnected)gorunur(b,true);},40);
       b.onclick=()=>{b.remove();d.classList.add("sz-kapali");git();};});
-    d.classList.add("sz-yeni");if(i>1)setTimeout(()=>{if(d.isConnected)d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"});},40);};
+    d.classList.add("sz-yeni");if(i>1)setTimeout(()=>{if(d.isConnected)gorunur(d);},40);};
+  git();}
+/* Çok sorulu kutu (soru zinciri, sayı/kesir kutularıyla): kurSoru(govde, j, bitti(ozet)) */
+function turZincir(kap,n,kurTur,bitince,o={}){let i=0;const ad=o.ad||"Soru",adk=ad.toLocaleLowerCase("tr");
+  const ust=yeniEl("div","sz-ust");kap.appendChild(ust);
+  const ciz=()=>{ust.innerHTML=`<span class="sz-et">${ad} ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span>`;};
+  const git=()=>{if(i>=n){ust.innerHTML=`<span class="sz-et">${o.sonEt||`Bu adımdaki ${n} ${adk} tamamlandı ✓`}</span><span class="sz-nok">${Array.from({length:n},()=>`<i class="ok"></i>`).join("")}</span>`;
+      if(o.son!==false){const s=yeniEl("p","tz-son",o.son||`${n} ${adk} de tamamlandı. Bu adım bitti; alttaki <b>Sonraki adım →</b> düğmesine basınız.`);kap.appendChild(s);}bitince&&bitince();return;}
+    const j=i++;ciz();const d=yeniEl("div","sor tz-tur sz-yeni");d.innerHTML=`<p class="tz-bas">${ad} ${j+1} / ${n}</p><div class="tz-govde"></div><p class="tz-oz" hidden></p>`;kap.appendChild(d);
+    let bitti=false;
+    kurTur(d.querySelector(".tz-govde"),j,oz=>{if(bitti)return;bitti=true;d.dataset.ok="1";const ozp=d.querySelector(".tz-oz");ozp.innerHTML=`<b>${ad} ${j+1}:</b> ${oz||"tamamlandı."}`;
+      if(i>=n){git();return;}
+      const b=yeniEl("button","primary sz-ileri",`Sıradaki ${adk} (${i+1} / ${n}) →`);b.type="button";d.appendChild(b);
+      setTimeout(()=>{if(b.isConnected)gorunur(b,true);},60);
+      b.onclick=()=>{b.remove();d.classList.add("tz-kapali");d.classList.remove("sz-yeni");d.querySelector(".tz-govde").hidden=true;ozp.hidden=false;git();};});
+    if(j>0)setTimeout(()=>{if(d.isConnected)gorunur(d);},60);};
   git();}
 const kuralA=(D,liste,ozet)=>({ad:"Kuralı bulun",yon:["Deney defterindeki sonuçlarınıza bakınız.","Soruları sırayla cevaplayınız. Yanlış seçerseniz başka bir seçenek deneyiniz."],bitis:"Soruların hepsini doğru cevaplayınca.",
   kur:(k,A)=>{if(D&&D.el&&D.n){k.appendChild(D.el);}soruZincir(k,liste,()=>A.tamam(ozet||"Kuralı buldunuz."));}});
@@ -1036,14 +1057,14 @@ function asamali(p,o){
       setTimeout(()=>{if(!kok.isConnected)return;i+1<N?ac(i+1):bitir();},650);}};
     cur=A;window.__asmOto=()=>{if(cur&&cur.oto&&!cur.bitti)return cur.oto();return false;};
     try{a.kur(s.querySelector(".as-ic"),A);}catch(e){console.error(e);s.querySelector(".as-ic").innerHTML=`<div class="fb no">Bu aşama yüklenirken bir sorun oluştu: ${e&&e.message}</div>`;}
-    if(i>0)setTimeout(()=>{if(s.isConnected)s.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"start"});},60);}
+    if(i>0)setTimeout(()=>{if(s.isConnected)gorunur(s);},60);}
   function bitir(){const t=o.tahmin;let th="";cur=null;
     if(t){const dg=t.secs.find(s=>String(s[0])===String(t.dogru));const dogruMu=tah&&String(tah.v)===String(t.dogru);
       th=`<p class="tk-sonuc"><b>Başta tahmininiz:</b> ${tah?tah.t:"seçmediniz"}. ${dogruMu?"Tahmininiz doğruydu!":`Doğru cevap: <b>${dg?dg[1]:""}</b>.`} ${t.neden||""}</p>`;
       const n=tk.querySelector(".tk-not");n.hidden=false;n.innerHTML=dogruMu?"Tahmininiz doğruydu!":`Doğru cevap: ${dg?dg[1]:""}`;}
     const d=yeniEl("section","ogrendim",`<div class="og-bas">Ne öğrendim?</div><p>${o.kural}</p>${th}<div class="row"><button type="button" class="primary tekrar">Baştan oynayın</button></div>`);kok.appendChild(d);
     d.querySelector(".tekrar").onclick=()=>window.dispatchEvent(new Event("kesif-tekrar"));
-    yonlendir("Etkinliği bitirdiniz. İsterseniz baştan oynayabilirsiniz.");setTimeout(()=>{if(d.isConnected)d.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"center"});},150);}
+    yonlendir("Etkinliği bitirdiniz. İsterseniz baştan oynayabilirsiniz.");setTimeout(()=>{if(d.isConnected)gorunur(d,true);},150);}
   ac(0);}
 
 const benzersiz=a=>[...new Set(a)];
@@ -1069,12 +1090,13 @@ const RENK=["#1971c2","#d9480f","#2b8a3e","#9c36b5","#e67700","#0c8599","#c2255c
 
 /* Rakamla cevap kutusu. Biçim yönergesi kutunun hemen üstünde yazılır (§4.y). */
 function sayiGir(kap,ust,dogru,okMsg,ipucu,sonra,o={}){
+  if(!ipucu&&!o.ozel)console.warn("IPUCU-YOK sayiGir: "+duzYazi(ust||"").slice(0,90));
   const d=yeniEl("div","sor");d.dataset.cvp=String(dogru);
   d.innerHTML=`${ust||""}<p class="bicim">${o.bicim||"Cevabınızı yalnız bir <b>sayı</b> olarak, rakamlarla yazınız."}</p><div class="row"><input class="ans sg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="Cevabın" placeholder="${o.ph||"ör. 12"}" style="width:8em"><button type="button" class="primary k">Kontrol edin</button></div><div class="fb" hidden></div>`;
   kap.appendChild(d);const inp=d.querySelector("input"),f=d.querySelector(".fb");let ok=false,yn=0;
   const kontrol=()=>{if(ok)return;const v=okuS(inp.value);if(v===null){fb(f,false,inp.value.trim()?"Yalnız rakam kullanınız. Örnek: 12":"Önce cevabınızı yazınız.");return;}
     if(v===dogru){ok=true;d.dataset.ok="1";inp.disabled=true;d.querySelector(".k").disabled=true;fb(f,true,okMsg);bip(760,.12);d.dispatchEvent(new Event("dogru"));sonra&&setTimeout(sonra,250);}
-    else{bip(220,.12);yn++;fb(f,false,yn>=3?`Yeniden deneyiniz. Doğru cevap: <b>${dogru}</b>`:"Yeniden deneyiniz.");}};
+    else{bip(220,.12);yn++;const oz=o.ozel&&o.ozel(v);fb(f,false,`${oz||`${v>dogru?"Cevabınız doğru cevaptan büyük.":"Cevabınız doğru cevaptan küçük."} ${ipucu||""}`} ${yn>=3?`Doğru cevap: <b>${dogru}</b>`:"Yeniden deneyiniz."}`);}};
   d.querySelector(".k").onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};
   d.oto=()=>{inp.value=String(dogru);kontrol();};return d;}
 
@@ -1086,9 +1108,9 @@ function cokSec(kap,o){const d=yeniEl("div","sor");kap.appendChild(d);
   d.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{if(ok)return;const v=+b.dataset.v;sec.has(v)?sec.delete(v):sec.add(v);b.setAttribute("aria-pressed",sec.has(v));b.classList.remove("no");f.hidden=true;bip(700,.04);});
   const kontrol=()=>{if(ok)return;if(!sec.size){fb(f,false,"Önce en az bir seçim yapınız.");return;}
     const yan=[...sec].filter(x=>!o.dogru.has(x));
-    if(yan.length){bip(220,.12);yan.forEach(x=>d.querySelector(`.chip[data-v="${x}"]`).classList.add("no"));fb(f,false,`Kırmızı işaretli ${yan.length>1?yan.length+" seçim":"seçim"} doğru değil. Yeniden deneyiniz.`);return;}
+    if(yan.length){bip(220,.12);yan.forEach(x=>d.querySelector(`.chip[data-v="${x}"]`).classList.add("no"));fb(f,false,o.yanlis?`${yan.slice(0,2).map(x=>o.yanlis(x)).join(" ")} Yeniden deneyiniz.`:`Kırmızı işaretli ${yan.length>1?yan.length+" seçim":"seçim"} koşulu sağlamıyor; deneyde ne gördüğünüzü hatırlayınız. Yeniden deneyiniz.`);return;}
     const eks=[...o.dogru].filter(x=>!sec.has(x));
-    if(eks.length){bip(220,.12);fb(f,false,`Seçmediğiniz ${eks.length} uygun sayı daha var. Yeniden deneyiniz.`);return;}
+    if(eks.length){bip(220,.12);fb(f,false,o.eksik?`${o.eksik(eks.length)} Yeniden deneyiniz.`:`Seçtikleriniz doğru ama eksik: seçmediğiniz ${eks.length} uygun sayı daha var. Yeniden deneyiniz.`);return;}
     ok=true;d.dataset.ok="1";d.querySelectorAll(".chip").forEach(b=>{b.disabled=true;if(sec.has(+b.dataset.v))b.classList.add("ok");});d.querySelector(".k").disabled=true;bip(760,.12);fb(f,true,o.ok);d.dispatchEvent(new Event("dogru"));o.sonra&&setTimeout(o.sonra,500);};
   d.querySelector(".k").onclick=kontrol;
   d.oto=()=>{sec.clear();o.dogru.forEach(x=>sec.add(x));d.querySelectorAll(".chip").forEach(b=>{b.setAttribute("aria-pressed",sec.has(+b.dataset.v));b.classList.remove("no");});kontrol();};return d;}
@@ -1226,6 +1248,17 @@ const secenek=(dogru,yanlislar,adet)=>{const r=[dogru];yanlislar.forEach(y=>{if(
 /* 20 */
 .dy-cv{min-height:70px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:8px}
 .dy-cv svg{max-width:100%;height:auto;display:block}
+/* 06.10.2026: sıradaki tur vurgusu ve 44 px dokunma hedefi */
+@keyframes tzVurgu{0%{box-shadow:0 0 0 4px var(--acc2)}100%{box-shadow:0 0 0 0 transparent}}
+.tz-gel{animation:szGel .45s ease-out,tzVurgu 1.6s ease-out}
+@media (prefers-reduced-motion:reduce){.tz-gel{animation:none}}
+.ta .sec{min-width:44px}.ta-ic button{min-height:44px;min-width:44px}
+@media (max-width:560px){.ci-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.tz-son{font-weight:700;margin:8px 0;color:var(--acc3)}
+.tz-oz{margin:6px 0;font-weight:700}.tz-oz::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.tz-tur{border:2px solid var(--acc);border-radius:14px;padding:8px 10px;margin:8px 0;background:var(--card)}
+.tz-bas{margin:0 0 6px;font-weight:800;color:var(--acc)}
+.tz-tur.tz-kapali{border-color:var(--line);opacity:.8;padding:6px 10px}.tz-tur.tz-kapali>.tz-bas{display:none}
 `;document.head.appendChild(st);})();
 /* Sayaç + etiketli kaydırıcı (§4: adı, anlık değeri ve uç değerleri yanında yazılır) */
 function sayiSec(ad,min,max,deger,fn,adim=1){const w=document.createElement("div");w.className="k6-ss";
@@ -1260,7 +1293,7 @@ function izgaraTur(k,n,D,A,sonra){
   const hata=m=>{bip(220,.12);fb(f,false,m);};
   function listele(){bulK.innerHTML=bul.size?hedef.filter(c=>bul.has(c[0]+"x"+c[1])).map(c=>`<span class="chip ok">${c[0]} x ${c[1]}</span>`).join(""):`<span class="ic-not">Henüz yok.</span>`;A.durum(`${bul.size} / ${hedef.length}`);}
   kay.onclick=()=>{if(bitti)return;if(!a)return hata("Önce ızgarada bir dikdörtgen kurunuz: Bir kareye dokununuz ya da parmağınızı sürükleyiniz.");
-    const x=a*b;if(x!==n)return hata(`Bu dikdörtgen ${n} birim kareden oluşmuyor. Yeniden deneyiniz.`);
+    const x=a*b;if(x!==n)return hata(`Bu dikdörtgen ${n} birim kareden oluşmuyor. Kurduğunuz ${a} x ${b} = ${x} birim kare; ${x<n?"kare eksik":"kare fazla"}. Yeniden deneyiniz.`);
     const s=Math.min(a,b)+"x"+Math.max(a,b);if(bul.has(s))return hata(`${a} x ${b} dikdörtgenini ya da döndürülmüş hâlini zaten buldunuz. Başka bir kenar uzunluğu deneyiniz.`);
     bul.add(s);bip(760,.1);D.ekle([String(n),`${Math.min(a,b)} x ${Math.max(a,b)}`,`${Math.min(a,b)} ve ${Math.max(a,b)}`],n+"-"+s);listele();
     if(bul.size<hedef.length){fb(f,true,`Doğru! ${a} x ${b} = ${n}. Kenar uzunlukları ${a} ve ${b} birim. Başka bir dikdörtgen daha var mı?`);return;}
@@ -1363,13 +1396,15 @@ function diziTur(k,D,A){const NL=[12,18,20,24,35];let n=rastgele(NL),r=0,cev=fal
     const x=tam<2?bol[0]:(deg[0]||bol[0]);if(x)diz(x);};A.durum("0 deneme");}
 function tersTur(k,D,A){
   const a=ra(3,9),b=ra(4,9),n=a*b,c=ra(3,9),d=ra(6,12),m=c*d;
-  sayiGir(k,soruKut(`▲ x ${b} = ${n} işleminde ▲ yerine hangi sayı gelmelidir?`),a,`Doğru! ${n} : ${b} = ${a}; bu yüzden ${a} x ${b} = ${n}. ${a} ve ${b}, ${ekS(n,"in")} çarpanlarıdır.`,`▲ sayısını bulmak için ${n} : ${b} işlemini yapınız.`,()=>{D.ekle([`▲ x ${b} = ${n}`,`${a} x ${b} = ${n}`,`${n} : ${b} = ${a}`],"t1");
-    sayiGir(k,soruKut(`${m} : ■ = ${d} işleminde ■ yerine hangi sayı gelmelidir?`),c,`Doğru! ${c} x ${d} = ${m}. ${c}, ${ekS(m,"i")} kalansız böler; ${c}, ${ekS(m,"in")} hem böleni hem çarpanıdır.`,`${d} x ■ = ${m} olmalı. ${m} : ${d} işlemini yapınız.`,()=>{D.ekle([`${m} : ■ = ${d}`,`${c} x ${d} = ${m}`,`${m} : ${c} = ${d}`],"t2");A.tamam("Çarpma ile bölmenin ters işlem olduğunu kullandınız.");},{ozel:v=>v===m*d?"Bölüneni bölümle çarpmışsınız. Bölen, bölünenin bölüme bölünmesiyle bulunur.":null});},{ozel:v=>v===n*b?"Çarpmışsınız. ▲ x "+b+" = "+n+" ise ▲ = "+n+" : "+b+" olur.":null});}
+  turZincir(k,2,(g,j,bit)=>{
+    if(j===0)sayiGir(g,soruKut(`▲ x ${b} = ${n} işleminde ▲ yerine hangi sayı gelmelidir?`),a,`Doğru! ${n} : ${b} = ${a}; bu yüzden ${a} x ${b} = ${n}. ${a} ve ${b}, ${ekS(n,"in")} çarpanlarıdır.`,`▲ sayısını bulmak için ${n} : ${b} işlemini yapınız.`,()=>{D.ekle([`▲ x ${b} = ${n}`,`${a} x ${b} = ${n}`,`${n} : ${b} = ${a}`],"t1");bit(`▲ = ${a}`);},{ozel:v=>v===n*b?"Çarpmışsınız. ▲ x "+b+" = "+n+" ise ▲ = "+n+" : "+b+" olur.":null});
+    else sayiGir(g,soruKut(`${m} : ■ = ${d} işleminde ■ yerine hangi sayı gelmelidir?`),c,`Doğru! ${c} x ${d} = ${m}. ${c}, ${ekS(m,"i")} kalansız böler; ${c}, ${ekS(m,"in")} hem böleni hem çarpanıdır.`,`${d} x ■ = ${m} olmalı. ${m} : ${d} işlemini yapınız.`,()=>{D.ekle([`${m} : ■ = ${d}`,`${c} x ${d} = ${m}`,`${m} : ${c} = ${d}`],"t2");bit(`■ = ${c}`);},{ozel:v=>v===m*d?"Bölüneni bölümle çarpmışsınız. Bölen, bölünenin bölüme bölünmesiyle bulunur.":null});},
+    ()=>A.tamam("Çarpma ile bölmenin ters işlem olduğunu kullandınız."),{ad:"Soru"});}
 const e_bolen=p=>{const D=defterY(["Dizi","Çarpma","Bölme"]);
   asamali(p,{tahmin:{soru:"5 x 7 = 35 olduğunu biliyoruz. Buna göre 35 : 7 işleminin sonucu nedir?",secs:[["5","5"],["7","7"],["28","28"],["42","42"]],dogru:"5",neden:"35 bilye 5 satıra dizilince her satırda 7 bilye olur; dizi çevrilince 7 satır, her satırda 5 bilye olur. 5 x 7 = 35 ise 35 : 7 = 5 ve 35 : 5 = 7 olur."},
     asamalar:[
       {ad:"Bilye dizisi",yon:["Bilye sayısını seçiniz, sonra kaç satıra dizileceğine dokununuz. Bilyeler satırlara eşit dizilir; artan bilye kırmızı görünür.","Artan bilye kalmazsa <b>Diziyi çevirin</b> düğmesine basınız ve çarpma, bölme işlemlerini okuyunuz. Farklı satır sayılarını deneyiniz; sonuçlar deney defterine yazılır."],bitis:"Görev listesindeki dört görev bitince (en az 4 dizi, 2 tam dizi, 1 çevirme).",kur:(k,A)=>diziTur(k,D,A)},
-      {ad:"Kayıp sayıyı bul",yon:["Kutudaki işlemde ▲ ya da ■ yerine gelecek sayıyı bulunuz.","Cevabınızı yazınız ve <b>Kontrol edin</b> düğmesine basınız."],bitis:"İki işlemi de doğru tamamlayınca.",kur:(k,A)=>tersTur(k,D,A)},
+      {ad:"Kayıp sayıyı bul",yon:["Kutudaki işlemde ▲ ya da ■ yerine gelecek sayıyı bulunuz.","Cevabınızı yazınız ve <b>Kontrol edin</b> düğmesine basınız. İki işlem vardır. Bir soru bitince <b>Sıradaki soru →</b> düğmesine basınız."],bitis:"İki işlemi de doğru tamamlayınca.",kur:(k,A)=>tersTur(k,D,A)},
       kuralA(D,[["a x b = n biçimindeki bir çarpma işlemi için hangisi doğrudur?",["n : a = b ve n : b = a olur.","a : n = b olur.","n : a = n olur."],"Doğru! Bir dizi çevrilince aynı bilyeler iki bölme işlemiyle okunur; çarpma ile bölme ters işlemdir.",["Bölünen, bilye sayısı olan n'dir; küçük sayı büyük sayıya bölünmez.","Deftere bakınız: 35 : 5 işleminin sonucu 35 değil 7'dir."]],
         ["Bilyeler bir satır sayısına dizilince artan bilye kaldıysa hangisi doğrudur?",["Satır sayısı, bilye sayısının çarpanı değildir; bölmede kalan vardır.","Satır sayısı, bilye sayısının çarpanıdır.","Bilye sayısı, satır sayısının çarpanıdır."],"Doğru! Artan bilye, bölmedeki kalandır.",["Deftere bakınız: Artan bilye kalan dizilerde çarpmanın sonucu bilye sayısını vermedi.","Bilye sayısı satır sayısından büyüktür; büyük sayı küçük sayının çarpanı olamaz."]],
         ["Bir sayının çarpanları için hangisi doğrudur?",["Çarpanlar aynı zamanda o sayının bölenleridir; sayıyı kalansız bölerler.","Çarpanlar sayıyı bölünce hep kalan kalır.","Çarpan ile bölen hiçbir zaman aynı sayı değildir."],"Doğru! 5 x 7 = 35 olduğu için 5 ve 7, 35'i kalansız böler.",["Deftere bakınız: Tam dizilerde bölme işleminde kalan yoktu.","5, 35'in hem çarpanı hem bölenidir."]]]),
@@ -1489,7 +1524,7 @@ function kayipDal(m,son){const n=rastgele([40,60,80,90,100]),c=rastgele(ciftler(
   const w=el(m,"stage ag-kap");w.innerHTML=agacHTML(kok);w.querySelectorAll(".ag-n").forEach(b=>b.tabIndex=-1);
   sayiGir(m,soruKut(`Yukarıdaki çarpan ağacında ■ ile gösterilen sayı silinmiştir. Buna göre, ■ yerine hangi sayı gelmelidir?`),b,`Doğru! ${e[0]} x ${e[1]} = ${b} ve ${a} x ${b} = ${n}.`,`■ iki yoldan bulunur: ${e[0]} x ${e[1]} işlemini ya da ${n} : ${a} işlemini yapınız.`,son,{ozel:v=>v===n-a?"Çıkarma değil bölme yapmalısınız: "+a+" x ■ = "+n+".":null});}
 const e_agac=p=>{const D=defterY(["İlk dal","Ağaçtaki sayılar","En alttaki sayılar"]);const n=rastgele([60,80,90,100]);let ilk=null;
-  asamali(p,{tahmin:{soru:`${ekS(n,"in")} çarpan ağacında görünen sayıların hepsi ${ekS(n,"in")} çarpanı mıdır?`,secs:[["e","Evet, hepsi çarpandır."],["h","Hayır, bazıları çarpan değildir."]],dogru:"e",neden:`Ağaçtaki her sayı ${ekS(n,"i")} kalansız böler.`},
+  asamali(p,{tahmin:{giris:[`Çarpan ağacında bir sayı iki çarpana ayrılır; sonra bu çarpanlar da ayrılabiliyorsa yeniden ikiye ayrılır. Örneğin ${n} = 2 x ${n/2} diye başlanır ve dallar aşağı doğru uzar.`],soru:`${ekS(n,"in")} çarpan ağacında görünen sayıların hepsi ${ekS(n,"in")} çarpanı mıdır?`,secs:[["e","Evet, hepsi çarpandır."],["h","Hayır, bazıları çarpan değildir."]],dogru:"e",neden:`Ağaçtaki her sayı ${ekS(n,"i")} kalansız böler.`},
     asamalar:[
       {ad:"İlk ağacı kur",yon:["Kesik çizgili sayıya dokununuz ve onu iki çarpana ayırmak için bir seçenek seçiniz.","Yeni dallardaki kesik çizgili sayıları da ayırınız. Yeşil çerçeveli sayılar 1 dışında iki çarpana ayrılamaz; o dal biter."],bitis:"Kesik çizgili sayı kalmayınca.",kur:(k,A)=>agacTur(k,n,D,A,null,kok=>{ilk=[kok.c[0].v,kok.c[1].v].sort((a,b)=>a-b);A.tamam("İlk ağacını kurdunuz.");})},
       {ad:"Farklı bir ağaç kur",yon:[`Aynı sayıyı (${n}) bu kez <b>farklı</b> bir ilk dalla ayırınız.`,"Sonra ağaçları karşılaştırınız ve soruyu cevaplayınız."],bitis:"Ağacı tamamlayıp soruyu doğru cevaplayınca.",
@@ -1536,7 +1571,7 @@ function yuzlukTur(k,D,A,o){/* o.hedef: gizli desen (aşama 2); yoksa görevli k
   A.oto=()=>{if(kos||bitti)return true;if(H){S.v=H;zipla();return;}const sira=[10,5,9,4].concat(aralik(2,12));const x=sira.find(x=>!den.has(x));if(x){S.v=x;zipla();}};
   A.durum(H?"0 deneme":"0 sayı");}
 const e_yuzluk=p=>{const D=defterY(["Sayı","Katları (100'e kadar)","Kat sayısı","Tablodaki desen"]);const k1=rastgele([6,8]),k2=rastgele([6,7,8,12]);
-  asamali(p,{tahmin:{soru:`Yüzlük tabloda ${ekS(k1,"in")} katlarını boyarsak ardışık iki boyalı sayı arasında hep aynı fark olur mu?`,secs:[["e","Evet, hep aynı fark olur."],["h","Hayır, fark değişir."]],dogru:"e",neden:`Ardışık iki kat arasında hep ${k1} fark vardır: Boya her seferinde ${k1} zıplar.`},
+  asamali(p,{tahmin:{giris:["Yüzlük tabloda 1'den 100'e kadar sayılar 10 satır ve 10 sütun hâlinde sıralanmıştır: ilk satır 1–10, ikinci satır 11–20 …"],soru:`Yüzlük tabloda ${ekS(k1,"in")} katlarını boyarsak ardışık iki boyalı sayı arasında hep aynı fark olur mu?`,secs:[["e","Evet, hep aynı fark olur."],["h","Hayır, fark değişir."]],dogru:"e",neden:`Ardışık iki kat arasında hep ${k1} fark vardır: Boya her seferinde ${k1} zıplar.`},
     asamalar:[
       {ad:"Zıplayan boya",yon:["Sayacı ya da kaydırıcıyı kullanarak 2 ile 12 arasında bir sayı seçiniz ve <b>Zıplayarak boyayın</b> düğmesine basınız. Boya 0'dan başlayıp o sayı kadar zıplar ve konduğu kareleri boyar.","Farklı sayılar deneyiniz ve desenleri karşılaştırınız. Görevler, doğru sayıyı denediğinizde kendiliğinden işaretlenir."],bitis:"Görev listesindeki dört görev bitince.",kur:(k,A)=>yuzlukTur(k,D,A,{})},
       {ad:"Gizli desen",yon:["Tablodaki kesik çizgili kareler gizli bir sayının katlarıdır.","Bir sayı seçip <b>Zıplayarak boyayın</b> düğmesine basınız. Boyanan kareler kesik çizgili karelerle tam örtüşene kadar farklı sayılar deneyiniz."],bitis:"Gizli deseni tutturunca.",kur:(k,A)=>yuzlukTur(k,D,A,{hedef:k2})},
@@ -1625,8 +1660,8 @@ const e_ayikla=p=>{const kk=rastgele([6,7,8,9]);const D=defterY(["Sayı",`${ekS(
   asamali(p,{tahmin:{soru:`${kk*6+1} sayısı ${ekS(kk,"in")} katı mıdır?`,secs:[["h","Hayır"],["e","Evet"]],dogru:"h",neden:`${kk*6+1} bilye ${ekS(kk,"lik")} gruplara ayrılınca 6 grup oluşur ve 1 bilye artar: ${kk*6+1} : ${kk} işleminde kalan 1'dir.`},
     asamalar:[
       {ad:"Bilyeleri gruplayın",yon:[`Bir sayı kartına dokununuz: Makine o kadar bilyeyi ${ekS(kk,"lik")} gruplara ayırır; artan bilyeler kırmızı görünür.`,`Gördüğünüze göre kartı <b>${ekS(kk,"in")} katı</b> ya da <b>${ekS(kk,"in")} katı değil</b> kutusuna koyunuz. İsterseniz alttaki kutuya kendi sayınızı yazıp gruplayabilirsiniz.`],bitis:"Sekiz kartın hepsi doğru kutuya girince.",kur:(k,A)=>ayiklaTur(k,kk,D,A,kt=>{katlar=kt;A.tamam("Kartları gruplara bakarak ayırdınız.");})},
-      {ad:"Kat olduğunu göster",yon:[`“${ekS(kk,"in")} katı” kutusundaki sayıları ${kk} x ■ biçiminde yazınız.`,"Her soruda ■ yerine gelecek sayıyı yazınız ve <b>Kontrol edin</b> düğmesine basınız."],bitis:"İki sayıyı da doğru yazınca.",
-        kur:(k,A)=>{const [x,y]=karistir(katlar);sayiGir(k,soruKut(`${x} = ${kk} x ■ ise ■ kaçtır?`),x/kk,`Doğru! ${x} = ${kk} x ${x/kk}; ${x}, ${ekS(kk,"in")} ${x/kk}. katıdır.`,`${x} : ${kk} işlemini yapınız.`,()=>sayiGir(k,soruKut(`${y} = ${kk} x ■ ise ■ kaçtır?`),y/kk,`Doğru! ${y}, ${ekS(kk,"in")} ${y/kk}. katıdır.`,`${y} : ${kk} işlemini yapınız.`,()=>A.tamam("Katları çarpma olarak yazdınız.")));}},
+      {ad:"Kat olduğunu göster",yon:[`“${ekS(kk,"in")} katı” kutusundaki sayıları ${kk} x ■ biçiminde yazınız.`,"Her soruda ■ yerine gelecek sayıyı yazınız ve <b>Kontrol edin</b> düğmesine basınız. İki soru vardır; bir soru bitince <b>Sıradaki soru →</b> düğmesine basınız."],bitis:"İki sayıyı da doğru yazınca.",
+        kur:(k,A)=>{const L=karistir(katlar).slice(0,2);turZincir(k,2,(g,j,bit)=>{const x=L[j];sayiGir(g,soruKut(`${x} = ${kk} x ■ ise ■ kaçtır?`),x/kk,`Doğru! ${x} = ${kk} x ${x/kk}; ${x}, ${ekS(kk,"in")} ${x/kk}. katıdır.`,`${x} : ${kk} işlemini yapınız.`,()=>bit(`${x} = ${kk} x ${x/kk}`));},()=>A.tamam("Katları çarpma olarak yazdınız."),{ad:"Soru"});}},
       kuralA(D,[[`Bir sayının ${ekS(kk,"in")} katı olduğunu nasıl anladınız?`,[`O sayıda bilye ${ekS(kk,"lik")} gruplara ayrılınca hiç bilye artmıyor; sayı ${kk} x (sayma sayısı) biçiminde yazılıyor.`,"Sayının son rakamına baktım.",`Sayı ${ekS(kk,"den")} büyükse kattır.`],"Doğru! Kalansız bölünen sayı kattır.",["Son rakam her sayı için yetmez; gruplara ve artan bilyelere bakınız.",`Deftere bakınız: ${ekS(kk,"den")} büyük olduğu hâlde bilye artan sayılar vardı.`]],
         [`${ekS(kk*5+1,"in")} ${ekS(kk,"in")} katı olmadığını gösteren hangisidir?`,[`${kk*5+1} bilye ${ekS(kk,"lik")} gruplara ayrılınca 1 bilye artar: ${kk*5+1} : ${kk} işleminde kalan 1'dir.`,`${kk*5+1} sayısı ${ekS(kk*5,"e")} çok yakındır.`,`${kk*5+1}, ${ekS(kk,"den")} büyüktür.`],"Doğru! Artan bilye (kalan) olduğu için kat değildir.",["Yakın olmak kat olmayı göstermez; artan bilyeye bakınız.","Büyük olmak kat olmayı göstermez."]]]),
       kendiY((m,son)=>{const k=rastgele([6,7,8,9]),q=ra(5,11),alt=k*q-ra(1,k-1),ust=alt+k-1;
@@ -1752,14 +1787,16 @@ function yolSvg(kap,L,adim,fn){const U=32,P=24,n=L/20,W=P*2+n*U,H=152,y0=88;
 function mola2(k,L,m,D,A){
   k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>İkinci otobüs</small><p>Bu otobüs ${L} km'lik yolda <b>her ${m} km'de bir</b> mola veriyor. Varış noktası da bir durak sayılır.</p></div><div class="nd-kap yl-kap"></div>`);
   const Y=yolSvg(k.querySelector(".yl-kap"),L,20,null);const q=ra(3,Math.min(9,L/m-1));
-  sayiGir(k,soruKut(`Bu otobüs yol boyunca (varış dahil) kaç kez durur?`),L/m,`Doğru! ${L} : ${m} = ${L/m}. Duraklar yola işlendi.`,`Durakların hepsi ${ekS(m,"in")} katı: ${m}, ${2*m}, ${3*m}, … ${ekS(L,"e")} kadar. ${L} : ${m} işlemini yapınız.`,()=>{
-    aralik(1,L/m).forEach((i,j)=>setTimeout(()=>{if(k.isConnected)Y.bayrak(i*m,`${i}.`,"var(--cp)");},azHareket()?0:j*120));D.ekle([`${L} km, her ${m} km`,`${L/m} mola`,`${L} : ${m} = ${L/m}`],"y2");
-    sayiGir(k,soruKut(`Otobüs ${q}. molasını kaçıncı kilometrede verir?`),q*m,`Doğru! ${m} x ${q} = ${q*m} km.`,`${q}. mola, ${ekS(m,"in")} ${q}. katıdır: ${m} x ${q}.`,()=>A.tamam("Mola noktalarını hesapla buldunuz."),{ph:"ör. 240",ozel:v=>v===m+q?"Toplamışsınız; "+q+". mola için "+m+" km'yi "+q+" kez almalısınız.":null});},{ozel:v=>v===L-m?"Çıkarma değil bölme yapmalısınız.":null});}
+  turZincir(k,2,(g,j,bit)=>{
+    if(j===0)sayiGir(g,soruKut(`Bu otobüs yol boyunca (varış dahil) kaç kez durur?`),L/m,`Doğru! ${L} : ${m} = ${L/m}. Duraklar yola işlendi.`,`Durakların hepsi ${ekS(m,"in")} katı: ${m}, ${2*m}, ${3*m}, … ${ekS(L,"e")} kadar. ${L} : ${m} işlemini yapınız.`,()=>{
+      aralik(1,L/m).forEach((i,j2)=>setTimeout(()=>{if(k.isConnected)Y.bayrak(i*m,`${i}.`,"var(--cp)");},azHareket()?0:j2*120));D.ekle([`${L} km, her ${m} km`,`${L/m} mola`,`${L} : ${m} = ${L/m}`],"y2");bit(`${L/m} kez durur`);},{ozel:v=>v===L-m?"Çıkarma değil bölme yapmalısınız.":null});
+    else sayiGir(g,soruKut(`Otobüs ${q}. molasını kaçıncı kilometrede verir?`),q*m,`Doğru! ${m} x ${q} = ${q*m} km.`,`${q}. mola, ${ekS(m,"in")} ${q}. katıdır: ${m} x ${q}.`,()=>bit(`${q}. mola ${q*m}. km'de`),{ph:"ör. 240",ozel:v=>v===m+q?"Toplamışsınız; "+q+". mola için "+m+" km'yi "+q+" kez almalısınız.":null});},
+    ()=>A.tamam("Mola noktalarını hesapla buldunuz."),{ad:"Soru"});}
 const e_mola=p=>{const D=defterY(["Mola aralığı ya da yol","Mola noktaları ya da sayısı","Varışa denk geldi mi?"]);const L1=rastgele([120,180,240]),m1=L1===180?40:50,m2=rastgele([40,120]),L2=m2===40?480:600;
   asamali(p,{tahmin:{soru:`${L1} km'lik yolda her ${m1} km'de bir mola veren otobüsün son molası varış noktasına denk gelir mi?`,secs:[["h","Hayır"],["e","Evet"]],dogru:"h",neden:`Molalar ${ekS(m1,"in")} katlarında verilir: ${m1}, ${2*m1}, ${3*m1}, … ${L1}, ${ekS(m1,"in")} katı değildir: ${kalanY(L1,m1)}.`},
     asamalar:[
       {ad:"Mola aralığını deneyin",yon:["Sayaç ya da kaydırıcıyla mola aralığını seçiniz (10 km ile 100 km arası) ve <b>Otobüsü yola çıkarın</b> düğmesine basınız. Otobüs her molada durur ve oraya bayrak dikilir.","Son molanın varış noktasına tam denk gelip gelmediğine bakınız. Farklı aralıklar deneyiniz; sonuçlar deney defterine yazılır."],bitis:"En az 5 aralık deneyip 2 denk gelen ve 2 denk gelmeyen aralık bulunca.",kur:(k,A)=>otobusTur(k,L1,D,A)},
-      {ad:"Hesapla bul",yon:["Bu kez otobüsü çalıştırmadan, hesap yaparak cevap veriniz.","Doğru cevap verince duraklar yola işlenir."],bitis:"İki soruyu da doğru cevaplayınca.",kur:(k,A)=>mola2(k,L2,m2,D,A)},
+      {ad:"Hesapla bul",yon:["Bu kez otobüsü çalıştırmadan, hesap yaparak cevap veriniz.","Doğru cevap verince duraklar yola işlenir. İki soru vardır. Bir soru bitince <b>Sıradaki soru →</b> düğmesine basınız."],bitis:"İki soruyu da doğru cevaplayınca.",kur:(k,A)=>mola2(k,L2,m2,D,A)},
       kuralA(D,[["Mola noktaları hangi sayıların katlarıdır?",["Molalar arasındaki uzaklığın (mola aralığının) katları","Yolun uzunluğunun katları","Mola sayısının katları"],"Doğru! Her 30 km'de bir mola veren otobüs 30, 60, 90, … km'de durur.",[`${L1} km'lik yolda ${ekS(L1,"in")} katı olan tek nokta varıştır.`,"Deftere bakınız: Kilometreler mola sayısının değil, mola aralığının katı."]],
         ["Son molanın varış noktasına tam denk geldiği aralıklar için hangisi doğrudur?",[`Bu aralıklar yol uzunluğunun (${L1} km) çarpanlarıdır; ${L1} de bu aralıkların katıdır.`,"Bu aralıkların hepsi 10'un katıdır.","Bu aralıklar yol uzunluğundan büyüktür."],`Doğru! ${L1} : aralık işleminde kalan 0 ise son mola varışa denk gelir.`,["Deftere bakınız: 10'un katı olduğu hâlde varışa denk gelmeyen aralıklar da vardı.","Aralıklar yol uzunluğundan küçüktü."]],
         ["Mola sayısını nasıl buldunuz?",["Yolun uzunluğunu molalar arasındaki uzaklığa böldüm.","Yolun uzunluğundan aradaki uzaklığı çıkardım.","İki sayıyı çarptım."],`Doğru! ${L2} : ${m2} = ${L2/m2}.`,["Çıkarma bir sonraki molanın kalan yolunu verir, mola sayısını değil.",`${L2} x ${m2} çok büyük bir sayı olur.`]]]),
@@ -1828,13 +1865,15 @@ function seritTur(k,D,A){let kos=false,gen=0;const den=new Set();
   cb.onclick=ciz;
   A.oto=()=>{if(kos)return true;const x=[9,12,24,15,7,30].find(x=>!den.has(x));S.v=x||ra(2,30);ciz();};A.durum("0 sayı");}
 function gizliSayi(k,D,A){const x=ra(11,40),y=ra(11,30);
-  sayiGir(k,soruKut(`Gizli sayının en büyük çarpanı ile en küçük katının toplamı ${ekS(2*x,"dir")}. Buna göre, gizli sayı kaçtır?`),x,`Doğru! En büyük çarpan da en küçük kat da gizli sayının kendisidir: ${x} + ${x} = ${2*x}.`,"En büyük çarpan ve en küçük kat hangi sayıdır? İkisi aynı sayı!",()=>{D.ekle([`Gizli sayı 1`,`${x}`,`${x} + ${x} = ${2*x}`,""],"g1");
-    sayiGir(k,soruKut(`Gizli bir sayının katları küçükten büyüğe sıralanınca ilk üç kat ${y}, ${2*y}, ${3*y} oluyor. Buna göre, gizli sayının en büyük çarpanı kaçtır?`),y,`Doğru! En küçük kat ${y} olduğuna göre gizli sayı ${ekS(y,"dir")}; en büyük çarpanı da ${ekS(y,"dir")}.`,"En küçük kat sayının kendisidir.",()=>{D.ekle([`Gizli sayı 2`,`${y}`,`${y}, ${2*y}, ${3*y}, …`,""],"g2");A.tamam("Gizli sayıları buldunuz.");},{ozel:v=>v===3*y?"Üçüncü katı yazdınız. En büyük çarpan, sayının kendisidir.":null});},{ozel:v=>v===2*x?"Toplamı yazdınız. Gizli sayı, toplamın yarısı değil mi? En büyük çarpan ile en küçük kat aynı sayıdır.":null});}
+  turZincir(k,2,(g,j,bit)=>{
+    if(j===0)sayiGir(g,soruKut(`Gizli sayının en büyük çarpanı ile en küçük katının toplamı ${ekS(2*x,"dir")}. Buna göre, gizli sayı kaçtır?`),x,`Doğru! En büyük çarpan da en küçük kat da gizli sayının kendisidir: ${x} + ${x} = ${2*x}.`,"En büyük çarpan ve en küçük kat hangi sayıdır? İkisi aynı sayı!",()=>{D.ekle([`Gizli sayı 1`,`${x}`,`${x} + ${x} = ${2*x}`,""],"g1");bit(`gizli sayı ${x}`);},{ozel:v=>v===2*x?"Toplamı yazdınız. Gizli sayı, toplamın yarısı değil mi? En büyük çarpan ile en küçük kat aynı sayıdır.":null});
+    else sayiGir(g,soruKut(`Gizli bir sayının katları küçükten büyüğe sıralanınca ilk üç kat ${y}, ${2*y}, ${3*y} oluyor. Buna göre, gizli sayının en büyük çarpanı kaçtır?`),y,`Doğru! En küçük kat ${y} olduğuna göre gizli sayı ${ekS(y,"dir")}; en büyük çarpanı da ${ekS(y,"dir")}.`,"En küçük kat sayının kendisidir.",()=>{D.ekle([`Gizli sayı 2`,`${y}`,`${y}, ${2*y}, ${3*y}, …`,""],"g2");bit(`en büyük çarpan ${y}`);},{ozel:v=>v===3*y?"Üçüncü katı yazdınız. En büyük çarpan, sayının kendisidir.":null});},
+    ()=>A.tamam("Gizli sayıları buldunuz."),{ad:"Soru"});}
 const e_sinir=p=>{const D=defterY(["Sayı","Çarpanları (mavi)","Katları (turuncu)","Buluştukları sayı"]);const n=ra(9,16);
   asamali(p,{tahmin:{soru:`${ekS(n,"in")} en büyük çarpanı ile en küçük katı arasında nasıl bir ilişki vardır?`,secs:[["e","İkisi aynı sayıdır."],["b","En büyük çarpan daha büyüktür."],["k","En küçük kat daha büyüktür."]],dogru:"e",neden:`İkisi de ${n} sayısının kendisidir: Şeritte mavi ile turuncu ${n} sayısında buluşur.`},
     asamalar:[
       {ad:"Sayı şeridi",yon:["Sayaç ya da kaydırıcıyla 2 ile 30 arasında bir sayı seçiniz ve <b>Şeride çizin</b> düğmesine basınız. Sayının çarpanları maviye, katları turuncuya boyanır.","Farklı sayılar deneyiniz ve iki rengin nerede buluştuğuna bakınız. Sonuçlar deney defterine yazılır."],bitis:"Görev listesindeki dört görev bitince (en az 4 sayı).",kur:(k,A)=>seritTur(k,D,A)},
-      {ad:"Gizli sayıyı bul",yon:["Bilmeceleri okuyunuz.","Gizli sayıyı bulup yazınız ve <b>Kontrol edin</b> düğmesine basınız."],bitis:"İki bilmeceyi de çözünce.",kur:(k,A)=>gizliSayi(k,D,A)},
+      {ad:"Gizli sayıyı bul",yon:["Bilmeceleri okuyunuz.","Gizli sayıyı bulup yazınız ve <b>Kontrol edin</b> düğmesine basınız. İki bilmece vardır. Bir soru bitince <b>Sıradaki soru →</b> düğmesine basınız."],bitis:"İki bilmeceyi de çözünce.",kur:(k,A)=>gizliSayi(k,D,A)},
       kuralA(D,[[`${ekS(n,"in")} en büyük çarpanı ve en küçük katı hangisidir?`,[`İkisi de ${ekS(n,"dir")}.`,`En büyük çarpanı ${n}, en küçük katı ${ekS(2*n,"dir")}.`,`En büyük çarpanı ${n%2===0?n/2:1}, en küçük katı ${ekS(n,"dir")}.`],"Doğru! "+n+" = "+n+" x 1.",[`${n} x 1 = ${n} de ${ekS(n,"in")} katıdır.`,`${n} x 1 = ${n} olduğu için ${n} de ${ekS(n,"in")} çarpanıdır.`]],
         ["Aşağıdakilerden hangisi doğrudur? (0 hariç)",["Bir sayının çarpanları sayıdan büyük olamaz; katları sayıdan küçük olamaz.","Bir sayının katları sayıdan küçük olabilir.","Bir sayının çarpanları sayıdan büyük olabilir."],"Doğru! Şeritte mavi sayılar hep seçilen sayıdan önce, turuncu sayılar hep ondan sonra geldi.",["Turuncu sayıların hepsi seçtiğiniz sayıya eşit ya da ondan büyüktü.","Mavi sayıların hepsi seçtiğiniz sayıya eşit ya da ondan küçüktü."]]]),
       kendiY((m,son)=>{const a=ra(12,45);
@@ -1862,13 +1901,15 @@ function bahceTur(k,Al,D,A){
 function bahce2(k,Al,D,A){const L=ciftler(Al).map(c=>({c,p:2*(c[0]+c[1])}));const et=x=>`${x.c[0]} m x ${x.c[1]} m`;
   k.insertAdjacentHTML("beforeend",`<div class="dkart"><small>Yeni bahçe</small><p>Alanı <b>${Al} m²</b> olan dikdörtgen bahçeler tam metre kenarlarla şöyle kurulabilir: ${L.map(et).join("; ")}.</p></div>`);
   const kisa=L[L.length-1],uzun=L[0];
-  soruY(k,`Duvarı (çevresi) <b>en kısa</b> olan bahçe hangisidir?`,[et(kisa),...L.slice(0,-1).slice(-3).map(et)],`Doğru! Çevresi ${kisa.c[0]} + ${kisa.c[1]} + ${kisa.c[0]} + ${kisa.c[1]} = ${kisa.p} m. Kenarları birbirine en yakın bahçe.`,L.slice(0,-1).slice(-3).map(x=>`Bu bahçenin duvarı ${x.p} m; daha kısa olan var.`),()=>{D.ekle([`${Al} m², en kısa`,et(kisa),`${kisa.p} m`],"k"+Al);
-    soruY(k,`Duvarı (çevresi) <b>en uzun</b> olan bahçe hangisidir?`,[et(uzun),...L.slice(1).slice(-3).map(et)],`Doğru! Çevresi 1 + ${Al} + 1 + ${Al} = ${uzun.p} m. Kenarları birbirinden en uzak bahçe.`,L.slice(1).slice(-3).map(x=>`Bu bahçenin duvarı ${x.p} m; daha uzun olan var.`),()=>{D.ekle([`${Al} m², en uzun`,et(uzun),`${uzun.p} m`],"u"+Al);A.tamam("En kısa ve en uzun duvarı buldunuz.");});});}
+  turZincir(k,2,(g,j,bit)=>{
+    if(j===0)soruY(g,`Duvarı (çevresi) <b>en kısa</b> olan bahçe hangisidir?`,[et(kisa),...L.slice(0,-1).slice(-3).map(et)],`Doğru! Çevresi ${kisa.c[0]} + ${kisa.c[1]} + ${kisa.c[0]} + ${kisa.c[1]} = ${kisa.p} m. Kenarları birbirine en yakın bahçe.`,L.slice(0,-1).slice(-3).map(x=>`Bu bahçenin duvarı ${x.p} m; daha kısa olan var.`),()=>{D.ekle([`${Al} m², en kısa`,et(kisa),`${kisa.p} m`],"k"+Al);bit(`en kısa duvar: ${et(kisa)} (${kisa.p} m)`);});
+    else soruY(g,`Duvarı (çevresi) <b>en uzun</b> olan bahçe hangisidir?`,[et(uzun),...L.slice(1).slice(-3).map(et)],`Doğru! Çevresi 1 + ${Al} + 1 + ${Al} = ${uzun.p} m. Kenarları birbirinden en uzak bahçe.`,L.slice(1).slice(-3).map(x=>`Bu bahçenin duvarı ${x.p} m; daha uzun olan var.`),()=>{D.ekle([`${Al} m², en uzun`,et(uzun),`${uzun.p} m`],"u"+Al);bit(`en uzun duvar: ${et(uzun)} (${uzun.p} m)`);});},
+    ()=>A.tamam("En kısa ve en uzun duvarı buldunuz."),{ad:"Soru"});}
 const e_bahce=p=>{const D=defterY(["Bahçe","Alan","Duvar (çevre)"]);const A1=rastgele([18,20,30]),A2=rastgele([40,60]);
-  asamali(p,{tahmin:{soru:`Alanı ${A1} m² olan dikdörtgen bahçelerin hepsinin duvar uzunluğu aynı mıdır?`,secs:[["h","Hayır, farklıdır."],["e","Evet, aynıdır."]],dogru:"h",neden:`Alan aynı olsa da kenar uzunlukları değişince çevre değişir.`},
+  asamali(p,{tahmin:{giris:[`Dikdörtgen biçimli bahçelerin kenarları tam metredir ve alanı ${A1} m²'dir. Bahçenin çevresine duvar örülecektir; duvar uzunluğu bahçenin çevresidir.`],soru:`Alanı ${A1} m² olan dikdörtgen bahçelerin hepsinin duvar uzunluğu aynı mıdır?`,secs:[["h","Hayır, farklıdır."],["e","Evet, aynıdır."]],dogru:"h",neden:`Alan aynı olsa da kenar uzunlukları değişince çevre değişir.`},
     asamalar:[
       {ad:`${A1} m²'lik bahçeler`,yon:["− ve + düğmeleriyle bahçenin enini seçiniz ve <b>Bahçeyi kurun</b> düğmesine basınız.","Bahçe kurulursa duvarın uzunluğunu (çevreyi) hesaplayınız ve yazınız. Alanı "+A1+" m² olan bütün bahçeleri bulunuz."],bitis:"Bütün bahçelerin duvarını bulunca.",kur:(k,A)=>bahceTur(k,A1,D,A)},
-      {ad:`${A2} m²'lik bahçeler`,yon:["Bahçelerin kenar uzunluklarını karşılaştırınız.","Önce duvarı en kısa, sonra en uzun olan bahçeyi seçiniz."],bitis:"İki soruyu da doğru cevaplayınca.",kur:(k,A)=>bahce2(k,A2,D,A)},
+      {ad:`${A2} m²'lik bahçeler`,yon:["Bahçelerin kenar uzunluklarını karşılaştırınız.","Önce duvarı en kısa, sonra en uzun olan bahçeyi seçiniz. İki soru vardır. Bir soru bitince <b>Sıradaki soru →</b> düğmesine basınız."],bitis:"İki soruyu da doğru cevaplayınca.",kur:(k,A)=>bahce2(k,A2,D,A)},
       kuralA(D,[[`Alanı ${A1} m² olan dikdörtgen bahçelerin kenar uzunlukları için hangisi doğrudur?`,[`Kenar uzunlukları ${ekS(A1,"in")} çarpan çiftidir.`,`Kenar uzunluklarının toplamı ${ekS(A1,"dir")}.`,`Kenar uzunlukları ${ekS(A1,"in")} katlarıdır.`],"Doğru! En x boy = alan.",["Deftere bakınız: Toplam değil çarpım alanı verir.",`Katlar ${ekS(A1,"den")} küçük olamaz; kenarlar ise ${ekS(A1,"den")} küçüktü.`]],
         ["Alanı aynı olan bahçelerde duvar en kısa hangisinde olur?",["Kenar uzunlukları birbirine en yakın olan bahçede","Bir kenarı 1 m olan bahçede","Hepsinde aynıdır."],"Doğru! Kenarlar birbirinden uzaklaştıkça duvar uzar.",["1 m x "+A1+" m bahçenin duvarı en uzun duvardı.","Deftere bakınız: Duvar uzunlukları farklıydı."]]]),
       kendiY((m,son)=>{const a=rastgele([50,70,80,90]);
@@ -1888,28 +1929,32 @@ function cubukCiz(kap,L,fn){const U=Math.max(16,Math.min(30,Math.floor(640/L))),
   sv.querySelectorAll(".cb-hit").forEach(r=>r.onclick=()=>fn(+r.dataset.i));
   return {ciz(set){ks.innerHTML=[...set].map(i=>{const x=P+i*U;return `<line x1="${x}" y1="${y0-14}" x2="${x}" y2="${y0+32}" stroke="#e03131" stroke-width="3"/><path d="M${x-6} ${y0-22}l6 8l6 -8" fill="none" stroke="#e03131" stroke-width="2.5"/>`;}).join("");},
     parca(set){const c=[0,...[...set].sort((a,b)=>a-b),L];pr.innerHTML=c.slice(1).map((b,j)=>{const a=c[j];return `<text x="${P+(a+b)/2*U}" y="${y0+20}" text-anchor="middle" style="font-size:13px;font-weight:800" fill="#fff">${b-a}</text>`;}).join("");}};}
+/* 06.10.2026 (E2): yeni tur açılınca kutuyu vurgula ve ekrana getir */
+function vurgu(e){if(!e)return;e.classList.remove("tz-gel");void e.offsetWidth;e.classList.add("tz-gel");setTimeout(()=>{if(e.isConnected)gorunur(e,true);},60);}
+function siraDug(kap,yaz,fn){const b=yeniEl("button","primary sz-ileri",yaz);b.type="button";kap.appendChild(b);setTimeout(()=>{if(b.isConnected)gorunur(b,true);},60);b.onclick=()=>{b.remove();fn();};return b;}
 function cubukTur(k,L,D,A){
   const cp=divs(L).filter(x=>x>1&&x<L&&x<=10),nc=aralik(3,9).filter(x=>L%x);const G=[rastgele(cp.filter(x=>x<=6)),rastgele(nc),rastgele(cp.filter(x=>x>2))];
   if(G[2]===G[0])G[2]=cp.find(x=>x!==G[0]&&x>2)||cp.find(x=>x!==G[0]);
-  k.insertAdjacentHTML("beforeend",`<div class="dkart cb-g"></div><div class="nd-kap cb-kap"></div><div class="row"><button type="button" class="primary cb-k">Kesin ve kontrol edin</button><button type="button" class="ghost cb-y">Bu çubuk bu kadar eşit parçaya ayrılamaz</button><button type="button" class="ghost cb-t">Kesimleri temizleyin</button></div><div class="fb" hidden></div>`);
+  k.insertAdjacentHTML("beforeend",`<div class="dkart cb-g"></div><div class="nd-kap cb-kap"></div><div class="row"><button type="button" class="primary cb-k">Kesin ve kontrol edin</button><button type="button" class="ghost cb-y">Bu çubuk bu kadar eşit parçaya ayrılamaz</button><button type="button" class="ghost cb-t">Kesimleri temizleyin</button></div><div class="fb" hidden></div><div class="cb-sir"></div>`);
   const f=k.querySelector(".fb"),kes=new Set();let t=0,bitti=false,bek=false;
   const C=cubukCiz(k.querySelector(".cb-kap"),L,i=>{if(bitti)return;kes.has(i)?kes.delete(i):kes.add(i);C.ciz(kes);C.parca(kes);f.hidden=true;bip(650,.04);});
   const gor=()=>{k.querySelector(".cb-g").innerHTML=`<small>Görev ${t+1} / ${G.length}</small><p>${L} cm'lik çubuğu <b>${G[t]} eşit parçaya</b> ayırınız.</p>`;A.durum(`Görev ${t+1} / ${G.length}`);};
-  const sonraki=()=>{bek=false;t++;kes.clear();C.ciz(kes);C.parca(kes);if(t>=G.length){bitti=true;A.tamam("Çubuk kesme görevlerini bitirdiniz.");return;}gor();};
+  const sonraki=()=>{bek=false;t++;kes.clear();C.ciz(kes);C.parca(kes);if(t>=G.length){bitti=true;A.tamam("Çubuk kesme görevlerini bitirdiniz.");return;}gor();f.hidden=true;vurgu(k.querySelector(".cb-g"));};
+  const bekle=()=>{if(t+1>=G.length){sonraki();el(k.querySelector(".cb-sir"),"tz-son",`Üç görev de tamamlandı. Bu adım bitti; alttaki <b>Sonraki adım →</b> düğmesine basınız.`);return;}siraDug(k.querySelector(".cb-sir"),`Sıradaki görev (${t+2} / ${G.length}) →`,sonraki);};
   k.querySelector(".cb-t").onclick=()=>{kes.clear();C.ciz(kes);C.parca(kes);};
   k.querySelector(".cb-k").onclick=()=>{if(bitti||bek)return;const p=G[t];
     if(kes.size!==p-1){bip(220,.12);fb(f,false,`${kes.size} kesimle çubuk ${p} parçaya ayrılmaz. Yeniden deneyiniz.`);return;}
     const c=[0,...[...kes].sort((a,b)=>a-b),L],u=c.slice(1).map((b,j)=>b-c[j]);
     if(u.some(x=>x!==u[0])){bip(220,.12);fb(f,false,`Parçaların uzunlukları ${u.join(", ")} cm; eşit değil. Yeniden deneyiniz.`);return;}
-    bip(760,.1);D.ekle([`${L} cm`,`${p} parça`,`${u[0]} cm`,`${p} x ${u[0]} = ${L}`],L+"-"+p);bek=true;fb(f,true,`Doğru! ${p} x ${u[0]} = ${L}. ${p}, ${ekS(L,"in")} çarpanıdır.`);setTimeout(()=>{if(k.isConnected)sonraki();},600);};
+    bip(760,.1);D.ekle([`${L} cm`,`${p} parça`,`${u[0]} cm`,`${p} x ${u[0]} = ${L}`],L+"-"+p);bek=true;fb(f,true,`Doğru! ${p} x ${u[0]} = ${L}. ${p}, ${ekS(L,"in")} çarpanıdır.`);bekle();};
   k.querySelector(".cb-y").onclick=()=>{if(bitti||bek)return;const p=G[t];
     if(L%p===0){bip(220,.12);fb(f,false,"Bu çubuk bu kadar eşit parçaya ayrılabilir. Yeniden deneyiniz.");return;}
-    bip(760,.1);D.ekle([`${L} cm`,`${p} parça`,"ayrılamaz",kalanY(L,p)],L+"-"+p);bek=true;fb(f,true,`Doğru! ${kalanY(L,p)}. Tam santimetrelik ${p} eşit parça olmaz; ${p}, ${ekS(L,"in")} çarpanı değil.`);setTimeout(()=>{if(k.isConnected)sonraki();},600);};
+    bip(760,.1);D.ekle([`${L} cm`,`${p} parça`,"ayrılamaz",kalanY(L,p)],L+"-"+p);bek=true;fb(f,true,`Doğru! ${kalanY(L,p)}. Tam santimetrelik ${p} eşit parça olmaz; ${p}, ${ekS(L,"in")} çarpanı değil.`);bekle();};
   A.oto=()=>{if(bitti||bek)return;const p=G[t];if(L%p){k.querySelector(".cb-y").click();return;}kes.clear();aralik(1,p-1).forEach(j=>kes.add(j*L/p));C.ciz(kes);k.querySelector(".cb-k").click();};gor();}
 const e_cubuk=p=>{const D=defterY(["Çubuk","Parça sayısı","Parça uzunluğu","İşlem"]);const L=rastgele([18,20,30]),L2=L===30?20:30;
   asamali(p,{tahmin:{soru:`${L} cm'lik bir çubuk tam santimetrelik 7 eşit parçaya ayrılabilir mi?`,secs:[["h","Hayır"],["e","Evet"]],dogru:"h",neden:`${kalanY(L,7)}; 7, ${ekS(L,"in")} çarpanı değildir.`},
     asamalar:[
-      {ad:"Çubuğu kes",yon:["Cetveldeki santimetre çizgilerine dokunarak kesim yerlerini işaretleyiniz; yeniden dokunursanız kesim kalkar.","<b>Kesin ve kontrol edin</b> düğmesine basınız. Görev yapılamıyorsa <b>Bu çubuk bu kadar eşit parçaya ayrılamaz</b> düğmesine basınız."],bitis:"Üç görevi de doğru tamamlayınca.",kur:(k,A)=>cubukTur(k,L,D,A)},
+      {ad:"Çubuğu kes",yon:["Cetveldeki santimetre çizgilerine dokunarak kesim yerlerini işaretleyiniz; yeniden dokunursanız kesim kalkar.","<b>Kesin ve kontrol edin</b> düğmesine basınız. Görev yapılamıyorsa <b>Bu çubuk bu kadar eşit parçaya ayrılamaz</b> düğmesine basınız.","Üç görev vardır. Bir görev bitince <b>Sıradaki görev →</b> düğmesine basınız."],bitis:"Üç görevi de doğru tamamlayınca.",kur:(k,A)=>cubukTur(k,L,D,A)},
       {ad:"Olası parça sayıları",yon:[`Bu kez ${L2} cm'lik bir çubuk var.`,"Tam santimetrelik eşit parçalara ayırabileceğiniz parça sayılarının hepsini seçiniz."],bitis:"Seçiminiz doğru olunca.",
         kur:(k,A)=>cokSec(k,{ust:`<p class="soru">${L2} cm'lik çubuk kaç eşit parçaya ayrılabilir? 2 ile 10 arasındaki olası parça sayılarının hepsini seçiniz.</p>`,sayilar:aralik(2,10),dogru:new Set(divs(L2).filter(x=>x>1&&x<=10)),etiket:x=>`${x} parça`,yanlis:x=>`${kalanY(L2,x)}; ${x} eşit parça tam santimetre olmaz.`,eksik:m=>`${m} parça sayısı eksik. ${L2} : ▲ işleminde kalan 0 olan sayıları arayınız.`,ok:`Doğru! Bu sayıların hepsi ${ekS(L2,"in")} çarpanıdır.`,sonra:()=>{D.ekle([`${L2} cm`,divs(L2).filter(x=>x>1&&x<=10).join(", ")+" parça","",""],"s"+L2);A.tamam("Olası parça sayılarını buldunuz.");}})},
       kuralA(D,[[`${L} cm'lik çubuk ▲ eşit parçaya ayrılabiliyorsa hangisi doğrudur?`,[`▲, ${ekS(L,"in")} çarpanıdır; her parça ${L} : ▲ cm olur.`,`▲, ${ekS(L,"in")} katıdır.`,"▲ tek sayıdır."],"Doğru!",[`Parça sayısı ${ekS(L,"den")} küçüktü; kat olamaz.`,"Deftere bakınız: Çift parça sayıları da vardı."]],
@@ -2049,22 +2094,22 @@ function rekorTur(k,D,A){const den=new Map();let son=0;
   A.oto=()=>{const x=[7,36,12,18,20,24,30,48,60].find(x=>!den.has(x));S.v=x||ra(1,60);kur();};A.durum("0 sayı");}
 function yarisTur(k,D,A){let tur=0,sen=0,bil=0,bitti=false,kilit=false;const R=[20,30,40];
   k.insertAdjacentHTML("beforeend",`<div class="kurallar"><h4>Yarış kuralları</h4><ul><li><b>Tur:</b> Yarış 3 turdur. Her turda 10 sayılık bir aralık verilir.<span class="orn">Örnek: 20 ile 29 arası.</span></li><li><b>Seçim:</b> Siz aralıktan bir sayı seçersiniz; bilgisayar da aynı aralıktan rastgele bir sayı seçer.</li><li><b>Kazanan:</b> Çarpan sayısı fazla olan sayıyı seçen turu alır. Eşitlikte tur berabere biter.<span class="orn">Örnek: 20'nin 6 çarpanı, 23'ün 2 çarpanı var; 20'yi seçen turu alır.</span></li><li><b>Bitiş:</b> 3 tur bitince yarış biter; kazanıp kaybetmeniz fark etmez.</li></ul></div><div class="skorlar s3"><div><small>Tur</small><b class="y-t">0 / 3</b></div><div><small>Siz</small><b class="y-s">0</b></div><div><small>Bilgisayar</small><b class="y-b">0</b></div></div><div class="dkart y-a"></div><div class="chips y-sec"></div><div class="fb" hidden></div>`);
-  const f=k.querySelector(".fb"),ys=k.querySelector(".y-sec"),ya=k.querySelector(".y-a");
+  const f=k.querySelector(".fb"),ys=k.querySelector(".y-sec"),ya=k.querySelector(".y-a");const sk=yeniEl("div","y-sir");f.after(sk);
   const skor=()=>{k.querySelector(".y-t").textContent=`${Math.min(tur+1,3)} / 3`;k.querySelector(".y-s").textContent=sen;k.querySelector(".y-b").textContent=bil;A.durum(`Tur ${Math.min(tur+1,3)} / 3`);};
-  function turAc(){if(tur>=R.length)return;kilit=false;const a=R[tur];ya.innerHTML=`<small>Tur ${tur+1}</small><p><b>${a}</b> ile <b>${a+9}</b> arasından bir sayı seçiniz.</p>`;ys.innerHTML=aralik(a,a+9).map(x=>`<button type="button" class="chip" data-v="${x}">${x}</button>`).join("");
+  function turAc(){if(tur>=R.length)return;kilit=false;const a=R[tur];ya.innerHTML=`<small>Tur ${tur+1} / 3</small><p><b>${a}</b> ile <b>${a+9}</b> arasından bir sayı seçiniz.</p>`;ys.innerHTML=aralik(a,a+9).map(x=>`<button type="button" class="chip" data-v="${x}">${x}</button>`).join("");
     ys.querySelectorAll(".chip").forEach(b=>b.onclick=()=>oyna(+b.dataset.v));skor();}
   function oyna(x){if(bitti||kilit)return;kilit=true;const a=R[tur];let y;do{y=ra(a,a+9);}while(y===x);const cx=cs_(x),cy=cs_(y);ys.querySelectorAll(".chip").forEach(b=>b.disabled=true);
     const s=cx>cy?1:cx<cy?-1:0;if(s>0)sen++;else if(s<0)bil++;bip(s>0?760:s<0?220:500,.12);
     fb(f,s>=0,`Siz: ${x} (çarpanları ${divs(x).join(", ")}: ${cx} çarpan). Bilgisayar: ${y} (çarpanları ${divs(y).join(", ")}: ${cy} çarpan). ${s>0?"Turu siz aldınız!":s<0?"Turu bilgisayar aldı.":"Berabere."}`);
     D.ekle([`Tur ${tur+1}: ${x} ve ${y}`,`${cx} ve ${cy} çarpan`,s>0?"Siz":s<0?"Bilgisayar":"Berabere"],"y"+tur);tur++;skor();
     if(tur>=3){bitti=true;setTimeout(()=>{if(!k.isConnected)return;ya.innerHTML=`<small>Yarış bitti</small><p>Siz ${sen}, bilgisayar ${bil}. ${sen>bil?"Kazandınız!":sen===bil?"Berabere!":"Bilgisayar kazandı; bir dahaki sefere çok çarpanlı sayıları arayınız."}</p>`;ys.innerHTML="";A.tamam(`Yarış bitti: Siz ${sen}, bilgisayar ${bil}.`);},900);}
-    else setTimeout(()=>{if(k.isConnected)turAc();},1400);}
+    else siraDug(sk,`Sıradaki tur (${tur+1} / 3) →`,()=>{f.hidden=true;turAc();vurgu(ya);});}
   A.oto=()=>{if(bitti)return;const b=[...ys.querySelectorAll(".chip:not(:disabled)")];if(!b.length)return;b.sort((p,q)=>cs_(+q.dataset.v)-cs_(+p.dataset.v))[0].click();};turAc();}
 const e_yaris=p=>{const D=defterY(["Sayı ya da tur","Dikdörtgenler ya da çarpan sayıları","Çarpan sayısı ya da kazanan"]);
   asamali(p,{tahmin:{soru:"30 ile 31 sayılarından hangisinin çarpan sayısı daha fazladır?",secs:[["30","30"],["31","31"],["e","Eşittir"]],dogru:"30",neden:"30 birim kareyle 4 dikdörtgen kurulur (8 çarpan: 1, 2, 3, 5, 6, 10, 15, 30); 31 birim kareyle yalnız 1 x 31 kurulur (2 çarpan)."},
     asamalar:[
       {ad:"Dikdörtgen makinesi",yon:["Sayaç ya da kaydırıcıyla 1 ile 60 arasında bir sayı seçiniz ve <b>Dikdörtgenleri kurun</b> düğmesine basınız. Makine o kadar birim kareyle kurulabilen bütün dikdörtgenleri çizer; grafiğe o sayının çarpan sayısı eklenir.","Görevlerdeki sayıları bulmak için farklı sayılar deneyiniz. Görevler, uygun sayıyı denediğinizde kendiliğinden işaretlenir."],bitis:"Görev listesindeki dört görev bitince (en az 8 sayı).",kur:(k,A)=>rekorTur(k,D,A)},
-      {ad:"Çarpan yarışı",yon:["Yarış kurallarını okuyunuz.","Her turda verilen aralıktan çarpanı çok olduğunu düşündüğünüz bir sayıya dokununuz."],bitis:"3 tur bitince.",kur:(k,A)=>yarisTur(k,D,A)},
+      {ad:"Çarpan yarışı",yon:["Yarış kurallarını okuyunuz.","Her turda verilen aralıktan çarpanı çok olduğunu düşündüğünüz bir sayıya dokununuz.","Yarış 3 turdur. Bir tur bitince <b>Sıradaki tur →</b> düğmesine basınız."],bitis:"3 tur bitince.",kur:(k,A)=>yarisTur(k,D,A)},
       kuralA(D,[["Büyük sayının çarpan sayısı her zaman daha fazla mıdır?",["Hayır; örneğin 59, 48'den büyüktür ama çarpanı daha azdır.","Evet, her zaman daha fazladır.","Evet, yalnız çift sayılarda."],"Doğru! Çarpan sayısı sayının büyüklüğüne bağlı değildir: 59'un 2, 48'in 10 çarpanı var.",["Grafiğe bakınız: Sütunlar sağa doğru hep uzamadı.","Çift sayılarda da olmaz: 50'nin 6, 48'in 10 çarpanı var."]],
         ["Çarpan sayısı tek olan sayılar için hangisi doğrudur?",["Dikdörtgenlerinden biri karedir (ör. 6 x 6); karenin kenarı listeye bir kez yazılır.","Bu sayıların hepsi tek sayıdır.","Bu sayıların yalnız bir dikdörtgeni vardır."],"Doğru! 36 = 6 x 6: Öteki dikdörtgenler iki çarpan, kare ise tek çarpan getirir; 36'nın 9 çarpanı var.",["16 ve 36 çift sayıdır ama çarpan sayıları tektir.","36 birim kareyle 5 dikdörtgen kurulur."]],
         ["Çarpanı çok olan sayıları nasıl tanıdınız?",["Birçok farklı dikdörtgen kurulabilen, yani 1, 2, 3, 4, 5, 6 gibi birçok küçük sayıya kalansız bölünen sayıların çarpanı çoktur.","Son rakamı 9 olan sayıların çarpanı çoktur.","Tek sayıların çarpanı çoktur."],"Doğru! Her dikdörtgen bir çarpan çifti getirir; 60 birim kareyle 6 dikdörtgen kurulur, 60'ın 12 çarpanı var.",["29 ve 59 birim kareyle yalnız birer dikdörtgen kurulur.","Tek sayıların çoğu 2, 4, 6 gibi sayılara bölünmez."]]]),
@@ -2102,33 +2147,34 @@ function dyKurallar(k,A){
     <div class="ic-kutu"><h4>Isınma turu (süre yok)</h4><p class="k6-not" style="margin-top:0">Alanı <b>6 birim kare</b> olan bir dikdörtgen kurunuz. İsterseniz önce artan kare çıkan bir kenar da deneyiniz.</p><div class="dy-is"></div></div></div>`);
   const K=dkKurucu(k.querySelector(".dy-is"),6,o=>{if(o.yeni){K.kapat();A.tamam("Kuralları öğrendiniz ve ilk dikdörtgeninizi kurdunuz.");}});
   A.oto=()=>K.sec(2);}
-function dyYaris(k,D,A){const T=karistir([12,18,20,24,30,36]).slice(0,3),SURE=45000;let tur=0,puan=0,kos=false,zam=null,t0=0,K=null,tp=0;
+function dyYaris(k,D,A){const T=karistir([12,18,20,24,30,36]).slice(0,3),SURE=45000;let tur=0,puan=0,kos=false,zam=null,t0=0,K=null,tp=0,bekle=false;
   k.insertAdjacentHTML("beforeend",`<div class="k6d"><div class="skorlar s3"><div><small>Tur</small><b class="dy-t">1 / 3</b></div><div><small>Puan</small><b class="dy-p">0</b></div><div><small>Bu turda</small><b class="dy-b">—</b></div></div>
     <div class="dkart dy-h"></div><div class="yaris" aria-label="Süre çubuğu"><i></i></div><div class="row"><button type="button" class="primary dy-bas">Turu başlatın</button></div><div class="dy-alan"></div></div><div class="fb" hidden></div>`);
   const q=s=>k.querySelector(s),bar=q(".yaris i"),bb=q(".dy-bas"),f=q(".fb");
   const durdur=()=>{if(zam){clearInterval(zam);zam=null;}};
   function hazirla(){const n=T[tur];q(".dy-t").textContent=`${tur+1} / 3`;q(".dy-b").textContent=`0 / ${ciftler(n).length}`;bar.style.width="0%";
-    q(".dy-h").innerHTML=`<small>Tur ${tur+1} / 3</small><p>Alanı <b class="buyuk">${n}</b> birim kare olan farklı dikdörtgenler kurunuz.</p>`;q(".dy-alan").innerHTML="";bb.hidden=false;bb.textContent=tur?"Sonraki turu başlatın":"Turu başlatın";A.durum(`Tur ${tur+1} / 3`);}
+    q(".dy-h").innerHTML=`<small>Tur ${tur+1} / 3</small><p>Alanı <b class="buyuk">${n}</b> birim kare olan farklı dikdörtgenler kurunuz.</p>`;q(".dy-alan").innerHTML="";bb.hidden=false;bb.textContent="Turu başlatın";A.durum(`Tur ${tur+1} / 3`);}
   function basla(){if(kos)return;const n=T[tur];kos=true;tp=0;bb.hidden=true;f.hidden=true;
     K=dkKurucu(q(".dy-alan"),n,o=>{if(!kos||!o.yeni)return;tp+=10;puan+=10;q(".dy-p").textContent=puan;q(".dy-b").textContent=`${K.bul.size} / ${K.hedef.length}`;if(K.bul.size===K.hedef.length){tp+=20;puan+=20;q(".dy-p").textContent=puan;bitir(true);}});
     t0=Date.now();durdur();zam=setInterval(()=>{if(!k.isConnected){durdur();return;}const o=(Date.now()-t0)/SURE;bar.style.width=Math.min(100,o*100)+"%";if(o>=1&&kos)bitir(false);},100);}
   function bitir(hepsi){kos=false;durdur();K.kapat();const n=T[tur],ek=K.eksik(),bl=K.hedef.filter(c=>K.bul.has(c[0]+"x"+c[1]));
     D.ekle([`Tur ${tur+1}: alan ${n}`,bl.map(c=>c.join(" x ")).join(", ")||"—",`${bl.length} / ${K.hedef.length}, ${tp} puan`],"t"+tur);
     fb(f,hepsi,hepsi?`Harika! ${ekS(n,"in")} bütün dikdörtgenlerini buldunuz: ${bl.map(c=>c.join(" x ")).join(", ")}. Bu tur ${tp} puan (20 bonus dahil).`:`Süre bitti. ${bl.length} / ${K.hedef.length} dikdörtgen buldunuz (${tp} puan).${ek.length?` Bulamadıklarınız: ${ek.map(c=>c.join(" x ")).join(", ")}.`:""}`);
-    tur++;if(tur>=T.length){bb.hidden=true;setTimeout(()=>{if(k.isConnected)A.tamam(`Yarış bitti: ${puan} puan.`);},600);}else setTimeout(()=>{if(k.isConnected)hazirla();},300);}
-  bb.onclick=basla;
-  A.oto=()=>{if(!kos){if(!bb.hidden)basla();return true;}const c=K.eksik()[0];if(c)K.sec(c[0]);return true;};hazirla();}
+    tur++;if(tur>=T.length){bb.hidden=true;setTimeout(()=>{if(k.isConnected)A.tamam(`Yarış bitti: ${puan} puan.`);},600);}
+    else{bekle=true;bb.hidden=false;bb.textContent=`Sıradaki tur (${tur+1} / 3) →`;bb.classList.add("sz-ileri");setTimeout(()=>{if(bb.isConnected)gorunur(bb,true);},60);}}
+  bb.onclick=()=>{if(bekle){bekle=false;bb.classList.remove("sz-ileri");f.hidden=true;hazirla();vurgu(q(".dy-h"));return;}basla();};
+  A.oto=()=>{if(!kos){if(!bb.hidden)bb.click();return true;}const c=K.eksik()[0];if(c)K.sec(c[0]);return true;};hazirla();}
 const e_duello=p=>{const D=defterY(["Tur ve hedef alan","Kurduğunuz dikdörtgenler","Bulunan / toplam"]);
   asamali(p,{tahmin:{giris:"Süreye karşı bir dikdörtgen yarışı yapacaksınız. Önce bir tahminle ısınınız.",soru:"Alanı 24 birim kare olan, kenarları tam birim olan kaç farklı dikdörtgen kurulabilir? (4 x 6 ile 6 x 4 aynı sayılır.)",secs:[["4","4"],["3","3"],["6","6"],["8","8"]],dogru:"4",neden:"1 x 24, 2 x 12, 3 x 8, 4 x 6: Bunlar 24'ün çarpan çiftleridir."},
     asamalar:[
       {ad:"Kuralları öğrenin",yon:["Yarış kurallarını madde madde okuyunuz.","Süresiz ısınma turunda bir kenar uzunluğu seçerek alanı 6 birim kare olan bir dikdörtgen kurunuz."],bitis:"Isınma turunda bir dikdörtgen kurunca.",kur:(k,A)=>dyKurallar(k,A)},
-      {ad:"Dikdörtgen yarışı",yon:["<b>Turu başlatın</b> düğmesine basınız. Süre çubuğu dolmadan kenar uzunluklarını deneyerek hedef alanlı farklı dikdörtgenler kurunuz.","Artan kare çıkarsa başka bir kenar deneyiniz. Tur bitince sonraki turu siz başlatırsınız."],bitis:"3 tur bitince (puanınız ne olursa olsun).",kur:(k,A)=>dyYaris(k,D,A)},
+      {ad:"Dikdörtgen yarışı",yon:["<b>Turu başlatın</b> düğmesine basınız. Süre çubuğu dolmadan kenar uzunluklarını deneyerek hedef alanlı farklı dikdörtgenler kurunuz.","Artan kare çıkarsa başka bir kenar deneyiniz. Yarış 3 turdur. Tur bitince <b>Sıradaki tur →</b> düğmesine, sonra <b>Turu başlatın</b> düğmesine basınız."],bitis:"3 tur bitince (puanınız ne olursa olsun).",kur:(k,A)=>dyYaris(k,D,A)},
       kuralA(D,[["Bir turda kurduğunuz dikdörtgenlerin kenar uzunlukları hedef alanın nesidir?",["Çarpanlarıdır; iki kenarın çarpımı alanı verir.","Katlarıdır.","Hiçbir ilişkisi yoktur."],"Doğru! a x b = n ise a ve b, n'nin çarpanları; n de a'nın ve b'nin katıdır.",["Kenar uzunlukları alandan büyük değildi; bir sayının katı ondan küçük olamaz.","Deftere bakınız: Her dikdörtgende kenar x kenar alanı verdi."]],
         ["Kırmızı (artan) kareler hangi durumda çıktı?",["Seçilen kenar, alanın çarpanı olmadığında; alan bu kenarın katı değildir.","Seçilen kenar tek sayı olduğunda.","Seçilen kenar 6'dan büyük olduğunda."],"Doğru! Bölmede kalan varsa son sütun dolmaz.",["Tek sayı olan 3 ile 24 karede tam dikdörtgen kurulur: 3 x 8 = 24.","12 ile de tam dikdörtgen kurulabilir: 2 x 12 = 24."]],
         ["Bir alanla kurulabilecek dikdörtgen sayısı için hangisi doğrudur?",["Sınırlıdır; çünkü bir sayının çarpanları sınırlıdır.","Sınırsızdır; çünkü katlar sınırsızdır.","Her alan için 4'tür."],"Doğru! Her dikdörtgen bir çarpan çiftidir; çarpan çiftlerinin sayısı sınırlıdır.",["Kenarlar alanın çarpanlarıdır, katları değil.","Deftere bakınız: Turlarda bulunan dikdörtgen sayıları farklıydı."]]]),
       kendiY((m,son)=>{const y=rastgele(["30'un çarpanları 1, 2, 3, 5, 6, 10, 15 ve 30'dan oluşur; 4 de 30'un çarpanıdır.","9'un 10. katı 99'dur.","Bir sayının en küçük katı o sayının 2 katıdır.","40 cm'lik çubuk tam santimetrelik 6 eşit parçaya ayrılabilir."]);
         const dg=karistir(["6'nın 9. katı 54'tür.","1, 50'nin çarpanıdır.","Her gün 6 TL atılan kumbarada bir gün 54 TL görülebilir.","Alanı 20 m² olan dikdörtgen bahçenin kenarları 4 m ve 5 m olabilir."]).slice(0,3);
-        soruY(m,"Aşağıdaki ifadelerden hangisi <b>yanlıştır</b>?",[y,...dg],"Doğru! Bu ifade yanlış; diğerlerinin hepsi doğru.","Bu ifade doğru. Çarpma ve bölme yaparak diğer ifadeleri kontrol ediniz.",son);})],
+        soruY(m,"Aşağıdaki ifadelerden hangisi <b>yanlıştır</b>?",[y,...dg],"Doğru! Bu ifade yanlış; diğerlerinin hepsi doğru.",(j,t)=>(t.includes("9. katı")?"Bu ifade doğru: 6 x 9 = 54.":t.includes("1, 50")?"Bu ifade doğru: 1 her sayının çarpanıdır.":t.includes("54 TL")?"Bu ifade doğru: 54, 6'nın katıdır.":"Bu ifade doğru: 4 x 5 = 20.")+" Yanlış olanı arıyoruz.",son);})],
     kural:"Alanı n birim kare olan dikdörtgenlerin kenar uzunlukları n'nin <b>çarpan çiftleridir</b>: a x b = n ise a ve b, n'nin <b>çarpanlarıdır</b>; n de a'nın ve b'nin <b>katıdır</b>. Çarpan olmayan bir kenar seçilirse kareler artar (bölmede kalan vardır). Çarpanlar sınırlı olduğu için bir alanla kurulabilecek dikdörtgen sayısı da sınırlıdır."});
 };
 
