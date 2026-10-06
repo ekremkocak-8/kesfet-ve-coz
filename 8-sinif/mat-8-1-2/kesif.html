@@ -1574,42 +1574,81 @@ const e_kucuk=p=>{const S=notr(asamali(p));const SAY=[0,.04,.25,.49,1,2.25,4];le
       ()=>S.bitir(`Bir sayının karekökü her zaman sayıdan küçük değildir: <b>1'den büyük sayılarda karekök sayıdan küçüktür</b> (${K(4)} = 2 < 4), <b>0 ile 1 arasındaki sayılarda karekök sayıdan büyüktür</b> (${K("0,25")} = 0,5 > 0,25). 0 ve 1'in karekökü kendisine eşittir.`));}
 };
 
-/* 16 · RASYONEL Mİ İRRASYONEL Mİ? (kart sınıflama) */
-const e_sinif=p=>{const S=notr(asamali(p));let tur="d",n=2;const ras=new Map(),irr=new Map();
-  /* 05.10.2026 (§4.k, C → A): öğrenci kök içindeki sayıyı sürgüyle değiştirir; hesap makinesi ekranı biten ya da bitmeyen açılımı gösterir,
-     kart kendiliğinden “Rasyonel” ya da “İrrasyonel” kutusuna düşer. */
-  const k=S.ac(1,{ne:"Kök içindeki sayıyı değiştirerek hesap makinesindeki karekök açılımına bakacak, kartların hangi kutuya düştüğünü inceleyeceksiniz.",
-    durum:`<b>Rasyonel sayı</b>, kesir olarak (iki tam sayının bölümü biçiminde) yazılabilen sayıdır: 6, ${kes(3,4)}, 0,7 = ${kes(7,10)} gibi. Ondalık gösterimi sonsuza kadar süren ve devretmeyen sayılara <b>irrasyonel sayı</b> denir; bunlar kesir olarak yazılamaz. Hesap makinesi bir karekökün ondalık gösterimini ekrana sığdığı kadar gösterir: ${K(2)} = 1,414213562…`,
-    nasil:["“Sayı türü” satırından doğal sayı ya da ondalık gösterim seçiniz.","“Kök içindeki sayı” sürgüsünü değiştiriniz; hesap makinesi karekökü hesaplar. Açılım bitiyorsa kart “Rasyonel”, bitmiyorsa “İrrasyonel” kutusuna düşer.","Kutulardaki kartları karşılaştırınız: Rasyonel kutusundaki kök içi sayıların ortak özelliği nedir?"],biter:bitG(3)});
-  S.tahmin(k,"Üzerinde √ işareti bulunan her sayı irrasyonel midir?",[["e","Evet"],["h","Hayır"]],"h",`${K(36)} = 6 ve ${K("0,49")} = 0,7 gibi sayılar rasyoneldir; yalnız tam kare olmayan sayıların karekökleri irrasyoneldir.`);
-  k.insertAdjacentHTML("beforeend",`<div class="r-den"></div><div class="r-hes"><div class="r-ekran r-ekr"></div></div><p class="r-sonuc"></p><div class="r-iki"><div class="r-kova ras"><h4>Rasyonel</h4><p>Açılım bitti: kesir olarak yazılabilir.</p><div class="r-kartlar r-kr"></div></div><div class="r-kova irr"><h4>İrrasyonel</h4><p>Açılım bitmiyor ve devretmiyor.</p><div class="r-kartlar r-ki"></div></div></div>`);
-  const dn=k.querySelector(".r-den"),ekr=k.querySelector(".r-ekr"),son=k.querySelector(".r-sonuc"),kr=k.querySelector(".r-kr"),ki=k.querySelector(".r-ki");
-  const sd=document.createElement("div");sd.className="a8-sd";sd.innerHTML=`<span class="a8-sd-ad">Sayı türü:</span>`;dn.appendChild(sd);
-  segment(sd,[["d","Doğal sayı (1–50)"],["o","Ondalık (0,01–0,50)"]],tur,v=>{tur=v;ciz();});
-  const sg=surgu("Kök içindeki sayı",1,50,n,v=>{n=v;ciz();});dn.appendChild(sg.el);
-  const G=gorevler(k,[{m:"<b>Rasyonel</b> kutusuna en az <b>3 doğal sayı</b> kartı düşürünüz.",ok:()=>[...ras.keys()].filter(x=>x[0]==="d").length>=3},
-    {m:"<b>İrrasyonel</b> kutusuna en az <b>4 kart</b> düşürünüz.",ok:()=>irr.size>=4},
-    {m:"Ondalık gösterimlerden <b>2 rasyonel</b> ve <b>2 irrasyonel</b> kart bulunuz.",ok:()=>[...ras.keys()].filter(x=>x[0]==="o").length>=2&&[...irr.keys()].filter(x=>x[0]==="o").length>=2,
-      s:()=>"Kök içindeki sayı tam kare ise (ondalıkta 0,01, 0,04, 0,25 … gibi) açılım bitti; tam kare değilse açılım bitmedi."}],acikla);
-  const D=defter(k,["Sayı","Ekranda","Tür"]);
-  function ciz(){const x=tur==="d"?n:n/100,ad=tur==="d"?String(n):Vk(x),r=Math.round(Math.sqrt(n)),tam=r*r===n;
-    const deg=tam?(tur==="d"?String(r):Vk(r/10)):Math.sqrt(x).toFixed(9).replace(".",",")+"…";
-    ekr.innerHTML=`${K(ad)} = ${deg}`;
-    son.innerHTML=tam?`<span class="r-ok2">Açılım bitti:</span> ${K(ad)} = ${deg}${tur==="o"?` = ${kes(r,10)}`:""}, çünkü ${tur==="d"?`${n} = ${r} · ${r}`:`${ad} = ${kes(n,100)}; ${n} = ${r} · ${r} ve 100 = 10 · 10`}.`:`<span class="r-no2">Açılım ekrana sığmadı;</span> basamaklar bitmiyor ve bir düzenle tekrar etmiyor. ${tur==="d"?`${n} tam kare değil.`:`${ad} = ${kes(n,100)}; ${n} tam kare değil.`}`;
-    const key=tur+n,M_=tam?ras:irr,kap=tam?kr:ki;
-    if(!M_.has(key)){M_.set(key,1);const b=document.createElement("span");b.className="r-kart ok";b.style.cursor="default";b.innerHTML=K(ad);kap.appendChild(b);D.ekle([K(ad),deg,tam?"Rasyonel":"İrrasyonel"],key);bip(tam?820:420,.08);G.kontrol();}}
+/* 16 · YÜZ KAT ALAN, ON KAT KENAR (bölük panosu: kök içi × 100 → karekök × 10) */
+/* 06.10.2026: Eski 16. etkinliğin konusu MAT.8.1.3 fasikülünde işlenir (orada Kare Halı Atölyesi ve Karekök Süzgeci).
+   Bu düzenekte öğrenci kök içindeki sayıyı × 100, ÷ 100, × 10, ÷ 10 düğmeleriyle değiştirir; pano basamakları virgülden başlayarak
+   ikişerli bölüklere ayırır, karekök tam bulunuyorsa her bölüğün altına karekökün bir basamağını yazar. */
+(function(){const st=document.createElement("style");st.textContent=`
+.r-vg-dug{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:520px;margin:6px 0}
+.r-vg-dug button{min-height:48px;font:800 19px "Source Sans 3",sans-serif;padding:4px 6px}
+.r-vg-dug button:disabled{opacity:.45;cursor:default}
+.r-vg{display:flex;align-items:stretch;gap:6px;margin:10px 0 4px;overflow-x:auto;padding-bottom:4px}
+.r-vg-ad{display:grid;grid-template-rows:56px 52px;gap:6px;align-items:center;font:800 14px Nunito,sans-serif;color:var(--muted);padding-right:4px;white-space:nowrap}
+.r-vg-s{display:grid;grid-template-rows:56px 52px;gap:6px;flex:0 0 auto}
+.r-vg-s span{display:flex;align-items:center;justify-content:center;min-width:54px;padding:0 6px;border-radius:12px;font:800 26px "Source Sans 3",sans-serif;font-variant-numeric:tabular-nums}
+.r-vg-s .u{border:3px solid var(--acc);background:var(--card)}
+.r-vg-s .a{border:3px solid var(--acc3);background:color-mix(in srgb,var(--acc3) 12%,var(--card))}
+.r-vg-s .a.yok{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--card));color:var(--bad)}
+.r-vg-s.vir span{min-width:14px;padding:0;border:0;background:none}
+.r-vg-s b{color:#d9480f}.r-vg-s i{font-style:normal;color:var(--muted);opacity:.6}
+.r-vg-kok .a8-sd .seg button{min-height:46px;min-width:54px;font-size:18px}
+.r-vg-kok .sec{min-height:48px}
+@media (max-width:560px){.r-vg-s span{min-width:44px;font-size:22px;padding:0 4px}.r-vg-dug button{font-size:17px}}
+`;document.head.appendChild(st);})();
+const e_virgul=p=>{p.classList.add("r-vg-kok");const S=notr(asamali(p));let b=36,e=0;const gor=new Set();
+  const KOK={36:6,49:7,81:9},EMIN=-4,EMAX=4;
+  const bin=s=>s.replace(/\B(?=(\d{3})+(?!\d))/g," ");                    /* bin ayırıcı: bölünmez boşluk (§12-5) */
+  /* dig·10^ex → tam ve ondalık kısmın basamakları; t: "b" başlangıç rakamı, "z" sıfır */
+  const parca=(dig,ex)=>{const L=dig.length,pp=L+ex,B=[...dig].map(c=>({c,t:"b"})),Z=n=>Array.from({length:n},()=>({c:"0",t:"z"}));
+    if(pp<=0)return [Z(1),Z(-pp).concat(B)];if(pp>=L)return [B.concat(Z(pp-L)),[]];return [B.slice(0,pp),B.slice(pp)];};
+  const metin=([i,f])=>bin(i.map(x=>x.c).join(""))+(f.length?","+f.map(x=>x.c).join(""):"");
+  const katYaz=n=>n===0?"başlangıç":(n>0?"× ":"÷ ")+bin("1"+"0".repeat(Math.abs(n)));
+  const k=S.ac(1,{ne:"Kök içindeki sayıyı 100 katına ya da 10 katına çıkarıp karekökün nasıl değiştiğini bulacaksınız.",
+    durum:`6 · 6 = 36, 7 · 7 = 49 ve 9 · 9 = 81 olduğundan ${K(36)} = 6, ${K(49)} = 7 ve ${K(81)} = 9'dur. Bu sayılardan biriyle başlanır. Düğmeler kök içindeki sayıyı 100 katına (× 100) ya da 10 katına (× 10) çıkarır; 100'e (÷ 100) ya da 10'a (÷ 10) böler. Bölük panosu, kök içindeki sayının basamaklarını <b>virgülden başlayarak ikişerli bölüklere</b> ayırır. Karekök tam bulunuyorsa her bölüğün altına karekökün bir basamağı yazılır.`,
+    nasil:["“Başlangıç” satırından 36, 49 ya da 81'i seçiniz.","× 100, ÷ 100, × 10 ve ÷ 10 düğmelerine basınız; panoda kök içindeki sayı ve karekökü hemen yazılır.","Turuncu rakamlar başlangıç sayısının rakamlarıdır. Her deneme deney defterine yazılır."],biter:bitG(4)});
+  S.tahmin(k,`${K(36)} = 6 olduğuna göre ${K(bin("3600"))} kaçtır?`,[["a","60"],["b","600"],["c",bin("1800")],["d","360"]],"a",`60 · 60 = ${bin("3600")} olduğu için ${K(bin("3600"))} = 60. Kök içi 100 katına çıktı, karekök 10 katına çıktı.`);
+  k.insertAdjacentHTML("beforeend",`<div class="r-den"></div><div class="r-vg-dug"></div><div class="r-vg"></div><p class="r-sonuc"></p>`);
+  const dn=k.querySelector(".r-den"),dug=k.querySelector(".r-vg-dug"),pano=k.querySelector(".r-vg"),son=k.querySelector(".r-sonuc");
+  sayiDugme(dn,"Başlangıç:",[36,49,81],b,v=>{b=+v;e=0;ciz();});
+  const DUG=[["× 100",2],["÷ 100",-2],["× 10",1],["÷ 10",-1]];
+  dug.innerHTML=DUG.map(([t,d],j)=>`<button type="button" class="ghost" data-j="${j}">${t}</button>`).join("");
+  dug.querySelectorAll("button").forEach(x=>x.onclick=()=>{const d=DUG[+x.dataset.j][1];if(e+d<EMIN||e+d>EMAX)return;e+=d;ciz();});
+  const ayni=b_=>[...gor].filter(x=>x.startsWith(b_+":")).map(x=>+x.split(":")[1]);
+  const G=gorevler(k,[{m:`Başlangıç <b>36</b> iken <b>× 100</b> düğmesine iki kez basınız.`,ok:()=>gor.has("36:2")&&gor.has("36:4"),s:()=>`${K(bin("3600"))} = 60 ve ${K(bin("360000"))} = 600: kök içi her seferinde 100 katına, karekök 10 katına çıktı.`},
+    {m:`Aynı başlangıç sayısıyla <b>÷ 100</b> düğmesine iki kez basınız.`,ok:()=>[36,49,81].some(x=>ayni(x).includes(-2)&&ayni(x).includes(-4)),s:()=>`${K("0,36")} = 0,6 ve ${K("0,0036")} = 0,06: kök içi 100'e bölününce karekök 10'a bölündü.`},
+    {m:`<b>49</b> ya da <b>81</b> ile başlayıp × 100 ya da ÷ 100 deneyiniz.`,ok:()=>[49,81].some(x=>ayni(x).some(y=>y!==0&&y%2===0)),s:()=>`Kural başka sayılarda da işledi: her bölüğün altına karekökün bir basamağı düştü.`},
+    {m:`<b>× 10</b> ya da <b>÷ 10</b> düğmesiyle sayıyı yalnız bir basamak kaydırınız.`,ok:()=>[...gor].some(x=>Math.abs(+x.split(":")[1])%2===1),s:()=>`Başlangıç sayısının rakamları iki bölüğe bölündü; karekök tam bulunamadı, yalnız yaklaşık değeri var.`}],acikla);
+  const D=defter(k,["Kök içindeki sayı","Karekök","Kök içi değişimi","Karekök değişimi"]);
+  function ciz(){const P=parca(String(b),e),ad=metin(P),tam=e%2===0;gor.add(b+":"+e);
+    dug.querySelectorAll("button").forEach(x=>{const d=DUG[+x.dataset.j][1];x.disabled=e+d<EMIN||e+d>EMAX;});
+    /* bölükler: tam kısım sağdan, ondalık kısım soldan ikişerli; eksik kalan son ondalık bölüğe 0 eklenir */
+    const [I,F]=P,gi=[],gf=[];for(let j=I.length;j>0;j-=2)gi.unshift(I.slice(Math.max(0,j-2),j));
+    for(let j=0;j<F.length;j+=2){const g=F.slice(j,j+2);if(g.length<2)g.push({c:"0",t:"p"});gf.push(g);}
+    const R=tam?parca(String(KOK[b]),e/2):null,ri=R?R[0]:[],rf=R?R[1]:[];
+    const hc=x=>x.t==="b"?`<b>${x.c}</b>`:x.t==="p"?`<i title="Bölüğü tamamlamak için eklenen sıfır">${x.c}</i>`:x.c;
+    const sut=(g,r)=>`<div class="r-vg-s"><span class="u">${g.map(hc).join("")}</span><span class="a${r?"":" yok"}">${r?hc(r):"?"}</span></div>`;
+    pano.innerHTML=`<div class="r-vg-ad"><span>Kök içi</span><span>Karekök</span></div>`+gi.map((g,j)=>sut(g,tam?ri[j]:null)).join("")
+      +(gf.length?`<div class="r-vg-s vir"><span>,</span><span>${tam?",":""}</span></div>`+gf.map((g,j)=>sut(g,tam?rf[j]:null)).join(""):"");
+    const r=Math.sqrt(b*10**e),yak=V(r,r<1?3:2),kok=tam?metin(R):null;
+    son.innerHTML=tam?dz(`${K(ad)} = <b>${kok}</b>`,`Sağlama: ${kok} · ${kok} = ${ad}`,`<span class="r-duz">${e===0?"Başlangıç sayısı":`Kök içi ${katYaz(e)}, karekök ${katYaz(e/2)}`}</span>`)
+      :dz(`<span class="r-no2">Karekök tam bulunamaz.</span>`,`${b} sayısının rakamları iki ayrı bölüğe bölündü.`,`${K(ad)} ≈ ${yak}`);
+    D.ekle([K(ad),tam?kok:`≈ ${yak} (tam değil)`,katYaz(e),tam?katYaz(e/2):"—"],b+":"+e);
+    bip(tam?700+e*40:300,.08);G.kontrol();}
   ciz();
-  function acikla(){const c=S.kural(2);
-    S.soru(c,`n pozitif bir tam sayı ise ${K("n")} ne zaman rasyoneldir?`,
-      ["n tam kare sayı ise",["n çift sayı ise",`${K(12)} ve ${K(50)} çift sayıların karekökü ama irrasyonel.`],["Her zaman",`${K(2)} = 1,4142… sonsuza kadar devretmeden sürer.`]],
-      `${K("n")}, n tam kare ise bir doğal sayıdır (rasyonel); n tam kare değilse irrasyoneldir.`,()=>
-    S.soru(c,"Hangisi irrasyoneldir?",
-      [K("0,9"),[K("0,81"),`0,9 · 0,9 = 0,81: ${K("0,81")} = 0,9 rasyoneldir.`],[K(kes(25,4)),`${kes(5,2)} · ${kes(5,2)} = ${kes(25,4)}: rasyoneldir.`],[K(49),`${K(49)} = 7, bir doğal sayıdır.`]],
-      `0,9 = ${kes(9,10)} ve 10 tam kare değildir: ${K("0,9")} irrasyoneldir (≈ 0,95).`,meydan));}
-  function meydan(){const m=S.son();
-    S.sayi(m,soruKut(`${K(1)}, ${K(2)}, ${K(3)}, … , ${K(50)} sayılarından kaç tanesi rasyoneldir? Cevabı sayı olarak yazınız.`),7,"1'den 50'ye kadar tam kareler 1, 4, 9, 16, 25, 36, 49'dur: 7 tane.","Kök içindeki sayının tam kare olduğu kartlar rasyoneldir. 1'den 50'ye kadar tam kareleri sayınız.",
-      ()=>S.bitir(`Kareköklü her sayı irrasyonel değildir. <b>Tam kare</b> sayıların (ve sade hâlinde payı ve paydası tam kare olan kesirlerin) karekökü rasyoneldir: ${K(36)} = 6, ${K(kes(9,16))} = ${kes(3,4)}, ${K("0,49")} = 0,7. <b>Tam kare olmayan</b> pozitif tam sayıların karekökü irrasyoneldir: ${K(2)} = 1,4142…, ${K(12)}, ${K(50)}; ondalık gösterimleri sonlu ya da devirli değildir.`),
-      v=>v===43?"İrrasyonel olanları saydınız.":v===25?"Yarısını değil, tam kareleri sayınız.":v===8?"8 · 8 = 64 > 50.":null);}
+  function acikla(){const c=S.kural(3);
+    S.soru(c,"Kök içindeki sayı 100 katına çıkınca karekök ne olur?",
+      ["10 katına çıkar",["100 katına çıkar",`${K(36)} = 6 ve ${K(bin("3600"))} = 60: 60, 6'nın 10 katıdır.`],["Değişmez",`${K(bin("3600"))} = 60, 6 değil.`],["50 katına çıkar","100'ün yarısı değil, karekökü düşünülür."]],
+      `100 = 10 · 10 olduğu için kök içi 100 katına çıkınca karekök 10 katına çıkar: ${K(bin("3600"))} = 60.`,()=>
+    S.soru(c,`${K(49)} = 7 olduğuna göre ${K("0,0049")} kaçtır?`,
+      ["0,07",["0,7","0,7 · 0,7 = 0,49 olur."],["0,007","0,007 · 0,007 = 0,000049 olur."],["0,0007","Karekökte basamak sayısı yarıya iner."]],
+      `0,0049 sayısında 49, 100'e iki kez bölünmüştür; karekök de 10'a iki kez bölünür: ${K("0,0049")} = 0,07. Sağlama: 0,07 · 0,07 = 0,0049.`,()=>
+    S.soru(c,"Hangisinin karekökü tam bulunamaz?",
+      [K("810"),[K(bin("8100")),`${K(bin("8100"))} = 90.`],[K("0,81"),`${K("0,81")} = 0,9.`],[K(bin("810000")),`${K(bin("810000"))} = 900.`]],
+      `810 = 81 · 10: kök içi yalnız 10 katına çıktı, bölükler 8 | 10 oldu. 28 · 28 = 784 &lt; 810 &lt; 841 = 29 · 29 olduğundan ${K("810")} tam bulunamaz.`,meydan)));}
+  function meydan(){const m=S.son({ne:"Bulduğunuz kuralı yeni bir örnekte kullanınız. Cevabı sayı olarak yazıp “Kontrol edin” düğmesine basınız."});
+    S.sayi(m,yaz([`Kare biçimli bir parkın alanı ${bin("16900")} m<sup>2</sup>'dir.`])+soruKut("Parkın bir kenar uzunluğu kaç metredir? Cevabı sayı olarak yazınız."),130,
+      `${bin("16900")} = 169 · 100 ve 13 · 13 = 169: kenar 13 · 10 = 130 m. Sağlama: 130 · 130 = ${bin("16900")}.`,"",
+      ()=>S.bitir(`Kök içindeki sayı <b>100 katına</b> çıkınca karekök <b>10 katına</b> çıkar; kök içi 100'e bölününce karekök 10'a bölünür: ${K(36)} = 6, ${K(bin("3600"))} = 60, ${K("0,36")} = 0,6, ${K("0,0036")} = 0,06. Basamaklar virgülden başlayarak <b>ikişerli bölüklere</b> ayrılır; her bölüğe karekökte bir basamak düşer. Kök içi yalnız 10 katına çıkarsa ya da 10'a bölünürse (${K(360)}, ${K("3,6")}) karekök tam bulunamaz.`));}
 };
 
 /* 17 · TOPLAMIN KÖKÜ DEDEKTİFİ (iki kare yan yana / tek kare) */
@@ -1814,13 +1853,13 @@ const ACT=[
  {ad:"Kesrin Karekökü",amac:"Kenarı kesir olan kareler kurarak bir kesrin karekökünün payın ve paydanın kareköklerinden oluştuğunu keşfetmek.",adimlar:ynr("Kenarı kesir olan kareler kurarak alanı kesir olan karenin kenarını bulacaksınız.","Kenarın payını ve paydasını seçiniz; boyalı karenin alanına bakınız."),ciz:e_kesir},
  {ad:"Ondalığın Karekökü",amac:"Kenarı ondalık gösterimle verilen kareler kurarak ondalık sayıların kareköklerini bulmak ve tam bulunamayanları ayırt etmek.",adimlar:ynr("Kenarı 0,1 birim adımlarla değişen kareler kurarak ondalık sayıların kareköklerini bulacaksınız.","“Kenar” sürgüsünü kullanınız; boyalı karenin alanına bakınız."),ciz:e_ondkok},
  {ad:"Küçük Sayıların Kökü",amac:"0 ile 1 arasındaki sayıların karekökünün sayıdan büyük, 1'den büyük sayıların karekökünün sayıdan küçük olduğunu keşfetmek.",adimlar:ynr("Bir sayı ile karekökünü çubuklarla karşılaştıracaksınız.","“Sayı” satırından bir sayı seçiniz; iki çubuğun uzunluğunu karşılaştırınız."),ciz:e_kucuk},
- {ad:"Rasyonel mi İrrasyonel mi?",amac:"Kök içindeki sayıyı değiştirip hesap makinesindeki açılımı inceleyerek kareköklü sayıların ne zaman rasyonel, ne zaman irrasyonel olduğunu keşfetmek.",adimlar:ynr("Kök içindeki sayıyı değiştirerek kartların rasyonel ya da irrasyonel kutusuna düşmesini inceleyeceksiniz.","Sayı türünü seçip “Kök içindeki sayı” sürgüsünü kullanınız; hesap makinesindeki açılımın bitip bitmediğine bakınız."),ciz:e_sinif},
+ {ad:"Yüz Kat Alan, On Kat Kenar",amac:"Kök içindeki sayıyı 100 katına ya da 10 katına çıkarıp basamakları ikişerli bölüklere ayırarak karekökün nasıl değiştiğini keşfetmek.",adimlar:ynr("Kök içindeki sayıyı düğmelerle büyütüp küçülterek karekökün nasıl değiştiğini bulacaksınız.","Bir başlangıç sayısı seçiniz; × 100, ÷ 100, × 10 ve ÷ 10 düğmelerine basıp bölük panosuna bakınız."),ciz:e_virgul},
  {ad:"Toplamın Kökü Dedektifi",amac:"Bir toplamın karekökünün, kareköklerin toplamına genellikle eşit olmadığını karelerle ve karşı örnekle göstermek.",adimlar:ynr("İki kareyi yan yana koyup alanları toplamı kadar olan tek kareyle karşılaştıracaksınız.","a ve b için sayılar seçiniz; iki uzunluk çubuğunu karşılaştırınız."),ciz:e_toplam},
  {ad:"Kare Karo Döşeme",amac:"Eldeki karolarla döşenebilecek en büyük kare zemini, karo sayısını aşmayan en büyük tam kareyi bularak belirlemek.",adimlar:ynr("Eldeki karolarla döşenebilecek en büyük kare zemini bulacaksınız.","Kenardaki karo sayısını değiştiriniz; en büyük kareyi bulunca “Kontrol edin” düğmesine basınız."),ciz:e_doseme},
  {ad:"Kökü Sayı Doğrusuna Yerleştir",amac:"Kareköklü sayıların sayı doğrusundaki yerini, ardışık tam kareleri ve yakınlığı kullanarak tahmin etmek.",adimlar:ynr("Kareköklü sayıların sayı doğrusundaki yerini tahmin edeceksiniz.","Turuncu işaretçiyi sürükleyiniz ya da ◀ ▶ düğmelerini kullanınız; “Yerleştiriniz” düğmesine basınız."),ciz:e_yerlestir},
  {ad:"Karekök Düellosu",amac:"Kareköklü sayıları bilgisayara karşı süreli bir yarışta sayı doğrusuna yerleştirerek karşılaştırmak.",adimlar:ynr("Bilgisayara karşı 6 turluk bir yerleştirme düellosu yapacaksınız.","Kurallar: Her turda iki kareköklü sayı gösterilir. A ve B işaretçilerini sayı doğrusunda kaydırıp “Yerleştiriniz” düğmesine basınız; iki işaretçi de doğru yerin en fazla 0,2 yakınındaysa turu siz alırsınız, değilse düzeltip yeniden deneyebilirsiniz. 40 saniye dolarsa turu bilgisayar alır. 6 turda en az 4 tur kazanan düelloyu kazanır."),ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"Kareköklü İfadeler Keşif Atölyesi",kisa:"Kareköklü İfadeler Keşif Atölyesi",kod:"MAT.8.1.2",ust:"8. Sınıf · Sayılar ve Nicelikler · MAT.8.1.2 · Fasikül 2",
-  aciklama:"Kareköklü ifadeler için yirmi keşfetme etkinliği: karenin alanı ve kenarı, tam kare sayılar, karekökün hangi iki doğal sayı arasında olduğu, onda birlik tahmin, kesme ve yuvarlama, sıralama, kesir ve ondalık gösterimlerin karekökleri ve irrasyonel sayılar. Her etkinlik farklı bir düzenek; tahmin ediniz, deneyiniz, kuralı bulunuz ve yeni bir örnekte kullanınız."});
+  aciklama:"Kareköklü ifadeler için yirmi keşfetme etkinliği: karenin alanı ve kenarı, tam kare sayılar, karekökün hangi iki doğal sayı arasında olduğu, onda birlik tahmin, kesme ve yuvarlama, sıralama, kesir ve ondalık gösterimlerin karekökleri ve kök içindeki sayı 100 katına çıkınca karekökün değişimi. Her etkinlik farklı bir düzenek; tahmin ediniz, deneyiniz, kuralı bulunuz ve yeni bir örnekte kullanınız."});
 
 /* İŞLEM BÖLÜNMEZ (01.10.2026, ANA_KURALLAR §5.x-5)
    Bir işlem (7⁰ = 1, (−4)⁰ = 1, 2/5 · 3 …) satır sonunda asla ikiye bölünmez.
