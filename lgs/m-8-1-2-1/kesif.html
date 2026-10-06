@@ -908,20 +908,46 @@ function asamaliTek(p,o){document.body.classList.add("ta-mod");
    Yönergeler "siz" dilinde; üsler HTML'de <sup>, SVG'de Unicode üst simge; eksi U+2212; kesirler .frac ile (kH).
    Kapsam (BRIEF §1): aynı tabanlı kuvvetleri çarpma/bölme kuralı YOK; üssün üssü yalnız tekrarlı çarpmayla (18) ve
    aynı tabana çevirme aracı olarak (19, 20). */
-/* §5.ip İpucu verilmez: yanlış seçenekte ve yanlış sayıda yalnız nötr "Yeniden deneyiniz." yazılır;
-   sayı cevaplı soruda 3. yanlıştan sonra yalnız doğru cevap gösterilir. */
-const YD="Yeniden deneyiniz.";
 /* Sayı yazımı: eksi U+2212, 10 000 ve üstünde bölünmez boşluk (§5.x) */
 const sn=n=>{if(typeof n!=="number")return String(n).replace(/-/g,"−");const s=String(Math.abs(n));
   return (n<0?"−":"")+(Math.abs(n)>=10000?s.replace(/\B(?=(\d{3})+(?!\d))/g," "):s);};
+/* 07.10.2026 (§4-5, §4-9; keşif denetimi E7, Ekrem KOÇAK: "Yanlış cevapta tabii ki ipucu verilecek"): yanlış cevaptan sonra
+   HATANIN TÜRÜNÜ söyleyen ipucu verilir. Seçmeli soruda her yanlış seçeneğin kendi ipucu vardır ([metin, ipucu]); sayı cevaplı soruda
+   genel ipucu ya da [genel, v=>yaygın hataya özel ipucu]. İpucu cevabı söylemez; 3. yanlıştan sonra doğru cevap da gösterilir.
+   Soru metnine ipucu yazılmaz (§5.ip). (kesif_813.js kalıbı; ortak dosyalara dokunmadan.) */
+const YD="Yeniden deneyiniz.";
+window.__ipEksik=window.__ipEksik||[];
+const ipNrm=h=>{const t=document.createElement("div");t.innerHTML=h;return t.innerHTML;};
 const notr=S=>{const so=S.soru,sa=S.sayi;
-  S.soru=(kap,soru,secs,ok,sonra)=>so(kap,soru,secs.map((s,i)=>i===0?s:[Array.isArray(s)?s[0]:s,YD]),ok,sonra);
-  S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
+  S.soru=(kap,soru,secs,ok,sonra)=>{const IP=secs.slice(1).map(x=>[ipNrm(Array.isArray(x)?x[0]:x),Array.isArray(x)?x[1]:""]);
+    IP.forEach(([t,ip])=>{if(!ip)window.__ipEksik.push("soru: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50)+" → "+t.replace(/<[^>]+>/g,""));});
+    const d=so(kap,soru,secs,ok,sonra);
+    if(d&&d.querySelectorAll){d.querySelectorAll(".sec").forEach(b=>{const m=IP.find(([t])=>t===b.innerHTML);if(!m)return;b._ip=m[1];
+      b.addEventListener("click",()=>{if(!b.classList.contains("yanlis"))return;const f=(b.closest(".sor")||d).querySelector(".fb");
+        if(f&&b._ip)fb(f,false,`<b>Bu seçenek doğru değil.</b> ${b._ip} ${YD}`);});});
+      if([...d.querySelectorAll(".sec")].filter(b=>b._ip!==undefined).length<IP.length)window.__ipEksik.push("eşleşmedi: "+String(soru).replace(/<[^>]+>/g,"").slice(0,50));}
+    return d;};
+  S.sayi=(kap,ust,dogru,ok,ip,sonra)=>{if(!ip)window.__ipEksik.push("sayi: "+String(ust).replace(/<[^>]+>/g,"").slice(0,60));
+    const ipG=Array.isArray(ip)?ip[0]:ip,ipO=Array.isArray(ip)?ip[1]:null;
+    const d=sa(kap,ust,dogru,ok,"",sonra);const kb=d.querySelector(".k"),inp=d.querySelector(".ans"),f=d.querySelector(".fb"),asil=kb.onclick;let yn=0;
     if(dogru<0)inp.setAttribute("inputmode","text");/* negatif cevap: telefonda eksi tuşu görünsün */
     const kontrol=()=>{inp.value=inp.value.replace(/[−–]/g,"-");const h=inp.value.replace(/[\s.]/g,"");if(!h||+h===dogru||inp.disabled)return asil();yn++;
-      fb(f,false,`<b>${sn(h)} doğru değil.</b> ${yn>=3?`Doğru cevap: <b>${sn(dogru)}</b>.`:YD}`);bip(220,.15,"triangle");};
+      const oz=ipO&&ipO(+h);
+      fb(f,false,`<b>${sn(h)} doğru değil.</b> ${oz||ipG||""} ${yn>=3?`Doğru cevap: <b>${sn(dogru)}</b>.`:YD}`);bip(220,.15,"triangle");};
     kb.onclick=kontrol;inp.onkeydown=e=>{if(e.key==="Enter")kontrol();};return d;};
-  return sozIleri(S);};
+  return sirali(sozIleri(S));};
+/* §4.k-5 (05.10.2026, Aşama 2): "Kuralı bulun" adımında birden çok soru varsa "Soru i / n" şeridi ve doğru cevaptan sonra
+   belirgin "Sıradaki soru (i+1 / n) →" düğmesi (kesif_611.js soruZincir kalıbı; ortak dosyalara dokunmadan). */
+function sirali(S){let top=1,no=0;const k0=S.kural,so=S.soru;
+  S.kural=(k,o)=>{top=k||1;no=0;return k0(k,o);};
+  S.soru=(kap,soru,secs,ok,sonra)=>{if(!(kap&&kap.kural)||top<2)return so(kap,soru,secs,ok,sonra);
+    const i=++no,n=top;let el=null;
+    const ser=`<div class="sz-ust"><span class="sz-et">Soru ${i} / ${n}</span><span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i-1?"ok":j===i-1?"su":""}"></i>`).join("")}</span></div>`;
+    el=so(kap,soru,secs,ok,()=>{sonra&&sonra();if(i<n&&el){const b=document.createElement("button");b.type="button";b.className="primary sz-ileri";b.textContent=`Sıradaki soru (${i+1} / ${n}) →`;
+      const q=el.querySelector(".a8-soru")||el;q.appendChild(b);setTimeout(()=>{if(b.isConnected)b.scrollIntoView({behavior:azHareket()?"auto":"smooth",block:"nearest"});},60);
+      b.onclick=()=>{const il=document.querySelector(".ta-ileri");if(il&&!il.disabled)il.click();};}});
+    const q=el&&(el.querySelector(".a8-soru")||el);if(q)q.insertAdjacentHTML("afterbegin",ser);return el;};
+  return S;}
 /* 05.10.2026 · §4.k-5 “Sıradaki soru”: kural adımında birden çok soru varsa, doğru cevaptan sonra alttaki düğme “Sıradaki soru (i+1 / n) →” olur
    (8. sınıf tek adım düzeninde her kural sorusu ayrı ekrandır; üst şeritte “Soru i / n” yazar). Ortak dosyalara dokunmadan bu dosyada çözülür. */
 const sozIleri=S=>{const ks=S.kural;let kn=0;S.kural=k=>{kn=k||1;return ks(k);};
@@ -935,6 +961,7 @@ const sozIleri=S=>{const ks=S.kural;let kn=0;S.kural=k=>{kn=k||1;return ks(k);};
 .vg-v small{font-size:11.5px;font-weight:700;color:var(--muted)}.vg-v.ok{border-color:#2f9e44;background:color-mix(in srgb,#2f9e44 12%,var(--card))}.vg-v.no{border-color:#e8590c;background:color-mix(in srgb,#e8590c 12%,var(--card))}
 .vg-v sup{font-size:.62em}.tbk{display:inline-block;border:3px solid var(--acc2);border-radius:10px;padding:0 6px}.islem{white-space:nowrap;display:inline-block;max-width:100%;overflow-x:auto}
 .no-i{color:#c92a2a;font-weight:800}.kv-orta .islem sup{font-size:.62em}
+.kv-yol .seg button{min-height:44px}/* 07.10.2026 (E6): en az 44 px */
 @media (max-width:560px){.vagon{gap:4px}.vg-v{font-size:15px;min-height:58px}.vg-v small{font-size:10.5px}}`;document.head.appendChild(st);})();
 /* Terazi: sol ve sağ kefedeki ifadeler; ağır kefe aşağı iner (L, R karşılaştırılır; bos: tartmaz) */
 function terazi(sE,sD,gE,gD,L,R,bos){const sv=svgEl(420,236),ink=css('--ink');
@@ -947,6 +974,44 @@ function terazi(sE,sD,gE,gD,L,R,bos){const sv=svgEl(420,236),ink=css('--ink');
     ${kefe(lx,ly,sE,sD,bos?"#f1f3f5":L>R?"#ffd8a8":"#e7f5ff")}${kefe(rx,ry,gE,gD,bos?"#f1f3f5":R>L?"#ffd8a8":"#e7f5ff")}
     <text x="${cx}" y="22" text-anchor="middle" font-size="16" font-weight="800" fill="${css('--muted')}">${bos?"Terazi tartamıyor":yon===0?"Dengede":yon<0?"Sol kefe ağır":"Sağ kefe ağır"}</text>`;
   return sv;}
+/* 06.10.2026 (§4.k-5 · keşif denetimi E2): deney düzeneğinde sırayla gelen kartlar/trenler/turlar/kasalar için
+   "Kart i / n" ilerleme şeridi, her tur bitince "Sıradaki kart (i+1 / n) →" düğmesi; öğrenci düğmeye basmadan yeni tur açılmaz.
+   Çözülen tur kısa bir satırla özetlenir; yeni tur vurgulanır ve ekrana kaydırılır; son turdan sonra adımın bittiği yazılır.
+   (soruZincir ile aynı görünüm: .sz-ust şeridi, .sz-ileri düğmesi; ortak dosyalara dokunmadan yalnız bu atölyede.) */
+(function(){const st=document.createElement("style");st.textContent=`
+.tz-ust{scroll-margin-top:96px}
+.tz-ozet{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px}
+.tz-ozet:empty{display:none}
+.tz-ozet li{font-size:14.5px;line-height:1.45;color:var(--muted);padding:4px 10px;border-left:4px solid #2b8a3e;background:color-mix(in srgb,#2b8a3e 7%,var(--card));border-radius:6px}
+.tz-ozet li::before{content:"✓ ";color:#2b8a3e;font-weight:800}
+.tz-yeni{animation:tzGel .9s ease-out}
+@keyframes tzGel{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc,#1c5fbf) 60%,transparent);background:color-mix(in srgb,var(--acc,#1c5fbf) 10%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+.tz-son{font-weight:700;color:#2b8a3e;margin:10px 0 4px;line-height:1.45}
+.tz-dug{scroll-margin-bottom:120px}
+.r-tusl[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.tz-yeni{animation:none}}`;document.head.appendChild(st);})();
+/* once: şeridin önüne konacağı öğe · o: {n (0 = sınırsız), ad:"Kart", tamlayan:"kartın", kur:i=>…(i. turu kurar; 0'dan),
+   vurgu:()=>öğe (yeni turda vurgulanacak alan), dugme: öğe (düğmenin ekleneceği yer), son:"son turdan sonraki cümle"} */
+function turZincir(once,o){const n=o.n||0,ad=o.ad,kucuk=ad.toLocaleLowerCase("tr");let i=0,bitti=false,btn=null,sonP=null;
+  const ust=document.createElement("div");ust.className="sz-ust tz-ust";ust.setAttribute("aria-live","polite");once.before(ust);
+  const oz=document.createElement("ol");oz.className="tz-ozet";oz.setAttribute("aria-label","Biten turlar");ust.after(oz);
+  const ciz=()=>{const hepsi=n&&bitti&&i===n-1;
+    ust.innerHTML=`<span class="sz-et">${hepsi?`${n} ${o.tamlayan} hepsi tamamlandı ✓`:n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}</span>`+(n?`<span class="sz-nok">${Array.from({length:n},(_,j)=>`<i class="${j<i||(bitti&&j===i)?"ok":j===i?"su":""}"></i>`).join("")}</span>`:"");};
+  const kaydir=(el,b)=>setTimeout(()=>{if(!(el&&el.isConnected&&el.offsetParent))return;const sm=azHareket()?"auto":"smooth";
+    if(b!=="start"){el.scrollIntoView({behavior:sm,block:b});return;}
+    const u=document.querySelector(".etk-ust"),ofs=(u&&getComputedStyle(u).position.includes("sticky")?u.getBoundingClientRect().height:0)+12;
+    window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-ofs),behavior:sm});},80);
+  const yer=()=>o.dugme||once.parentNode;
+  const T={get i(){return i;},get bitti(){return bitti;},
+    tamam(ozet){if(bitti)return;bitti=true;ciz();
+      if(ozet){const li=document.createElement("li");li.innerHTML=`${n?`${ad} ${i+1} / ${n}`:`${i+1}. ${kucuk}`}: ${ozet}`;oz.appendChild(li);}
+      if(!n||i<n-1){btn=document.createElement("button");btn.type="button";btn.className="primary sz-ileri tz-dug";
+        btn.textContent=n?`Sıradaki ${kucuk} (${i+2} / ${n}) →`:`Sıradaki ${kucuk} (${i+2}. ${kucuk}) →`;yer().appendChild(btn);kaydir(btn,"center");
+        btn.onclick=()=>{btn.remove();btn=null;i++;bitti=false;ciz();o.kur(i);const v=o.vurgu?o.vurgu():once.parentNode;
+          if(v){v.classList.remove("tz-yeni");void v.offsetWidth;v.classList.add("tz-yeni");}bip(660,.08);kaydir(ust,"start");};}
+      else{sonP=document.createElement("p");sonP.className="tz-son";sonP.innerHTML=o.son||`${n} ${o.tamlayan} hepsi bitti. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız.`;yer().appendChild(sonP);kaydir(sonP,"center");}},
+    sifirla(){i=0;bitti=false;oz.innerHTML="";if(btn){btn.remove();btn=null;}if(sonP){sonP.remove();sonP=null;}ciz();}};
+  ciz();return T;}
 /* Yardımcılar (yalnız bu dosya) */
 const UST=e=>String(e).replace(/[−-]/g,"⁻").split("").map(c=>c==="⁻"?c:"⁰¹²³⁴⁵⁶⁷⁸⁹"[+c]).join("");
 const tb=a=>typeof a==="number"&&a<0?`(${sn(a)})`:String(a);       /* taban: negatifse parantezli */
@@ -999,14 +1064,14 @@ const e_hucre=p=>{const S=notr(adimli(p));const MX={2:6,3:4};
   OTO(()=>{const kur=(a,b)=>{segTikla(k.querySelector(".or_"),a);U.v=b;n=b;ciz();};[1,2,3].forEach(b=>kur(2,b));[1,2,3].forEach(b=>kur(3,b));});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Her hücre ikiye ayrılıyor. n bölünmeden sonraki hücre sayısı hangisidir?",
-      [us(2,"n"),"2 · n",us("n",2),"n + 2"],
+      [us(2,"n"),["2 · n","2'yi n ile çarptınız. Her bölünmede hücre sayısı 2 ile çarpılır; 3 bölünmede 2 · 2 · 2 olur."],[us("n",2),"Taban ile üssün yerini değiştirdiniz. Tekrar eden çarpan hangisidir: 2 mi, n mi?"],["n + 2","2'yi n'ye eklediniz. Hücre sayısı her bölünmede 2 artmaz, 2 katına çıkar."]],
       "Her bölünmede hücre sayısı 2 ile çarpılır. n bölünmede 2 sayısı n kez çarpılır: 2<sup>n</sup>.",()=>
     S.soru(c,"2 · 2 · 2 · 2 · 2 · 2 çarpımı üslü ifadeyle yazılınca taban ve üs hangisidir?",
-      ["Taban 2, üs 6","Taban 6, üs 2","Taban 2, üs 2","Taban 12, üs 1"],
+      ["Taban 2, üs 6",["Taban 6, üs 2","Taban ile üssü karıştırdınız: tekrar eden çarpan tabandır, kaç kez yazıldığı üstür."],["Taban 2, üs 2","2 sayısı kaç kez yazılmış? Çarpanları yeniden sayınız."],["Taban 12, üs 1","Çarpanları topladınız (2 + 2 + … = 12). Üslü ifadede aynı sayının kaç kez çarpıldığı yazılır."]],
       "Tekrar eden çarpan <b>taban</b> (2), çarpanın kaç kez yazıldığı <b>üs</b>tür (6): 2<sup>6</sup>.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,yaz(["Başka bir hücre türünde her hücre, her bölünmede 4 hücreye ayrılır. Başta 1 hücre vardır."])+soruKut("3 bölünmeden sonra kaç hücre olur?"),64,
-      "4 · 4 · 4 = 4<sup>3</sup> = 64 hücre.","",
+      "4 · 4 · 4 = 4<sup>3</sup> = 64 hücre.",["Her bölünmede hücre sayısı 4 ile çarpılır; tekrarlı çarpmayı yazınız.",v=>v===12?"4'ü 3 ile çarptınız. 3 bölünmede 4 sayısı 3 kez çarpılır.":v===16?"4'ü yalnız iki kez çarptınız; 3 bölünme vardır.":v===81?"Taban ile üssün yerini değiştirdiniz: 3<sup>4</sup> değil, 4<sup>3</sup>.":v===7?"Sayıları topladınız; her bölünmede hücre sayısı çarpılır.":""],
       ()=>S.bitir("Aynı sayının tekrar tekrar çarpımı <b>üslü ifadeyle</b> kısaca yazılır: 2 · 2 · 2 · 2 = 2<sup>4</sup>. Tekrar eden çarpan <b>taban</b>, kaç kez çarpıldığı <b>üs</b>tür. 2<sup>4</sup> “2'nin 4. kuvveti” diye okunur."));}
 };
 
@@ -1035,14 +1100,14 @@ const e_taban=p=>{const S=notr(adimli(p));
   OTO(()=>{[[2,3],[2,5],[3,4],[2,4],[1,3]].forEach(([x,y])=>{segTikla(ay,x);segTikla(by,y);});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Bir üslü ifadede taban ile üs yer değiştirirse değer için hangisi doğrudur?",
-      ["Genellikle değişir; aynı kalması özel bir durumdur","Hiçbir zaman değişmez","Her zaman büyür"],
+      ["Genellikle değişir; aynı kalması özel bir durumdur",["Hiçbir zaman değişmez","Defterde 2<sup>3</sup> ile 3<sup>2</sup>'ye bakınız: değerleri aynı mı?"],["Her zaman büyür","Terazide 2<sup>5</sup> ile 5<sup>2</sup>'yi tartınız: yer değiştirince değer büyüdü mü, küçüldü mü?"]],
       "Örneğin 2<sup>3</sup> = 8 ama 3<sup>2</sup> = 9. Yalnız 2<sup>4</sup> = 4<sup>2</sup> gibi özel durumlarda değerler eşit çıkar.",()=>
     S.soru(c,"2<sup>5</sup> için hangisi doğrudur?",
-      ["5 tane 2'nin çarpımıdır","2 ile 5'in çarpımıdır","2 tane 5'in çarpımıdır"],
+      ["5 tane 2'nin çarpımıdır",["2 ile 5'in çarpımıdır","Üssü çarpan gibi kullandınız. Üs, tabanın kaç kez çarpıldığını gösterir."],["2 tane 5'in çarpımıdır","Taban ile üssün yerini değiştirdiniz. Tekrar eden çarpan hangisidir?"]],
       "2<sup>5</sup> = 2 · 2 · 2 · 2 · 2. Üs bir çarpan değildir; tabanın kaç kez çarpıldığını gösterir.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("3<sup>4</sup> ile 4<sup>3</sup> ifadelerinin değerleri arasındaki fark kaçtır?"),17,
-      "3<sup>4</sup> = 3 · 3 · 3 · 3 = 81 ve 4<sup>3</sup> = 4 · 4 · 4 = 64; 81 − 64 = 17.","",
+      "3<sup>4</sup> = 3 · 3 · 3 · 3 = 81 ve 4<sup>3</sup> = 4 · 4 · 4 = 64; 81 − 64 = 17.",["3<sup>4</sup> ve 4<sup>3</sup>'ü tekrarlı çarpmayla ayrı ayrı hesaplayınız.",v=>v===0?"Taban ile üs yer değiştirince değer değişir; iki değeri ayrı ayrı hesaplayınız.":v===-17?"Büyük değerden küçüğü çıkarınız; fark pozitif olur.":""],
       ()=>S.bitir("Üslü ifadede <b>taban</b> ile <b>üs</b> yer değiştirince değer genellikle değişir: 2<sup>5</sup> ≠ 5<sup>2</sup>. Üs bir çarpan değildir; tabanın kaç kez çarpıldığını gösterir."));}
 };
 
@@ -1075,14 +1140,14 @@ const e_kule=p=>{const S=notr(adimli(p));
   OTO(()=>{const kur=(a,b,d)=>{n=a;r=b;h=d;R.v=b;H.v=d;segTikla(ay,a);ciz();};kur(3,3,1);kur(3,3,3);kur(2,2,2);kur(4,4,4);});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Bir kenarında n küp bulunan kare katta kaç birim küp vardır?",
-      [us("n",2),"2 · n","n + n",us("n",3)],
+      [us("n",2),["2 · n","n'yi 2 ile çarptınız. Kare katta n sıra vardır ve her sırada n küp bulunur."],["n + n","Sıraları topladınız. Kare katta n tane sıra vardır; n + n yalnız iki sıradır."],[us("n",3),"Kat sayısını da eklediniz. Kare kat tek kattır; büyük küpte n kat vardır."]],
       "n sıra var ve her sırada n küp bulunur: n · n = n<sup>2</sup>. Bu yüzden n<sup>2</sup> “n'nin karesi” diye okunur.",()=>
     S.soru(c,"5<sup>3</sup> nasıl okunur ve neyi gösterir?",
-      ["“5'in küpü”; kenarında 5 küp olan büyük küpteki birim küp sayısını","“5'in karesi”; kenarında 5 küp olan kare kattaki küp sayısını","“5 çarpı 3”; 5 küplük üç sırayı"],
+      ["“5'in küpü”; kenarında 5 küp olan büyük küpteki birim küp sayısını",["“5'in karesi”; kenarında 5 küp olan kare kattaki küp sayısını","Üssü 2 olan ifade “kare” diye okunur; burada üs kaçtır?"],["“5 çarpı 3”; 5 küplük üç sırayı","Üssü çarpan gibi kullandınız. 5<sup>3</sup>, 5'in kaç kez çarpıldığını gösterir?"]],
       "5<sup>3</sup> = 5 · 5 · 5. Üssü 2 olan ifade “kare”, üssü 3 olan ifade “küp” diye okunur.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("Bir kenarında 6 birim küp bulunan büyük bir küp kurmak için kaç birim küp gerekir?"),216,
-      "6<sup>3</sup> = 6 · 6 · 6 = 216 birim küp.","",
+      "6<sup>3</sup> = 6 · 6 · 6 = 216 birim küp.",["Büyük küp, kenar küp sayısı kadar sıradan ve kattan oluşur: 6 · 6 · 6.",v=>v===36?"Bu kare kattaki küp sayısıdır; büyük küpte 6 kat vardır.":v===18?"6'yı 3 ile çarptınız. Büyük küpte 6 sayısı 3 kez çarpılır.":""],
       ()=>S.bitir("Bir sayının <b>karesi</b> (a<sup>2</sup>), kenarında a küp bulunan kare kattaki; <b>küpü</b> (a<sup>3</sup>) kenarında a küp bulunan büyük küpteki birim küp sayısıdır. 4<sup>2</sup> “4'ün karesi”, 4<sup>3</sup> “4'ün küpü” diye okunur."));}
 };
 
@@ -1121,14 +1186,14 @@ const e_isaret=p=>{const S=notr(adimli(p));const MAX={"-2":8,"-3":6};
   OTO(()=>{[-2,-3].forEach(tt=>{segTikla(ay,tt);while(N[tt]<MAX[tt])k.querySelector(".carp").click();});k.querySelector(".sif").click();for(let i=0;i<3;i++)k.querySelector(".carp").click();});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Negatif bir tabanın art arda kuvvetlerinde işaret nasıl değişti?",
-      ["Üs 1 artınca işaret değişti: −, +, −, + …","Hep negatif kaldı","Hep pozitif oldu","Yalnız ilk çarpımda değişti"],
+      ["Üs 1 artınca işaret değişti: −, +, −, + …",["Hep negatif kaldı","Defterin işaret sütununa bakınız: (−2)<sup>2</sup> = 4 negatif mi?"],["Hep pozitif oldu","Defterin işaret sütununa bakınız: (−2)<sup>1</sup> ve (−2)<sup>3</sup> pozitif mi?"],["Yalnız ilk çarpımda değişti","Makinede 3., 4., 5. kuvvetlere bakınız: işaret yalnız bir kez mi değişti?"]],
       "(−2)<sup>1</sup> = −2, (−2)<sup>2</sup> = 4, (−2)<sup>3</sup> = −8 … Her çarpımda bir negatif çarpan daha gelir ve işaret değişir.",()=>
     S.soru(c,"Makine (−3)<sup>3</sup> = −27 gösterirken bir kez daha çarparsanız sonuç 0'ın hangi yanına düşer?",
-      ["Sağına; (−3)<sup>4</sup> pozitiftir","Soluna; (−3)<sup>4</sup> negatiftir","Tam 0'a düşer"],
+      ["Sağına; (−3)<sup>4</sup> pozitiftir",["Soluna; (−3)<sup>4</sup> negatiftir","İki negatif sayının çarpımının işaretini düşününüz: (−27) · (−3)."],["Tam 0'a düşer","0'a düşmesi için çarpanlardan biri 0 olmalıdır. (−27) · (−3) 0 mıdır?"]],
       "(−27) · (−3) = 81: dört negatif çarpanın çarpımı pozitiftir.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("(−3)<sup>3</sup> ifadesinin değeri kaçtır?"),-27,
-      "(−3) · (−3) · (−3) = 9 · (−3) = −27.","",
+      "(−3) · (−3) · (−3) = 9 · (−3) = −27.",["Negatif çarpanların sayısına bakınız: üç negatif çarpanın çarpımının işareti nedir?",v=>v===27?"Sayı doğru ama işaret yanlış: üs tek olduğu için sonuç negatiftir.":v===-9||v===9?"Üssü çarpan gibi kullandınız. (−3) üç kez çarpılır.":""],
       ()=>S.bitir("Negatif bir tabanın kuvvetlerinde her çarpımla işaret değişir: (−2)<sup>1</sup> negatif, (−2)<sup>2</sup> pozitif, (−2)<sup>3</sup> negatif … Değerin sayı kısmı, tabanın eksisiz hâlinin kuvvetidir: (−2)<sup>3</sup> = −(2<sup>3</sup>) = −8."));}
 };
 
@@ -1160,14 +1225,14 @@ const e_cifttek=p=>{const S=notr(adimli(p));
   OTO(()=>{[[-7,9],[-2,4],[-2,5],[-3,6],[-5,3],[-10,10],[-3,11],[-5,12]].forEach(([x,y])=>{segTikla(k.querySelector(".tr_"),x);U.v=y;e=y;ciz();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Tabanı negatif olan bir kuvvetin işaretini ne belirler?",
-      ["Üssün çift ya da tek olması","Tabanın büyüklüğü","Üssün büyüklüğü"],
+      ["Üssün çift ya da tek olması",["Tabanın büyüklüğü","Defterde taban −2 ile −10'a bakınız: taban büyüdükçe işaret değişti mi?"],["Üssün büyüklüğü","(−2)<sup>4</sup> ile (−2)<sup>5</sup>'i karşılaştırınız: üs yalnız 1 arttı ama işaret değişti. Üssün hangi özelliği önemli?"]],
       "Üs çiftse negatif çarpanlar ikişer ikişer eşleşir ve sonuç pozitif olur; üs tekse bir negatif çarpan artar ve sonuç negatif olur.",()=>
     S.soru(c,"a pozitif bir tam sayı ve (−a)<sup>n</sup> negatif ise n için hangisi doğrudur?",
-      ["n tek sayıdır","n çift sayıdır","n, a'dan büyüktür"],
+      ["n tek sayıdır",["n çift sayıdır","Üs çiftken negatif çarpanlar ikişer ikişer eşleşir. Sonuç negatif mi olur?"],["n, a'dan büyüktür","(−2)<sup>3</sup> negatiftir ama 3, 2'den büyüktür; (−5)<sup>3</sup> de negatiftir ama 3, 5'ten küçüktür."]],
       "Negatif tabanın kuvveti yalnız üs tek iken negatiftir.",meydan));}
   function meydan(){const m=S.son();
     S.soru(m,"Aşağıdakilerden hangisinin sonucu negatiftir?",
-      [us(-6,9),us(-6,10),us(-9,6),us(-1,100)],
+      [us(-6,9),[us(-6,10),"Üs 10 çift sayıdır; negatif çarpanlar ikişer ikişer eşleşir."],[us(-9,6),"Üs 6 çift sayıdır; negatif çarpanlar ikişer ikişer eşleşir."],[us(-1,100),"Üs 100 çift sayıdır; (−1)'in çift kuvvetinin işaretini düşününüz."]],
       "(−6)<sup>9</sup> ifadesinde taban negatif, üs tektir; sonuç negatiftir.",
       ()=>S.bitir("Tabanı negatif olan bir kuvvette <b>üs çift ise sonuç pozitif</b>, <b>üs tek ise sonuç negatiftir</b>. İşareti bulmak için hesap yapmaya gerek yoktur; üssün çift mi tek mi olduğuna bakılır."));}
 };
@@ -1199,14 +1264,14 @@ const e_parantez=p=>{const S=notr(adimli(p));
   OTO(()=>{const kur=(x,y,z)=>{segTikla(k.querySelector(".ay"),x);U.v=y;e=y;ciz();segTikla(k.querySelector(".pr_"),z);};kur(3,4,1);kur(3,4,0);kur(2,3,1);kur(2,3,0);});
   function acikla(){const c=S.kural(2);
     S.soru(c,"−3<sup>4</sup> ifadesinde üs hangi sayıya etki eder?",
-      ["Yalnız 3'e","−3'e","4'e"],
+      ["Yalnız 3'e",["−3'e","Parantez yokken eksi işareti tabana dâhil midir? Parantezli ve parantezsiz açılımları karşılaştırınız."],["4'e","Üs, tabanın kaç kez çarpılacağını gösterir; kendisine etki etmez."]],
       "Parantez yoksa üs yalnız 3'e etki eder: −3<sup>4</sup> = −(3 · 3 · 3 · 3) = −81.",()=>
     S.soru(c,"(−2)<sup>3</sup> ile −2<sup>3</sup> ifadelerinin değerleri neden eşit çıktı?",
-      ["Üs tek olduğu için (−2)<sup>3</sup> de negatif oldu","Parantez hiçbir zaman sonucu değiştirmez","Taban 2 olduğu için"],
+      ["Üs tek olduğu için (−2)<sup>3</sup> de negatif oldu",["Parantez hiçbir zaman sonucu değiştirmez","Üs çiftken parantez değeri değiştirdi: (−3)<sup>4</sup> = 81, −3<sup>4</sup> = −81."],["Taban 2 olduğu için","Taban 3 iken de üs tekse değerler eşit çıktı: (−3)<sup>3</sup> = −3<sup>3</sup>. Üssün hangi özelliği önemli?"]],
       "(−2)<sup>3</sup> = −8 ve −2<sup>3</sup> = −8. Üs çift olsaydı değerler farklı çıkardı: (−5)<sup>2</sup> = 25, −5<sup>2</sup> = −25.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("−3<sup>2</sup> + (−2)<sup>3</sup> işleminin sonucu kaçtır?"),-17,
-      "−3<sup>2</sup> = −9 ve (−2)<sup>3</sup> = −8; −9 + (−8) = −17.","",
+      "−3<sup>2</sup> = −9 ve (−2)<sup>3</sup> = −8; −9 + (−8) = −17.",["−3<sup>2</sup>'de taban 3'tür; (−2)<sup>3</sup>'te taban −2'dir. Önce kuvvetleri, sonra toplamı bulunuz.",v=>v===1?"−3<sup>2</sup>'yi (−3)<sup>2</sup> gibi hesapladınız. Parantez yoksa üs yalnız 3'e etki eder.":v===-1?"(−2)<sup>3</sup>'ün işaretine bakınız: üs tek.":v===17?"İki kuvvetin işaretlerini yeniden kontrol ediniz.":""],
       ()=>S.bitir("Üs, hemen solundaki sayıya ya da parantezin tamamına etki eder. <b>(−3)<sup>4</sup></b> ifadesinde taban −3'tür: (−3)<sup>4</sup> = 81. <b>−3<sup>4</sup></b> ifadesinde taban 3'tür; önce kuvvet alınır, sonra eksi yazılır: −3<sup>4</sup> = −81."));}
 };
 
@@ -1214,17 +1279,20 @@ const e_parantez=p=>{const S=notr(adimli(p));
 const e_eksibir=p=>{const S=notr(adimli(p));
   const BIG=[15,40,99,100,2026,7,58,333,64,1001];
   const k=S.ac(1,{ne:"(−1)'in kuvvetlerini sayı doğrusunda izleyecek, sonra çok büyük üslerde sonucu hızlıca bulacaksınız.",
-    durum:"(−1)<sup>n</sup> ifadesinde n bir pozitif tam sayıdır. Deneyin ilk bölümünde n, 1 ile 12 arasında seçilir. İkinci bölümde (hızlı tur) 15, 40, 99, 100, 2026 gibi büyük üsler gelir.",
-    nasil:["“Üs (n)” sürgüsüyle ya da − ve + düğmeleriyle üssü değiştiriniz. Sayı doğrusundaki nokta (−1)<sup>n</sup> değerine gider ve değer deney defterine yazılır.","Hızlı turda ekrandaki ifadenin değerine karar veriniz ve “1” ya da “−1” düğmesine basınız.","Yanlış cevapta üst üste doğru sayısı sıfırlanır."],biter:bitG(2)});
+    durum:"(−1)<sup>n</sup> ifadesinde n bir pozitif tam sayıdır. Deneyin ilk bölümünde n, 1 ile 12 arasında seçilir. İkinci bölümde (hızlı tur) 15, 40, 99, 100, 2026 gibi büyük üslü <b>10 ifade</b> sırayla gelir.",
+    nasil:["“Üs (n)” sürgüsüyle ya da − ve + düğmeleriyle üssü değiştiriniz. Sayı doğrusundaki nokta (−1)<sup>n</sup> değerine gider ve değer deney defterine yazılır.","Hızlı turda 10 ifade vardır; “İfade i / 10” şeridi kaçıncı ifadede olduğunuzu gösterir. Ekrandaki ifadenin değerine karar veriniz ve “1” ya da “−1” düğmesine basınız.","Doğru cevaptan sonra “Sıradaki ifade (i+1 / 10) →” düğmesine basınız. Yanlış cevapta üst üste doğru sayısı sıfırlanır."],biter:bitG(2)});
   S.tahmin(k,"(−1)<sup>n</sup> ifadesi, n'nin farklı değerleri için kaç farklı değer alır?",[[1,"1"],[2,"2"],[12,"12"],["s","Sonsuz sayıda"]],2,"(−1)<sup>n</sup> yalnız 1 ve −1 değerlerini aldı.");
   k.insertAdjacentHTML("beforeend",`<div class="row sr"></div><div class="stage st"></div><p class="durum sn"></p>
     <div class="a8-et" style="margin-top:12px">Hızlı tur</div><div class="kv-buyuk hb"></div><div class="row hz" style="justify-content:center;margin-top:0"><button class="kv-kart" data-v="1">1</button><button class="kv-kart" data-v="-1">−1</button></div>
-    <div class="kv-skorlar"><div class="kv-sk"><small>Üst üste doğru</small><b class="se">0</b></div><div class="kv-sk"><small>En uzun seri</small><b class="eu">0</b></div></div><div class="fb" hidden></div>`);
+    <div class="kv-skorlar"><div class="kv-sk"><small>Üst üste doğru</small><b class="se">0</b></div><div class="kv-sk"><small>En uzun seri</small><b class="eu">0</b></div></div><div class="fb" hidden></div><div class="tzd"></div>`);
   const sr=k.querySelector(".sr"),st=k.querySelector(".st"),sd=k.querySelector(".sn"),hb=k.querySelector(".hb"),f=k.querySelector(".fb");
-  let n=1,once=null,j=0,seri=0,enUzun=0;
+  let n=1,once=null,j=0,seri=0,enUzun=0,cz=0,cvp=false;
   const D=defter(k,["Üs (n)","(−1)<sup>n</sup>"]);
   const G=gorevler(k,[{m:"Sürgüyle <b>6 farklı</b> üs deneyiniz.",ok:()=>D.n>=6},
-    {m:"Hızlı turda <b>üst üste 5</b> doğru cevap veriniz.",ok:()=>enUzun>=5,s:()=>"Üs çiftse 1, üs tekse −1"}],acikla);
+    {m:"Hızlı turdaki <b>10 ifadenin hepsinin</b> değerini bulunuz.",ok:()=>cz>=BIG.length,s:()=>"Üs çiftse 1, üs tekse −1"}],acikla);
+  /* 07.10.2026 (§4.k-5 · E2): hızlı turdaki 10 ifade için "İfade i / 10" şeridi; doğru cevaptan sonra "Sıradaki ifade (i+1 / 10) →" düğmesi */
+  const TZ=turZincir(hb,{n:BIG.length,ad:"İfade",tamlayan:"ifadenin",kur:i=>{j=i;cvp=false;f.hidden=true;hizli();},vurgu:()=>hb,dugme:k.querySelector(".tzd"),
+    son:"Hızlı turdaki 10 ifadenin hepsi bitti. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   const U=surgu("Üs (n)",1,12,n,v=>{once=n;n=v;ciz();});sr.appendChild(U.el);
   const X=v=>300+v*120;
   function ciz(){const v=(-1)**n,sv=svgEl(600,130);let h=`<line x1="40" y1="90" x2="560" y2="90" stroke="${css('--ink')}" stroke-width="3"/>`;
@@ -1233,22 +1301,23 @@ const e_eksibir=p=>{const S=notr(adimli(p));
     h+=`<circle cx="${X(v)}" cy="90" r="11" fill="${css('--acc')}" stroke="#fff" stroke-width="3"/><text x="${X(v)}" y="54" text-anchor="middle" font-size="18" font-weight="800">${usS(-1,n)}</text>`;
     sv.innerHTML=h;st.replaceChildren(sv);D.ekle([n,sn(v)],String(n));
     sd.innerHTML=dz(`(−1)<sup>${n}</sup> = <b>${sn(v)}</b>`,`Denenen üs: <b>${D.n}</b>`);G.kontrol();}
-  function hizli(){hb.innerHTML=us(-1,BIG[j%BIG.length]);k.querySelector(".se").textContent=seri;k.querySelector(".eu").textContent=enUzun;}
-  k.querySelectorAll(".hz button").forEach(b=>b.onclick=()=>{const e=BIG[j%BIG.length],v=(-1)**e;
-    if(+b.dataset.v===v){seri++;enUzun=Math.max(enUzun,seri);fb(f,true,`${us(-1,e)} = ${sn(v)}`);bip(620+seri*30,.08);j++;}
-    else{seri=0;fb(f,false,YD);yanlisSes();}hizli();G.kontrol();});
+  function hizli(){hb.innerHTML=us(-1,BIG[j])+(cvp?` = ${sn((-1)**BIG[j])}`:"");k.querySelector(".se").textContent=seri;k.querySelector(".eu").textContent=enUzun;
+    k.querySelectorAll(".hz button").forEach(b=>b.disabled=cvp);}
+  k.querySelectorAll(".hz button").forEach(b=>b.onclick=()=>{if(cvp)return;const e=BIG[j],v=(-1)**e,s_=+b.dataset.v;
+    if(s_===v){seri++;enUzun=Math.max(enUzun,seri);cvp=true;cz++;fb(f,true,`${us(-1,e)} = ${sn(v)}: üs ${e%2?"tek":"çift"} sayıdır.`);bip(620+seri*30,.08);hizli();TZ.tamam(`${us(-1,e)} = ${sn(v)}`);}
+    else{seri=0;fb(f,false,`${sn(s_)} çıkması için üssün ${s_===1?"çift":"tek"} olması gerekir; ${e} öyle mi? ${YD}`);yanlisSes();hizli();}G.kontrol();});
   ciz();hizli();
-  OTO(()=>{for(let v=2;v<=6;v++){U.v=v;once=n;n=v;ciz();}for(let t=0;t<5;t++){const e=BIG[j%BIG.length];k.querySelector(`.hz [data-v="${(-1)**e}"]`).click();}});
+  OTO(()=>{for(let v=2;v<=6;v++){U.v=v;once=n;n=v;ciz();}for(let t=0;t<BIG.length;t++){const e=BIG[j];k.querySelector(`.hz [data-v="${(-1)**e}"]`).click();const b=k.querySelector(".tz-dug");if(b)b.click();}});
   function acikla(){const c=S.kural(2);
     S.soru(c,"n pozitif bir tam sayı iken (−1)<sup>n</sup> hangi değerleri alır?",
-      ["Yalnız 1 ve −1","1'den 12'ye kadar bütün sayıları","Yalnız −1"],
+      ["Yalnız 1 ve −1",["1'den 12'ye kadar bütün sayıları","Sürgüyle denediğiniz kuvvetlerde sayı doğrusundaki nokta kaç farklı yere gitti?"],["Yalnız −1","(−1)<sup>2</sup>'ye bakınız: değeri −1 mi?"]],
       "Üs her 1 arttığında değer 1 ile −1 arasında gidip gelir.",()=>
     S.soru(c,"(−1)<sup>2026</sup> kaçtır?",
-      ["1","−1","−2026","2026"],
+      ["1",["−1","Üs 2026 çift mi, tek mi? Tek üsler −1 verir."],["−2026","Tabanı üsle çarptınız. (−1)'in kuvvetleri yalnız iki değer alır."],["2026","Üssü değer gibi yazdınız. (−1)'in kuvvetleri yalnız iki değer alır."]],
       "2026 çift olduğundan (−1)<sup>2026</sup> = 1.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("(−1)<sup>100</sup> + (−1)<sup>101</sup> + (−1)<sup>102</sup> toplamı kaçtır?"),1,
-      "(−1)<sup>100</sup> = 1, (−1)<sup>101</sup> = −1, (−1)<sup>102</sup> = 1; 1 + (−1) + 1 = 1.","",
+      "(−1)<sup>100</sup> = 1, (−1)<sup>101</sup> = −1, (−1)<sup>102</sup> = 1; 1 + (−1) + 1 = 1.",["Üç kuvvetin değerini ayrı ayrı bulup toplayınız; üs çiftse 1, tekse −1'dir.",v=>v===3?"Üç kuvvetin hepsini 1 saydınız; 101 tek sayıdır.":v===-1?"Çift üslü kuvvetler 1'dir; 100 ve 102 çift sayıdır.":v===303?"Üsleri topladınız; (−1)'in kuvvetleri yalnız 1 ve −1 değerlerini alır.":""],
       ()=>S.bitir("(−1)'in kuvvetleri yalnız <b>1</b> ve <b>−1</b> değerlerini alır: üs çiftse (−1)<sup>n</sup> = 1, üs tekse (−1)<sup>n</sup> = −1. Üs ne kadar büyük olursa olsun, yalnız çift mi tek mi olduğuna bakılır."));}
 };
 
@@ -1283,14 +1352,14 @@ const e_merdiven=p=>{const S=notr(adimli(p));
   OTO(()=>{[2,3,10].forEach(x=>{segTikla(ay,x);while(E[x]>0)k.querySelector(".in_").click();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Merdivende bir basamak inince (üs 1 azalınca) değer nasıl değişti?",
-      ["Tabana bölündü","1 azaldı","Tabandan çıkarıldı"],
+      ["Tabana bölündü",["1 azaldı","Merdivende 16'dan 8'e inildi: 1 mi azaldı?"],["Tabandan çıkarıldı","Merdivende 16'dan 8'e inildi: 16'dan 2 çıkarılınca 14 olur."]],
       "16 : 2 = 8, 8 : 2 = 4 … Her basamakta değer tabana bölünür.",()=>
     S.soru(c,"a sıfırdan farklı bir sayı ise a<sup>0</sup> kaçtır?",
-      ["1","0","a"],
+      ["1",["0","Merdivende a<sup>1</sup> = a basamağından bir basamak inince a, a'ya bölünür. a : a kaçtır?"],["a","a<sup>1</sup> = a'dır; a<sup>0</sup> bir basamak aşağıdadır ve değer tabana bölünür."]],
       "a<sup>1</sup> = a basamağından bir basamak inilince a : a = 1 bulunur.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("5<sup>0</sup> + 5<sup>1</sup> + 5<sup>2</sup> toplamı kaçtır?"),31,
-      "5<sup>0</sup> = 1, 5<sup>1</sup> = 5, 5<sup>2</sup> = 25; 1 + 5 + 25 = 31.","",
+      "5<sup>0</sup> = 1, 5<sup>1</sup> = 5, 5<sup>2</sup> = 25; 1 + 5 + 25 = 31.",["Her kuvvetin değerini merdivende olduğu gibi bulup toplayınız.",v=>v===30?"5<sup>0</sup>'ı 0 saydınız; sıfırdan farklı tabanın sıfırıncı kuvveti 0 değildir.":v===35?"5<sup>0</sup>'ı 5 saydınız; merdivende 5<sup>1</sup>'den bir basamak inince değer 5'e bölünür.":v===16||v===15?"5<sup>2</sup>'yi 5 · 2 gibi hesapladınız. Üs, tabanın kaç kez çarpıldığını gösterir.":""],
       ()=>S.bitir("Üs 1 azaldığında değer tabana bölünür. Merdivende a<sup>1</sup> = a basamağından bir basamak inilince a : a = 1 bulunur. Bu yüzden <b>sıfırdan farklı her sayının sıfırıncı kuvveti 1'dir</b>: 2<sup>0</sup> = 3<sup>0</sup> = 10<sup>0</sup> = 1."));}
 };
 
@@ -1324,14 +1393,14 @@ const e_dedektif=p=>{const S=notr(adimli(p));
   OTO(()=>{const kur=(x,y)=>{segTikla(k.querySelector(".ay"),x);segTikla(k.querySelector(".ey"),y);U.v=0;e=0;ciz();};kur(9,"ic");kur(7,"yok");kur(3,"dis");kur(0,"yok");});
   function acikla(){const c=S.kural(2);
     S.soru(c,"−9<sup>0</sup> ile (−9)<sup>0</sup> ifadelerinin değerleri neden farklı çıktı?",
-      ["−9<sup>0</sup> ifadesinde taban 9'dur; önce 9<sup>0</sup> = 1 bulunur, sonra eksi yazılır","Negatif sayıların sıfırıncı kuvveti −1'dir","İki ifadenin değeri de 1'dir"],
+      ["−9<sup>0</sup> ifadesinde taban 9'dur; önce 9<sup>0</sup> = 1 bulunur, sonra eksi yazılır",["Negatif sayıların sıfırıncı kuvveti −1'dir","(−9)<sup>0</sup> ifadesine bakınız: taban negatif ama değer 1 çıktı."],["İki ifadenin değeri de 1'dir","Deneyde −9<sup>0</sup> kaç çıktı? Defterin değer sütununa bakınız."]],
       "(−9)<sup>0</sup> = 1, −9<sup>0</sup> = −(9<sup>0</sup>) = −1.",()=>
     S.soru(c,"Aşağıdaki ifadelerden hangisinin değeri tanımsızdır?",
-      ["0<sup>0</sup>","(−1)<sup>0</sup>","2026<sup>0</sup>"],
+      ["0<sup>0</sup>",["(−1)<sup>0</sup>","Taban (−1) sıfırdan farklıdır. Deneyde değeri kaç çıktı?"],["2026<sup>0</sup>","Taban 2026 sıfırdan farklıdır. Sıfırdan farklı tabanların sıfırıncı kuvveti kaçtır?"]],
       "Sıfırıncı kuvvet yalnız sıfırdan farklı tabanlar için 1'dir; 0<sup>0</sup> tanımsızdır.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("−4<sup>0</sup> + (−4)<sup>0</sup> − 4<sup>0</sup> işleminin sonucu kaçtır?"),-1,
-      "−4<sup>0</sup> = −1, (−4)<sup>0</sup> = 1, 4<sup>0</sup> = 1; −1 + 1 − 1 = −1.","",
+      "−4<sup>0</sup> = −1, (−4)<sup>0</sup> = 1, 4<sup>0</sup> = 1; −1 + 1 − 1 = −1.",["Her terimin tabanına bakınız: −4<sup>0</sup>'da taban 4'tür, (−4)<sup>0</sup>'da taban −4'tür.",v=>v===1?"−4<sup>0</sup>'ı 1 saydınız. Parantez yoksa önce 4<sup>0</sup> bulunur, sonra eksi yazılır.":v===-3?"(−4)<sup>0</sup>'ı −1 saydınız. Negatif tabanın sıfırıncı kuvveti de 1'dir.":v===0?"Sıfırıncı kuvvetleri 0 saydınız; sıfırdan farklı tabanın sıfırıncı kuvveti 0 değildir.":""],
       ()=>S.bitir("Sıfırdan farklı her tabanın sıfırıncı kuvveti 1'dir: (−9)<sup>0</sup> = 1. Parantez yoksa üs yalnız sayıya etki eder: −9<sup>0</sup> = −(9<sup>0</sup>) = −1. <b>0<sup>0</sup> tanımsızdır.</b>"));}
 };
 
@@ -1361,14 +1430,14 @@ const e_bodrum=p=>{const S=notr(adimli(p));
   OTO(()=>{[2,3].forEach(x=>{segTikla(ay,x);while(E[x]>-3)k.querySelector(".in_").click();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"2<sup>−3</sup> hangisine eşittir?",
-      [kH(1,"2<sup>3</sup>"),"−2<sup>3</sup>","−6","2 · (−3)"],
+      [kH(1,"2<sup>3</sup>"),["−2<sup>3</sup>","Üssün eksisini tabana verdiniz. Negatif üs sonucu negatif yapmaz; bodrum katlarındaki değerlere bakınız."],["−6","Üssü çarpan gibi kullandınız: 2 · (−3) = −6. Üs, tabanın kaç kez çarpıldığını gösterir."],["2 · (−3)","Üssü çarpan gibi kullandınız. Bodrum katında her inişte değer tabana bölünür."]],
       `2<sup>0</sup> = 1'den üç kat inilir: 1 : 2 : 2 : 2 = ${kH(1,"2<sup>3</sup>")} = ${kH(1,8)}.`,()=>
     S.soru(c,"a sıfırdan farklı bir sayı ve n pozitif bir tam sayı ise a<sup>−n</sup> hangisine eşittir?",
-      [kH(1,"a<sup>n</sup>"),"−a<sup>n</sup>","a · (−n)"],
+      [kH(1,"a<sup>n</sup>"),["−a<sup>n</sup>","Üssün eksisini tabana verdiniz. Bodrum katlarındaki değerler negatif miydi?"],["a · (−n)","Üssü çarpan gibi kullandınız. Üs, kaç kez bölündüğünü gösterir."]],
       `a<sup>0</sup> = 1 sayısı n kez a'ya bölünür: a<sup>−n</sup> = ${kH(1,"a<sup>n</sup>")}.`,meydan));}
   function meydan(){const m=S.son();
     S.soru(m,"5<sup>−2</sup> hangisine eşittir?",
-      [kH(1,25),"−25","−10",kH(1,10)],
+      [kH(1,25),["−25","Üssün eksisini tabana verdiniz. 5<sup>−2</sup> pozitif bir sayıdır."],["−10","Üssü çarpan gibi kullandınız: 5 · (−2) = −10."],[kH(1,10),`5'i 2 ile çarptınız. ${kH(1,10)} = 5<sup>−2</sup> olması için paydada 5 · 5 olmalıdır.`]],
       `5<sup>−2</sup> = ${kH(1,"5<sup>2</sup>")} = ${kH(1,25)}.`,
       ()=>S.bitir(`Merdivenden aşağı inmeye devam edince üsler negatif olur ve her katta değer yine tabana bölünür: 2<sup>−1</sup> = ${kH(1,2)}, 2<sup>−2</sup> = ${kH(1,4)}. Genel olarak a ≠ 0 için <b>a<sup>−n</sup> = ${kH(1,"a<sup>n</sup>")}</b>'dir.`));}
 };
@@ -1397,7 +1466,9 @@ const e_ters=p=>{const S=notr(adimli(p));
       const [a,e]=SOL[ls],[c,d]=SAG[j],x=qPow(a,e),y=qPow(c,d),z=qMul(x,y),bir=z.p===1&&z.q===1;
       mk.innerHTML=`${us(a,e)} · ${us(c,d)} = ${qH(x)} · ${qH(y)} = ${qH(z)}<span class="kv-isik ${bir?"yes":""}"></span>`;
       D.ekle([us(a,e),us(c,d),qH(z)],ls+"-"+j);
-      if(bir){es[ls]=j;fb(f,true,"Çarpım 1. Kartlar eşleşti.");bip(800,.12);ls=null;}else{birDegil++;fb(f,false,`Çarpım 1 olmadı. ${YD}`);yanlisSes();}
+      if(bir){es[ls]=j;fb(f,true,"Çarpım 1. Kartlar eşleşti.");bip(800,.12);ls=null;}else{birDegil++;
+        const ip=c!==a?(Math.abs(c)===Math.abs(a)?"Tabanların işaretleri farklı; çarpımın işaretine bakınız.":"Tabanlar farklı; aynı tabanın kuvvetlerini deneyiniz."):d===e?"Üsler aynı; kuvvet kendisiyle çarpıldı. Üssün işaretine bakınız.":"Taban aynı ama üs, soldaki üssün zıt işaretlisi değil.";
+        fb(f,false,`Çarpım 1 olmadı. ${ip} ${YD}`);yanlisSes();}
       ciz();G.kontrol();});}
   ciz();
   OTO(()=>{const kl=(i,j)=>{sl.querySelector(`[data-i="${i}"]`).click();sg.querySelector(`[data-j="${j}"]`).click();};
@@ -1405,14 +1476,14 @@ const e_ters=p=>{const S=notr(adimli(p));
     SOL.slice(1).forEach(([a,e],i)=>kl(i+1,SAG.findIndex(([c,d])=>c===a&&d===-e)));});
   function acikla(){const c=S.kural(2);
     S.soru(c,"a sıfırdan farklı bir sayı ise a<sup>n</sup> · a<sup>−n</sup> çarpımı kaçtır?",
-      ["1","0","a","−1"],
+      ["1",["0","0 çıkması için çarpanlardan biri 0 olmalıdır. a<sup>n</sup> de a<sup>−n</sup> de 0 değildir."],["a","Deneyde 2<sup>3</sup> · 2<sup>−3</sup> kaç çıktı? Makinenin gösterdiği çarpıma bakınız."],["−1","Deneyde eşleşen kartların çarpımı kaçtı? Çarpımın işaretine bakınız."]],
       `a<sup>−n</sup> = ${kH(1,"a<sup>n</sup>")} olduğundan a<sup>n</sup> · ${kH(1,"a<sup>n</sup>")} = 1.`,()=>
     S.soru(c,"a<sup>−n</sup> sayısı, a<sup>n</sup> sayısının nesidir?",
-      ["Çarpmaya göre tersi","Toplamaya göre tersi","Karesi"],
+      ["Çarpmaya göre tersi",["Toplamaya göre tersi","Toplamaya göre ters, toplamı 0 yapan sayıdır. 2<sup>3</sup> ile 2<sup>−3</sup>'ün toplamı 0 mı?"],["Karesi","2<sup>3</sup>'ün karesi 2<sup>6</sup>'dır. 2<sup>−3</sup> ile 2<sup>3</sup>'ün çarpımı kaçtı?"]],
       "Çarpımları 1 olan iki sayı birbirinin çarpmaya göre tersidir.",meydan));}
   function meydan(){const m=S.son();
     S.soru(m,"Çarpmaya göre tersi 7<sup>−3</sup> olan sayı hangisidir?",
-      [us(7,3),"−7<sup>3</sup>",us(-7,3),us(3,7)],
+      [us(7,3),["−7<sup>3</sup>","Üssün eksisini tabana verdiniz. −7<sup>3</sup> · 7<sup>−3</sup> çarpımının işaretine bakınız."],[us(-7,3),"Tabanın işaretini değiştirdiniz. (−7)<sup>3</sup> negatiftir; 7<sup>−3</sup> ile çarpımı 1 olur mu?"],[us(3,7),"Taban ile üssün yerini değiştirdiniz. 3<sup>7</sup>, 7<sup>3</sup> ile aynı sayı değildir."]],
       `7<sup>3</sup> · 7<sup>−3</sup> = 7<sup>3</sup> · ${kH(1,"7<sup>3</sup>")} = 1.`,
       ()=>S.bitir(`a ≠ 0 için a<sup>n</sup> ile a<sup>−n</sup> sayılarının çarpımı 1'dir. Yani a<sup>−n</sup>, a<sup>n</sup> sayısının <b>çarpmaya göre tersidir</b>: 2<sup>−3</sup> = ${kH(1,"2<sup>3</sup>")} = ${kH(1,8)}.`));}
 };
@@ -1448,14 +1519,14 @@ const e_tuzak=p=>{const S=notr(adimli(p));
   OTO(()=>{[[2,-1],[3,-2],[4,-1],[-2,-2],[-3,-3]].forEach(([x,y])=>{segTikla(k.querySelector(".ay"),x);segTikla(k.querySelector(".uy"),y);});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Üssün negatif olması sonucun işaretini belirler mi?",
-      ["Hayır; işaret tabanın işaretine ve üssün tek ya da çift olmasına bağlıdır","Evet; negatif üs sonucu her zaman negatif yapar","Evet; negatif üs sonucu her zaman pozitif yapar"],
+      ["Hayır; işaret tabanın işaretine ve üssün tek ya da çift olmasına bağlıdır",["Evet; negatif üs sonucu her zaman negatif yapar","Deneyde pozitif tabanlarla kurduğunuz negatif kuvvetler sayı doğrusunun hangi tarafındaydı?"],["Evet; negatif üs sonucu her zaman pozitif yapar","Deneyde negatif tabanla kurduğunuz (−2)<sup>−3</sup> nereye düştü? 0'ın solunda mıydı?"]],
       `2<sup>−3</sup> = ${kH(1,8)} pozitif, (−2)<sup>−3</sup> = −${kH(1,8)} negatif, (−2)<sup>−2</sup> = ${kH(1,4)} pozitiftir.`,()=>
     S.soru(c,"2<sup>−3</sup> = −6 yazan bir öğrencinin hatası nedir?",
-      ["Üssü çarpan gibi kullanmıştır","Tabanın işaretini değiştirmiştir","Hata yapmamıştır"],
+      ["Üssü çarpan gibi kullanmıştır",["Tabanın işaretini değiştirmiştir","Taban 2 pozitiftir; işaret değişmemiştir. −6 sayısı nereden geldi?"],["Hata yapmamıştır","2<sup>−3</sup> sayı doğrusunda 0 ile 1 arasındadır; −6 değildir."]],
       `Üs çarpan değildir: 2<sup>−3</sup> = ${kH(1,"2<sup>3</sup>")} = ${kH(1,8)}.`,meydan));}
   function meydan(){const m=S.son();
     S.soru(m,"Aşağıdakilerden hangisinin değeri negatiftir?",
-      [us(-2,-3),us(2,-3),us(-2,-2),us(3,-1)],
+      [us(-2,-3),[us(2,-3),"2<sup>−3</sup>'te taban pozitiftir; sonuç negatif olamaz."],[us(-2,-2),"(−2)<sup>−2</sup>'de üs çifttir; negatif çarpanlar ikişer ikişer eşleşir."],[us(3,-1),"3<sup>−1</sup>'de taban pozitiftir; sonuç negatif olamaz."]],
       `(−2)<sup>−3</sup> = ${kH(1,"(−2)<sup>3</sup>")} = −${kH(1,8)}.`,
       ()=>S.bitir(`Negatif üs sonucu negatif yapmaz; kuvvetin çarpmaya göre tersini verir: 2<sup>−3</sup> = ${kH(1,8)}. Sonucun işareti, pozitif kuvvetlerde olduğu gibi <b>tabanın işaretine</b> ve <b>üssün tek ya da çift olmasına</b> bağlıdır: (−2)<sup>−3</sup> = −${kH(1,8)}, (−2)<sup>−2</sup> = ${kH(1,4)}.`));}
 };
@@ -1492,19 +1563,20 @@ const e_ucyol=p=>{const S=notr(adimli(p));
       d.querySelector(".hs").onclick=()=>{const v=deg(y,s),hedef=qPow(a,-n),es=qEs(v,hedef);
         D.ekle([us(a,-n),YAD[y].split(" · ")[0],yaz_(y,s),qH(v),es?"eşit":"eşit değil"],`${j}/${y}/${JSON.stringify(s)}`);
         if(es){DUR[j][y]=true;bip(820,.1);ciz();sd.innerHTML=dz(`${YAD[y].split(" · ")[0]}: <b>${yaz_(y,s)} = ${qH(v)}</b>`,DUR[j].every(Boolean)?`<b>Üç yol da ${qH(v)} verdi.</b>`:"Diğer yolları da deneyiniz.");G.kontrol();}
-        else{d.querySelector(".sonuc").innerHTML=`= ${qH(v)} <span class="no-i">eşit değil</span>`;sd.innerHTML=`Kurduğunuz yazılışın değeri ${qH(v)}. Yazılışı değiştirip yeniden hesaplatınız.`;yanlisSes();}};});}
+        else{const ab=x=>Q(Math.abs(x.p),x.q),ip=qEs(ab(v),ab(hedef))?"Sayı değeri doğru ama işaret farklı; tabanın işaretine bakınız.":qEs(v,Q(hedef.q,hedef.p))?"Değer, ifadenin çarpmaya göre tersi çıktı; negatif üste pay 1 olur, kuvvet paydaya iner.":"Tabanı ya da üssü yeniden seçiniz; üssün sayı değeri aynı kalmalıdır.";
+          d.querySelector(".sonuc").innerHTML=`= ${qH(v)} <span class="no-i">eşit değil</span>`;sd.innerHTML=`Kurduğunuz yazılışın değeri ${qH(v)}. ${ip} Yazılışı değiştirip yeniden hesaplatınız.`;yanlisSes();}};});}
   ciz();
   OTO(()=>{EX.forEach(([a,n],i)=>{segTikla(ay,i);const tq=Math.abs(a);SEC[i]=[[a,n],[[Math.sign(a),tq],n],[[Math.sign(a),tq],n]];ciz();for(let y=0;y<3;y++)yl.querySelector(`[data-y="${y}"] .hs`).click();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"a<sup>−n</sup> ifadesi pozitif üslü olarak nasıl yazılır? (a ≠ 0)",
-      [`${kH(1,"a<sup>n</sup>")} ya da (${kH(1,"a")})<sup>n</sup>`,"−a<sup>n</sup> ya da (−a)<sup>n</sup>",`${kH(1,"a")} · n`],
+      [`${kH(1,"a<sup>n</sup>")} ya da (${kH(1,"a")})<sup>n</sup>`,["−a<sup>n</sup> ya da (−a)<sup>n</sup>","Üssün eksisini tabana verdiniz. Üç yolda da sonuç pozitif çıktı mı?"],[`${kH(1,"a")} · n`,"Üssü çarpan gibi kullandınız. Tekrarlı çarpma yolunda kaç tane çarpan yazdınız?"]],
       "Üç yol da aynı sonucu verdi.",()=>
     S.soru(c,`${kH(1,"2<sup>−3</sup>")} ifadesinin değeri kaçtır?`,
-      ["8",kH(1,8),"−8","−6"],
+      ["8",[kH(1,8),"Pay ile paydayı ters çevirmediniz: 1, 2<sup>−3</sup>'e bölünür."],["−8","İşaret nereden geldi? 2<sup>−3</sup> pozitif bir sayıdır."],["−6","Üssü çarpan gibi kullandınız. 2<sup>−3</sup>'ün değeri −6 değildir."]],
       `2<sup>−3</sup> = ${kH(1,8)} olduğundan 1 : ${kH(1,8)} = 8. Paydadaki negatif kuvvet, paya pozitif kuvvet olarak çıkar: ${kH(1,"a<sup>−n</sup>")} = a<sup>n</sup>.`,meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut(`${kH(1,"(−3)<sup>−3</sup>")} ifadesinin değeri kaçtır?`),-27,
-      `${kH(1,"(−3)<sup>−3</sup>")} = (−3)<sup>3</sup> = −27.`,"",
+      `${kH(1,"(−3)<sup>−3</sup>")} = (−3)<sup>3</sup> = −27.`,["Önce (−3)<sup>−3</sup>'ün değerini bulunuz; sonra 1'i bu sayıya bölünüz.",v=>v===27?"Sayı doğru ama işaret yanlış: taban negatif ve üs tek.":v===9||v===-9?"Üssü çarpan gibi kullandınız. Tekrarlı çarpmayla hesaplayınız.":""],
       ()=>S.bitir(`Negatif kuvvet farklı yollarla pozitif kuvvete çevrilir ve hepsi aynı sonucu verir: a<sup>−n</sup> = ${kH(1,"a<sup>n</sup>")} = (${kH(1,"a")})<sup>n</sup>. Paydada negatif kuvvet varsa ${kH(1,"a<sup>−n</sup>")} = a<sup>n</sup> olur.`));}
 };
 
@@ -1531,19 +1603,19 @@ const e_kesirters=p=>{const S=notr(adimli(p));
   function ciz(){const o=EX[j];sol.innerHTML=solH(o)+(o.ok?` = ${qH(o.v)}`:"");sag.innerHTML=sagH();}
   k.querySelector(".kon").onclick=()=>{const o=EX[j];const v=Q((I*P)**U,R**U);
     if(qEs(v,o.v)){o.ok=true;D.ekle([solH(o),sagH(),qH(o.v)],String(j));fb(f,true,`${solH(o)} = ${sagH()} = <b>${qH(o.v)}</b>`);bip(820,.12);}
-    else{fb(f,false,YD);yanlisSes();}ciz();G.kontrol();};
+    else{const ab=x=>Q(Math.abs(x.p),x.q),ip=qEs(ab(v),ab(o.v))?"Sayı değeri doğru ama işaret farklı; ters çevirmede tabanın işareti değişmez.":qEs(v,Q(o.v.q,o.v.p))?"Kurduğunuz ifade, sol ifadenin çarpmaya göre tersi oldu; negatif üste kesir ters çevrilir.":U!==o.n?"Üs farklı; ters çevirince üssün sayı değeri aynı kalır, yalnız pozitif olur.":"Pay ile paydaya bakınız: sol ifadedeki kesir ters çevrildi mi?";fb(f,false,`${ip} ${YD}`);yanlisSes();}ciz();G.kontrol();};
   ciz();
   OTO(()=>{EX.forEach((o,i)=>{segTikla(ay,i);segTikla(S1.parentNode,o.s);segTikla(S2.parentNode,o.q);segTikla(S3.parentNode,o.p);segTikla(S4.parentNode,o.n);k.querySelector(".kon").click();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"a ve b sıfırdan farklı tam sayılar ise (a/b)<sup>−n</sup> hangisine eşittir?".replace("(a/b)",`(${kH("a","b")})`),
-      [`(${kH("b","a")})<sup>n</sup>`,`(−${kH("a","b")})<sup>n</sup>`,`(${kH("a","b")})<sup>n</sup>`],
+      [`(${kH("b","a")})<sup>n</sup>`,[`(−${kH("a","b")})<sup>n</sup>`,"Tabanın işaretini değiştirdiniz. Negatif üste yalnız kesir ters çevrilir."],[`(${kH("a","b")})<sup>n</sup>`,"Kesri ters çevirmediniz. Negatif üs pozitif olunca kesre ne olur?"]],
       "Negatif üste kesir ters çevrilir, üs pozitif olur.",()=>
     S.soru(c,"Kesir ters çevrilirken tabanın işareti için hangisi doğrudur?",
-      ["İşaret değişmez; yalnız pay ile payda yer değiştirir","İşaret de değişir","Sonuç her zaman pozitif olur"],
+      ["İşaret değişmez; yalnız pay ile payda yer değiştirir",["İşaret de değişir",`(−${kH(1,2)})<sup>−3</sup>'e bakınız: deneyde (−2)<sup>3</sup> ile eşleşti, taban negatif kaldı.`],["Sonuç her zaman pozitif olur",`(−${kH(1,2)})<sup>−3</sup> = −8'dir; sonuç pozitif değildir.`]],
       `(−${kH(1,2)})<sup>−3</sup> = (−2)<sup>3</sup> = −8: taban negatif kaldı.`,meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut(`(${kH(1,3)})<sup>−3</sup> ifadesinin değeri kaçtır?`),27,
-      `(${kH(1,3)})<sup>−3</sup> = 3<sup>3</sup> = 27.`,"",
+      `(${kH(1,3)})<sup>−3</sup> = 3<sup>3</sup> = 27.`,["Negatif üste kesir ters çevrilir ve üs pozitif olur; sonra tekrarlı çarpmayla hesaplayınız.",v=>v===-27?"Negatif üs sonucu negatif yapmaz; taban pozitif.":v===9?"Üssü çarpan gibi kullandınız; 3 sayısı 3 kez çarpılır.":v===-9?"Üssü çarpan gibi kullandınız ve işareti de değiştirdiniz.":""],
       ()=>S.bitir(`Tabanı kesir olan bir ifadenin negatif kuvvetinde kesir ters çevrilir ve üs pozitif olur: (${kH("a","b")})<sup>−n</sup> = (${kH("b","a")})<sup>n</sup>. Tabanın işareti değişmez: (−${kH(1,2)})<sup>−3</sup> = (−2)<sup>3</sup> = −8.`));}
 };
 
@@ -1552,37 +1624,41 @@ const e_kesirkuv=p=>{const S=notr(adimli(p));
   const HED=[[kH(1,8),8],[kH(1,"5<sup>3</sup>"),125],[kH(1,100),100],[kH(1,"7<sup>2</sup>"),49],[kH(1,27),27]];
   const k=S.ac(1,{ne:"Pay 1 olan kesirleri, taban ve üssü kendiniz seçerek negatif üslü kuvvet olarak yazacaksınız.",
     durum:`Bantta sırayla beş kesir gelir: ${HED.map(x=>x[0]).join(", ")}. Kuvvet kurucuda taban −3, −2, 2, 3, 5, 7 ya da 10; üs −4 ile 4 arasında seçilir.`,
-    nasil:["Tabanı düğmelerle, üssü sürgüyle seçiniz. Kurduğunuz kuvvetin değeri anında yazar.","Değer banttaki sıradaki kesre eşit olunca kesir yerine oturur ve bant ilerler.","Her deneme deney defterine yazılır."],biter:bitG(2)});
+    nasil:["Bantta 5 kesir vardır; “Kesir i / 5” şeridi kaçıncı kesirde olduğunuzu gösterir.","Tabanı düğmelerle, üssü sürgüyle seçiniz. Kurduğunuz kuvvetin değeri anında yazar. Değer sıradaki kesre eşit olunca kesir yerine oturur.","Sonra “Sıradaki kesir (i+1 / 5) →” düğmesine basınız; bant ancak o zaman ilerler. Her deneme deney defterine yazılır."],biter:bitG(2)});
   S.tahmin(k,`${kH(1,8)} sayısı 2'nin hangi kuvvetidir?`,[["a","2<sup>−3</sup>"],["b","2<sup>3</sup>"],["c","−2<sup>3</sup>"],["d","2<sup>−4</sup>"]],"a",`${kH(1,8)} = ${kH(1,"2<sup>3</sup>")} = 2<sup>−3</sup>.`);
   k.insertAdjacentHTML("beforeend",`<div class="kv-bant bn"></div><div class="kv-ikili"><div class="kv-ifk"><div class="a8-et" style="margin:0">Sıradaki kesir</div><div class="kv-ifb sr_"></div></div><div class="kv-vs vs">?</div><div class="kv-ifk"><div class="a8-et" style="margin:0">Kurduğunuz kuvvet</div><div class="kv-ifb kl"></div><div class="kv-ac kd"></div></div></div>
-    <div class="row ty"></div><div class="row uy"></div><p class="durum sn"></p>`);
+    <div class="row ty"></div><div class="row uy"></div><p class="durum sn"></p><div class="tzd"></div>`);
   const bn=k.querySelector(".bn"),sr_=k.querySelector(".sr_"),kl=k.querySelector(".kl"),kd=k.querySelector(".kd"),vs=k.querySelector(".vs"),sd=k.querySelector(".sn");
-  let i=0,t=2,u=1;
+  let i=0,t=2,u=1,cz=0,bekle=false;
   const D=defter(k,["Kurulan kuvvet","Değeri","Sıradaki kesir","Eşit mi?"]);
-  const G=gorevler(k,[{m:"<b>2 kesri</b> negatif üslü kuvvet olarak yazınız.",ok:()=>i>=2},
-    {m:"Beş kesrin <b>hepsini</b> yazınız.",ok:()=>i>=HED.length,s:()=>`${kH(1,"a<sup>n</sup>")} = a<sup>−n</sup>; negatif taban ya da pozitif üs bu kesirleri vermedi.`}],acikla);
+  const G=gorevler(k,[{m:"<b>2 kesri</b> negatif üslü kuvvet olarak yazınız.",ok:()=>cz>=2},
+    {m:"Beş kesrin <b>hepsini</b> yazınız.",ok:()=>cz>=HED.length,s:()=>`${kH(1,"a<sup>n</sup>")} = a<sup>−n</sup>; negatif taban ya da pozitif üs bu kesirleri vermedi.`}],acikla);
+  /* 07.10.2026 (§4.k-5 · E2): bant kendiliğinden ilerlemez; "Kesir i / 5" şeridi ve "Sıradaki kesir (i+1 / 5) →" düğmesi */
+  const ikili=k.querySelector(".kv-ikili");
+  const TZ=turZincir(bn,{n:HED.length,ad:"Kesir",tamlayan:"kesrin",kur:x=>{i=x;bekle=false;ciz();},vurgu:()=>ikili,dugme:k.querySelector(".tzd"),
+    son:"Bantta kesir kalmadı; beş kesrin hepsini yazdınız. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   sayiDugme(k.querySelector(".ty"),"Taban:",[-3,-2,2,3,5,7,10].map(x=>[x,sn(x)]),t,v=>{t=+v;ciz();});
   const U=surgu("Üs",-4,4,u,v=>{u=v;U.el.querySelector("output").textContent=sn(v);ciz();});
   U.el.querySelector(".a8-min").textContent=sn(-4);U.el.querySelector("output").textContent=sn(u);k.querySelector(".uy").appendChild(U.el);
-  function bant(){bn.innerHTML=HED.map(([h],x)=>`<span class="${x<i?"tamam":x===i?"simdi":""}">${h}${x<i?" ✓":""}</span>`).join("");sr_.innerHTML=i<HED.length?HED[i][0]:"Bant bitti.";}
+  function bant(){const ok_=x=>x<i||(x===i&&bekle);bn.innerHTML=HED.map(([h],x)=>`<span class="${ok_(x)?"tamam":x===i?"simdi":""}">${h}${ok_(x)?" ✓":""}</span>`).join("");sr_.innerHTML=HED[i][0];}
   function ciz(){const v=qPow(t,u);kl.innerHTML=us(t,u);kd.innerHTML=`= ${qH(v)}`;bant();
-    if(i>=HED.length){vs.textContent="✓";sd.innerHTML="Bütün kesirleri yazdınız.";return;}
+    if(bekle){vs.textContent="✓";return;}
     const es=qEs(v,Q(1,HED[i][1]));vs.textContent=es?"=":"≠";
     D.ekle([us(t,u),qH(v),HED[i][0],es?"eşit":"eşit değil"],i+"/"+t+"/"+u);
-    if(es){const h=HED[i][0];i++;bip(800,.12);bant();sd.innerHTML=`<b>${h} = ${us(t,u)}</b> yerine oturdu.${i<HED.length?" Sıradaki kesir için yeni bir kuvvet kurunuz.":" Bant bitti."}`;G.kontrol();return;}
-    sd.innerHTML=dz(`Kurduğunuz kuvvet: <b>${qH(v)}</b>`,`Sıradaki kesir: <b>${HED[i][0]}</b>`);}
+    if(es){const h=HED[i][0];bekle=true;cz++;bip(800,.12);bant();vs.textContent="✓";sd.innerHTML=`<b>${h} = ${us(t,u)}</b> yerine oturdu.`;G.kontrol();TZ.tamam(`${h} = ${us(t,u)}`);return;}
+    sd.innerHTML=dz(`Kurduğunuz kuvvet: <b>${qH(v)}</b>`,`Sıradaki kesir: <b>${HED[i][0]}</b>`)+(v.p<0?" Kurduğunuz kuvvet negatif; kesir ise pozitif.":u>=0?" Kesir 1'den küçük; tabanı 1'den büyük bir kuvvet, üs pozitif ya da 0 iken 1'den küçük olmaz.":"");}
   ciz();
-  OTO(()=>{[[2,-3],[5,-3],[10,-2],[7,-2],[3,-3]].forEach(([x,y])=>{U.v=y;u=y;segTikla(k.querySelector(".ty"),x);});});
+  OTO(()=>{[[2,-3],[5,-3],[10,-2],[7,-2],[3,-3]].forEach(([x,y])=>{U.v=y;u=y;segTikla(k.querySelector(".ty"),x);const b=k.querySelector(".tz-dug");if(b)b.click();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,`a sıfırdan farklı bir tam sayı ise ${kH(1,"a<sup>n</sup>")} kesri hangi biçimde yazılır?`,
-      ["a<sup>−n</sup>","−a<sup>n</sup>","(−a)<sup>n</sup>"],
+      ["a<sup>−n</sup>",["−a<sup>n</sup>",`Kesrin işaretine bakınız: ${kH(1,"a<sup>n</sup>")} kesri pozitiftir; a pozitifken −a<sup>n</sup> negatiftir.`],["(−a)<sup>n</sup>","Tabanın işaretini değiştirdiniz. Bantta kesirleri karşılayan kuvvetlerin tabanı negatif miydi?"]],
       `${kH(1,"a<sup>n</sup>")} = a<sup>−n</sup>. Kesir pozitif olduğundan −a<sup>n</sup> yazılamaz.`,()=>
     S.soru(c,`${kH(1,100)} sayısı aşağıdakilerden hangisine eşittir?`,
-      ["10<sup>−2</sup>","−10<sup>2</sup>","10<sup>2</sup>","2<sup>−10</sup>"],
+      ["10<sup>−2</sup>",["−10<sup>2</sup>",`Üssün eksisini tabana verdiniz. ${kH(1,100)} pozitif bir sayıdır.`],["10<sup>2</sup>",`10<sup>2</sup> = 100'dür; ${kH(1,100)} ise 100'ün çarpmaya göre tersidir.`],["2<sup>−10</sup>","Taban ile üssün yerini değiştirdiniz. 2<sup>10</sup> = 1024'tür."]],
       `${kH(1,100)} = ${kH(1,"10<sup>2</sup>")} = 10<sup>−2</sup>.`,meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut(`${kH(1,128)} = 2<sup>x</sup> olduğuna göre x kaçtır?`),-7,
-      `128 = 2<sup>7</sup> olduğundan ${kH(1,128)} = ${kH(1,"2<sup>7</sup>")} = 2<sup>−7</sup>; x = −7.`,"",
+      `128 = 2<sup>7</sup> olduğundan ${kH(1,128)} = ${kH(1,"2<sup>7</sup>")} = 2<sup>−7</sup>; x = −7.`,["128'i 2'nin kuvveti olarak yazınız; payda kuvvet olunca kesir negatif üsle yazılır.",v=>v===7?"Sayı doğru ama işaret yanlış: kesir 1'den küçük olduğu için üs negatiftir.":v===-6||v===-8?"2'nin kuvvetlerini yeniden hesaplayınız: 2<sup>6</sup> = 64, 2<sup>8</sup> = 256.":v===-64?"Üssü değil, 128'in yarısını yazdınız; x bir üstür.":""],
       ()=>S.bitir(`Pay 1 olan bir kesrin paydası bir kuvvetse kesir negatif üsle yazılır: <b>${kH(1,"a<sup>n</sup>")} = a<sup>−n</sup></b>. Örneğin ${kH(1,8)} = ${kH(1,"2<sup>3</sup>")} = 2<sup>−3</sup>. ${kH(1,"a<sup>n</sup>")} kesrini −a<sup>n</sup> yazmak yanlıştır.`));}
 };
 
@@ -1606,21 +1682,21 @@ const e_yazilis=p=>{const S=notr(adimli(p));
   const U_=sayiDugme(k.querySelector(".usr"),"Üs:",US.map(x=>[x,sn(x)]),u,v=>{u=+v;f.hidden=true;ciz();});
   function ciz(){gs.innerHTML=`${us(t,u)} = ${qH(qPow(t,u))}`;kol.innerHTML=K[h].map(([a,e])=>`<span class="kv-kart ok" style="display:inline-block">${us(a,e)}</span>`).join("")||'<span class="bosk">Henüz yazılış yok.</span>';}
   k.querySelector(".ekl").onclick=()=>{const v=qPow(t,u);
-    if(!qEs(v,Q(1,h))){fb(f,false,`${us(t,u)} = ${qH(v)}; hedefe eşit değil. ${YD}`);yanlisSes();return;}
+    if(!qEs(v,Q(1,h))){const pd=t**(-u);fb(f,false,`${us(t,u)} = ${qH(v)}; hedefe eşit değil. ${pd<h?`Kuvvetin paydası (${sn(pd)}) hedefin paydasından küçük.`:`Kuvvetin paydası (${sn(pd)}) hedefin paydasından büyük.`} ${YD}`);yanlisSes();return;}
     if(K[h].some(([a,e])=>a===t&&e===u)){fb(f,false,"Bu yazılış koleksiyonda var. Başka bir yazılış arayınız.");return;}
     K[h].push([t,u]);D.ekle([kH(1,h),us(t,u)],h+"/"+t);fb(f,true,`${kH(1,h)} = ${us(t,u)} koleksiyona eklendi.`);bip(700+K[h].length*40,.1);ciz();G.kontrol();};
   ciz();
   OTO(()=>{[64,16].forEach(x=>{segTikla(hd,x);HED[x].forEach(([a,e])=>{segTikla(T_.parentNode,a);segTikla(U_.parentNode,e);k.querySelector(".ekl").click();});});});
   function acikla(){const c=S.kural(2);
     S.soru(c,`${kH(1,64)} sayısının yazılışları için hangisi doğrudur?`,
-      ["2<sup>−6</sup> = 4<sup>−3</sup> = 8<sup>−2</sup>","2<sup>−6</sup> = 4<sup>−2</sup> = 8<sup>−3</sup>","2<sup>−6</sup> = 3<sup>−2</sup> = 6<sup>−1</sup>"],
+      ["2<sup>−6</sup> = 4<sup>−3</sup> = 8<sup>−2</sup>",["2<sup>−6</sup> = 4<sup>−2</sup> = 8<sup>−3</sup>","4<sup>2</sup> = 16 ve 8<sup>3</sup> = 512'dir. 64 hangi kuvvetlerle yazılır?"],["2<sup>−6</sup> = 3<sup>−2</sup> = 6<sup>−1</sup>","3 ve 6, 64'ün tabanı olamaz: 64, 3'e bölünmez."]],
       `64 = 2<sup>6</sup> = 4<sup>3</sup> = 8<sup>2</sup>; bu kuvvetlerin her birinin çarpmaya göre tersi ${kH(1,64)}'tür.`,()=>
     S.soru(c,"4<sup>−3</sup> ile 2<sup>−6</sup> sayıları eşit midir?",
-      [`Evet; ikisi de ${kH(1,64)} sayısına eşittir`,"Hayır; tabanları farklıdır","Hayır; üsleri farklıdır"],
+      [`Evet; ikisi de ${kH(1,64)} sayısına eşittir`,["Hayır; tabanları farklıdır","Taban farklı olsa da değerler eşit olabilir. 4<sup>3</sup> ve 2<sup>6</sup>'nın değerlerini bulunuz."],["Hayır; üsleri farklıdır","Üs farklı olsa da değerler eşit olabilir. 4<sup>3</sup> ve 2<sup>6</sup>'nın değerlerini bulunuz."]],
       `4<sup>−3</sup> = ${kH(1,"4<sup>3</sup>")} = ${kH(1,64)} ve 2<sup>−6</sup> = ${kH(1,"2<sup>6</sup>")} = ${kH(1,64)}.`,meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut(`${kH(1,729)} sayısı, tabanı 1'den büyük bir tam sayı ve üssü negatif bir tam sayı olan kaç farklı üslü ifadeyle yazılabilir?`),4,
-      `729 = 3<sup>6</sup> = 9<sup>3</sup> = 27<sup>2</sup> = 729<sup>1</sup>; ${kH(1,729)} = 3<sup>−6</sup> = 9<sup>−3</sup> = 27<sup>−2</sup> = 729<sup>−1</sup>.`,"",
+      `729 = 3<sup>6</sup> = 9<sup>3</sup> = 27<sup>2</sup> = 729<sup>1</sup>; ${kH(1,729)} = 3<sup>−6</sup> = 9<sup>−3</sup> = 27<sup>−2</sup> = 729<sup>−1</sup>.`,["729'u farklı tabanların kuvveti olarak yazmanın yollarını sayınız.",v=>v===3?"729<sup>−1</sup> yazılışını da saydınız mı? 729, kendisinin 1. kuvvetidir.":v===2?"Bir tabanı atladınız; 729'u 3'ün, 9'un, 27'nin kuvveti olarak yazmayı deneyiniz.":v>4?"Cevabınız büyük: taban 1'den büyük bir tam sayı olmalıdır.":""],
       ()=>S.bitir(`Bir kesir farklı tabanlarla negatif kuvvet olarak yazılabilir: ${kH(1,64)} = 2<sup>−6</sup> = 4<sup>−3</sup> = 8<sup>−2</sup> = 64<sup>−1</sup>. Bunun için payda, farklı tabanların kuvveti olarak yazılır.`));}
 };
 
@@ -1631,15 +1707,17 @@ const e_sirala=p=>{const S=notr(adimli(p));
   Object.keys(TUR).forEach(x=>TUR[x]=karistir(TUR[x]));
   const k=S.ac(1,{ne:"İki turda beşer kuvveti vagonlara küçükten büyüğe dizecek, dizilişinizi sınayıp yanlış yerleri düzelteceksiniz.",
     durum:"1. turdaki kuvvetler: 2<sup>1</sup>, 2<sup>0</sup>, 2<sup>−1</sup>, 2<sup>−2</sup>, (−2)<sup>−1</sup>. 2. turdaki kuvvetler: 3<sup>−1</sup>, 3<sup>−2</sup>, (−3)<sup>−1</sup>, −3<sup>0</sup>, (−3)<sup>0</sup>. 1. vagona en küçük, 5. vagona en büyük kuvvet gelir.",
-    nasil:["Bir karta dokununuz; kart ilk boş vagona biner. Vagondaki karta dokunursanız kart geri iner.","Beş vagon dolunca “Sınayın” düğmesine basınız. Doğru yerdeki vagonlar yeşil, yanlış yerdekiler turuncu olur ve kuvvetler sayı doğrusunda gösterilir.","Yanlış yerleri düzeltip yeniden sınayınız. Her sınama deney defterine yazılır."],biter:bitG(2)});
+    nasil:["İki tur vardır; “Tur i / 2” şeridi kaçıncı turda olduğunuzu gösterir. Bir karta dokununuz; kart ilk boş vagona biner. Vagondaki karta dokunursanız kart geri iner.","Beş vagon dolunca “Sınayın” düğmesine basınız. Doğru yerdeki vagonlar yeşil, yanlış yerdekiler turuncu olur ve kuvvetler sayı doğrusunda gösterilir.","Yanlış yerleri düzeltip yeniden sınayınız. Tur doğru dizilince “Sıradaki tur (2 / 2) →” düğmesine basınız. Her sınama deney defterine yazılır."],biter:bitG(2)});
   S.tahmin(k,"2<sup>−1</sup> ile 2<sup>−2</sup> sayılarından hangisi büyüktür?",[["a","2<sup>−1</sup>"],["b","2<sup>−2</sup>"],["c","Eşittir"]],"a",`2<sup>−1</sup> = ${kH(1,2)}, 2<sup>−2</sup> = ${kH(1,4)}; 2<sup>−1</sup> büyüktür.`);
-  k.insertAdjacentHTML("beforeend",`<div class="row ay"></div><div class="kv-sira"><b>Kartlar:</b><span class="kartlar kp"></span></div><div class="vagon vg"></div><div class="row"><button class="primary sin">Sınayın</button></div><div class="stage st"></div><p class="durum sn"></p>`);
-  const ay=k.querySelector(".ay"),kp=k.querySelector(".kp"),vg=k.querySelector(".vg"),st=k.querySelector(".st"),sd=k.querySelector(".sn");
+  k.insertAdjacentHTML("beforeend",`<div class="kv-sira"><b>Kartlar:</b><span class="kartlar kp"></span></div><div class="vagon vg"></div><div class="row"><button class="primary sin">Sınayın</button></div><div class="stage st"></div><p class="durum sn"></p><div class="tzd"></div>`);
+  const kp=k.querySelector(".kp"),vg=k.querySelector(".vg"),st=k.querySelector(".st"),sd=k.querySelector(".sn");
   let tr="A";const V={A:[null,null,null,null,null],B:[null,null,null,null,null]},bitti={A:false,B:false},son={A:null,B:null};
   const D=defter(k,["Tur","Dizilişiniz","Doğru yerde"]);
   const G=gorevler(k,[{m:"1. turu doğru diziniz.",ok:()=>bitti.A,s:()=>"(−2)<sup>−1</sup> &lt; 2<sup>−2</sup> &lt; 2<sup>−1</sup> &lt; 2<sup>0</sup> &lt; 2<sup>1</sup>"},
     {m:"2. turu doğru diziniz.",ok:()=>bitti.B,s:()=>"−3<sup>0</sup> &lt; (−3)<sup>−1</sup> &lt; 3<sup>−2</sup> &lt; 3<sup>−1</sup> &lt; (−3)<sup>0</sup>"}],acikla);
-  sayiDugme(ay,"Tur:",[["A","1. tur"],["B","2. tur"]],tr,v=>{tr=v;ciz();});
+  /* 07.10.2026 (§4.k-5 · E2): iki tur seçim düğmesi yerine "Tur i / 2" şeridi ve "Sıradaki tur (2 / 2) →" düğmesi */
+  const TZ=turZincir(kp.parentNode,{n:2,ad:"Tur",tamlayan:"turun",kur:x=>{tr=["A","B"][x];ciz();},vurgu:()=>vg,dugme:k.querySelector(".tzd"),
+    son:"İki turun ikisi de doğru dizildi. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   const X=v=>24+(v+1.2)*(392/3.4);
   const sira=()=>TUR[tr].map((o,i)=>i).sort((a,b)=>TUR[tr][a].v-TUR[tr][b].v);
   function ciz(){const L=TUR[tr],v=V[tr],s=son[tr];
@@ -1652,23 +1730,24 @@ const e_sirala=p=>{const S=notr(adimli(p));
     for(let t=-1;t<=2;t+=.5){const x=X(t),tam=Number.isInteger(t);h+=`<line x1="${x}" y1="${tam?90:94}" x2="${x}" y2="${tam?110:106}" stroke="${ink}" stroke-width="${tam?2.5:1.5}"/>`;if(tam)h+=`<text x="${x}" y="134" text-anchor="middle" font-size="18" font-weight="700">${sn(t)}</text>`;}
     if(s)v.forEach((i,n)=>{const o=L[i],x=X(o.v),y=24+(n%2)*24;h+=`<line x1="${x}" y1="${y+4}" x2="${x}" y2="94" stroke="${css('--muted')}" stroke-width="1"/><circle cx="${x}" cy="100" r="7" fill="${s[n]?"#2f9e44":"#e8590c"}"/><text x="${x}" y="${y}" text-anchor="middle" font-size="16" font-weight="800">${o.s}</text>`;});
     sv.innerHTML=h;st.replaceChildren(sv);
-    sd.innerHTML=bitti[tr]?"<b>Bu tur doğru dizildi.</b>":s?dz(`Doğru yerde: <b>${s.filter(Boolean).length} / 5</b>`,"Turuncu vagonları düzeltip yeniden sınayınız."):dz(`Dolu vagon: <b>${v.filter(x=>x!==null).length} / 5</b>`);}
+    const isH=s&&v.some((i,x)=>x>0&&L[v[x-1]].v>0&&L[i].v<0);
+    sd.innerHTML=bitti[tr]?"<b>Bu tur doğru dizildi.</b>":s?dz(`Doğru yerde: <b>${s.filter(Boolean).length} / 5</b>`,"Turuncu vagonları düzeltip yeniden sınayınız.")+(isH?" Negatif bir kuvveti pozitif bir kuvvetin sağına koydunuz; negatif sayılar 0'ın solundadır.":" Turuncu kartların değerlerini sayı doğrusunda karşılaştırınız; negatif üslü kuvvetleri kesir olarak düşününüz."):dz(`Dolu vagon: <b>${v.filter(x=>x!==null).length} / 5</b>`);}
   k.querySelector(".sin").onclick=()=>{const v=V[tr];if(v.includes(null))return;const dog=sira(),s=v.map((i,x)=>TUR[tr][i].v===TUR[tr][dog[x]].v);son[tr]=s;
     const n=s.filter(Boolean).length;D.ekle([tr==="A"?"1. tur":"2. tur",v.map(i=>TUR[tr][i].h).join(" &lt; "),`${n} / 5`],tr+v.join(""));
-    if(n===5){bitti[tr]=true;bip(880,.15);}else yanlisSes();ciz();G.kontrol();};
+    if(n===5){bitti[tr]=true;bip(880,.15);}else yanlisSes();ciz();G.kontrol();if(n===5)TZ.tamam(v.map(i=>TUR[tr][i].h).join(" &lt; "));};
   ciz();
-  OTO(()=>{["A","B"].forEach(x=>{segTikla(ay,x);const L=TUR[x];[...L.keys()].reverse().forEach(i=>kp.querySelector(`[data-i="${i}"]`)&&kp.querySelector(`[data-i="${i}"]`).click());k.querySelector(".sin").click();
+  OTO(()=>{["A","B"].forEach(x=>{const tb_=k.querySelector(".tz-dug");if(tb_)tb_.click();const L=TUR[x];[...L.keys()].reverse().forEach(i=>kp.querySelector(`[data-i="${i}"]`)&&kp.querySelector(`[data-i="${i}"]`).click());k.querySelector(".sin").click();
     V[x]=[null,null,null,null,null];son[x]=null;ciz();sira().forEach(i=>kp.querySelector(`[data-i="${i}"]`).click());k.querySelector(".sin").click();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"Taban 2 iken üs küçüldükçe (1, 0, −1, −2) kuvvetin değeri nasıl değişti?",
-      ["Küçüldü ama hep pozitif kaldı","Negatif oldu","Değişmedi"],
+      ["Küçüldü ama hep pozitif kaldı",["Negatif oldu","Defterdeki değerlere bakınız: 2<sup>−1</sup> ile 2<sup>−2</sup> negatif miydi?"],["Değişmedi","Defterdeki değerlere bakınız: 2<sup>1</sup> = 2 ile 2<sup>−2</sup> aynı mıydı?"]],
       `2<sup>1</sup> = 2, 2<sup>0</sup> = 1, 2<sup>−1</sup> = ${kH(1,2)}, 2<sup>−2</sup> = ${kH(1,4)}: değer küçülür ama 0'ın altına inmez.`,()=>
     S.soru(c,"2<sup>−3</sup> sayısı sayı doğrusunda nerededir?",
-      ["0 ile 1 arasında","0'ın solunda","1'in sağında"],
+      ["0 ile 1 arasında",["0'ın solunda","Taban 2 pozitiftir; negatif üs sonucu negatif yapmaz."],["1'in sağında",`2<sup>−3</sup> = ${kH(1,8)}'dir; 1'den büyük müdür?`]],
       `2<sup>−3</sup> = ${kH(1,8)}; 0 ile 1 arasındadır.`,meydan));}
   function meydan(){const m=S.son();
     S.soru(m,"a = 5<sup>−1</sup>, b = 5<sup>−2</sup> ve c = 5<sup>0</sup> sayılarının sıralaması hangisidir?",
-      ["b &lt; a &lt; c","a &lt; b &lt; c","c &lt; b &lt; a","c &lt; a &lt; b"],
+      ["b &lt; a &lt; c",["a &lt; b &lt; c",`a = ${kH(1,5)} ile b = ${kH(1,25)}'i karşılaştırınız: hangisi büyüktür?`],["c &lt; b &lt; a","c = 5<sup>0</sup> = 1'dir; negatif üslü kuvvetler 1'den küçüktür."],["c &lt; a &lt; b","c = 5<sup>0</sup> = 1'dir; a ile b 1'den küçüktür."]],
       `b = ${kH(1,25)}, a = ${kH(1,5)}, c = 1.`,
       ()=>S.bitir(`Taban 1'den büyük bir pozitif sayı iken üs küçüldükçe kuvvetin değeri küçülür: 2<sup>1</sup> &gt; 2<sup>0</sup> &gt; 2<sup>−1</sup> &gt; 2<sup>−2</sup>. Pozitif tabanın negatif kuvvetleri <b>0 ile 1 arasındadır</b>. Negatif tabanlı kuvvetler, üs tekse 0'ın solunda yer alır.`));}
 };
@@ -1697,14 +1776,14 @@ const e_kuvkuv=p=>{const S=notr(adimli(p));
   OTO(()=>{const kur=(x,y,z)=>{segTikla(k.querySelector(".ay"),x);M.v=y;N_.v=z;m=y;n=z;ciz();};kur(2,3,2);kur(2,2,3);kur(3,3,4);kur(3,1,2);kur(2,1,1);kur(3,2,2);});
   function acikla(){const c=S.kural(2);
     S.soru(c,"(a<sup>m</sup>)<sup>n</sup> ifadesinde a sayısı kaç kez çarpılır?",
-      ["m · n kez","m + n kez","m<sup>n</sup> kez"],
+      ["m · n kez",["m + n kez","Üsleri topladınız. Ekranda kaç kutu vardı, her kutuda kaç taban vardı?"],["m<sup>n</sup> kez","İç üssü dış üs kadar kuvvete yükselttiniz. Kutu sayısı ile kutudaki taban sayısını çarpınız."]],
       "a<sup>m</sup>, n kez yazılır ve her birinde m tane a vardır: toplam m · n tane a.",()=>
     S.soru(c,"(5<sup>2</sup>)<sup>3</sup> hangisine eşittir?",
-      ["5<sup>6</sup>","5<sup>5</sup>","5<sup>8</sup>","10<sup>3</sup>"],
+      ["5<sup>6</sup>",["5<sup>5</sup>","Üsleri topladınız. 5<sup>2</sup> üç kez çarpılır; her birinde kaç tane 5 vardır?"],["5<sup>8</sup>","Üsleri topladınız ya da yanlış saydınız. 5<sup>2</sup> üç kez çarpılır; toplam kaç tane 5 olur?"],["10<sup>3</sup>","Taban ile üssü çarptınız. Taban 5 olarak kalır."]],
       "(5<sup>2</sup>)<sup>3</sup> = 5<sup>2</sup> · 5<sup>2</sup> · 5<sup>2</sup> = (5 · 5) · (5 · 5) · (5 · 5) = 5<sup>6</sup>.",meydan));}
   function meydan(){const m_=S.son();
     S.sayi(m_,soruKut("(3<sup>4</sup>)<sup>5</sup> = 3<sup>x</sup> olduğuna göre x kaçtır?"),20,
-      "3<sup>4</sup> beş kez çarpılır; her birinde dört tane 3 vardır: 4 · 5 = 20 tane 3. x = 20.","",
+      "3<sup>4</sup> beş kez çarpılır; her birinde dört tane 3 vardır: 4 · 5 = 20 tane 3. x = 20.",["Dış üs, iç kuvvetin kaç kez çarpılacağını gösterir; toplam kaç tane 3 çarpılır?",v=>v===9?"Üsleri topladınız. 3<sup>4</sup> beş kez çarpılır; her birinde dört tane 3 vardır.":v===1024||v===625?"İç üssü dış üs kadar kuvvete yükselttiniz. Kutu sayısı ile kutudaki taban sayısını çarpınız.":""],
       ()=>S.bitir("(a<sup>m</sup>)<sup>n</sup> ifadesinde a<sup>m</sup>, n kez çarpılır ve her birinde m tane a bulunur. Toplam m · n tane a çarpılır: <b>(a<sup>m</sup>)<sup>n</sup> = a<sup>m · n</sup></b>. Örneğin (2<sup>3</sup>)<sup>2</sup> = 2<sup>6</sup>."));}
 };
 
@@ -1714,34 +1793,39 @@ const e_aynitaban=p=>{const S=notr(adimli(p));
     [us(4,3),6,"(2<sup>2</sup>)<sup>3</sup>"],[us(8,-2),-6,"(2<sup>3</sup>)<sup>−2</sup>"],[us(16,2),8,"(2<sup>4</sup>)<sup>2</sup>"]];
   const k=S.ac(1,{ne:"Bantla gelen sayıları ve üslü ifadeleri 2'nin kuvveti olarak yazacaksınız.",
     durum:`Bantta sırayla şunlar gelir: 4, 8, 16, ${kH(1,8)}, ${kH(1,2)}, 1, 64, ${kH(1,16)}, sonra 4<sup>3</sup>, 8<sup>−2</sup> ve 16<sup>2</sup>. Kalıpta 2<sup>k</sup> yazılıdır; k, −6 ile 8 arasında seçilir.`,
-    nasil:["“Kalıbın üssü (k)” sürgüsüyle ya da − ve + düğmeleriyle k'yi seçiniz. 2<sup>k</sup> kuvvetinin değeri ekranda yazar.","Kalıp banttaki sıradaki sayıya eşitse “Eşitliği yazın” düğmesine basınız.","Doğru eşitlik deney defterine yazılır ve bant ilerler."],biter:bitG(3)});
+    nasil:["Bantta 11 sayı vardır; “Sayı i / 11” şeridi kaçıncı sayıda olduğunuzu gösterir.","“Kalıbın üssü (k)” sürgüsüyle ya da − ve + düğmeleriyle k'yi seçiniz. 2<sup>k</sup> kuvvetinin değeri ekranda yazar. Kalıp sıradaki sayıya eşitse “Eşitliği yazın” düğmesine basınız.","Doğru eşitlik deney defterine yazılır. Sonra “Sıradaki sayı (i+1 / 11) →” düğmesine basınız; bant ancak o zaman ilerler."],biter:bitG(3)});
   S.tahmin(k,"8<sup>−2</sup> sayısı 2'nin hangi kuvvetidir?",[["a","2<sup>−6</sup>"],["b","2<sup>−4</sup>"],["c","2<sup>6</sup>"],["d","2<sup>−10</sup>"]],"a","8<sup>−2</sup> = (2<sup>3</sup>)<sup>−2</sup> = 2<sup>−6</sup>.");
   k.insertAdjacentHTML("beforeend",`<div class="kv-bant bn"></div><div class="kv-ikili"><div class="kv-ifk"><div class="a8-et" style="margin:0">Sıradaki</div><div class="kv-ifb sr_"></div></div><div class="kv-vs">=</div><div class="kv-ifk"><div class="a8-et" style="margin:0">Kalıp</div><div class="kv-ifb kl"></div><div class="kv-ac kd"></div></div></div>
-    <div class="row sg_"></div><div class="row"><button class="primary yzn">Eşitliği yazın</button></div><div class="fb" hidden></div>`);
+    <div class="row sg_"></div><div class="row"><button class="primary yzn">Eşitliği yazın</button></div><div class="fb" hidden></div><div class="tzd"></div>`);
   const bn=k.querySelector(".bn"),sr_=k.querySelector(".sr_"),kl=k.querySelector(".kl"),kd=k.querySelector(".kd"),f=k.querySelector(".fb");
-  let i=0,kk=0;
+  let i=0,kk=0,cz=0,bekle=false;
   const D=defter(k,["Sayı","2'nin kuvveti olarak"]);
-  const G=gorevler(k,[{m:"İlk <b>4 sayıyı</b> 2'nin kuvveti olarak yazınız.",ok:()=>i>=4},{m:"İlk <b>8 sayının</b> hepsini yazınız.",ok:()=>i>=8},
-    {m:"4<sup>3</sup>, 8<sup>−2</sup> ve 16<sup>2</sup> ifadelerini de 2'nin kuvveti olarak yazınız.",ok:()=>i>=IT.length,s:()=>"4<sup>3</sup> = 2<sup>6</sup>, 8<sup>−2</sup> = 2<sup>−6</sup>, 16<sup>2</sup> = 2<sup>8</sup>"}],acikla);
+  const G=gorevler(k,[{m:"İlk <b>4 sayıyı</b> 2'nin kuvveti olarak yazınız.",ok:()=>cz>=4},{m:"İlk <b>8 sayının</b> hepsini yazınız.",ok:()=>cz>=8},
+    {m:"4<sup>3</sup>, 8<sup>−2</sup> ve 16<sup>2</sup> ifadelerini de 2'nin kuvveti olarak yazınız.",ok:()=>cz>=IT.length,s:()=>"4<sup>3</sup> = 2<sup>6</sup>, 8<sup>−2</sup> = 2<sup>−6</sup>, 16<sup>2</sup> = 2<sup>8</sup>"}],acikla);
+  /* 07.10.2026 (§4.k-5 · E2): bant kendiliğinden ilerlemez; "Sayı i / 11" şeridi ve "Sıradaki sayı (i+1 / 11) →" düğmesi */
+  const ikili=k.querySelector(".kv-ikili");
+  const TZ=turZincir(bn,{n:IT.length,ad:"Sayı",tamlayan:"sayının",kur:x=>{i=x;bekle=false;f.hidden=true;ciz();},vurgu:()=>ikili,dugme:k.querySelector(".tzd"),
+    son:"Bantta sayı kalmadı; 11 sayının hepsini 2'nin kuvveti olarak yazdınız. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   const K=surgu("Kalıbın üssü (k)",-6,8,kk,v=>{kk=v;K.el.querySelector("output").textContent=sn(v);f.hidden=true;ciz();});
   K.el.querySelector(".a8-min").textContent=sn(-6);K.el.querySelector("output").textContent=sn(kk);k.querySelector(".sg_").appendChild(K.el);
-  function ciz(){bn.innerHTML=IT.map(([h],x)=>`<span class="${x<i?"tamam":x===i?"simdi":""}">${h}${x<i?" ✓":""}</span>`).join("");
-    sr_.innerHTML=i<IT.length?IT[i][0]:"Bant bitti.";kl.innerHTML=us(2,kk);kd.innerHTML=`= ${qH(qPow(2,kk))}`;k.querySelector(".yzn").disabled=i>=IT.length;}
-  k.querySelector(".yzn").onclick=()=>{if(i>=IT.length)return;const [h,e,z]=IT[i];
-    if(kk===e){D.ekle([h,z?`${z} = ${us(2,e)}`:us(2,e)],String(i));fb(f,true,`${h} = ${z?z+" = ":""}${us(2,e)}`);bip(640+i*25,.08);i++;}
-    else{fb(f,false,YD);yanlisSes();}ciz();G.kontrol();};
+  function ciz(){const ok_=x=>x<i||(x===i&&bekle);bn.innerHTML=IT.map(([h],x)=>`<span class="${ok_(x)?"tamam":x===i?"simdi":""}">${h}${ok_(x)?" ✓":""}</span>`).join("");
+    sr_.innerHTML=IT[i][0];kl.innerHTML=us(2,kk);kd.innerHTML=`= ${qH(qPow(2,kk))}`;k.querySelector(".yzn").disabled=bekle;}
+  k.querySelector(".yzn").onclick=()=>{if(bekle)return;const [h,e,z]=IT[i];
+    if(kk===e){D.ekle([h,z?`${z} = ${us(2,e)}`:us(2,e)],String(i));fb(f,true,`${h} = ${z?z+" = ":""}${us(2,e)}`);bip(640+i*25,.08);bekle=true;cz++;ciz();G.kontrol();TZ.tamam(`${h} = ${us(2,e)}`);return;}
+    const ip=e!==0&&kk===-e?"Üssün işaretine bakınız: 1'den küçük sayılar 2'nin negatif kuvvetleridir.":kk>e?`Kalıbın değeri (${qH(qPow(2,kk))}) sıradaki sayıdan büyük.`:`Kalıbın değeri (${qH(qPow(2,kk))}) sıradaki sayıdan küçük.`;
+    fb(f,false,`${ip}${z?" Üslü ifadenin tabanını da 2'nin kuvveti olarak düşününüz.":""} ${YD}`);yanlisSes();ciz();G.kontrol();};
   ciz();
-  OTO(()=>{while(i<IT.length){kk=IT[i][1];K.v=kk;ciz();k.querySelector(".yzn").click();}});
+  OTO(()=>{for(let x=0;x<IT.length;x++){kk=IT[i][1];K.v=kk;ciz();k.querySelector(".yzn").click();const b=k.querySelector(".tz-dug");if(b)b.click();}});
   function acikla(){const c=S.kural(2);
     S.soru(c,"8<sup>−2</sup> ifadesi 2 tabanında nasıl yazılır?",
-      ["(2<sup>3</sup>)<sup>−2</sup> = 2<sup>−6</sup>","(2<sup>3</sup>)<sup>−2</sup> = 2<sup>1</sup>","(2<sup>3</sup>)<sup>−2</sup> = 2<sup>−5</sup>"],
+      ["(2<sup>3</sup>)<sup>−2</sup> = 2<sup>−6</sup>",["(2<sup>3</sup>)<sup>−2</sup> = 2<sup>1</sup>","Üsleri topladınız: 3 + (−2) = 1. (2<sup>3</sup>)<sup>−2</sup> ifadesinde üsler nasıl birleşiyordu?"],["(2<sup>3</sup>)<sup>−2</sup> = 2<sup>−5</sup>","Üslerden birini yanlış hesapladınız. 8<sup>−2</sup> = (2<sup>3</sup>)<sup>−2</sup>'de 2'nin kaç kez çarpıldığını düşününüz."]],
       "8 = 2<sup>3</sup> olduğundan 8<sup>−2</sup> = (2<sup>3</sup>)<sup>−2</sup>; 3 · (−2) = −6.",()=>
     S.soru(c,"n bir tam sayı ise 4<sup>n</sup> sayısı 2'nin hangi kuvvetidir?",
-      ["2<sup>2n</sup>","2<sup>n+2</sup>","2<sup>n</sup>"],
+      ["2<sup>2n</sup>",["2<sup>n+2</sup>","Üslere 2 eklediniz. 4 = 2<sup>2</sup>'dir; 4<sup>n</sup> = (2<sup>2</sup>)<sup>n</sup> olur."],["2<sup>n</sup>","4 ile 2 aynı sayı değildir. 4<sup>1</sup> = 2<sup>1</sup> olur mu?"]],
       "4 = 2<sup>2</sup> olduğundan 4<sup>n</sup> = (2<sup>2</sup>)<sup>n</sup> = 2<sup>2n</sup>.",meydan));}
   function meydan(){const m=S.son();
     S.sayi(m,soruKut("9<sup>−2</sup> = 3<sup>x</sup> olduğuna göre x kaçtır?"),-4,
-      "9 = 3<sup>2</sup> olduğundan 9<sup>−2</sup> = (3<sup>2</sup>)<sup>−2</sup> = 3<sup>−4</sup>; x = −4.","",
+      "9 = 3<sup>2</sup> olduğundan 9<sup>−2</sup> = (3<sup>2</sup>)<sup>−2</sup> = 3<sup>−4</sup>; x = −4.",["9'u 3'ün kuvveti olarak yazınız; sonra üssün üssünü tekrarlı çarpmayla düşününüz.",v=>v===4?"Sayı doğru ama işaret yanlış: 9<sup>−2</sup> 1'den küçük olduğu için üs negatiftir.":v===0?"Üsleri topladınız: 2 + (−2). Üslerin nasıl birleştiğini kuvvetin kuvveti etkinliğinde gördünüz.":v===-2?"9 ile 3 aynı taban değildir; önce 9'u 3'ün kuvveti olarak yazınız.":""],
       ()=>S.bitir(`Farklı görünen sayılar çoğu zaman aynı tabanla yazılabilir: 4 = 2<sup>2</sup>, 8 = 2<sup>3</sup>, ${kH(1,8)} = 2<sup>−3</sup>, 1 = 2<sup>0</sup>. Üslü bir ifadenin tabanı da aynı tabanla yazılır ve üssün üssü kullanılır: 8<sup>−2</sup> = (2<sup>3</sup>)<sup>−2</sup> = 2<sup>−6</sup>.`));}
 };
 
@@ -1750,65 +1834,69 @@ const e_duello=p=>{const S=notr(adimli(p));
   const DU=[[2,30,3,20],[2,40,3,30],[5,20,2,50],[3,15,5,10],[2,60,7,20]].map(([a,x,b,y])=>({a,x,b,y,ok:false}));
   const k=S.ac(1,{ne:"Beş düelloda, tabanları ve üsleri farklı iki büyük kuvveti ortak bir üsle yeniden yazıp terazide tartacaksınız.",
     durum:"Düellolar: 2<sup>30</sup> ile 3<sup>20</sup>, 2<sup>40</sup> ile 3<sup>30</sup>, 5<sup>20</sup> ile 2<sup>50</sup>, 3<sup>15</sup> ile 5<sup>10</sup>, 2<sup>60</sup> ile 7<sup>20</sup>. Bu sayılar hesap makinesinin ekranına sığmayacak kadar büyüktür.",
-    nasil:["“Ortak üs” sürgüsünü değiştiriniz. Seçtiğiniz sayı iki üssü de bölüyorsa iki kuvvet o üsle yeniden yazılır ve terazi tartar; bölmüyorsa terazi tartamaz.","Üsler eşitlenince terazide tabanı büyük olan kuvvet ağır gelir.","Düello tartılınca deney defterine yazılır; “Sonraki düello” düğmesine basınız."],biter:bitG(2)});
+    nasil:["5 düello vardır; “Düello i / 5” şeridi kaçıncı düelloda olduğunuzu gösterir.","“Ortak üs” sürgüsünü değiştiriniz. Seçtiğiniz sayı iki üssü de bölüyorsa iki kuvvet o üsle yeniden yazılır ve terazi tartar; bölmüyorsa terazi tartamaz. Üsler eşitlenince terazide tabanı büyük olan kuvvet ağır gelir.","Düello tartılınca deney defterine yazılır; “Sıradaki düello (i+1 / 5) →” düğmesine basınız."],biter:bitG(2)});
   S.tahmin(k,"2<sup>30</sup> ile 3<sup>20</sup> sayılarından hangisi büyüktür?",[["a","2<sup>30</sup>"],["b","3<sup>20</sup>"],["c","Eşittir"]],"b","2<sup>30</sup> = 8<sup>10</sup>, 3<sup>20</sup> = 9<sup>10</sup>; 3<sup>20</sup> büyüktür.");
-  k.insertAdjacentHTML("beforeend",`<div class="kv-skorlar"><div class="kv-sk"><small>Düello</small><b class="dn">1 / 5</b></div><div class="kv-sk"><small>Tartılan</small><b class="kz">0</b></div></div>
+  k.insertAdjacentHTML("beforeend",`<div class="kv-skorlar"><div class="kv-sk"><small>Tartılan düello</small><b class="kz">0</b></div></div>
     <div class="kv-ikili"><div class="kv-ifk sl"></div><div class="kv-vs vs">?</div><div class="kv-ifk sg"></div></div><div class="row ou"></div><div class="stage st"></div><p class="durum sn"></p>
-    <div class="row"><button class="primary snr" hidden>Sonraki düello →</button></div>`);
-  const sl=k.querySelector(".sl"),sg=k.querySelector(".sg"),vs=k.querySelector(".vs"),st=k.querySelector(".st"),sd=k.querySelector(".sn"),snr=k.querySelector(".snr");
+    <div class="tzd"></div>`);
+  const sl=k.querySelector(".sl"),sg=k.querySelector(".sg"),vs=k.querySelector(".vs"),st=k.querySelector(".st"),sd=k.querySelector(".sn");
   let j=0,kk=1;
   const D=defter(k,["Düello","Ortak üs","Yeni yazılış","Ağır gelen"]);const kaz=()=>DU.filter(d=>d.ok).length;
   const G=gorevler(k,[{m:"İlk düelloyu terazide tartınız.",ok:()=>DU[0].ok},{m:"Beş düellonun <b>hepsini</b> tartınız.",ok:()=>kaz()===5,s:()=>"Üsler eşitlenince tabanı büyük olan kuvvet ağır geldi."}],acikla);
   const U=surgu("Ortak üs",1,20,kk,v=>{kk=v;ciz();});k.querySelector(".ou").appendChild(U.el);
+  /* 07.10.2026 (§4.k-5 · E2): "Düello i / 5" şeridi; düello tartılınca "Sıradaki düello (i+1 / 5) →" düğmesi, biten düello özetlenir */
+  const ikili=k.querySelector(".kv-ikili");
+  const TZ=turZincir(ikili,{n:DU.length,ad:"Düello",tamlayan:"düellonun",kur:x=>{j=x;kk=1;U.v=1;ciz();},vurgu:()=>ikili,dugme:k.querySelector(".tzd"),
+    son:"Beş düellonun hepsi tartıldı. Görev listesine bakınız; görevler tamamlanınca alttaki <b>“Sonraki adım →”</b> düğmesine basınız."});
   const yeni=(a,x)=>`(${us(a,x/kk)})<sup>${kk}</sup> = ${us(sn(a**(x/kk)),kk)}`;
-  function ciz(){const d=DU[j],bol=d.x%kk===0&&d.y%kk===0&&kk>1;k.querySelector(".dn").textContent=`${j+1} / ${DU.length}`;k.querySelector(".kz").textContent=kaz();
+  function ciz(){const d=DU[j],bol=d.x%kk===0&&d.y%kk===0&&kk>1;k.querySelector(".kz").textContent=kaz();
     const L=d.x*Math.log(d.a),R=d.y*Math.log(d.b);
     sl.innerHTML=`<div class="kv-ifb">${us(d.a,d.x)}</div><div class="kv-ac">${bol?yeni(d.a,d.x):"&nbsp;"}</div>`;
     sg.innerHTML=`<div class="kv-ifb">${us(d.b,d.y)}</div><div class="kv-ac">${bol?yeni(d.b,d.y):"&nbsp;"}</div>`;
     vs.textContent=bol?(L>R?">":"<"):"?";
     st.replaceChildren(bol?terazi(usS(sn(d.a**(d.x/kk)),kk),"",usS(sn(d.b**(d.y/kk)),kk),"",L,R):terazi(usS(d.a,d.x),"",usS(d.b,d.y),"",1,1,true));
     sd.innerHTML=kk===1?"Ortak üssü 1'den büyük bir sayı yapınız.":bol?dz(`Ortak üs: <b>${kk}</b>`,`Tabanlar: <b>${sn(d.a**(d.x/kk))}</b> ve <b>${sn(d.b**(d.y/kk))}</b>`,`<b>${L>R?"Sol":"Sağ"} kefe ağır</b>`):`${kk}, ${d.x} ile ${d.y} üslerinin ikisini birden bölmüyor; terazi tartamıyor.`;
-    if(bol){if(!d.ok){d.ok=true;bip(880,.12);}D.ekle([`${us(d.a,d.x)} ile ${us(d.b,d.y)}`,kk,`${us(sn(d.a**(d.x/kk)),kk)} ile ${us(sn(d.b**(d.y/kk)),kk)}`,L>R?us(d.a,d.x):us(d.b,d.y)],j+"/"+kk);}
-    snr.hidden=!(d.ok&&j<DU.length-1);G.kontrol();}
-  snr.onclick=()=>{if(j<DU.length-1&&DU[j].ok){j++;kk=1;U.v=1;ciz();}};
+    if(bol){const yeniOk=!d.ok;if(yeniOk){d.ok=true;bip(880,.12);k.querySelector(".kz").textContent=kaz();}D.ekle([`${us(d.a,d.x)} ile ${us(d.b,d.y)}`,kk,`${us(sn(d.a**(d.x/kk)),kk)} ile ${us(sn(d.b**(d.y/kk)),kk)}`,L>R?us(d.a,d.x):us(d.b,d.y)],j+"/"+kk);
+      if(yeniOk)TZ.tamam(`${us(d.a,d.x)} ile ${us(d.b,d.y)}: ${L>R?us(d.a,d.x):us(d.b,d.y)} büyük`);}
+    G.kontrol();}
   ciz();
-  OTO(()=>{DU.forEach((d,i)=>{const g=gcd(d.x,d.y);U.v=g;kk=g;ciz();if(i<DU.length-1)snr.click();});});
+  OTO(()=>{DU.forEach((d,i)=>{const g=gcd(d.x,d.y);U.v=g;kk=g;ciz();const b=k.querySelector(".tz-dug");if(b)b.click();});});
   function acikla(){const c=S.kural(2);
     S.soru(c,"2<sup>30</sup> ile 3<sup>20</sup> nasıl karşılaştırılabilir?",
-      ["Üsler eşitlenir: 8<sup>10</sup> ile 9<sup>10</sup> karşılaştırılır","Üssü büyük olan her zaman büyüktür","Tabanı büyük olan her zaman büyüktür"],
+      ["Üsler eşitlenir: 8<sup>10</sup> ile 9<sup>10</sup> karşılaştırılır",["Üssü büyük olan her zaman büyüktür","Üssü büyük olan 2<sup>30</sup> mu daha büyüktü? Terazide 8<sup>10</sup> ile 9<sup>10</sup>'u karşılaştırınız."],["Tabanı büyük olan her zaman büyüktür","5<sup>20</sup> ile 2<sup>50</sup> düellosuna bakınız: tabanı büyük olan mı ağır geldi?"]],
       "2<sup>30</sup> = (2<sup>3</sup>)<sup>10</sup> = 8<sup>10</sup> ve 3<sup>20</sup> = (3<sup>2</sup>)<sup>10</sup> = 9<sup>10</sup>.",()=>
     S.soru(c,"Üsleri eşit olan iki kuvvetin tabanları 1'den büyük ise hangisi büyüktür?",
-      ["Tabanı büyük olan","Tabanı küçük olan","İkisi eşittir"],
+      ["Tabanı büyük olan",["Tabanı küçük olan","Üs aynıyken çarpan sayısı aynıdır; çarpanı küçük olanın çarpımı küçük olur."],["İkisi eşittir","Tabanlar farklıysa çarpımlar farklıdır. 9<sup>10</sup> ile 8<sup>10</sup>'u düşününüz."]],
       "9<sup>10</sup> = 9 · 9 · … · 9 ve 8<sup>10</sup> = 8 · 8 · … · 8: çarpan sayısı aynı, çarpanı büyük olan büyüktür.",meydan));}
   function meydan(){const m=S.son();
     S.soru(m,"a = 2<sup>45</sup>, b = 3<sup>30</sup> ve c = 5<sup>15</sup> sayılarının sıralaması hangisidir?",
-      ["c &lt; a &lt; b","a &lt; b &lt; c","c &lt; b &lt; a","b &lt; a &lt; c"],
+      ["c &lt; a &lt; b",["a &lt; b &lt; c","Üsleri 15'e eşitleyince c'nin tabanı kaç olur? Tabanları karşılaştırınız."],["c &lt; b &lt; a","Üssü büyük olanı büyük saydınız. Üsleri 15'e eşitleyip tabanları karşılaştırınız."],["b &lt; a &lt; c","Üsleri 15'e eşitleyiniz: a = 8<sup>15</sup> olur. a ile b'nin tabanlarını karşılaştırınız."]],
       "Üsler 15'e eşitlenir: a = 8<sup>15</sup>, b = 9<sup>15</sup>, c = 5<sup>15</sup>.",
       ()=>S.bitir("Tabanları ve üsleri farklı büyük kuvvetler <b>üsler eşitlenerek</b> karşılaştırılır: 2<sup>30</sup> = (2<sup>3</sup>)<sup>10</sup> = 8<sup>10</sup>, 3<sup>20</sup> = (3<sup>2</sup>)<sup>10</sup> = 9<sup>10</sup>. Üsler eşit olunca tabanı büyük olan sayı büyüktür: 3<sup>20</sup> &gt; 2<sup>30</sup>."));}
 };
 
 /* ================= liste ================= */
 const ACT=[
- {ad:"Hücre Bölünmesi",amac:"Her adımda ikiye bölünen hücre sayısından tekrarlı çarpmayı ve üslü yazımı keşfetmek.",adimlar:ynr("Bir hücrenin art arda ikiye bölünmesini izleyeceksiniz.","Her bölünmeden sonra hücre sayısını gösteren üslü ifadeyi kartlardan seçiniz."),ciz:e_hucre},
- {ad:"Taban mı, Üs mü?",amac:"Taban ve üs yer değiştirince sonucun değiştiğini (2<sup>5</sup> ile 5<sup>2</sup>) keşfetmek.",adimlar:ynr("a<sup>b</sup> ile b<sup>a</sup> kartlarını karşılaştıracaksınız.","a ve b sayılarını seçiniz; hangi kartın büyük olduğuna karar veriniz."),ciz:e_taban},
+ {ad:"Hücre Bölünmesi",amac:"Her adımda ikiye bölünen hücre sayısından tekrarlı çarpmayı ve üslü yazımı keşfetmek.",adimlar:ynr("Hücrelerin kaç hücreye ayrılacağını (2 ya da 3) ve kaç kez bölüneceğini kendiniz seçeceksiniz.","Ayrılma sayısını düğmelerle, bölünme sayısını sürgüyle seçiniz; hücreler, tekrarlı çarpma ve üslü yazım anında görünür ve deftere yazılır."),ciz:e_hucre},
+ {ad:"Taban mı, Üs mü?",amac:"Taban ve üs yer değiştirince sonucun değiştiğini (2<sup>5</sup> ile 5<sup>2</sup>) keşfetmek.",adimlar:ynr("Taban ile üssün yer değiştirdiği a<sup>b</sup> ile b<sup>a</sup> ifadelerini terazide tartacaksınız.","a ve b sayılarını düğmelerle seçiniz; terazi iki ifadeyi hemen tartar ve tartım deftere yazılır."),ciz:e_taban},
  {ad:"Kuvvet Kulesi",amac:"Küplerle kare ve küp kuvvetlerini modellemek.",adimlar:ynr("Birim küplerle sıra, kare kat ve büyük küp kuracaksınız.","Sıranın uzunluğunu düğmelerle, sıra ve kat sayısını sürgülerle seçiniz."),ciz:e_kule},
- {ad:"İşaret Makinesi",amac:"Negatif tabanın art arda kuvvetlerinde işaretin nasıl değiştiğini keşfetmek.",adimlar:ynr("Negatif bir sayıyı makinede kendisiyle art arda çarpacaksınız.","Her çarpımdan önce sonucun pozitif mi, negatif mi olacağını seçiniz."),ciz:e_isaret},
- {ad:"Çift mi, Tek mi?",amac:"Üssün çift ya da tek olmasına göre işareti hesap yapmadan tahmin etmek.",adimlar:ynr("Negatif tabanlı kuvvet kartlarını iki kutuya ayıracaksınız.","Her kartı sonucun işaretine göre “Pozitif sonuç” ya da “Negatif sonuç” kutusuna koyunuz."),ciz:e_cifttek},
- {ad:"Parantez Avcısı",amac:"(−3)<sup>4</sup> ile −3<sup>4</sup> farkını işlem sırasıyla keşfetmek.",adimlar:ynr("Parantezli ve parantezsiz altı ifadenin tabanını ve değerini bulacaksınız.","Bir ifade seçiniz; önce tabanı, sonra değeri seçiniz."),ciz:e_parantez},
- {ad:"−1'in Kuvvetleri",amac:"(−1)<sup>n</sup>'nin yalnız 1 ve −1 değerlerini aldığını keşfetmek.",adimlar:ynr("(−1)'in kuvvetlerini sayı doğrusunda izleyip büyük üslerle hızlı tur oynayacaksınız.","Üssü sürgüyle değiştiriniz; hızlı turda “1” ya da “−1” düğmesine basınız."),ciz:e_eksibir},
- {ad:"Bölen Merdiven",amac:"Kuvvetleri her basamakta tabana bölerek sıfırıncı kuvvete inmek.",adimlar:ynr("Kuvvet merdiveninden basamak basamak ineceksiniz.","Tabanı seçiniz; her basamağın değerini kartlardan seçerek en alt basamağa iniz."),ciz:e_merdiven},
- {ad:"Sıfırıncı Kuvvet Dedektifi",amac:"Parantezli ve parantezsiz sıfırıncı kuvvetleri ayırt etmek.",adimlar:ynr("On dosyadaki sıfırıncı kuvvet ifadelerini damgalayacaksınız.","Bir dosyaya, sonra doğru damgaya (1, −1 ya da Tanımsız) dokununuz."),ciz:e_dedektif},
- {ad:"Merdivenin Altı",amac:"Bölmeyi sürdürerek negatif kuvvetleri keşfetmek.",adimlar:ynr("Kuvvet merdiveninin bodrum katlarına değer kartları yerleştireceksiniz.","Bir kart seçiniz, sonra kartın gideceği boş bodrum katına dokununuz."),ciz:e_bodrum},
+ {ad:"İşaret Makinesi",amac:"Negatif tabanın art arda kuvvetlerinde işaretin nasıl değiştiğini keşfetmek.",adimlar:ynr("Negatif bir sayıyı makinede kendisiyle art arda çarpacaksınız.","Tabanı seçip “Bir kez daha çarpın” düğmesine basınız; sonuç sayı doğrusunda 0'ın sağına ya da soluna zıplar."),ciz:e_isaret},
+ {ad:"Çift mi, Tek mi?",amac:"Üssün çift ya da tek olmasına göre işareti hesap yapmadan tahmin etmek.",adimlar:ynr("Negatif bir taban ve bir üs seçerek sonucun işaretini göreceksiniz.","Tabanı düğmelerle, üssü sürgüyle seçiniz; negatif çarpanlar ikişer ikişer eşlenir ve sonucun işareti görünür."),ciz:e_cifttek},
+ {ad:"Parantez Avcısı",amac:"(−3)<sup>4</sup> ile −3<sup>4</sup> farkını işlem sırasıyla keşfetmek.",adimlar:ynr("Bir ifadede parantezi açıp kapatarak üssün hangi sayıya etki ettiğini göreceksiniz.","Sayıyı ve üssü seçiniz; “Parantez” düğmeleriyle eksi işaretini parantezin içine ya da dışına alınız. Taban, açılım ve değer anında değişir."),ciz:e_parantez},
+ {ad:"−1'in Kuvvetleri",amac:"(−1)<sup>n</sup>'nin yalnız 1 ve −1 değerlerini aldığını keşfetmek.",adimlar:ynr("(−1)'in kuvvetlerini sayı doğrusunda izleyecek, sonra büyük üslü 10 ifadelik hızlı turu oynayacaksınız.","Üssü sürgüyle değiştiriniz. Hızlı turda her ifade için “1” ya da “−1” düğmesine basınız; doğru cevaptan sonra “Sıradaki ifade →” düğmesiyle yeni ifadeye geçiniz."),ciz:e_eksibir},
+ {ad:"Bölen Merdiven",amac:"Kuvvetleri her basamakta tabana bölerek sıfırıncı kuvvete inmek.",adimlar:ynr("Kuvvet merdiveninden basamak basamak ineceksiniz.","Tabanı seçiniz; “Bir basamak inin” düğmesine her basışta değer tabana bölünür. En alt basamağa kadar ininiz."),ciz:e_merdiven},
+ {ad:"Sıfırıncı Kuvvet Dedektifi",amac:"Parantezli ve parantezsiz sıfırıncı kuvvetleri ayırt etmek.",adimlar:ynr("Bir ifadeyi kendiniz kuracak, üssü 0'a indirip değerini göreceksiniz.","Sayıyı ve eksi işaretinin yerini düğmelerle seçiniz; üssü sürgüyle 0'a indiriniz. Üs 0 iken ifade deftere yazılır."),ciz:e_dedektif},
+ {ad:"Merdivenin Altı",amac:"Bölmeyi sürdürerek negatif kuvvetleri keşfetmek.",adimlar:ynr("Kuvvet binasının bodrum katlarına asansörle inerek negatif kuvvetlerin değerlerini göreceksiniz.","Tabanı seçiniz; “Bir kat inin” düğmesine her basışta üs 1 azalır ve değer tabana bölünür."),ciz:e_bodrum},
  {ad:"Ters Çeviri",amac:"a<sup>n</sup> ile a<sup>−n</sup>'nin çarpımının 1 olduğunu keşfetmek.",adimlar:ynr("Kuvvet kartlarına çarpımları 1 olan eşler bulacaksınız.","Soldan bir kart, sağdan bir kart seçiniz; makine çarpımı gösterir."),ciz:e_ters},
- {ad:"İşaret Tuzağı",amac:"Negatif üssün sonucu negatif yapmadığını sınamak.",adimlar:ynr("Negatif üslü kuvvetlerle ilgili sekiz iddiayı değerlendireceksiniz.","Her iddia için “Doğru” ya da “Yanlış” düğmesine basınız; gerçek değer sayı doğrusunda görünür."),ciz:e_tuzak},
- {ad:"Üç Yol Bir Sonuç",amac:"Negatif kuvveti üç yöntemle pozitife çevirip karşılaştırmak.",adimlar:ynr("Negatif üslü üç ifadeyi üç yolla pozitif üslü yazacaksınız.","Her yolun kutusunda ifadeye eşit yazılışı seçiniz; sonra değeri seçiniz."),ciz:e_ucyol},
+ {ad:"İşaret Tuzağı",amac:"Negatif üssün sonucu negatif yapmadığını sınamak.",adimlar:ynr("Taban ve negatif üs seçerek kuvvetler kuracak, “negatif üs sonucu negatif yapar” iddiasını sınayacaksınız.","Tabanı ve üssü düğmelerle seçiniz; kuvvetin değeri sayı doğrusunda işaretlenir ve deftere yazılır."),ciz:e_tuzak},
+ {ad:"Üç Yol Bir Sonuç",amac:"Negatif kuvveti üç yöntemle pozitife çevirip karşılaştırmak.",adimlar:ynr("Negatif üslü üç ifadeyi üç yolla pozitif üslü yazacaksınız.","Her yolun kutusunda düğmelerle bir yazılış kurup “Hesaplayın” düğmesine basınız; değer ifadeye eşitse yol tamamlanır."),ciz:e_ucyol},
  {ad:"Kesrin Negatif Kuvveti",amac:`(${kH(1,"a")})<sup>−n</sup> ve (${kH("a","b")})<sup>−n</sup> için ters çevirmeyi keşfetmek.`,adimlar:ynr("Tabanı kesir olan negatif kuvvetlere eşit pozitif üslü ifadeler kuracaksınız.","İşaret, pay, payda ve üs düğmeleriyle sağdaki ifadeyi kurunuz; “Kontrol edin” düğmesine basınız."),ciz:e_kesirters},
- {ad:"Kesri Kuvvete Çevir",amac:`${kH(1,"a<sup>n</sup>")} biçimindeki kesirleri negatif kuvvetle yazmak.`,adimlar:ynr("Pay 1 olan kesirleri negatif üslü kuvvet kartlarıyla eşleştireceksiniz.","Soldan bir kesre, sağdan ona eşit karta dokununuz."),ciz:e_kesirkuv},
+ {ad:"Kesri Kuvvete Çevir",amac:`${kH(1,"a<sup>n</sup>")} biçimindeki kesirleri negatif kuvvetle yazmak.`,adimlar:ynr("Banttaki 5 kesri, taban ve üssü kendiniz seçerek negatif üslü kuvvet olarak yazacaksınız.","Tabanı düğmelerle, üssü sürgüyle seçiniz; kuvvet sıradaki kesre eşit olunca kesir yerine oturur. Sonra “Sıradaki kesir →” düğmesine basınız."),ciz:e_kesirkuv},
  {ad:"Kaç Farklı Yazılış?",amac:`Bir sayıyı (${kH(1,64)} gibi) farklı tabanlarla yazmak.`,adimlar:ynr("Bir kesri farklı tabanlı negatif kuvvetlerle yazmanın yollarını toplayacaksınız.","Taban ve üs düğmeleriyle kuvvet kurunuz; hedefe eşitse koleksiyona ekleyiniz."),ciz:e_yazilis},
- {ad:"Kuvvet Sıralaması",amac:"Kuvvetleri sayı doğrusunda sıralamak.",adimlar:ynr("İki turda beşer kuvveti küçükten büyüğe sıralayacaksınız.","Kartlara en küçüğünden başlayarak sırayla dokununuz; kartlar sayı doğrusuna yerleşir."),ciz:e_sirala},
- {ad:"Kuvvetin Kuvveti",amac:"(a<sup>m</sup>)<sup>n</sup>'yi tekrarlı çarpmayla açıp üslerin çarpıldığını keşfetmek.",adimlar:ynr("Kuvvetin kuvveti olan üç ifadeyi tekrarlı çarpmaya açacaksınız.","İfadeyi adım adım açınız, çarpanları sayınız ve eşit kuvveti seçiniz."),ciz:e_kuvkuv},
- {ad:"Aynı Tabana Getir",amac:`4, 8, 16, ${kH(1,8)} gibi sayıları 2'nin kuvveti olarak yazmak.`,adimlar:ynr("Bantla gelen sayıları 2'nin kuvveti olarak yazacaksınız.","2<sup>k</sup> kalıbının üssünü sürgüyle seçiniz; kalıp sayıya eşitse eşitliği yazınız."),ciz:e_aynitaban},
- {ad:"Büyük Kuvvet Düellosu",amac:"2<sup>30</sup> ile 3<sup>20</sup> gibi kuvvetleri üssün üssüyle karşılaştırmak.",adimlar:ynr("Beş düelloda iki büyük kuvvetten büyük olanı bulacaksınız.","Kurallar: Önce iki kuvvete ortak bir üs seçiniz, sonra büyük olanı seçiniz. Doğru kararla düelloyu kazanırsınız; beş düello bitince oyun biter."),ciz:e_duello}];
+ {ad:"Kuvvet Sıralaması",amac:"Kuvvetleri sayı doğrusunda sıralamak.",adimlar:ynr("İki turda beşer kuvveti küçükten büyüğe sıralayacaksınız.","Kartlara en küçüğünden başlayarak sırayla dokununuz; kartlar vagonlara biner. “Sınayın” düğmesine basınca kuvvetler sayı doğrusunda gösterilir. 1. tur bitince “Sıradaki tur →” düğmesine basınız."),ciz:e_sirala},
+ {ad:"Kuvvetin Kuvveti",amac:"(a<sup>m</sup>)<sup>n</sup>'yi tekrarlı çarpmayla açıp üslerin çarpıldığını keşfetmek.",adimlar:ynr("İç ve dış üssü kendiniz seçerek kuvvetin kuvvetini kuracak, tabanın kaç kez çarpıldığını göreceksiniz.","Tabanı düğmelerle, iç ve dış üssü sürgülerle seçiniz; ekranda dış üs kadar kutu açılır ve çarpan sayısı yazar."),ciz:e_kuvkuv},
+ {ad:"Aynı Tabana Getir",amac:`4, 8, 16, ${kH(1,8)} gibi sayıları 2'nin kuvveti olarak yazmak.`,adimlar:ynr("Bantla sırayla gelen 11 sayıyı 2'nin kuvveti olarak yazacaksınız.","2<sup>k</sup> kalıbının üssünü sürgüyle seçiniz; kalıp sayıya eşitse eşitliği yazınız. Sonra “Sıradaki sayı →” düğmesine basınız."),ciz:e_aynitaban},
+ {ad:"Büyük Kuvvet Düellosu",amac:"2<sup>30</sup> ile 3<sup>20</sup> gibi kuvvetleri üssün üssüyle karşılaştırmak.",adimlar:ynr("Beş düelloda iki büyük kuvveti ortak bir üsle yeniden yazıp terazide tartacaksınız.","Kurallar: “Ortak üs” sürgüsüyle iki üssü de bölen bir sayı seçiniz; iki kuvvet bu üsle yeniden yazılır ve terazi ağır geleni gösterir. Düello tartılınca “Sıradaki düello →” düğmesine basınız; beş düello bitince deney biter."),ciz:e_duello}];
 kesifBaslat(ACT,{baslik:"Kuvvetler Keşif Atölyesi",kisa:"Kuvvetler Keşif Atölyesi",kod:"M.8.1.2.1",ust:"M.8.1.2.1 · Fasikül 5 · Tam Sayıların Tam Sayı Kuvvetleri",
   aciklama:"Tam sayıların tam sayı kuvvetleri için yirmi keşfetme etkinliği: her biri farklı bir düzenek. Önce tahmin ediniz, deneyiniz, kuralı bulunuz ve yeni bir örnekte kendinizi deneyiniz."});
 
