@@ -1179,53 +1179,52 @@ const e_kule=p=>{const S=notr(asamali(p));const CIFT=[[8,14],[12,20]],H=120;
       v=>v===70?"70 cm kule yüksekliğidir; soru kutu sayısını istiyor.":null);}
 };
 
-/* 6 · DİŞLİ ÇARKLAR */
-const e_disli=p=>{const S=notr(asamali(p));const CIFT=[[16,24],[20,28]];
-  const k=S.ac(1,{ne:"Birbirine geçmiş iki çarkta, başta birbirine değen işaretli dişlerin yeniden karşılaşması için kaç diş ilerlemek gerektiğini bulacaksınız.",
-    nasil:["Üstten çark çiftini seçiniz. Kırmızı çizgiler işaretli dişleri gösterir; ortadaki kırmızı üçgen karşılaşma noktasıdır.","“1 diş ilerletin” çarkları bir diş döndürür. “Oynat” çarkları işaretler yeniden karşılaşana kadar döndürür; “Durdur” ile durdurabilirsiniz.","İki işaret de üçgene gelince karşılaşma deftere yazılır. “Baştan başlatın” çarkları başa alır."],
+/* 6 · ATLIKARINCALAR (14.10.2026, Ekrem KOÇAK kararı §5.g-6: dişli kurgusu yerine; sayılar ve hedef aynı) */
+const e_atli=p=>{const S=notr(asamali(p));const CIFT=[[16,24],[20,28]];
+  const k=S.ac(1,{ne:"Lunaparktaki iki atlıkarıncanın kırmızı eyerli atları başta kendi kapılarının önündedir. İki atın yeniden aynı anda kapılarının önüne gelmesi için kaç saniye geçmesi gerektiğini bulacaksınız.",
+    nasil:["Üstten atlıkarınca çiftini seçiniz. Sayılar, atlıkarıncaların bir turu kaç saniyede döndüğünü gösterir. Kırmızı eyerli at kırmızıdır; kırmızı üçgen o atlıkarıncanın kapısıdır.","“1 saniye ilerletin” zamanı bir saniye ilerletir. “Oynat” atlıkarıncaları iki at yeniden birlikte kapıya gelene kadar döndürür; “Durdur” ile durdurabilirsiniz.","İki kırmızı at da kendi kapısına aynı anda gelince bu an deftere yazılır. “Baştan başlatın” atlıkarıncaları başa alır."],
     biter:bitG(3)});
-  S.tahmin(k,"16 dişli ve 24 dişli çarklarda işaretli dişler en az kaç diş ilerleyince yeniden karşılaşır?",[[8,"8"],[24,"24"],[48,"48"],[384,"384"]],48,"48 diş sonra karşılaşırlar: küçük çark 3 tur, büyük çark 2 tur atmıştır.");
-  k.insertAdjacentHTML("beforeend",`<div class="row sy"></div><div class="stage"></div><div class="row"><button class="ghost bir">1 diş ilerletin</button><button class="primary oyn">Oynat</button><button class="ghost bas">Baştan başlatın</button></div><p class="durum"></p>`);
+  S.tahmin(k,"Bir turu 16 saniyede ve 24 saniyede dönen iki atlıkarıncada kırmızı eyerli atlar en az kaç saniye sonra yeniden birlikte kapılarının önüne gelir?",[[8,"8"],[24,"24"],[48,"48"],[384,"384"]],48,"48 saniye sonra birlikte gelirler: küçük atlıkarınca 3 tur, büyük atlıkarınca 2 tur dönmüştür.");
+  k.insertAdjacentHTML("beforeend",`<div class="row sy"></div><div class="stage"></div><div class="row"><button class="ghost bir">1 saniye ilerletin</button><button class="primary oyn">Oynat</button><button class="ghost bas">Baştan başlatın</button></div><p class="durum"></p>`);
   const sy=k.querySelector(".sy"),st=k.querySelector(".stage"),du=k.querySelector(".durum"),ob=k.querySelector(".oyn");
   let c=0,A,B,n=0,zam=null,tur1=false;const kars={0:new Set(),1:new Set()};
-  const D=defter(k,["Çarklar","İlerleyen diş","Küçük çark","Büyük çark"]);
-  const G=gorevler(k,[{m:"Küçük çarkı tam <b>1 tur</b> (16 diş) döndürünüz ve büyük çarkın işaretine bakınız.",ok:()=>tur1,s:()=>"16 diş: büyük çarkın işareti henüz gelmedi."},
-    {m:"İşaretlerin yeniden karşılaştığı <b>ilk</b> anı bulunuz.",ok:()=>kars[0].has(48),s:()=>"48 diş: küçük çark 3 tur, büyük çark 2 tur"},
-    {m:"20 ve 28 dişli çarklarda aynı anı bulunuz.",ok:()=>kars[1].has(140),s:()=>"140 diş: 7 tur ve 5 tur"}],acikla);
+  const D=defter(k,["Tur süreleri","Geçen süre","Küçük atlıkarınca","Büyük atlıkarınca"]);
+  const G=gorevler(k,[{m:"Küçük atlıkarıncayı tam <b>1 tur</b> (16 saniye) döndürünüz ve büyük atlıkarıncanın kırmızı atına bakınız.",ok:()=>tur1,s:()=>"16 saniye: büyük atlıkarıncanın kırmızı atı henüz kapıya gelmedi."},
+    {m:"İki kırmızı atın yeniden birlikte kapıya geldiği <b>ilk</b> anı bulunuz.",ok:()=>kars[0].has(48),s:()=>"48 saniye: küçük atlıkarınca 3 tur, büyük atlıkarınca 2 tur"},
+    {m:"20 ve 28 saniyelik atlıkarıncalarda aynı anı bulunuz.",ok:()=>kars[1].has(140),s:()=>"140 saniye: 7 tur ve 5 tur"}],acikla);
   const durdur=()=>{if(zam){clearInterval(zam);zam=null;}ob.textContent="Oynat";};
-  function kur(i){durdur();c=i;[A,B]=CIFT[i];n=0;du.innerHTML="İşaretli dişler karşılaşma noktasında.";ciz();}
-  sayiDugme(sy,"Çarklar:",CIFT.map((x,i)=>[i,`${x[0]} ve ${x[1]} diş`]),0,v=>kur(+v));
-  const tur=(n,z)=>n%z?`${Math.floor(n/z)} tur ${n%z} diş`:`${n/z} tam tur`;
+  function kur(i){durdur();c=i;[A,B]=CIFT[i];n=0;du.innerHTML="İki kırmızı eyerli at da kendi kapısının önünde.";ciz();}
+  sayiDugme(sy,"Atlıkarıncalar:",CIFT.map((x,i)=>[i,`${x[0]} ve ${x[1]} saniye`]),0,v=>kur(+v));
+  const tur=(n,z)=>n%z?`${Math.floor(n/z)} tur ve ${n%z} saniye`:`${n/z} tam tur`;
   function adim(){n++;if(c===0&&n>=16)tur1=true;let bu=false;
-    if(n%A===0&&n%B===0){bu=true;kars[c].add(n);D.ekle([`${A} ve ${B} diş`,n,`${n/A} tur`,`${n/B} tur`],c+"-"+n);bip(880,.25);
-      du.innerHTML=`İşaretler yeniden karşılaştı! <b>${n}</b> diş = ${A} · ${n/A} = ${B} · ${n/B}`;}
-    else{bip(n%A===0||n%B===0?640:420,.03);du.innerHTML=dz(`İlerleyen diş: <b>${n}</b>`,`Küçük çark: ${tur(n,A)}`,`Büyük çark: ${tur(n,B)}`);}
+    if(n%A===0&&n%B===0){bu=true;kars[c].add(n);D.ekle([`${A} ve ${B} saniye`,`${n} saniye`,`${n/A} tur`,`${n/B} tur`],c+"-"+n);bip(880,.25);
+      du.innerHTML=`İki kırmızı at yeniden birlikte kapıda! <b>${n}</b> saniye = ${A} · ${n/A} = ${B} · ${n/B}`;}
+    else{bip(n%A===0||n%B===0?640:420,.03);du.innerHTML=dz(`Geçen süre: <b>${n}</b> saniye`,`Küçük atlıkarınca: ${tur(n,A)}`,`Büyük atlıkarınca: ${tur(n,B)}`);}
     ciz();G.kontrol();return bu;}
   k.querySelector(".bir").onclick=()=>{durdur();adim();};
   ob.onclick=()=>{if(zam){durdur();return;}ob.textContent="Durdur";zam=setInterval(()=>{if(!k.isConnected){durdur();return;}if(adim()||n>=600)durdur();},azHareket()?20:70);};
   k.querySelector(".bas").onclick=()=>kur(c);
-  function cark(cx,cy,z,aci,renk){const R=z*3.05;let h=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="${renk}" fill-opacity=".22" stroke="${renk}" stroke-width="3"/>`;
-    for(let i=0;i<z;i++)h+=`<rect x="${cx+R-1}" y="${cy-4.5}" width="11" height="9" rx="2" fill="${i===0?"#e03131":renk}" transform="rotate(${(aci+i*360/z).toFixed(2)} ${cx} ${cy})"/>`;
-    h+=`<line x1="${cx}" y1="${cy}" x2="${cx+R-3}" y2="${cy}" stroke="#e03131" stroke-width="4" stroke-linecap="round" transform="rotate(${aci.toFixed(2)} ${cx} ${cy})"/><circle cx="${cx}" cy="${cy}" r="6" fill="${css('--ink')}"/>`;
+  /* atlıkarınca (üstten): platform, 8 at; kırmızı eyerli at başta alttaki kapının önünde; aci: dönme açısı */
+  function atli(cx,cy,R,aci,renk,sure){let h=`<circle cx="${cx}" cy="${cy}" r="${R+12}" fill="none" stroke="#adb5bd" stroke-width="3" stroke-dasharray="10 6"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="${renk}" fill-opacity=".22" stroke="${renk}" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="${R*.45}" fill="#fff" stroke="${renk}" stroke-width="2"/>`;
+    for(let i=0;i<8;i++){const a=(90+aci+i*45)*Math.PI/180,x=cx+R*.75*Math.cos(a),y=cy+R*.75*Math.sin(a);h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i===0?11:8}" fill="${i===0?"#e03131":"#fff"}" stroke="${i===0?"#a51111":renk}" stroke-width="2.5"/>`;}
+    h+=`<path d="M${cx-9} ${cy+R+30} L${cx+9} ${cy+R+30} L${cx} ${cy+R+16} Z" fill="#e03131"/><circle cx="${cx}" cy="${cy}" r="6" fill="${css('--ink')}"/>`;
+    h+=`<text x="${cx}" y="${cy+R+54}" text-anchor="middle" font-size="19" font-weight="800">Bir tur: ${sure} saniye</text>`;
     return h;}
-  function ciz(){const RA=A*3.05,RB=B*3.05,cy=125,cxA=320-RA-7,cxB=320+RB+7;const sv=svgEl(640,255);
-    let h=cark(cxA,cy,A,n*360/A,"#1c7ed6")+cark(cxB,cy,B,180-n*360/B,"#f08c00");
-    h+=`<path d="M314 ${cy-RB-22} L326 ${cy-RB-22} L320 ${cy-RB-10} Z" fill="#e03131"/><line x1="320" y1="${cy-RB-10}" x2="320" y2="${cy+RB+10}" stroke="#e03131" stroke-dasharray="3 5" stroke-opacity=".5"/>`;
-    h+=`<text x="${cxA}" y="${cy+RA+30}" text-anchor="middle" font-size="20" font-weight="800">${A} diş</text><text x="${cxB}" y="${cy+RB+30>250?248:cy+RB+30}" text-anchor="middle" font-size="20" font-weight="800">${B} diş</text>`;
-    const x1=Math.min(cxA-RA-16,300),x2=Math.max(cxB+RB+16,340);sv.setAttribute("viewBox",`${x1} 0 ${x2-x1} 255`);sv.style.maxWidth=(x2-x1)*1.3+"px";
-    sv.innerHTML=h;st.replaceChildren(sv);}
+  function ciz(){const RA=58,RB=78,cy=110,cxA=170,cxB=460;const sv=svgEl(640,250);
+    let h=atli(cxA,cy,RA,n*360/A,"#1c7ed6",A)+atli(cxB,cy,RB,n*360/B,"#f08c00",B);
+    sv.setAttribute("viewBox","0 0 640 250");sv.style.maxWidth="640px";sv.innerHTML=h;st.replaceChildren(sv);}
   kur(0);
   function acikla(){const c=S.kural(2);
-    S.soru(c,"İşaretler 48 diş sonra karşılaştı. 48, 16 ile 24'ün nesidir?",
-      ["En küçük ortak katı: EKOK(16, 24) = 48",["Çarpımı","16 · 24 = 384; işaretler çok daha önce, 48. dişte karşılaştı."],["Toplamının 2 katı","16 + 24 = 40, 2 katı 80'dir; 48 değil."]],
-      "İlerleyen diş sayısı hem 16'nın hem 24'ün katı olunca iki işaret de karşılaşma noktasına gelir.",()=>
-    S.soru(c,"O anda küçük çark kaç tur atmıştır, nasıl bulunur?",
-      ["48 : 16 = 3 tur",["48 : 24 = 2 tur","Bu, büyük çarkın tur sayısıdır; küçük çarkın diş sayısına bölmelisiniz."],["16 + 24 = 40 tur","Tur sayısı, ilerleyen diş sayısının çarkın diş sayısına bölümüdür."]],
-      "Küçük çark 3 tur, büyük çark 48 : 24 = 2 tur atmıştır.",meydan));}
+    S.soru(c,"Kırmızı atlar 48 saniye sonra birlikte kapıya geldi. 48, 16 ile 24'ün nesidir?",
+      ["En küçük ortak katı: EKOK(16, 24) = 48",["Çarpımı","16 · 24 = 384; atlar çok daha önce, 48. saniyede birlikte geldi."],["Toplamının 2 katı","16 + 24 = 40, 2 katı 80'dir; 48 değil."]],
+      "Geçen süre hem 16'nın hem 24'ün katı olunca iki kırmızı at da kendi kapısının önüne gelir.",()=>
+    S.soru(c,"O anda küçük atlıkarınca kaç tur dönmüştür, nasıl bulunur?",
+      ["48 : 16 = 3 tur",["48 : 24 = 2 tur","Bu, büyük atlıkarıncanın tur sayısıdır; küçük atlıkarıncanın tur süresine bölmelisiniz."],["16 + 24 = 40 tur","Tur sayısı, geçen sürenin o atlıkarıncanın tur süresine bölümüdür."]],
+      "Küçük atlıkarınca 3 tur, büyük atlıkarınca 48 : 24 = 2 tur dönmüştür.",meydan));}
   function meydan(){const m=S.son();
-    S.sayi(m,yaz(["30 dişli ve 45 dişli iki çark birbirine geçmiştir. Birbirine değen dişler işaretlenmiştir."])+soruKut("İşaretli dişlerin yeniden karşılaşması için küçük çark en az kaç tur atmalıdır?"),3,"EKOK(30, 45) = 90 diş. Küçük çark 90 : 30 = 3 tur atar.","Önce EKOK(30, 45)'i bulunuz. Sonra küçük çarkın diş sayısına bölünüz.",
-      ()=>S.bitir("Birbirine geçmiş iki çarkta işaretli dişler, ilerleyen diş sayısı iki diş sayısının <b>ortak katı</b> olunca karşılaşır. İlk karşılaşma <b>EKOK</b> kadar diş sonradır. Her çarkın tur sayısı = EKOK : o çarkın diş sayısı."),
-      v=>v===2?"2, büyük çarkın tur sayısıdır.":v===90?"90 diş sayısıdır; tur sayısını bulmak için 30'a bölünüz.":null);}
+    S.sayi(m,yaz(["İki atlıkarıncadan biri bir turunu 30 saniyede, diğeri 45 saniyede dönmektedir. Başta iki atlıkarıncanın kırmızı eyerli atları kendi kapılarının önündedir."])+soruKut("İki kırmızı atın yeniden birlikte kapılarının önüne gelmesi için 30 saniyede dönen atlıkarınca en az kaç tur dönmelidir?"),3,"EKOK(30, 45) = 90 saniye. Bu atlıkarınca 90 : 30 = 3 tur döner.","Önce EKOK(30, 45)'i bulunuz. Sonra bu atlıkarıncanın tur süresine bölünüz.",
+      ()=>S.bitir("Farklı sürelerde dönen iki atlıkarıncada işaretli atlar, geçen süre iki tur süresinin <b>ortak katı</b> olunca birlikte kapıya gelir. İlk buluşma <b>EKOK</b> kadar süre sonradır. Her atlıkarıncanın tur sayısı = EKOK : o atlıkarıncanın tur süresi."),
+      v=>v===2?"2, öteki atlıkarıncanın tur sayısıdır.":v===90?"90 geçen süredir (saniye); tur sayısını bulmak için 30'a bölünüz.":null);}
 };
 
 /* 7 · DENİZ FENERLERİ (zaman çizelgesi) */
@@ -1833,7 +1832,7 @@ const ACT=[
  {ad:"Algoritma Makinesi",amac:"Algoritma yönteminde kalan iki sayıyı sağa taşıyarak EKOK'u bulmak.",adimlar:ynr("Algoritma yöntemiyle EKOK'u bulacaksınız.","İki sayıyı ortak asallarla bölünüz, kalanları çizginin sağına taşıyınız ve sağdaki bütün sayıları çarpınız."),ciz:e_algoritma},
  {ad:"Kuvvet Kuleleri",amac:"Üslü yazımda her tabanın büyük kuvvetini seçerek EKOK'u bulmak.",adimlar:ynr("Asal çarpanların kuvvetlerini ayarlayarak en küçük ortak katı kuracaksınız.","Kuvvetleri − ve + ile değiştiriniz; iki lambayı da yakınız ve sayıyı en küçük yapınız."),ciz:e_kuvvet},
  {ad:"Kutu Kuleleri",amac:"Özdeş kutulardan eşit yükseklikte kuleler kurarak en kısa kulenin EKOK olduğunu keşfetmek.",adimlar:ynr("Özdeş kutularla eşit yükseklikte en kısa kuleleri yapacaksınız.","Kulelere kutu ekleyiniz ya da çıkarınız; yeşil çizgi kulelerin eşit olduğunu gösterir."),ciz:e_kule},
- {ad:"Dişli Çarklar",amac:"İşaretli dişlerin yeniden karşılaşması için gereken diş sayısının EKOK olduğunu keşfetmek.",adimlar:ynr("İşaretli dişlerin yeniden karşılaştığı anı bulacaksınız.","Çarkları diş diş ya da “Oynat” ile döndürünüz; işaretlerin üçgende buluşmasına bakınız."),ciz:e_disli},
+ {ad:"Atlıkarıncalar",amac:"Farklı sürelerde dönen iki atlıkarıncanın işaretli atlarının yeniden birlikte kapıya gelmesi için geçen sürenin EKOK olduğunu keşfetmek.",adimlar:ynr("İşaretli atların yeniden birlikte kapıya geldiği anı bulacaksınız.","Zamanı saniye saniye ya da “Oynat” ile ilerletiniz; iki kırmızı atın kapılarına birlikte gelmesine bakınız."),ciz:e_atli},
  {ad:"Deniz Fenerleri",amac:"Belirli aralıklarla yanan iki fenerin birlikte yanma anlarının EKOK'un katları olduğunu keşfetmek.",adimlar:ynr("İki fenerin birlikte yandığı anları yakalayacaksınız.","Zamanı ilerletiniz; iki fener birlikte yanınca “Birlikte yandı!” düğmesine basınız."),ciz:e_fener},
  {ad:"Kalkış Çizelgesi",amac:"İki vapurun belli bir saate kadar kaç kez birlikte kalktığını EKOK ile bulmak.",adimlar:ynr("İki vapurun birlikte kalktığı saatleri çizelgede bulacaksınız.","Vapurların kalkış aralıklarını sürgülerle değiştiriniz; çizelge anında dolar. Birlikte kalkışların kaç dakikada bir geldiğine bakınız."),ciz:e_cizelge},
  {ad:"Boncuk Kolye",amac:"İki farklı parçadan oluşan birimin özdeş parça gibi düşünüldüğünü keşfetmek.",adimlar:ynr("İki kolyeyi eşit uzunlukta yapacaksınız.","Birinci kolyeye kırmızı ve beyaz boncukları sırayla, ikinciye mavi parçaları diziniz."),ciz:e_kolye},
