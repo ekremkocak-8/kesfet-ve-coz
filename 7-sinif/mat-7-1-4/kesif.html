@@ -1107,8 +1107,9 @@ function dogruH(W,min,max,bol,o={}){const L=o.L||28,Rr=W-(o.R||28),y=o.y||60,x=v
     if(tm&&o.etiket!==false&&(!o.her||i%(o.her*bol)===0))h+=`<text x="${x(v)}" y="${y+31}" text-anchor="middle" font-size="${fsE}" font-weight="800">${T(v)}</text>`;}
   return {h,x,L,R:Rr,y};}
 /* Sayı doğrusu üstünde ok (yay): a'dan b'ye; kat: kaçıncı sıra (üst üste binmesin) */
-function okYay(d,a,b,renk,kat=0,et=""){const xa=d.x(a),xb=d.x(b),yy=d.y-14-kat*30,tepe=yy-22;if(Math.abs(xb-xa)<1)return "";
-  return `<path d="M${xa} ${yy} C${xa} ${tepe} ${xb} ${tepe} ${xb} ${yy}" fill="none" stroke="${renk}" stroke-width="3"/><path d="M${xb-6} ${yy-9}L${xb} ${yy}L${xb+6} ${yy-9}" fill="none" stroke="${renk}" stroke-width="3" stroke-linejoin="round"/><circle cx="${xa}" cy="${yy}" r="4" fill="${renk}"/>${et?`<text x="${(xa+xb)/2}" y="${tepe-6}" text-anchor="middle" font-size="14" font-weight="800" fill="${renk}">${et}</text>`:""}`;}
+function okYay(d,a,b,renk,kat=0,et=""){const xa=d.x(a),xb=d.x(b),yy=d.y-14-kat*44,tepe=yy-22;if(Math.abs(xb-xa)<1)return "";
+  /* 15.10.2026: işlem okları doğrunun üstünde, katlar etiket payıyla aralıklı; ok uçlarından doğruya kesik kılavuz */
+  return `<path d="M${xa} ${d.y-4}V${yy}M${xb} ${d.y-4}V${yy}" stroke="${renk}" stroke-width="1.4" stroke-dasharray="3 3" opacity=".7"/><path d="M${xa} ${yy} C${xa} ${tepe} ${xb} ${tepe} ${xb} ${yy}" fill="none" stroke="${renk}" stroke-width="3"/><path d="M${xb-6} ${yy-9}L${xb} ${yy}L${xb+6} ${yy-9}" fill="none" stroke="${renk}" stroke-width="3" stroke-linejoin="round"/><circle cx="${xa}" cy="${yy}" r="4" fill="${renk}"/>${et?`<text x="${(xa+xb)/2}" y="${tepe-6}" text-anchor="middle" font-size="14" font-weight="800" fill="${renk}">${et}</text>`:""}`;}
 /* Görev kartı (06.10.2026, E2): üstte "Görev i / n" şeridi; görev bitince kart "tamamlandı" olur ve
    "Sıradaki görev (i+1 / n) →" düğmesi çıkar; düğmeye basılmadan yeni görev açılmaz. Biten görev küçülerek
    kartın üstünde özetlenir, yeni görev vurgulanır ve ekrana kaydırılır; son görevden sonra adımın bittiği yazılır. */
@@ -1182,7 +1183,7 @@ function okTur(k,D,A,gorevler,serbest){k.dataset.no=++_stNo;let a=0,b=0,bek=null
   const W=gW(640,300),sv=svgEl(W,150);el(k,"stage").appendChild(sv);
   const sa=sayac("1. sayı",-9,9,0,v=>{a=v;ciz();G&&!bek&&G.kontrol();}),sb=sayac("2. sayı",-9,9,0,v=>{b=v;ciz();G&&!bek&&G.kontrol();});
   const rw=el(k,"row k7-sayaclar");rw.append(sa.el,sb.el);const so=el(k,"k7-soru"),f=el(k,"fb");f.hidden=true;
-  function ciz(){const d=dogruH(W,-12,12,1,{y:118,her:W<420?4:W<700?2:1});sv.innerHTML=d.h+okYay(d,0,a,"#2b8a3e",1,a?tP(a):"")+okYay(d,a,a+b,"#c92a2a",0,b?tP(b):"");}
+  function ciz(){const d=dogruH(W,-12,12,1,{y:118,her:W<420?4:W<700?2:1});sv.innerHTML=d.h+okYay(d,0,a,"#2b8a3e",0,a?tP(a):"")+okYay(d,a,a+b,"#c92a2a",1,b?tP(b):"");}
   let G=null;
   if(!serbest){G=gorevli(k,A,D,gorevler.map(([x,y])=>({m:`Sayaçlarla 1. sayıyı <b>${T(x)}</b>, 2. sayıyı <b>${T(y)}</b> yapınız. Oklar sayı doğrusunda çizilir.`,ok:()=>a===x&&b===y,
       sor:son=>{bek=cevap(so,`<p class="soru">İkinci ok hangi noktada bitiyor? (${tP(x)} + ${tP(y)} = ?)</p>`,x+y,`Doğru! ${tP(x)} + ${tP(y)} = ${T(x+y)}.`,v=>v[0]/v[1]===x-y?"İkinci okun yönünü ters aldınız; ok hangi yöne gidiyor?":"İkinci ok, ilk okun bittiği yerden başlar; kırmızı okun ucundaki sayıyı okuyunuz.",()=>{bek=null;so.innerHTML="";son();},{eksi:true,sayi:true,ph:"ör. −3"});},
