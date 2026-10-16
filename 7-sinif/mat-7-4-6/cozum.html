@@ -1,0 +1,830 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Çözümler · Keşfet ve Çöz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d2433;--muted:#5b6478;--line:#dfe5ef;--bg:#f5f7fb;--card:#fff;--ss:#6741d9;--kk:#0b7285;--b:#d0700f;--ok:#2b8a3e;--warn:#c92a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Nunito,system-ui,sans-serif}
+header{background:linear-gradient(135deg,#1c5fbf,#2f8fe0);color:#fff;padding:18px 16px 22px}
+header .ic{max-width:780px;margin:0 auto}header small{opacity:.9;font-weight:800;letter-spacing:.08em;font-size:12px}header h1{margin:4px 0 0;font-size:24px;line-height:1.2}
+main{max-width:780px;margin:14px auto 40px;padding:0 16px}
+nav.sec{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}nav.sec button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+nav.sec button[aria-pressed=true]{background:#1c5fbf;color:#fff;border-color:#1c5fbf}
+.kart{background:var(--card);border-radius:16px;box-shadow:0 2px 0 rgba(0,0,0,.04),0 6px 20px rgba(20,40,80,.06);padding:18px;margin:0 0 16px;border-top:5px solid var(--c,#1c5fbf)}
+.et{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.1em;color:#fff;background:var(--c);border-radius:6px;padding:3px 9px}
+h2{font-size:20px;margin:8px 0 4px;line-height:1.3}
+.soru{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+.soru svg{max-width:100%;height:auto}
+ol.sec{list-style:none;padding:0;margin:8px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px}
+ol.sec li{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff}ol.sec li.dogru{border-color:var(--ok);background:#ebfbee;font-weight:800}
+.adim{border-left:4px solid var(--c);padding:6px 12px;margin:8px 0;background:#fff;border-radius:0 10px 10px 0;animation:gel .35s ease-out}
+.adim b{color:var(--c)}@keyframes gel{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.dug{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.btn{border:0;border-radius:12px;padding:10px 16px;font:inherit;font-weight:900;cursor:pointer;background:var(--c);color:#fff;min-height:44px}
+button.btn.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+.dikkat{background:#fff4e6;border:2px solid #f59f00;border-radius:12px;padding:10px 14px;margin:12px 0 4px}.dikkat b{color:#d9480f}
+.tuzak{font-size:15px;color:var(--muted);margin-top:8px}
+.cevap{font-weight:900;color:var(--ok);margin-top:8px}
+table{width:100%;border-collapse:collapse;margin-top:8px}td,th{border:1px solid var(--line);padding:8px 10px;text-align:left}th{background:#e3fafc;color:#0b7285;font-size:13px;letter-spacing:.06em}
+.ses{display:flex;align-items:center;gap:10px;margin:10px 0;padding:10px 12px;border-radius:12px;background:#eef2ff}
+.ses button{border:0;width:44px;height:44px;border-radius:50%;background:var(--c);color:#fff;font-size:18px;cursor:pointer}
+.ses span{font-size:14px;color:var(--muted)}
+.gizli{display:none}
+.tum{margin:4px 0 14px;font-size:14px}.tum a{color:#1c5fbf;font-weight:800}
+@media (prefers-reduced-motion:reduce){.adim{animation:none}}
+/* Canlandır (05.10.2026) */
+.sek{display:flex;gap:6px;margin:12px 0 0;border-bottom:2px solid var(--line)}
+.sek button{border:0;background:none;font:inherit;font-weight:900;font-size:15px;padding:10px 14px;border-radius:10px 10px 0 0;cursor:pointer;color:var(--muted);min-height:44px;position:relative;top:2px;border-bottom:3px solid transparent}
+.sek button[aria-selected=true]{color:var(--c);border-bottom-color:var(--c);background:#fff8f0}
+.sek .yeni{display:inline-block;font-size:10px;background:#2b8a3e;color:#fff;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px;letter-spacing:.06em}
+.cn{padding-top:10px}
+.cn-yon{background:#eef6ff;border-radius:12px;padding:10px 14px;font-size:15px;margin-bottom:10px}
+.cn-sahne{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px;min-height:120px;overflow-x:auto}
+.cn-sahne svg{width:100%;height:auto;max-height:420px;display:block}
+.cn-den{margin-top:10px;display:grid;gap:8px}
+.cn-satir{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cn-adimci{display:inline-flex;align-items:center;gap:6px;font-weight:800;flex-wrap:wrap}
+.cn-adimci button{width:44px;height:44px;border-radius:12px;border:2px solid var(--c);background:#fff;color:var(--c);font:inherit;font-size:22px;font-weight:900;cursor:pointer}
+.cn-adimci input,.cn-test input{width:84px;height:44px;border:2px solid var(--line);border-radius:12px;font:inherit;font-weight:900;text-align:center;font-size:18px}
+.cn-test label{font-weight:800;display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cn-btn{border:0;border-radius:12px;padding:10px 16px;font:inherit;font-weight:900;cursor:pointer;background:var(--c);color:#fff;min-height:44px}
+.cn-btn.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+.cn-btn[aria-pressed=true]{background:var(--ac,var(--c));color:#fff;border-color:var(--ac,var(--c))}
+.cn-btn:disabled{opacity:.5}
+.cn-hazir{display:flex;flex-wrap:wrap;gap:6px}
+.cn-dur{margin-top:10px;border-left:6px solid var(--c);background:#fffaf3;border-radius:0 12px 12px 0;padding:10px 14px;min-height:48px}
+.cn-dur .iyi{color:var(--ok);font-weight:900}.cn-dur .kotu{color:var(--warn);font-weight:900}
+.cn-df{margin-top:10px;overflow-x:auto}@media(max-width:480px){.cn-adimci>span{flex-basis:100%}.cn-h{font-size:12px;padding:5px 0}.cn-izg{gap:3px}.cn-sahne{padding:6px}}@media(max-width:480px){.cn-df table{font-size:13px}.cn-df td,.cn-df th{padding:4px 5px}}.cn-df summary{font-weight:900;cursor:pointer;padding:6px 0}.cn-say{color:var(--muted);font-weight:700}
+.cn-df table{font-size:15px}.cn-df td{padding:5px 8px}.cn-df tr.cn-iyi td{background:#ebfbee}.cn-df tr.cn-kotu td{background:#fff5f5}.cn-df tr.cn-son td{outline:2px solid var(--c);outline-offset:-2px}
+.cn-p{animation:cnGel .35s ease-out both}@keyframes cnGel{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.cn-o{fill:#ffa94d;stroke:#d9480f;stroke-width:1}.cn-o2{fill:#e8590c}.cn-k{fill:#ffc9c9;stroke:#c92a2a;stroke-width:1.5;stroke-dasharray:3 2}
+.cn-cerceve{stroke:#2b8a3e;stroke-width:3}.cn-et{font-size:13px;font-weight:800;fill:#5b6478}.cn-et.b,.cn-et2b{font-weight:900;fill:#1d2433}.cn-et2{font-size:11px;fill:#5b6478;font-weight:700}.cn-et2b{font-size:13px;fill:#fff}
+.cn-ku{fill:#fff4e6;stroke:#ffa94d;stroke-width:1.5}.cn-kk{fill:#fff5f5;stroke:#c92a2a;stroke-width:1.5;stroke-dasharray:4 3}
+.cn-tahta0{fill:#f1f3f5;stroke:#ced4da}.cn-tahta{fill:#c08552;stroke:#8d5a2b}
+.cn-ek{stroke:#868e96;stroke-width:2}.cn-sinir{stroke:#c92a2a;stroke-width:3;stroke-dasharray:5 4}.cn-yay{fill:none;stroke:#f76707;stroke-width:2}
+.cn-v1{stroke:#2b8a3e;stroke-width:3}.cn-v2{stroke:#c92a2a;stroke-width:3}.cn-kis{font-size:20px}.cn-bus{font-size:16px}.cn-bek{stroke:#c92a2a;stroke-width:5;stroke-linecap:round;opacity:.6}
+.cn-kum{fill:#ffe8cc;stroke:#e8590c;stroke-width:3}.cn-kum2{fill:#495057}.cn-para{fill:#ffd43b;opacity:.85}.cn-buyuk{font-size:26px;font-weight:900;fill:#1d2433}
+.cn-zem{fill:#adb5bd}.cn-kat{fill:#f1f3f5;stroke:#ced4da}.cn-katon{fill:#d3f9d8;stroke:#2b8a3e}.cn-katoff{fill:#ffe3e3;stroke:#e03131}
+.cn-izg{display:grid;gap:4px}.cn-h,.cn-gb{border-radius:8px;text-align:center;font-weight:800;font-size:14px;padding:6px 0}.cn-h{background:#f1f3f5;transition:background .25s,transform .25s}
+.cn-gb{background:none;color:var(--muted);font-size:12px}.cn-h.on{background:#ffa94d;color:#1d2433}.cn-h.yeni{transform:scale(1.18);box-shadow:0 0 0 3px #e8590c}
+.cn-kartlar{display:flex;flex-wrap:wrap;gap:6px;padding:4px}.cn-kart{min-width:44px;padding:8px 10px;text-align:center;border-radius:10px;background:#fff4e6;border:2px solid #ffa94d;font-weight:900;animation:cnGel .3s}
+.cn-kart.kare{background:#e7f5ff;border-color:#1c7ed6}.cn-bosk{color:var(--muted)}
+.cn-cift{display:flex;flex-wrap:wrap;gap:6px 14px;padding:6px 4px;font-weight:800}.cn-cift i{font-weight:600;color:#1c7ed6}
+.cn-katlar{padding:4px}.cn-katsat{display:inline-flex;flex-wrap:wrap;gap:6px}.cn-kat2{background:#e6fcf5;border:1.5px solid #12b886;border-radius:8px;padding:3px 8px;font-weight:800;animation:cnGel .3s}.cn-sonsuz{font-weight:800;color:#0b7285}
+.cn-onr{background:#f8f0fc;border:2px solid #ae3ec9;border-radius:12px;padding:10px 14px}.cn-kanit{padding:10px 4px 2px}
+.cn-kay{display:inline-flex;align-items:center;gap:8px;font-weight:800;flex-wrap:wrap}.cn-kay{max-width:100%}.cn-kay input{width:min(220px,70vw);accent-color:#d0700f}.cn-satir>*{min-width:0;max-width:100%}
+@media (prefers-reduced-motion:reduce){.cn-p,.cn-kart,.cn-kat2{animation:none}.cn-h{transition:none}}
+/* 05.10.2026 · KOŞUL ve LABİRENT motorları (SB 6.1.1) */
+@media(max-width:560px){.soru [style*="grid-template-columns:repeat"]{grid-template-columns:1fr!important}}   /* çok sütunlu konuşma balonları telefonda alt alta */
+.cn-kl{list-style:none;padding:0;margin:0;display:grid;gap:4px}.cn-not{color:var(--muted);font-size:14px}.cn-sonuc{margin-top:6px;font-weight:800}
+.cn-secg{gap:6px}.cn-secad{font-weight:800;flex-basis:100%}.cn-secg .cn-btn{padding:8px 12px}
+.cn-mv{fill:#74c0fc;stroke:#1c7ed6;stroke-width:1}.cn-tl{fill:#69db7c;stroke:#2b8a3e;stroke-width:1.5}
+.cn-lab{display:grid;gap:4px;align-items:center;max-width:460px;margin:0 auto}
+.cn-lc{min-height:44px;border-radius:8px;border:1.5px solid #ced4da;background:#fff;font:inherit;font-weight:900;font-size:16px;cursor:pointer;padding:0;color:var(--ink)}
+.cn-lc.yol{background:#d3f9d8;border-color:#2b8a3e}.cn-lc.simdi{background:#2b8a3e;color:#fff;box-shadow:0 0 0 3px #b2f2bb}.cn-lc.kapali{background:#ffe3e3;border-color:#e03131;color:#c92a2a;text-decoration:line-through}
+.cn-lok{color:#2b8a3e;font-weight:900;text-align:center}.cn-lcik{min-height:44px;border:0;background:none;font:inherit;font-weight:900;color:#d9480f;cursor:pointer;padding:0;white-space:nowrap;font-size:14px}.cn-lcik:disabled{cursor:default}
+
+</style></head><body>
+<header><div class="ic"><small id="kod"></small><h1 id="bas">Çözümler</h1></div></header>
+<main><nav class="sec" id="nav" aria-label="Bölümler"></nav><p class="tum" id="tum" hidden><a href="?">Bütün çözümleri göster</a></p><div id="ic"></div></main>
+<script>
+/* ANA_KURALLAR §4.y-3: Etkinliklerde bütün kesirler kesir çizgisiyle (alt alta pay/payda) gösterilir. Düz yazılmış a/b biçimleri otomatik dönüştürülür. */
+(function(){
+  if (window.__kesirCizgi) return; window.__kesirCizgi = 1;
+  const RX = /(^|[^\w\/.,:%])([−-])?(?:(\d+) )?(\d{1,4})\/(\d{1,4})(?![\w\/.,]\d|\w)/g;
+  const ATLA = "script,style,svg,textarea,input,select,code,.ilr,.frac,[data-duz]";
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function donustur(kok){
+    if (!kok || !kok.nodeType) return;
+    if (kok.nodeType === 3) kok = kok.parentElement;
+    if (!kok || (kok.closest && kok.closest(ATLA))) return;
+    const w = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, { acceptNode: t => {
+      if (!/\d\/\d/.test(t.nodeValue)) return NodeFilter.FILTER_REJECT;
+      const p = t.parentElement; if (!p || p.closest(ATLA)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT; } });
+    const L = []; let t; while ((t = w.nextNode())) L.push(t);
+    L.forEach(t => {
+      let deg = false;
+      const h = esc(t.nodeValue).replace(RX, (m, a, s, tam, p, q) => { deg = true;
+        return a + (s ? "−" : "") + (tam ? tam + " " : "") + '<span class="frac"><span>' + p + "</span><span>" + q + "</span></span>"; });
+      if (!deg) return;
+      const k = document.createElement("span"); k.innerHTML = h; t.replaceWith(...k.childNodes);
+    });
+  }
+  let bekleyen = new Set(), plan = 0;
+  const calis = () => { plan = 0; const b = bekleyen; bekleyen = new Set(); b.forEach(donustur); };
+  const gozcu = new MutationObserver(ms => { ms.forEach(m => {
+      if (m.type === "characterData") bekleyen.add(m.target); else m.addedNodes.forEach(n => bekleyen.add(n)); });
+    if (!plan) plan = requestAnimationFrame(calis); });
+  const bas = () => { donustur(document.body); gozcu.observe(document.body, { childList: true, subtree: true, characterData: true }); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bas); else bas();
+  const st = document.createElement("style");
+  st.textContent = ".frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 2px}.frac>span{display:block;text-align:center;padding:0 3px}.frac>span:first-child{border-bottom:1.5px solid currentColor}";
+  document.head.appendChild(st);
+})();
+
+/* Canlandır · bağlam sorularına simülasyon motorları (05.10.2026, ANA_KURALLAR §4.k, §19)
+   Her motor: öğrenci düzeneği elle değiştirir → sonucu anında görür → deney defterine yazılır → tekrar dener.
+   Kullanım: CANL[no] = el => MOTOR(el, {...})
+   05.10.2026 (SB 6.1.1): KOŞUL ve LABİRENT motorları; GRUPLA'ya hazır değer düğmeleri (hazir) ve özel satır (satir),
+   ATLA'ya soruya özel sınama (test), nokta rengi (renk) ve çizelge adımları (tikAdim, etAdim, etYaz) eklendi (eski ayarlar aynen çalışır). */
+const CN = (() => {
+  const az = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const h = (t, c, html) => { const e = document.createElement(t); if (c) e.className = c; if (html != null) e.innerHTML = html; return e; };
+  const bekle = ms => new Promise(r => setTimeout(r, az ? 0 : ms));
+  const x = "×";
+  // Türkçe ek: E(40,"in") → 40'ın · E(58,"den") → 58'den  (ünlü uyumu sayının okunuşunun son sözcüğüne göre)
+  const EKT = {bir:["in","den","e"],iki:["nin","den","ye"],"üç":["ün","ten","e"],"dört":["ün","ten","e"],"beş":["in","ten","e"],"altı":["nın","dan","ya"],yedi:["nin","den","ye"],sekiz:["in","den","e"],dokuz:["un","dan","a"],
+    on:["un","dan","a"],yirmi:["nin","den","ye"],otuz:["un","dan","a"],"kırk":["ın","tan","a"],elli:["nin","den","ye"],"altmış":["ın","tan","a"],"yetmiş":["in","ten","e"],seksen:["in","den","e"],doksan:["ın","dan","a"],"yüz":["ün","den","e"],bin:["in","den","e"],"sıfır":["ın","dan","a"]};
+  const BIR = ["sıfır","bir","iki","üç","dört","beş","altı","yedi","sekiz","dokuz"], ON = ["","on","yirmi","otuz","kırk","elli","altmış","yetmiş","seksen","doksan"];
+  const sonSoz = n => n === 0 ? "sıfır" : n % 10 ? BIR[n % 10] : n % 100 ? ON[(n % 100) / 10] : n % 1000 ? "yüz" : "bin";
+  const E = (n, t) => { const e = EKT[sonSoz(Math.abs(n))]; const i = {in:0,nin:0,den:1,dan:1,e:2,a:2}[t]; let k = e[i];
+    if (t === "de" || t === "da") k = e[1].replace("n", ""); return `${n}'${k}`; };
+  // ortak iskelet: yönerge + sahne + denetimler + durum + deney defteri
+  function iskelet(el, o) {
+    el.innerHTML = "";
+    const y = h("div", "cn-yon", `<b>Ne yapacaksınız?</b> ${o.yon}<br><b>Ne zaman biter?</b> ${o.bitis}`);
+    const sah = h("div", "cn-sahne"); const den = h("div", "cn-den"); const dur = h("div", "cn-dur", o.ilk || "Bir deneme yapın.");
+    dur.setAttribute("aria-live", "polite");
+    const df = h("details", "cn-df"); df.open = true;
+    df.innerHTML = `<summary>Deney defteri <span class="cn-say">(0 deneme)</span></summary><table><thead><tr>${o.sutun.map(s => `<th>${s}</th>`).join("")}</tr></thead><tbody></tbody></table>`;
+    el.append(y, sah, den, dur, df);
+    const tb = df.querySelector("tbody"), say = df.querySelector(".cn-say"); const kayit = new Set();
+    const yaz = (anahtar, hucre, iyi) => {
+      if (kayit.has(anahtar)) { [...tb.rows].forEach(r => r.classList.toggle("cn-son", r.dataset.k === anahtar)); return; }
+      kayit.add(anahtar); const tr = h("tr", iyi === true ? "cn-iyi" : iyi === false ? "cn-kotu" : ""); tr.dataset.k = anahtar;
+      tr.innerHTML = hucre.map(c => `<td>${c}</td>`).join(""); [...tb.rows].forEach(r => r.classList.remove("cn-son")); tr.classList.add("cn-son");
+      tb.appendChild(tr); say.textContent = `(${kayit.size} deneme)`;
+    };
+    return { sah, den, dur, yaz, sayi: () => kayit.size };
+  }
+  function adimci(etiket, min, max, deger, deg) {   // − [n] + denetimi
+    const w = h("div", "cn-adimci"); w.innerHTML = `<span>${etiket}</span><button type="button" aria-label="azalt">−</button><input type="number" inputmode="numeric" min="${min}" max="${max}" value="${deger}"><button type="button" aria-label="artır">+</button>`;
+    const [a, b] = w.querySelectorAll("button"), i = w.querySelector("input");
+    const ayarla = v => { v = Math.max(min, Math.min(max, Math.round(+v || min))); i.value = v; deg(v); };
+    a.onclick = () => ayarla(+i.value - 1); b.onclick = () => ayarla(+i.value + 1); i.onchange = () => ayarla(i.value);
+    return { w, ayarla, get: () => +i.value };
+  }
+  const dug = (t, cls = "") => { const b = h("button", "cn-btn " + cls, t); b.type = "button"; return b; };
+
+  /* 1) DİZİLİM: N birim kare/sandalye eşit sıralara dizilir */
+  function DIZILIM(el, o) {
+    const N0 = o.N; let N = o.N;
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Bir sıradaki", "Sıra sayısı", "Artan", "Sonuç"] });
+    const kut = h("div", "cn-satir");
+    let sayiA = null;
+    if (o.sayiSec) { sayiA = adimci(o.sayiEtiket || "Sayı:", 2, 100, N, v => { N = v; ciz(g.get()); }); kut.appendChild(sayiA.w); }
+    const g = adimci(o.etiket || "Bir sıradaki kare sayısı:", 1, o.maxG || N, o.bas || 1, v => ciz(v));
+    kut.appendChild(g.w); s.den.appendChild(kut);
+    if (o.hazir) { const hz = h("div", "cn-hazir"); o.hazir.forEach(n => { const b = dug(n, "ghost"); b.onclick = () => { sayiA.ayarla(n); }; hz.appendChild(b); }); s.den.appendChild(hz); }
+    function ciz(gen) {
+      if (gen > N) { g.ayarla(N); return; }
+      const sira = Math.floor(N / gen), art = N % gen, tumSira = Math.ceil(N / gen);
+      const hc = Math.max(10, Math.min(30, Math.floor(560 / Math.max(gen, 1)), Math.floor(330 / tumSira)));
+      const W = gen * hc + 20, H = tumSira * hc + 20; let sv = "";
+      for (let k = 0; k < N; k++) {
+        const r = Math.floor(k / gen), c = k % gen, kalan = r >= sira;
+        const xx = 10 + c * hc, yy = 10 + r * hc, d = az ? 0 : Math.min(k * 12, 900);
+        sv += o.sandalye
+          ? `<g class="cn-p" style="animation-delay:${d}ms"><rect x="${xx + hc * .18}" y="${yy + hc * .1}" width="${hc * .64}" height="${hc * .5}" rx="${hc * .1}" class="${kalan ? "cn-k" : "cn-o"}"/><rect x="${xx + hc * .18}" y="${yy + hc * .62}" width="${hc * .64}" height="${hc * .18}" rx="${hc * .06}" class="${kalan ? "cn-k" : "cn-o2"}"/></g>`
+          : `<rect class="cn-p ${kalan ? "cn-k" : "cn-o"}" style="animation-delay:${d}ms" x="${xx + 1}" y="${yy + 1}" width="${hc - 2}" height="${hc - 2}" rx="3"/>`;
+      }
+      if (!art && !o.sandalye) sv += `<rect x="10" y="10" width="${gen * hc}" height="${sira * hc}" fill="none" class="cn-cerceve"/>
+        <text x="${10 + gen * hc / 2}" y="${H + 4}" class="cn-et" text-anchor="middle">${gen} ${o.birim || ""}</text>
+        <text x="${W + 4}" y="${10 + sira * hc / 2}" class="cn-et" dominant-baseline="middle">${sira} ${o.birim || ""}</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W + 70} ${H + 22}" role="img" aria-label="${N} ${o.ad || "kare"}, her sırada ${gen}">${sv}</svg>`;
+      const r = o.kural ? o.kural(gen, sira, art, N) : null;
+      let m;
+      if (art) m = `<span class="kotu">✘</span> ${N} ${o.ad || "kare"} her sırada ${gen} olacak biçimde dizilince ${sira} tam sıra oluşur, <b>${art} ${o.ad || "kare"} artar</b>. Dikdörtgen olmaz: ${N} : ${gen} işleminde kalan ${art}.`;
+      else m = `<span class="iyi">✔</span> <b>${N} = ${gen} ${x} ${sira}</b> · ${sira} sıra, her sırada ${gen} ${o.ad || "kare"}; hiç artmadı.` + (gen === sira ? ` <b>Kare oldu!</b> İki kenar aynı: ${gen}.` : "");
+      if (!art && o.cevre) m += ` Çevre = 2 ${x} (${gen} + ${sira}) = <b>${2 * (gen + sira)} m</b>.`;
+      if (r && r.msg) m += `<br>${r.msg}`;
+      s.dur.innerHTML = m;
+      const sutunlar = o.satir ? o.satir(gen, sira, art, N, r) : [gen, art ? `${sira} (+ ${art} artan)` : sira, art, art ? "olmaz" : (gen === sira ? "kare" : "dikdörtgen")];
+      s.yaz(N + ":" + gen, sutunlar, !art && (!r || r.ok !== false));
+    }
+    ciz(g.get());
+  }
+
+  /* 2) GRUPLA: N nesne k'şar gruplara ayrılır (nokta) ya da N cm çubuk p parçaya kesilir (cubuk) */
+  function GRUPLA(el, o) {
+    const N = o.N;
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || (o.cubuk ? ["Parça sayısı", "Bir parça", "Artan", "Sonuç"] : ["Bir gruptaki", "Grup sayısı", "Artan", "Sonuç"]) });
+    const g = adimci(o.etiket, 1, o.max || N, o.bas || 2, v => { sonK = v; });
+    let sonK = g.get(); const b = dug(o.dugme || "Dağıt ▶"); const kut = h("div", "cn-satir"); kut.append(g.w, b); s.den.appendChild(kut);
+    if (o.hazir) { const hz = h("div", "cn-hazir"); o.hazir.forEach(n => { const bb = dug(o.hazirAd ? o.hazirAd(n) : n, "ghost"); bb.onclick = () => { g.ayarla(n); b.click(); }; hz.appendChild(bb); }); s.den.appendChild(hz); }   // 05.10.2026 (SB 6.1.1)
+    let calis = false;
+    b.onclick = async () => { if (calis) return; calis = true; b.disabled = true; await (o.cubuk ? kes(g.get()) : dagit(g.get())); calis = false; b.disabled = false; };
+    async function dagit(k) {
+      const grup = Math.floor(N / k), art = N % k;
+      const sut = Math.min(grup + (art ? 1 : 0), Math.max(1, Math.floor(600 / (Math.min(k, 6) * 16 + 18))));
+      const kolon = Math.min(k, 6), satirK = Math.ceil(k / kolon), gw = kolon * 14 + 16, gh = satirK * 14 + 26;
+      const toplamKutu = grup + (art ? 1 : 0), sat = Math.ceil(toplamKutu / sut);
+      const W = sut * (gw + 8) + 10, H = sat * (gh + 8) + 10;
+      let sv = "";
+      for (let gi = 0; gi < toplamKutu; gi++) {
+        const gx = 10 + (gi % sut) * (gw + 8), gy = 10 + Math.floor(gi / sut) * (gh + 8), artan = gi === grup;
+        sv += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" rx="8" class="${artan ? "cn-kk" : "cn-ku"}"/><text x="${gx + gw / 2}" y="${gy + gh - 6}" text-anchor="middle" class="cn-et2">${artan ? "artan" : (gi + 1) + ". " + (o.grupAd || "grup")}</text>`;
+        const adet = artan ? art : k;
+        for (let j = 0; j < adet; j++) {
+          const cx = gx + 15 + (j % kolon) * 14, cy = gy + 12 + Math.floor(j / kolon) * 14;
+          const d = az ? 0 : Math.min((gi * k + j) * 8, 1200);
+          sv += `<circle class="cn-p ${artan ? "cn-k" : "cn-o"}" style="animation-delay:${d}ms" cx="${cx}" cy="${cy}" r="5.5"/>`;
+        }
+      }
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${N} ${o.ad} her grupta ${k}">${sv}</svg>`;
+      s.dur.innerHTML = "Dağıtılıyor…"; await bekle(Math.min(N * 8, 1200) + 200);
+      const r = o.kural ? o.kural(k, grup, art) : null;
+      s.dur.innerHTML = (art ? `<span class="kotu">✘</span> ${N} ${o.ad} her grupta ${k} olacak biçimde ayrılınca ${grup} ${o.grupAd || "grup"} oluşur, <b>${art} ${o.ad} açıkta kalır</b> (${N} : ${k} → kalan ${art}).`
+        : `<span class="iyi">✔</span> <b>${N} = ${k} ${x} ${grup}</b> · ${grup} ${o.grupAd || "grup"}, hiç artmadı. ${k}, ${E(N,"in")} çarpanıdır.`) + (r && r.msg ? "<br>" + r.msg : "");
+      s.yaz("" + k, o.satir ? o.satir(k, grup, art, r) : [k, grup, art, art ? "artıyor" : "tam bölünüyor"], !art && (!r || r.ok !== false));
+    }
+    async function kes(p) {
+      const par = Math.floor(N / p), art = N % p, W = 440, sk = (W - 40) / N;
+      let sv = `<rect x="20" y="30" width="${N * sk}" height="40" rx="4" class="cn-tahta0"/>`;
+      for (let i = 0; i < p; i++) {
+        const xx = 20 + i * par * sk, d = az ? 0 : i * 140;
+        sv += `<g class="cn-p" style="animation-delay:${d}ms"><rect x="${xx + 2}" y="30" width="${par * sk - 4}" height="40" rx="4" class="cn-tahta"/><text x="${xx + par * sk / 2}" y="56" text-anchor="middle" class="cn-et2b">${par}</text></g>`;
+      }
+      if (art) sv += `<g class="cn-p" style="animation-delay:${az ? 0 : p * 140}ms"><rect x="${20 + p * par * sk + 2}" y="30" width="${art * sk - 4}" height="40" rx="4" class="cn-k"/><text x="${20 + p * par * sk + art * sk / 2}" y="88" text-anchor="middle" class="cn-et">${art} cm artan</text></g>`;
+      sv += `<text x="20" y="20" class="cn-et">0</text><text x="${20 + N * sk}" y="20" text-anchor="end" class="cn-et">${N} cm</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} 96" style="max-height:200px" role="img" aria-label="${N} santimetrelik çubuk ${p} parçaya kesildi">${sv}</svg>`;
+      s.dur.innerHTML = "Kesiliyor…"; await bekle(p * 140 + 250);
+      const r = o.kural ? o.kural(p, par, art) : null;
+      s.dur.innerHTML = (art ? `<span class="kotu">✘</span> ${N} cm ${p} eş parçaya bölünemez: her parça ${par} cm olursa <b>${art} cm artar</b>.`
+        : `<span class="iyi">✔</span> <b>${N} = ${p} ${x} ${par}</b> · ${p} parça, her biri ${par} cm; hiç artmadı.`) + (r && r.msg ? "<br>" + r.msg : "");
+      s.yaz("" + p, [p, art ? "—" : par + " cm", art ? art + " cm" : 0, art ? "artıyor" : "tam"], !art && (!r || r.ok !== false));
+    }
+  }
+
+  /* 3) ATLA: 0'dan başlayıp k'şar ilerleme (merdiven, kumbara, yol, kâğıt) */
+  function ATLA(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Sayı", "Sonuç"] });
+    let k = o.k, L = o.son; const W = 660, sol = 22, sag = 22, sk = (W - sol - sag) / L;
+    const izle = []; let n = 0, tmr = null;
+    const kut = h("div", "cn-satir");
+    const bA = dug("▶ Oynat"), bB = dug("+1 " + (o.adimAd || "adım"), "ghost"), bS = dug("Baştan", "ghost");
+    kut.append(bA, bB, bS);
+    let kA = null;
+    if (o.kSec) { kA = adimci(o.kEtiket || "Adım:", 2, Math.floor(L / 2), k, v => { k = v; sifirla(); }); kut.prepend(kA.w); }
+    s.den.appendChild(kut);
+    const test = h("div", "cn-satir cn-test"); test.innerHTML = `<label>${o.testEtiket || "Bir sayı yazın:"} <input type="number" inputmode="numeric" min="1" max="${o.testMax || L * 2}"></label>`;
+    const bT = dug(o.testDugme || "Dene", "ghost"); test.appendChild(bT); s.den.appendChild(test);
+    const ti = test.querySelector("input");
+    function taban() {
+      let sv = `<line x1="${sol}" y1="62" x2="${sol + L * sk}" y2="62" class="cn-ek"/>`;
+      const adimT = o.tikAdim || (L <= 60 ? 1 : L <= 200 ? 5 : 25), et = o.etAdim || (L <= 60 ? 5 : L <= 200 ? 25 : 100);
+      for (let v = 0; v <= L; v += adimT) sv += `<line x1="${sol + v * sk}" y1="${v % et ? 58 : 54}" x2="${sol + v * sk}" y2="66" class="cn-ek"/>` + (v % et ? "" : `<text x="${sol + v * sk}" y="82" text-anchor="middle" class="cn-et">${o.etYaz ? o.etYaz(v) : v}</text>`);
+      sv += `<line x1="${sol + L * sk}" y1="30" x2="${sol + L * sk}" y2="70" class="cn-sinir"/><text x="${sol + L * sk}" y="24" text-anchor="end" class="cn-et">${o.sonEt || L}</text>`;
+      return sv;
+    }
+    function ciz(vurgu, iyi) {
+      let sv = taban();
+      izle.forEach((v, i) => {
+        const a = i ? izle[i - 1] : 0; const x1 = sol + a * sk, x2 = sol + v * sk, yy = 62 - Math.min(30, (x2 - x1) * .6 + 8);
+        sv += `<path d="M${x1} 62 Q${(x1 + x2) / 2} ${yy} ${x2} 62" class="cn-yay"/><circle cx="${x2}" cy="62" r="4.5" class="${o.renk ? o.renk(v, i + 1) : "cn-o"}"/>`;
+        if (izle.length <= 14 || i === izle.length - 1 || i % Math.ceil(izle.length / 10) === 0) sv += `<text x="${x2}" y="${98}" text-anchor="middle" class="cn-et2">${v}</text>`;
+      });
+      if (vurgu != null) { const xv = sol + Math.min(vurgu, L) * sk; sv += `<line x1="${xv}" y1="40" x2="${xv}" y2="70" class="${(iyi === undefined ? vurgu % k === 0 && vurgu <= L : iyi) ? "cn-v1" : "cn-v2"}"/><text x="${xv}" y="38" text-anchor="middle" class="cn-et b">${vurgu}</text>`; }
+      const son = izle.length ? izle[izle.length - 1] : 0, ix = sol + son * sk;
+      sv += `<text x="${ix}" y="50" text-anchor="middle" class="cn-kis">${o.simge || "●"}</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} 104" role="img" aria-label="${k} birimlik adımlarla ilerleme">${sv}</svg>`;
+    }
+    const ileri = () => {
+      const v = (n + 1) * k;
+      if (v > L) { durdur(); s.dur.innerHTML = `<span class="kotu">■</span> Sonraki ${o.adimAd || "adım"} ${k} ${x} ${n + 1} = <b>${v}</b> olurdu; bu ${E(L,"den")} büyük. ${o.bitti ? o.bitti(n, k, L) : `Toplam ${n} ${o.adimAd || "adım"}; son değer ${n * k}.`}`; if (!izle.length) ciz(); return false; }
+      n++; izle.push(v); ciz(); s.dur.innerHTML = o.durum ? o.durum(n, v, k) : `${n}. ${o.adimAd || "adım"}: ${k} ${x} ${n} = <b>${v}</b>`; return true;
+    };
+    function durdur() { clearInterval(tmr); tmr = null; bA.textContent = "▶ Oynat"; }
+    function sifirla() { durdur(); n = 0; izle.length = 0; ciz(); s.dur.innerHTML = o.ilk || "Oynat düğmesine basın ya da tek tek ilerleyin."; }
+    bA.onclick = () => { if (tmr) { durdur(); return; } bA.textContent = "❚❚ Durdur"; tmr = setInterval(() => { if (!ileri()) durdur(); }, az ? 60 : Math.max(120, 900 - L)); };
+    bB.onclick = () => { durdur(); ileri(); }; bS.onclick = sifirla;
+    bT.onclick = () => {
+      const v = Math.round(+ti.value); if (!v) return;
+      if (o.test) { const t = o.test(v, k, L); ciz(t.vurgu != null ? t.vurgu : v, t.ok); s.dur.innerHTML = t.msg; s.yaz("t" + v, t.hucre, t.ok); return; }   // 05.10.2026: soruya özel sınama
+      ciz(v);
+      const b = Math.floor(v / k), r = v % k, ic = v <= L;
+      let m = r === 0 ? `<span class="iyi">✔</span> <b>${v} = ${k} ${x} ${b}</b> · ${v}, ${E(k,"in")} katıdır; ${b}. ${o.adimDa || "adımda"} ${o.ulas || "ulaşılır"}.` : `<span class="kotu">✘</span> ${k} ${x} ${b} = ${k * b} ve ${k} ${x} ${b + 1} = ${k * (b + 1)}; ${v} arada kalır (${v} : ${k} → kalan ${r}). ${o.ulasmaz || "Bu sayıya basılmaz"}.`;
+      if (r === 0 && !ic) m += ` Ama ${v} > ${L}: sınırın dışında.`;
+      s.dur.innerHTML = m; s.yaz("t" + v, [v, r === 0 ? (ic ? `${k} ${x} ${b} ✔` : `${k} ${x} ${b} (sınır dışı)`) : `kalan ${r} ✘`], r === 0 && ic);
+    };
+    sifirla();
+  }
+
+  /* 4) TABLO: 1..son sayılar ızgarada; k'nın katları boyanır (yüzlük tablo, takvim, bilet) */
+  function TABLO(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || [o.kAd || "k", "Boyanan", "En büyük"] });
+    let k = o.k || 2, son = o.son;
+    const kut = h("div", "cn-satir");
+    const kA = adimci((o.kEtiket || "Katları boyanacak sayı:"), 2, o.kMax || 20, k, v => { k = v; temiz(); });
+    const bB = dug("Boya ▶"); kut.append(kA.w, bB);
+    if (o.sonSec) { const sw = h("div", "cn-hazir"); o.sonSec.forEach(v => { const b = dug(v + " gün", "ghost"); b.onclick = () => { son = v; kur(); temiz(); }; sw.appendChild(b); }); s.den.append(kut, sw); }
+    else s.den.appendChild(kut);
+    let hucre = [];
+    function kur() {
+      const g = h("div", "cn-izg" + (o.takvim ? " cn-tak" : "")); g.style.gridTemplateColumns = `repeat(${o.sutunSay},1fr)`;
+      if (o.takvim) o.takvim.gunler.forEach(d => g.appendChild(h("div", "cn-gb", d)));
+      for (let i = 0; i < (o.bosluk || 0); i++) g.appendChild(h("div", "cn-bos"));
+      hucre = [];
+      for (let v = o.bas || 1; v <= son; v++) { const c = h("div", "cn-h", v); g.appendChild(c); hucre[v] = c; }
+      s.sah.innerHTML = ""; s.sah.appendChild(g);
+    }
+    function temiz() { hucre.forEach(c => c && c.classList.remove("on", "yeni")); s.dur.innerHTML = o.ilk || "Sayıyı seçip Boya düğmesine basın."; }
+    let calis = false;
+    bB.onclick = async () => {
+      if (calis) return; calis = true; bB.disabled = true; temiz(); let say = 0, enb = 0;
+      for (let v = k; v <= son; v += k) {
+        hucre[v].classList.add("on", "yeni"); say++; enb = v;
+        s.dur.innerHTML = `${k} ${x} ${say} = <b>${v}</b>  ·  boyanan: ${say}`; await bekle(o.hiz || 260); hucre[v].classList.remove("yeni");
+      }
+      const sonraki = (Math.floor(son / k) + 1) * k;
+      s.dur.innerHTML = `<b>${say}</b> ${o.birimAd || "kare"} boyandı. En büyüğü ${enb} = ${k} ${x} ${say}. Sonraki kat ${k} ${x} ${say + 1} = ${sonraki}, ${E(son,"den")} büyük.` + (o.yorum ? "<br>" + o.yorum(k, say, enb, son) : "");
+      s.yaz(k + ":" + son, o.satir ? o.satir(k, say, enb, son) : [k, say, enb], o.iyi ? o.iyi(k, say, enb, son) : null);
+      calis = false; bB.disabled = false;
+    };
+    kur(); temiz();
+  }
+
+  /* 5) ASANSÖR: iki kural, katlar binada boyanır */
+  function ASANSOR(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Açık asansörler", "Gidilen kat", "Gidilemeyen kat"] });
+    const ac = o.asansor.map(() => false);
+    const kut = h("div", "cn-satir"); const bt = o.asansor.map((a, i) => { const b = dug(a.ad, "ghost"); b.style.setProperty("--ac", a.renk); b.setAttribute("aria-pressed", "false"); b.onclick = () => { ac[i] = !ac[i]; b.setAttribute("aria-pressed", ac[i]); ciz(); }; kut.appendChild(b); return b; });
+    s.den.appendChild(kut);
+    function ciz() {
+      let sv = ""; const H = o.kat * 17 + 40; let git = 0, gitme = [];
+      for (let f = o.kat; f >= 0; f--) {
+        const y = 10 + (o.kat - f) * 17; const dur = o.asansor.map((a, i) => ac[i] && f > 0 && a.kural(f));
+        const herhangi = dur.some(Boolean);
+        if (f > 0) { if (herhangi) git++; else gitme.push(f); }
+        sv += `<rect x="60" y="${y}" width="150" height="15" rx="2" class="${f === 0 ? "cn-zem" : herhangi ? "cn-katon" : (ac.some(Boolean) ? "cn-katoff" : "cn-kat")}"/><text x="52" y="${y + 12}" text-anchor="end" class="cn-et">${f === 0 ? "Z" : f}</text>`;
+        o.asansor.forEach((a, i) => { if (dur[i]) sv += `<circle cx="${230 + i * 22}" cy="${y + 7.5}" r="6" fill="${a.renk}"/>`; });
+      }
+      s.sah.innerHTML = `<svg viewBox="0 0 300 ${H}" style="max-height:440px" role="img" aria-label="${o.kat} katlı bina">${sv}</svg>`;
+      const acik = o.asansor.filter((a, i) => ac[i]).map(a => a.ad);
+      if (!acik.length) { s.dur.innerHTML = "Bir asansör düğmesine basın; durduğu katlar boyanır."; return; }
+      s.dur.innerHTML = `Açık: ${acik.join(" + ")} · Zemin kattan gidilen kat: <b>${git}</b> · Gidilemeyen kat: <b>${gitme.length}</b>` + (gitme.length && gitme.length <= 12 ? ` (${gitme.sort((a, b) => a - b).join(", ")})` : "");
+      s.yaz(acik.join("+"), [acik.join(" + "), git, gitme.length], null);
+    }
+    ciz();
+  }
+
+  /* 6) SAAT: eşit aralıklı seferler ve varış saati */
+  function SAAT(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Sefer aralığı", "Varış", "Önceki sefer", "Sonraki sefer", "Bekleme"] });
+    let ara = o.ara, var_ = o.varis; const bas = o.bas, bit = o.bit;
+    const sa = m => `${String(Math.floor(m / 60)).padStart(2, "0")}.${String(m % 60).padStart(2, "0")}`;
+    const saDa = m => sa(m) + "'" + E(m % 60 || Math.floor(m / 60), "da").split("'")[1];
+    const kut = h("div", "cn-satir");
+    const aA = adimci("Sefer aralığı (dk):", 5, 60, ara, v => { ara = v; ciz(); });
+    const vw = h("label", "cn-kay", `Varış saati: <b class="cn-vs"></b><input type="range" min="${bas}" max="${bit}" step="5" value="${var_}">`);
+    kut.append(aA.w, vw); s.den.appendChild(kut);
+    const r = vw.querySelector("input"), vs = vw.querySelector(".cn-vs");
+    r.oninput = () => { var_ = +r.value; ciz(); };
+    function ciz() {
+      vs.textContent = sa(var_); const W = 660, sk = (W - 40) / (bit - bas);
+      let sv = `<line x1="20" y1="50" x2="${W - 20}" y2="50" class="cn-ek"/>`;
+      for (let m = bas; m <= bit; m += 30) sv += `<line x1="${20 + (m - bas) * sk}" y1="46" x2="${20 + (m - bas) * sk}" y2="54" class="cn-ek"/><text x="${20 + (m - bas) * sk}" y="72" text-anchor="middle" class="cn-et">${sa(m)}</text>`;
+      let onc = null, snr = null;
+      for (let m = bas; m <= bit + ara; m += ara) { if (m <= var_) onc = m; if (m >= var_ && snr == null) snr = m; if (m <= bit) sv += `<text x="${20 + (m - bas) * sk}" y="40" text-anchor="middle" class="cn-bus">🚌</text>`; }
+      const vx = 20 + (var_ - bas) * sk; sv += `<line x1="${vx}" y1="20" x2="${vx}" y2="60" class="cn-v2"/><text x="${vx}" y="92" text-anchor="middle" class="cn-et b">${o.kisi} ${sa(var_)}</text>`;
+      if (snr != null && snr <= bit + ara) { const sx = 20 + (Math.min(snr, bit) - bas) * sk; sv += `<path d="M${vx} 56 L${sx} 56" class="cn-bek"/>`; }
+      s.sah.innerHTML = `<svg viewBox="0 0 ${W} 100" role="img" aria-label="Sefer çizelgesi">${sv}</svg>`;
+      const gec = var_ - bas;
+      s.dur.innerHTML = `${o.kisi} durağa ${saDa(var_)} geliyor: ilk seferden <b>${gec} dakika</b> sonra. Seferler ${E(ara,"in")} katı olan dakikalarda: ${ara} ${x} ${Math.floor(gec / ara)} = ${Math.floor(gec / ara) * ara}` + (gec % ara ? `, ${ara} ${x} ${Math.floor(gec / ara) + 1} = ${(Math.floor(gec / ara) + 1) * ara}. Sonraki otobüs ${saDa(snr)}; bekleme <b>${snr - var_} dakika</b>.` : `. Tam sefer saatinde geldi; bekleme <b>0 dakika</b>.`);
+      s.yaz(ara + ":" + var_, [ara + " dk", sa(var_), sa(onc), sa(snr), (snr - var_) + " dk"], null);
+    }
+    ciz();
+  }
+
+  /* 7) ÇARPAN AVCISI: bir sayının çarpanlarını bölerek bulma; isteğe bağlı katlar akışı */
+  function CARPAN(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Sayı", "Çarpanlar", "Çarpan sayısı"] });
+    let N = o.N || o.hazir[0]; let bul = new Set(), denendi = new Set();
+    const kut = h("div", "cn-satir");
+    const sA = adimci("Sayı:", 2, o.max || 200, N, v => { N = v; yeni(); });
+    kut.appendChild(sA.w);
+    if (o.hazir) { const hz = h("div", "cn-hazir"); o.hazir.forEach(n => { const b = dug(n, "ghost"); b.onclick = () => sA.ayarla(n); hz.appendChild(b); }); kut.appendChild(hz); }
+    s.den.appendChild(kut);
+    const bolen = h("div", "cn-satir cn-test"); bolen.innerHTML = `<label>Bölen deneyin: <input type="number" inputmode="numeric" min="1"></label>`;
+    const bD = dug("Böl"), bS = dug("Sıradakini dene", "ghost"); bolen.append(bD, bS); s.den.appendChild(bolen);
+    const bi = bolen.querySelector("input");
+    let bK = null; if (o.katlar) { bK = dug(o.katDugme || "Katlarını say ▶", "ghost"); s.den.appendChild(bK); }
+    const ciftler = h("div", "cn-cift"); const katlar = h("div", "cn-katlar");
+    function yeni() { bul = new Set(); denendi = new Set(); ciz(); s.dur.innerHTML = `${N} sayısını 1, 2, 3, … sayılarına bölerek çarpan çiftlerini bulun.`; katlar.textContent = ""; }
+    function ciz() {
+      const L = [...bul].sort((a, b) => a - b);
+      s.sah.innerHTML = ""; const kartlar = h("div", "cn-kartlar");
+      L.forEach(v => kartlar.appendChild(h("span", "cn-kart" + (v * v === N ? " kare" : ""), v)));
+      if (!L.length) kartlar.appendChild(h("span", "cn-bosk", "Henüz çarpan bulunmadı"));
+      s.sah.append(kartlar, ciftler, katlar);
+      ciftler.innerHTML = L.filter(v => v * v <= N).map(v => `<span>${v} ${x} ${N / v}${v * v === N ? " <i>(aynı sayı: bir kez yazılır)</i>" : ""}</span>`).join("");
+    }
+    const tamamMi = () => { for (let i = 1; i * i <= N; i++) if (!denendi.has(i)) return false; return true; };
+    const eksik = () => { const L = []; for (let i = 1; i * i <= N; i++) if (!denendi.has(i)) L.push(i); return ` <br>Henüz denenmeyen küçük bölenler var: <b>${L.join(", ")}</b>. Bunları da deneyin.`; };
+    function dene(d) {
+      if (!d || d < 1) return; denendi.add(d);
+      const b = Math.floor(N / d), r = N % d;
+      if (d > N) { s.dur.innerHTML = `${d} > ${N}: ${E(N,"den")} büyük sayı ${E(N,"in")} çarpanı olamaz.`; return; }
+      if (r === 0) { bul.add(d); bul.add(b); ciz(); s.dur.innerHTML = `<span class="iyi">✔</span> ${N} : ${d} = ${b}, kalan 0 → <b>${d} ${x} ${b} = ${N}</b>. ${d} ve ${b} çarpandır.` + (d * d >= N ? tamamMi() ? ` <br><b>Dikkat:</b> ${d} ${x} ${d} ${d * d === N ? "=" : ">"} ${N}. Artık yeni çift çıkmaz; bütün çarpanlar bulundu.` : eksik() : ""); }
+      else { s.dur.innerHTML = `<span class="kotu">✘</span> ${N} : ${d} işleminde bölüm ${b}, <b>kalan ${r}</b>. ${d}, ${E(N,"in")} çarpanı değildir.` + (d * d > N ? tamamMi() ? ` <br><b>Dikkat:</b> ${d} ${x} ${d} > ${N}. Daha büyük bölen denemeye gerek yok; çarpan listesi tamam.` : eksik() : ""); }
+      const tamam = [...Array(N).keys()].map(i => i + 1).every(v => N % v || bul.has(v));
+      if (tamam) s.yaz("n" + N, [N, [...bul].sort((a, b) => a - b).join(", "), bul.size], true);
+    }
+    bD.onclick = () => dene(Math.round(+bi.value));
+    bS.onclick = () => { let d = 1; while (denendi.has(d)) d++; bi.value = d; dene(d); };
+    if (bK) bK.onclick = async () => {
+      bK.disabled = true; katlar.textContent = ""; const sat = h("div", "cn-katsat"); katlar.append(h("b", "", `${E(N,"in")} katları: `), sat);
+      for (let i = 1; i <= (o.katSay || 12); i++) { sat.appendChild(h("span", "cn-kat2", `${N * i}`)); await bekle(220); }
+      sat.appendChild(h("span", "cn-sonsuz", "… ve sonsuza kadar sürer"));
+      bK.disabled = false;
+    };
+    yeni();
+  }
+
+  /* 8) KUMBARA: her hafta k TL eklenir; hedef para mümkün mü? (ATLA'nın kumbara görünümü) */
+  function KUMBARA(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Para", "Sonuç"] });
+    const k = o.k; let hafta = 0, tmr = null;
+    const kut = h("div", "cn-satir"); const bA = dug("Bir hafta geçsin +"), bO = dug("▶ Haftaları oynat", "ghost"), bS = dug("Baştan", "ghost");
+    kut.append(bA, bO, bS); s.den.appendChild(kut);
+    const test = h("div", "cn-satir cn-test"); test.innerHTML = `<label>Kumbarada şu para olabilir mi? <input type="number" inputmode="numeric" min="1" max="500"> TL</label>`;
+    const bT = dug("Dene", "ghost"); test.appendChild(bT); s.den.appendChild(test); const ti = test.querySelector("input");
+    function ciz() {
+      const top = hafta * k, sv = [];
+      const yuk = Math.min(150, top * 1.4);
+      sv.push(`<rect x="110" y="20" width="120" height="160" rx="22" class="cn-kum"/><rect x="150" y="14" width="40" height="8" rx="3" class="cn-kum2"/>`);
+      sv.push(`<rect x="116" y="${176 - yuk}" width="108" height="${yuk}" rx="10" class="cn-para"/>`);
+      sv.push(`<text x="170" y="110" text-anchor="middle" class="cn-buyuk">${top} TL</text><text x="170" y="134" text-anchor="middle" class="cn-et">${hafta}. hafta</text>`);
+      let cizgi = ""; for (let i = 1; i <= hafta && i <= 16; i++) cizgi += `<text x="${260 + ((i - 1) % 4) * 52}" y="${40 + Math.floor((i - 1) / 4) * 34}" class="cn-et2">${k}${x}${i}=${k * i}</text>`;
+      s.sah.innerHTML = `<svg viewBox="0 0 480 190" role="img" aria-label="Kumbara">${sv.join("")}${cizgi}</svg>`;
+      s.dur.innerHTML = hafta ? `${hafta}. hafta sonunda kumbarada ${k} ${x} ${hafta} = <b>${top} TL</b> var.` : `Kumbara boş. Her hafta ${k} TL atılıyor.`;
+    }
+    bA.onclick = () => { hafta++; ciz(); };
+    bO.onclick = () => { if (tmr) { clearInterval(tmr); tmr = null; bO.textContent = "▶ Haftaları oynat"; return; } bO.textContent = "❚❚ Durdur"; tmr = setInterval(() => { if (hafta >= 15) { clearInterval(tmr); tmr = null; bO.textContent = "▶ Haftaları oynat"; return; } hafta++; ciz(); }, az ? 50 : 500); };
+    bS.onclick = () => { hafta = 0; ciz(); };
+    bT.onclick = () => {
+      const v = Math.round(+ti.value); if (!v) return; const b = Math.floor(v / k), r = v % k;
+      s.dur.innerHTML = r ? `<span class="kotu">✘</span> ${k} ${x} ${b} = ${k * b} TL, ${k} ${x} ${b + 1} = ${k * (b + 1)} TL. ${v} TL arada kalır (${v} : ${k} → kalan ${r}). Kumbarada hiçbir hafta ${v} TL olmaz.`
+        : `<span class="iyi">✔</span> ${v} = ${k} ${x} ${b} · ${b}. hafta sonunda kumbarada tam ${v} TL olur.`;
+      if (!r) { hafta = b; ciz(); s.dur.innerHTML = `<span class="iyi">✔</span> ${v} = ${k} ${x} ${b} · <b>${b}. hafta</b> sonunda kumbarada tam ${v} TL olur.`; }
+      s.yaz("t" + v, [v + " TL", r ? `kalan ${r} ✘` : `${k} ${x} ${b} ✔`], !r);
+    };
+    ciz();
+  }
+
+  /* 9) ÖNERME LABORATUVARI: önermeyi farklı sayılarla sınama */
+  function ONERME(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: ["Önerme", "Sayı", "Sonuç"] });
+    let akt = 0; const kut = h("div", "cn-hazir");
+    const bt = o.onermeler.map((on, i) => { const b = dug(on.ad, "ghost"); b.setAttribute("aria-pressed", i === 0); b.onclick = () => { akt = i; bt.forEach((x, j) => x.setAttribute("aria-pressed", j === i)); goster(); }; kut.appendChild(b); return b; });
+    s.den.appendChild(kut);
+    const test = h("div", "cn-satir cn-test"); test.innerHTML = `<label>Sınanacak sayı: <input type="number" inputmode="numeric" min="1" max="200" value="12"></label>`;
+    const bT = dug("Sına"), bR = dug("Rastgele sayı", "ghost"); test.append(bT, bR); s.den.appendChild(test); const ti = test.querySelector("input");
+    function goster() { s.sah.innerHTML = `<div class="cn-onr"><b>${o.onermeler[akt].ad}:</b> “${o.onermeler[akt].metin}”</div>`; s.dur.innerHTML = "Bir sayı yazıp Sına düğmesine basın. Önerme her sayıda doğru mu?"; }
+    function sina(n) {
+      const on = o.onermeler[akt], r = on.sina(n);
+      s.sah.innerHTML = `<div class="cn-onr"><b>${on.ad}:</b> “${on.metin}”</div><div class="cn-kanit">${r.goster}</div>`;
+      s.dur.innerHTML = (r.ok ? `<span class="iyi">✔</span> ${n} için önerme doğru.` : `<span class="kotu">✘</span> ${n} için önerme yanlış! Bir karşı örnek bulundu.`) + (r.not ? " " + r.not : "");
+      s.yaz(akt + ":" + n, [on.ad, n, r.ok ? "doğru" : "yanlış (karşı örnek)"], r.ok);
+    }
+    bT.onclick = () => { const n = Math.round(+ti.value); if (n > 0) sina(n); };
+    bR.onclick = () => { const n = 2 + Math.floor(Math.random() * 59); ti.value = n; sina(n); };
+    goster();
+  }
+
+
+  /* 10) KOŞUL LABORATUVARI (05.10.2026, SB 6.1.1): girdileri (sayı ya da seçim) değiştir → sahne anında çizilir →
+     koşullar tek tek denetlenir (✔/✘) → deney defterine yazılır. Doğru cevap verilmez; öğrenci uygun girdiyi kendisi arar.
+     o.girdi: [{ad, min, max, bas} | {ad, sec:[…], bas, yaz?}] · o.ciz(v) → SVG/HTML · o.kosullar: [{ad, f(v) → bool | {ok, not}}]
+     o.dugme: düğme yazısı (false → her değişiklikte denetlenir) · o.sonuc(v, hepsi, L) · o.satir(v, hepsi, L) · o.iyi(v, L) · o.ek: [{ad, deger(v) → v}] */
+  function KOSUL(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun });
+    const v = o.girdi.map(g => g.bas), ayar = [];
+    o.girdi.forEach((g, i) => {
+      const w = h("div", "cn-satir");
+      if (g.sec) {
+        w.classList.add("cn-secg"); w.appendChild(h("span", "cn-secad", g.ad));
+        const bs = g.sec.map(x => { const b = dug(g.yaz ? g.yaz(x) : x, "ghost"); b.setAttribute("aria-pressed", x === v[i]); b.onclick = () => sec(x); w.appendChild(b); return b; });
+        const sec = x => { v[i] = x; bs.forEach((y, j) => y.setAttribute("aria-pressed", g.sec[j] === x)); degis(); };
+        ayar[i] = sec;
+      } else { const a = adimci(g.ad, g.min, g.max, g.bas, x => { v[i] = x; degis(); }); ayar[i] = a.ayarla; w.appendChild(a.w); }
+      s.den.appendChild(w);
+    });
+    const alt = h("div", "cn-satir"); let bS = null;
+    if (o.dugme !== false) { bS = dug(o.dugme || "Sına ✔"); bS.onclick = () => sina(); alt.appendChild(bS); }
+    (o.ek || []).forEach(e => { const b = dug(e.ad, "ghost"); b.onclick = () => { const y = e.deger(v.slice()); y.forEach((x, i) => { if (x !== v[i]) { v[i] = x; } }); y.forEach((x, i) => ayar[i](x)); }; alt.appendChild(b); });
+    if (alt.children.length) s.den.appendChild(alt);
+    let kur = false;
+    function ciz() { s.sah.innerHTML = o.ciz(v.slice()); }
+    function degis() { if (!kur) return; ciz(); if (!bS) sina(); else s.dur.innerHTML = o.bekle || "Değerleri değiştirdiniz. Sına düğmesine basın."; }
+    function sina() {
+      const L = o.kosullar.map(k => { const r = k.f(v.slice()); return typeof r === "object" ? r : { ok: !!r }; });
+      const hepsi = L.every(r => r.ok);
+      let m = `<ul class="cn-kl">` + o.kosullar.map((k, i) => `<li><span class="${L[i].ok ? "iyi" : "kotu"}">${L[i].ok ? "✔" : "✘"}</span> ${typeof k.ad === "function" ? k.ad(v.slice()) : k.ad}${L[i].not ? ` <span class="cn-not">${L[i].not}</span>` : ""}</li>`).join("") + `</ul>`;
+      if (o.sonuc) m += o.sonuc(v.slice(), hepsi, L);
+      s.dur.innerHTML = m;
+      s.yaz(v.join("|"), o.satir(v.slice(), hepsi, L), o.iyi ? o.iyi(v.slice(), L) : hepsi);
+    }
+    kur = true; ciz();
+    if (bS) s.dur.innerHTML = o.ilk || "Değerleri seçip Sına düğmesine basın."; else sina();
+  }
+
+  /* 11) LABİRENT (05.10.2026, SB 6.1.1): sayı ızgarasında kurala uyan karelere basarak ilerleme; çapraz geçiş yok.
+     o.izgara: [[…]] · o.kural(v) → {ok, msg} · o.cikis: {satır: "ad"} (sağ kenar) · giriş sol üst kare */
+  function LABIRENT(el, o) {
+    const s = iskelet(el, { yon: o.yon, bitis: o.bitis, sutun: o.sutun || ["Kare", "Sonuç"] });
+    const Rn = o.izgara.length, Cn = o.izgara[0].length;
+    let yol = [[0, 0]], kotu = new Set(), cikti = null;
+    const kut = h("div", "cn-satir"); const bG = dug("↶ Bir adım geri", "ghost"), bB = dug("Baştan", "ghost"); kut.append(bG, bB); s.den.appendChild(kut);
+    const g = h("div", "cn-lab"); g.style.gridTemplateColumns = `22px repeat(${Cn},minmax(0,1fr)) 44px`; s.sah.appendChild(g);
+    const hc = [];
+    for (let i = 0; i < Rn; i++) {
+      g.appendChild(h("div", "cn-lok", i === 0 ? "➜" : "")); hc[i] = [];
+      for (let j = 0; j < Cn; j++) { const b = h("button", "cn-lc", o.izgara[i][j]); b.type = "button"; b.onclick = () => bas(i, j); g.appendChild(b); hc[i][j] = b; }
+      const c = h("button", "cn-lcik", o.cikis[i] ? "→" + o.cikis[i] : ""); c.type = "button"; c.disabled = !o.cikis[i]; if (o.cikis[i]) c.onclick = () => cik(i); g.appendChild(c);
+    }
+    const anahtar = (i, j) => i + ":" + j, son = () => yol[yol.length - 1];
+    const yoldaMi = (i, j) => yol.some(([a, b]) => a === i && b === j);
+    function boya() {
+      for (let i = 0; i < Rn; i++) for (let j = 0; j < Cn; j++) {
+        const c = hc[i][j]; c.className = "cn-lc" + (yoldaMi(i, j) ? " yol" : "") + (kotu.has(anahtar(i, j)) ? " kapali" : "");
+      }
+      const [a, b] = son(); hc[a][b].classList.add("simdi");
+    }
+    function cikmaz() {
+      const [a, b] = son();
+      const ac = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([di, dj]) => { const x = a + di, y = b + dj; return x >= 0 && y >= 0 && x < Rn && y < Cn && !yoldaMi(x, y) && !kotu.has(anahtar(x, y)); });
+      return !ac && !(b === Cn - 1 && o.cikis[a]);
+    }
+    function bas(i, j) {
+      if (cikti) { s.dur.innerHTML = `Labirentten <b>${cikti}</b> çıkışından çıktınız. Yeniden denemek için Baştan düğmesine basın.`; return; }
+      const [a, b] = son();
+      if (yoldaMi(i, j)) { s.dur.innerHTML = "Bu kareden zaten geçtiniz. Geri dönmek için “Bir adım geri” düğmesini kullanın."; return; }
+      if (Math.abs(a - i) + Math.abs(b - j) !== 1) { s.dur.innerHTML = `Yalnız bulunduğunuz karenin (<b>${o.izgara[a][b]}</b>) sağındaki, solundaki, üstündeki ya da altındaki kareye geçebilirsiniz.`; return; }
+      const v = o.izgara[i][j], r = o.kural(v);
+      if (!r.ok) { kotu.add(anahtar(i, j)); boya(); s.dur.innerHTML = `<span class="kotu">✘</span> ${r.msg} Bu kareye basılmaz.`; s.yaz("k" + anahtar(i, j), [v, "basılmaz ✘"], false); return; }
+      yol.push([i, j]); boya();
+      s.dur.innerHTML = `<span class="iyi">✔</span> ${r.msg} Yol: ${yol.map(([x, y]) => o.izgara[x][y]).join(" → ")}` + (cikmaz() ? `<br><b>Çıkmaz yol!</b> Buradan gidilebilecek yeni kare yok; geri dönün.` : "");
+      s.yaz("k" + anahtar(i, j), [v, "basılır ✔"], true);
+    }
+    function cik(i) {
+      const [a, b] = son();
+      if (cikti) return;
+      if (a !== i || b !== Cn - 1) { s.dur.innerHTML = `${o.cikis[i]} çıkışından çıkmak için bu çıkışın hemen solundaki karede (<b>${o.izgara[i][Cn - 1]}</b>) olmalısınız.`; return; }
+      cikti = o.cikis[i]; s.dur.innerHTML = `<span class="iyi">✔</span> <b>${cikti} çıkışından çıktınız!</b> Yol: ${yol.map(([x, y]) => o.izgara[x][y]).join(" → ")} → ${cikti}`;
+      s.yaz("c" + cikti + yol.length, ["çıkış " + cikti, `${yol.length} karelik yol ✔`], true);
+    }
+    bG.onclick = () => { if (cikti) cikti = null; else if (yol.length > 1) yol.pop(); boya(); s.dur.innerHTML = `Şu an <b>${o.izgara[son()[0]][son()[1]]}</b> yazan karedesiniz.`; };
+    bB.onclick = () => { yol = [[0, 0]]; kotu = new Set(); cikti = null; boya(); s.dur.innerHTML = o.ilk || "Giriş karesindesiniz. Komşu bir kareye dokunun."; };
+    boya(); s.dur.innerHTML = o.ilk || "Giriş karesindesiniz. Komşu bir kareye dokunun.";
+  }
+
+  const carp = n => { const L = []; for (let i = 1; i <= n; i++) if (n % i === 0) L.push(i); return L; };
+  return { DIZILIM, GRUPLA, ATLA, TABLO, ASANSOR, SAAT, CARPAN, KUMBARA, ONERME, KOSUL, LABIRENT, carp, E };
+})();
+
+/* MAT.7.4.6 · Yüzey Alanı ve Hacim Problemleri — bağlam sorularının "Canlandır" düzenekleri (16.10.2026) — ortak motor: canlandir.js (CN.KOSUL); yeni motor yok.
+   Her düzenek: öğrenci düğmelerle ya da − / + sayaçlarıyla durumu değiştirir → sahne anında çizilir → koşullar denetlenir → deneme deney defterine
+   yazılır → yeniden dener. Doğru cevap bir düğmeyle verilmez; denemelerden çıkar (§4.k, §19-10). */
+window.CANL = (() => {
+  if (!document.getElementById("c746-stil")) { const st = document.createElement("style"); st.id = "c746-stil";
+    st.textContent = ".cn-btn{min-width:44px;min-height:44px}.cn-adimci button{min-width:44px;min-height:44px}.cn-secg button{min-height:44px}"; document.head.appendChild(st); }
+  const N = v => { const r = Math.round(v * 1e6) / 1e6; const [t, o] = String(r).split("."); return t.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (o ? "," + o : ""); };
+  const svg = (w, h, ic) => `<svg viewBox="0 0 ${w} ${h}" style="width:100%;max-width:${w * 1.4}px;height:auto;display:block;margin:0 auto">${ic}</svg>`;
+  const tx = (x, y, s, o = {}) => `<text x="${x}" y="${y}" text-anchor="${o.an || "middle"}" style="font-size:${o.fs || 15}px;font-weight:800;fill:${o.r || "#1d2433"}">${s}</text>`;
+  const KO = (el, o) => CN.KOSUL(el, Object.assign({ dugme: false }, o));
+  const SA = (a, b, c) => 2 * (a * b + a * c + b * c);
+  /* yan görünüşte kap: dolu / kapasite oranı, taşma uyarısı */
+  const kap = (dolu, kapasite, x = 90, w = 100) => { const f = Math.min(dolu / kapasite, 1); return `<rect x="${x - w / 2}" y="30" width="${w}" height="160" rx="6" fill="#f8f9fa" stroke="#5c7cfa" stroke-width="2.4"/><rect x="${x - w / 2 + 2}" y="${188 - 156 * f}" width="${w - 4}" height="${156 * f}" fill="#a5d8ff"/>` + (dolu > kapasite ? tx(x, 22, "Taştı!", { r: "#c92a2a" }) : ""); };
+  const satirlar = (L) => svg(420, 30 + 30 * L.length, L.map((l, i) => tx(20, 34 + 30 * i, l[0], { an: "start" }) + tx(400, 34 + 30 * i, l[1], { an: "end", r: l[2] || "#1c5fbf" })).join(""));
+  const cubuk = (deg, ust, x, ad, renk = "#74c0fc") => { const h = Math.min(deg / ust, 1) * 150; return `<rect x="${x - 26}" y="${180 - h}" width="52" height="${h}" fill="${renk}" stroke="#1d2433"/>` + tx(x, 198, ad, { fs: 13 }) + tx(x, 172 - h, N(deg), { fs: 13 }); };
+
+  return {
+    /* 1 · Kum havuzu işleri */
+    1: el => { const M = { "Kenarları boyamak": "Alan", "Kumla doldurmak": "Hacim", "Çevreye ip germek": "Uzunluk", "Tabana branda sermek": "Alan" };
+      return KO(el, { yon: "Bir iş ve bir bileşen seçiniz; seçiminizin uygun olup olmadığı denetlenir.", bitis: "Dört işin bileşenini bulup alan gerektirenleri belirleyince.",
+        girdi: [{ ad: "İş:", sec: Object.keys(M), bas: "Kenarları boyamak" }, { ad: "Bileşen:", sec: ["Uzunluk", "Alan", "Hacim"], bas: "Hacim" }],
+        ciz: v => satirlar([[v[0], v[1], M[v[0]] === v[1] ? "#2b8a3e" : "#c92a2a"], ["Bu iş", M[v[0]] === "Alan" ? "yüzeyi örter" : M[v[0]] === "Hacim" ? "içini doldurur" : "kenar boyunca uzanır", "#495057"]]),
+        kosullar: [{ ad: v => `${v[0]}: ${v[1]} uygun.`, f: v => M[v[0]] === v[1] }], sutun: ["İş", "Bileşen", "Uygun mu?"], satir: (v, ok) => [v[0], v[1], ok ? "Uygun" : "Uygun değil"] }); },
+    /* 2 · Hediye kutusu ve kâğıt */
+    2: el => KO(el, { yon: "Kaplanan yüz sayısını − / + ile değiştiriniz; kullanılan ve artan kâğıt yazılır.", bitis: "Altı yüz de kaplanınca artan kâğıdı bulunca.",
+      girdi: [{ ad: "Kaplanan yüz", min: 1, max: 6, bas: 3 }],
+      ciz: v => { const Y = [600, 600, 300, 300, 200, 200], k = Y.slice(0, v[0]).reduce((a, b) => a + b, 0); return satirlar([["Kâğıt", "50 · 50 = 2 500 cm²"], ["Kaplanan", `${N(k)} cm²`], ["Artan", `${N(2500 - k)} cm²`, "#2b8a3e"]]); },
+      kosullar: [{ ad: "Kutunun altı yüzü de kaplandı.", f: v => v[0] === 6 }], sutun: ["Yüz", "Artan (cm²)"], satir: v => [v[0], N(2500 - [600, 600, 300, 300, 200, 200].slice(0, v[0]).reduce((a, b) => a + b, 0))] }),
+    /* 3 · Depodaki su */
+    3: el => KO(el, { yon: "Su yüksekliğini − / + ile (dm) ayarlayınız; depodaki su hesaplanır.", bitis: "Su yüksekliği görseldeki gibi 0,4 m olunca.",
+      girdi: [{ ad: "Su yüksekliği (dm)", min: 1, max: 10, bas: 2 }],
+      ciz: v => svg(420, 200, kap(v[0], 10) + tx(290, 80, `3 · 2 · ${N(v[0] / 10)} m³`, { fs: 14 }) + tx(290, 110, `= ${N(6 * v[0] / 10)} m³ = ${N(600 * v[0])} L`, { fs: 14 })),
+      kosullar: [{ ad: "Su yüksekliği 0,4 m.", f: v => v[0] === 4 }], sutun: ["Su (m)", "Litre"], satir: v => [N(v[0] / 10), N(600 * v[0])] }),
+    /* 4 · Kek kalıbı */
+    4: el => KO(el, { yon: "Hamurun yüksekliğini − / + ile ayarlayınız; hamurun hacmi mL olarak yazılır.", bitis: "Hamur 4 cm yüksekliğe gelince.",
+      girdi: [{ ad: "Hamur (cm)", min: 1, max: 8, bas: 2 }],
+      ciz: v => svg(420, 200, kap(v[0], 8) + tx(290, 90, `30 · 10 · ${v[0]} = ${N(300 * v[0])} cm³`, { fs: 14 }) + tx(290, 120, `= ${N(300 * v[0])} mL`, { fs: 14 })),
+      kosullar: [{ ad: "Hamur 4 cm yükseklikte.", f: v => v[0] === 4 }], sutun: ["Yükseklik", "mL"], satir: v => [v[0], N(300 * v[0])] }),
+    /* 5 · Süs taşı */
+    5: el => KO(el, { yon: "Taştan sonraki su yüksekliğini − / + ile okuyunuz; taşın hacmi hesaplanır.", bitis: "Seviye görseldeki gibi 19 cm olunca.",
+      girdi: [{ ad: "Son seviye (cm)", min: 16, max: 21, bas: 17 }],
+      ciz: v => svg(420, 200, kap(v[0], 21) + tx(290, 80, `Yükselme: ${v[0] - 16} cm`, { fs: 14 }) + tx(290, 110, `40 · 30 · ${v[0] - 16} = ${N(1200 * (v[0] - 16))} cm³`, { fs: 14 }) + tx(290, 140, `= ${N(1.2 * (v[0] - 16))} L`, { fs: 14 })),
+      kosullar: [{ ad: "Seviye 19 cm.", f: v => v[0] === 19 }], sutun: ["Seviye", "Hacim (L)"], satir: v => [v[0], N(1.2 * (v[0] - 16))] }),
+    /* 6 · Sınıfın hacmi */
+    6: el => KO(el, { yon: "Sonucun birimini seçiniz; büyüklük bildiğimiz nesnelerle karşılaştırılır.", bitis: "Makul birimi bulunca.",
+      girdi: [{ ad: "Birim:", sec: ["L", "m³", "cm³"], bas: "L" }],
+      ciz: v => satirlar([["8 · 7 · 3", `168 ${v[0]}`], ["Karşılaştırma", v[0] === "m³" ? "Bir sınıf kadar: makul" : v[0] === "L" ? "Bir küvetten az: makul değil" : "Bir fincandan az: makul değil", v[0] === "m³" ? "#2b8a3e" : "#c92a2a"]]),
+      kosullar: [{ ad: "Birim makul.", f: v => v[0] === "m³" }], sutun: ["Birim", "Makul mü?"], satir: (v, ok) => [v[0], ok ? "Makul" : "Makul değil"] }),
+    /* 7 · Havuz fayansı */
+    7: el => { const Y = { "Taban": 18, "Ön ve arka yüz": 12, "Sağ ve sol yüz": 6, "Üst (açık)": 18 };
+      return KO(el, { yon: "Kaplanacak yüzleri tek tek ekleyiniz; toplam alan ve fayans sayısı yazılır.", bitis: "Taban ve dört yan yüz eklenince.",
+        girdi: [{ ad: "Eklenecek yüzler", min: 1, max: 4, bas: 1 }],
+        ciz: v => { const ad = Object.keys(Y).slice(0, v[0]), t = ad.reduce((a, k) => a + Y[k], 0); return satirlar([["Yüzler", ad.join(", ")], ["Alan", `${t} m² = ${N(t * 10000)} cm²`], ["Fayans", `${N(t * 10000)} : 400 = ${N(t * 25)}`]]); },
+        kosullar: [{ ad: "Taban ve dört yan yüz kaplandı (üst kaplanmaz).", f: v => v[0] === 3 }], sutun: ["Yüz grubu", "Fayans"], satir: v => [v[0], N(Object.values(Y).slice(0, v[0]).reduce((a, b) => a + b, 0) * 25)] }); },
+    /* 8 · Çocuk havuzu ve musluk */
+    8: el => KO(el, { yon: "Geçen süreyi − / + ile dakika olarak ayarlayınız; havuza akan su çizilir.", bitis: "Havuz tam dolunca.",
+      girdi: [{ ad: "Süre (dk)", min: 0, max: 80, bas: 20 }],
+      ciz: v => svg(420, 200, kap(15 * v[0], 900) + tx(290, 80, "Havuz: 900 L", { fs: 14 }) + tx(290, 110, `Akan: ${v[0]} · 15 = ${N(15 * v[0])} L`, { fs: 14 })),
+      kosullar: [{ ad: "Havuz tam doldu.", f: v => 15 * v[0] === 900 }], sutun: ["Dakika", "Su (L)"], satir: v => [v[0], N(15 * v[0])] }),
+    /* 9 · Kaptan kaba */
+    9: el => KO(el, { yon: "2. kaba dökülen su yüksekliğini − / + ile artırınız; 1. kaptaki suyun hepsi dökülünce sonucu görünüz.", bitis: "12 000 cm³ suyun tamamı dökülünce.",
+      girdi: [{ ad: "Dökülen (L)", min: 0, max: 12, bas: 4 }],
+      ciz: v => svg(420, 200, kap(12 - v[0], 12, 80) + kap(v[0] * 1000, 10400, 250) + tx(80, 210 - 12, "1. kap", { fs: 13 }) + tx(250, 210 - 12, "2. kap", { fs: 13 }) + tx(360, 90, `${N(v[0] * 1000)}`, { fs: 13 }) + tx(360, 110, "cm³", { fs: 13 })),
+      kosullar: [{ ad: "1. kaptaki suyun tamamı döküldü.", f: v => v[0] === 12 }], sutun: ["Dökülen (cm³)", "Taşan (cm³)"], satir: v => [N(v[0] * 1000), N(Math.max(0, v[0] * 1000 - 10400))] }),
+    /* 10 · Konteyner */
+    10: el => KO(el, { yon: "Uzunlukta sığan koli sayısını − / + ile deneyiniz; 58 dm'yi aşan sıra kırmızıya döner.", bitis: "Uzunlukta en fazla koli sayısını bulunca.",
+      girdi: [{ ad: "Uzunlukta koli", min: 5, max: 11, bas: 6 }],
+      ciz: v => svg(420, 120, Array.from({ length: v[0] }, (_, i) => `<rect x="${10 + i * 36}" y="40" width="34" height="40" fill="${(i + 1) * 6 > 58 ? "#ffa8a8" : "#ffd8a8"}" stroke="#1d2433"/>`).join("") + `<line x1="10" y1="96" x2="${10 + 58 * 6}" y2="96" stroke="#1d2433" stroke-width="2"/>` + tx(10 + 29 * 6, 114, "58 dm", { fs: 13 })),
+      kosullar: [{ ad: "Koliler 58 dm'ye sığıyor.", f: v => v[0] * 6 <= 58 }, { ad: "Bir koli daha sığmıyor.", f: v => (v[0] + 1) * 6 > 58 }], sutun: ["Koli", "Uzunluk (dm)"], satir: v => [v[0], v[0] * 6] }),
+    /* 11 · Dört küp kutu */
+    11: el => KO(el, { yon: "Birbirine değen yüz çiftlerini − / + ile değiştiriniz; dışarıda kalan kare yüzler sayılır.", bitis: "Kare dizilişteki 4 temas bulununca.",
+      girdi: [{ ad: "Temas eden yüz çifti", min: 0, max: 4, bas: 0 }],
+      ciz: v => satirlar([["Dışarıdaki kare yüz", `24 − 2 · ${v[0]} = ${24 - 2 * v[0]}`], ["Kâğıt", `${24 - 2 * v[0]} · 36 = ${N((24 - 2 * v[0]) * 36)} cm²`], ["Tasarruf", `${N(2 * v[0] * 36)} cm²`, "#2b8a3e"]]),
+      kosullar: [{ ad: "2 · 2 · 1 dizilişte 4 temas var.", f: v => v[0] === 4 }], sutun: ["Temas", "Kâğıt (cm²)"], satir: v => [v[0], N((24 - 2 * v[0]) * 36)] }),
+    /* 12 · Üç tasarım */
+    12: el => { const T = { A: [10, 10, 10], B: [5, 10, 20], C: [5, 5, 40] };
+      return KO(el, { yon: "Bir tasarım seçiniz; hacmi ve kartonu yazılır.", bitis: "En az kartonlu tasarımı bulunca.",
+        girdi: [{ ad: "Tasarım:", sec: Object.keys(T), bas: "C" }],
+        ciz: v => svg(420, 210, Object.keys(T).map((k, i) => cubuk(SA(...T[k]), 900, 90 + i * 120, k, k === v[0] ? "#74c0fc" : "#dee2e6")).join("")),
+        kosullar: [{ ad: "Seçilen tasarım en az kartonu istiyor.", f: v => v[0] === "A" }], sutun: ["Tasarım", "Karton (cm²)"], satir: v => [v[0], SA(...T[v[0]])] }); },
+    /* 13 · Sünger blok */
+    13: el => KO(el, { yon: "Oyukta oluşan kare yüz sayısını − / + ile ayarlayınız; yüzey alanı yeniden hesaplanır.", bitis: "Oyuktaki yüz sayısını doğru bulunca.",
+      girdi: [{ ad: "Oyukta oluşan kare yüz", min: 2, max: 6, bas: 2 }],
+      ciz: v => satirlar([["İlk yüzey alanı", "880 cm²"], ["Giden kare yüz", "2 · 16 cm²"], ["Oluşan kare yüz", `${v[0]} · 16 cm²`], ["Yeni yüzey alanı", `${880 - 32 + 16 * v[0]} cm²`]]),
+      kosullar: [{ ad: "Ayrıtın ortasından kesimde 4 kare yüz oluşur.", f: v => v[0] === 4 }], sutun: ["Oluşan yüz", "Yüzey (cm²)"], satir: v => [v[0], 880 - 32 + 16 * v[0]] }),
+    /* 14 · Kavanozlar ve koli */
+    14: el => KO(el, { yon: "Bir sıradaki kavanoz sayısını − / + ile değiştiriniz; kolinin taban ölçüleri yazılır.", bitis: "3 kavanozlu 2 sıra kurulunca.",
+      girdi: [{ ad: "Bir sıradaki kavanoz", min: 1, max: 6, bas: 2 }],
+      ciz: v => { const s = Math.ceil(6 / v[0]); return svg(420, 170, Array.from({ length: 6 }, (_, i) => `<circle cx="${30 + (i % v[0]) * 40}" cy="${30 + Math.floor(i / v[0]) * 40}" r="19" fill="#d0ebff" stroke="#1c7ed6"/>`).join("") + tx(330, 60, `${v[0]} · 8 = ${v[0] * 8} cm`, { fs: 14 }) + tx(330, 90, `${s} · 8 = ${s * 8} cm`, { fs: 14 })); },
+      kosullar: [{ ad: "Görseldeki gibi 3 kavanozlu 2 sıra.", f: v => v[0] === 3 }], sutun: ["Sırada", "Taban (cm)", "Karton (cm²)"], satir: v => { const s = Math.ceil(6 / v[0]); return [v[0], `${v[0] * 8} · ${s * 8}`, N(SA(v[0] * 8, s * 8, 12))]; } }),
+    /* 15 · Problem kurma */
+    15: el => { const P = { "Tamamı kaç L?": 60, "İçindeki su kaç L?": 45, "Doldurmak için kaç L?": 15 };
+      return KO(el, { yon: "Bir soru seçiniz; cevabı hesaplanır. Cevabı 15 L olan soruyu bulunuz.", bitis: "Cevabı 15 L olan soruyu bulunca.",
+        girdi: [{ ad: "Soru:", sec: Object.keys(P), bas: "Tamamı kaç L?" }],
+        ciz: v => satirlar([["Soru", v[0]], ["Cevap", `${P[v[0]]} L`, P[v[0]] === 15 ? "#2b8a3e" : "#c92a2a"]]),
+        kosullar: [{ ad: "Cevap 15 L.", f: v => P[v[0]] === 15 }], sutun: ["Soru", "Cevap"], satir: v => [v[0], P[v[0]] + " L"] }); },
+    /* 16 · Boyama teklifleri */
+    16: el => KO(el, { yon: "Boyanacak alanı − / + ile m² olarak değiştiriniz; iki teklifin tutarı yazılır.", bitis: "Gerçek alan (40 m²) için iki teklifi karşılaştırınca.",
+      girdi: [{ ad: "Alan (m²)", min: 10, max: 60, bas: 20 }],
+      ciz: v => svg(420, 210, cubuk(90 * v[0], 6000, 130, "A") + cubuk(1000 + 60 * v[0], 6000, 290, "B")),
+      kosullar: [{ ad: "Alan taban ve dört yan yüz: 40 m².", f: v => v[0] === 40 }], sutun: ["Alan", "A (TL)", "B (TL)"], satir: v => [v[0], N(90 * v[0]), N(1000 + 60 * v[0])] }),
+    /* 17 · Kamyon kasası */
+    17: el => { const Y = { "1. yerleşim": [80, 60, 50], "2. yerleşim": [50, 80, 60] };
+      return KO(el, { yon: "Bir yerleşim seçiniz; her yönde sığan koli ve toplam yazılır.", bitis: "İki yerleşimi karşılaştırınca.",
+        girdi: [{ ad: "Yerleşim:", sec: Object.keys(Y), bas: "2. yerleşim" }],
+        ciz: v => { const y = Y[v[0]], n = [Math.floor(400 / y[0]), Math.floor(200 / y[1]), Math.floor(200 / y[2])]; return satirlar([["İleri", `400 : ${y[0]} → ${n[0]}`], ["Yana", `200 : ${y[1]} → ${n[1]}`], ["Yukarı", `200 : ${y[2]} → ${n[2]}`], ["Toplam", `${n[0] * n[1] * n[2]} koli`, "#2b8a3e"]]); },
+        kosullar: [{ ad: "En çok koli alan yerleşim.", f: v => v[0] === "1. yerleşim" }], sutun: ["Yerleşim", "Koli"], satir: v => { const y = Y[v[0]]; return [v[0], Math.floor(400 / y[0]) * Math.floor(200 / y[1]) * Math.floor(200 / y[2])]; } }); },
+    /* 18 · Ece'nin çözümü */
+    18: el => KO(el, { yon: "3 000 cm³'ü litreye çevirirken bölünecek sayıyı seçiniz.", bitis: "Doğru dönüşümü bulunca.",
+      girdi: [{ ad: "Bölünecek sayı:", sec: ["10", "100", "1 000"], bas: "100" }],
+      ciz: v => { const b = +v[0].replace(" ", ""); return satirlar([["3 000 cm³", `3 000 : ${v[0]} = ${N(3000 / b)} L`, b === 1000 ? "#2b8a3e" : "#c92a2a"], ["Kontrol", b === 1000 ? "Bir taş için makul" : "Bir taş için çok büyük", "#495057"]]); },
+      kosullar: [{ ad: "1 L = 1 000 cm³ kullanıldı.", f: v => v[0] === "1 000" }], sutun: ["Bölen", "Litre"], satir: v => [v[0], N(3000 / +v[0].replace(" ", ""))] }),
+    /* 19 · Kargo tarifesi */
+    19: el => { const K = { "Ela": [40, 30, 20], "Can": [50, 40, 20] }; const ucret = L => L <= 10 ? 40 : L <= 30 ? 60 : 90;
+      return KO(el, { yon: "Bir koli seçiniz; hacmi litreye çevrilip tarifedeki ücret bulunur.", bitis: "İki kolinin ücretini bulunca.",
+        girdi: [{ ad: "Koli:", sec: Object.keys(K), bas: "Ela" }],
+        ciz: v => { const k = K[v[0]], L = k[0] * k[1] * k[2] / 1000; return satirlar([["Hacim", `${k.join(" · ")} = ${N(L * 1000)} cm³`], ["Litre", `${N(L)} L`], ["Ücret", `${ucret(L)} TL`, "#2b8a3e"]]); },
+        kosullar: [{ ad: "Kolinin ücreti bulundu.", f: () => true }], sutun: ["Koli", "Litre", "Ücret"], satir: v => { const k = K[v[0]], L = k[0] * k[1] * k[2] / 1000; return [v[0], N(L), ucret(L)]; } }); },
+    /* 20 · Genellemeler */
+    20: el => { const T = [100, 150, 200, 300, 400, 600];
+      return KO(el, { yon: "Kabın taban alanını seçiniz; hacmi 600 cm³ olan taşın yükselttiği su yazılır.", bitis: "Taban büyüdükçe yükselmenin azaldığını görünce.",
+        girdi: [{ ad: "Taban alanı (cm²):", sec: T.map(String), bas: "200" }],
+        ciz: v => svg(420, 200, kap(600 / +v[0], 6) + tx(290, 90, `Yükselme: 600 : ${v[0]}`, { fs: 14 }) + tx(290, 120, `= ${N(Math.round(600 / +v[0] * 100) / 100)} cm`, { fs: 14 })),
+        kosullar: [{ ad: "Taban alanı 300 cm²'den büyük; yükselme 2 cm'den az.", f: v => +v[0] > 300 }], sutun: ["Taban (cm²)", "Yükselme (cm)"], satir: v => [v[0], N(Math.round(600 / +v[0] * 100) / 100)] }); },
+  };
+})();
+
+</script>
+<script>
+const V={"baslik": "Yüzey Alanı ve Hacim Problemleri", "kod": "7. SINIF · MAT.7.4.6", "ses": "", "bet": "BAĞLAM TEMELLİ SORU", "bad": "Bağlam Soruları", "s": [{"no": 1, "bas": "Problemi okumak", "q": [{"k": "Bir dolabın bütün ayrıtlarına ışıklı şerit yapıştırılacak, dış yüzleri boyanacak ve içine eşya konacaktır. Her iş için hangi niceliği (uzunluk, alan, hacim) bulmanız gerekir?", "a": ["Şerit ayrıtlar boyunca uzanır: uzunluk.", "Boya yüzlere sürülür: alan.", "Eşya dolabın içini doldurur: hacim."], "c": "Uzunluk; alan; hacim"}, {"k": "Bir kum havuzunun taban ölçüleri 3 m ve 2 m, derinliği 40 cm'dir. Prizma taslağı çiziniz ve ölçüleri aynı birimle yerleştiriniz.", "a": ["Taban ölçüleri yere paralel iki ayrıttır: 3 m ve 2 m.", "Derinlik dik ayrıttır: 40 cm = 0,4 m.", "Taslakta ayrıtlar 3 m, 2 m ve 0,4 m yazılır."], "c": "3 m, 2 m, 0,4 m"}]}, {"no": 2, "bas": "Kaplama ve boyama", "q": [{"k": "Tabanı 7 m ve 6 m, yüksekliği 3 m olan bir sınıfın dört duvarı boyanacaktır. Duvarlarda 2 m²'lik bir kapı ve her biri 3 m² olan iki pencere vardır. Bir kutu boya 15 m² boyuyorsa en az kaç kutu boya gerekir?", "a": ["Dört duvar: 2 · (7 + 6) · 3 = 78 m².", "Boyanacak alan: 78 − 2 − 2 · 3 = 70 m².", "70 : 15 ≈ 4,7; bir üst doğal sayı: 5 kutu."], "c": "5 kutu"}, {"k": "Bir havuzun tabanı 10 m ve 5 m'dir. Havuzun iç yüzeyinin (taban ve dört yan yüz) alanı 92 m²'dir. Havuzun derinliği kaç metredir?", "a": ["Taban: 10 · 5 = 50 m²; dört yan yüzün alanı: 92 − 50 = 42 m².", "Yan yüzlerin taban çevresi: 2 · (10 + 5) = 30 m.", "Derinlik: 42 : 30 = 1,4 m."], "c": "1,4 m"}]}, {"no": 3, "bas": "Doldurma ve aktarma", "q": [{"k": "Damlayan bir musluk her gün 3 L su israf etmektedir. Bir yılda (365 gün) israf edilen su kaç metreküptür?", "a": ["365 · 3 = 1 095 L.", "1 000 L = 1 m³: 1 095 : 1 000 = 1,095 m³."], "c": "1,095 m³"}, {"k": "Tabanı 20 cm ve 15 cm olan bir kapta 16 cm yüksekliğinde su vardır. Bu su, tabanı 40 cm ve 30 cm olan boş bir kaba boşaltılırsa su kaç santimetre yüksekliğe çıkar?", "a": ["Su: 20 · 15 · 16 = 4 800 cm³ (hacim korunur).", "Yeni taban: 40 · 30 = 1 200 cm².", "4 800 : 1 200 = 4 cm."], "c": "4 cm"}]}, {"no": 4, "bas": "Seviye ve taşma", "q": [{"k": "Tabanı 20 cm ve 15 cm olan dikdörtgenler prizması biçimindeki bir kaba bir taş bırakılmış, su 4 cm yükselmiştir. Taşın hacmi kaç cm³'tür?", "a": ["Yükselen su bir prizmadır: 20 · 15 · 4.", "Taşın hacmi 1 200 cm³'tür."], "c": "1 200 cm³"}, {"k": "Tabanı 10 cm ve 10 cm, yüksekliği 20 cm olan bir kapta 17 cm yüksekliğinde su vardır. Kaba her biri 30 cm³ olan 12 eş bilye atılırsa su taşar mı?", "a": ["Boş kısım: 10 · 10 · 3 = 300 cm³.", "Bilyeler: 12 · 30 = 360 cm³.", "360 &gt; 300; su taşar (60 cm³ taşar)."], "c": "Taşar"}]}, {"no": 5, "bas": "Yerleştirme", "q": [{"k": "İç ölçüleri 90 cm, 30 cm ve 40 cm olan bir rafa ölçüleri 30 cm, 15 cm ve 20 cm olan eş kutular aynı yönde yerleştirilecektir. Kaç kutu sığar? İki stratejiyle bulup karşılaştırınız.", "a": ["Ayrıt ayrıt: 90 : 30 = 3; 30 : 15 = 2; 40 : 20 = 2; 3 · 2 · 2 = 12.", "Hacim bölme: 108 000 : 9 000 = 12.", "Ayrıtlar tam bölündüğü için iki strateji aynı sonucu verir."], "c": "12 kutu"}, {"k": "Bir öğrenci iç ölçüleri 70 cm, 50 cm ve 30 cm olan bir kasaya bir ayrıtı 20 cm olan küp kutulardan “105 000 : 8 000 ≈ 13 kutu sığar.” demiştir. Bu sonucun neden yanlış olduğunu açıklayınız.", "a": ["Ayrıt ayrıt: 70 : 20 → 3; 50 : 20 → 2; 30 : 20 → 1.", "3 · 2 · 1 = 6 kutu sığar.", "Hacim bölme, kutuların sığmadığı boşlukları da kutuyla dolu saymıştır."], "c": "6 kutu sığar"}]}, {"no": 6, "bas": "Birleştirme", "q": [{"k": "Ölçüleri 10 cm, 6 cm ve 4 cm olan üç eş kutu iki farklı biçimde dizilecektir: en büyük yüzleri üst üste gelecek şekilde ve en küçük yüzleri birbirine değecek şekilde uç uca. Hangi dizilişte daha az ambalaj kâğıdı gerekir? Fark kaç cm²'dir?", "a": ["Üst üste (10, 6, 12): 2 · (60 + 120 + 72) = 504 cm².", "Uç uca (30, 6, 4): 2 · (180 + 120 + 24) = 648 cm².", "648 − 504 = 144 cm²; üst üste dizilişte daha az kâğıt gerekir."], "c": "Üst üste; 144 cm²"}, {"k": "Ölçüleri 10 cm, 6 cm ve 5 cm olan bir bloğun köşesinden bir ayrıtı 1 cm olan küp çıkarılmıştır. Yeni hacmi ve yüzey alanını eski değerlerle karşılaştırınız.", "a": ["Eski hacim 300 cm³; yeni hacim 300 − 1 = 299 cm³.", "Köşeden giden üç kare yüzün yerine oyukta üç kare yüz oluşur.", "Yüzey alanı değişmez: 2 · (60 + 50 + 30) = 280 cm²."], "c": "Hacim 299 cm³; yüzey alanı 280 cm²"}]}, {"no": 7, "bas": "Aynı hacim, en az yüzey", "q": [{"k": "Hacmi 18 cm³ olan ve ayrıtları santimetre cinsinden doğal sayı olan bütün kutuları tabloyla listeleyiniz. En az karton gerektireni bulunuz.", "a": ["1, 1, 18 → 74 cm²; 1, 2, 9 → 58 cm²; 1, 3, 6 → 54 cm²; 2, 3, 3 → 42 cm².", "Ayrıtları birbirine en yakın olan 2, 3, 3'lük kutudur."], "c": "2 cm, 3 cm, 3 cm"}, {"k": "“Yüzey alanları eşit olan kutuların hacimleri de eşittir.” önermesinin yanlış olduğunu bir örnekle gösteriniz.", "a": ["1, 1, 5'lik kutu: yüzey alanı 2 · (1 + 5 + 5) = 22 cm², hacmi 5 cm³.", "1, 2, 3'lük kutu: yüzey alanı 2 · (2 + 3 + 6) = 22 cm², hacmi 6 cm³.", "Yüzey alanları eşit, hacimleri farklıdır."], "c": "1, 1, 5 ile 1, 2, 3"}]}, {"no": 8, "bas": "Strateji ve kontrol", "q": [{"k": "İç ölçüleri 3 m, 2 m ve 1 m olan bir tankta 0,4 m yüksekliğinde su vardır. Tankı doldurmak için gereken suyu iki farklı yolla bulunuz.", "a": ["1. yol: 3 · 2 · 1 − 3 · 2 · 0,4 = 6 − 2,4 = 3,6 m³.", "2. yol: boş kısım 1 − 0,4 = 0,6 m; 3 · 2 · 0,6 = 3,6 m³.", "İki yol da 3,6 m³ = 3 600 L verir."], "c": "3 600 L"}, {"k": "Üstü açık, ölçüleri 20 cm, 10 cm ve 8 cm olan bir kutunun dışını kaplamak için bir öğrenci “2 · (200 + 160 + 80) = 880 cm²” yazmıştır. Hatayı bulup düzeltiniz.", "a": ["Öğrenci altı yüzü toplamıştır; üst yüz kaplanmaz.", "Üst yüz 20 · 10 = 200 cm²'dir.", "Doğrusu: 880 − 200 = 680 cm²."], "c": "680 cm²"}]}, {"no": 9, "bas": "Genelleme ve problem kurma", "q": [{"k": "Batan cismin hacmini “taban alanı · yükselme” ile bulma stratejisi, tabanı yukarı doğru genişleyen bir kovada kullanılabilir mi? Gerekçesiyle açıklayınız.", "a": ["Strateji, kabın her yükseklikteki kesitinin taban alanına eşit olmasına dayanır.", "Kovanın kesiti yukarı doğru büyür; yükselen su bir prizma değildir.", "Bu nedenle strateji kovada doğrudan kullanılamaz."], "c": "Kullanılamaz"}, {"k": "Ayrıtları 20 cm, 10 cm ve 10 cm olan bir kutu için cevabı 2 L olan bir problem kurup çözünüz.", "a": ["Örnek: “Bu kutu biçimindeki kap tam dolunca kaç litre su alır?”", "20 · 10 · 10 = 2 000 cm³ = 2 L."], "c": "Kaç litre su alır? 2 L"}]}], "k": [{"no": 1, "bas": "Kaplanacak yüzey kaç birim karedir?", "yon": "Her durumda kaplanacak yüzeyin alanını yazınız.", "r": [{"n": "Kapalı kutu: 5 cm, 4 cm, 3 cm", "c": "94 cm²"}, {"n": "Üstü açık kutu: 6 cm, 5 cm, 2 cm", "c": "74 cm²"}, {"n": "Yalnız yan yüzler: 8 cm, 5 cm, yükseklik 3 cm", "c": "78 cm²"}, {"n": "Kapalı küp: ayrıt 7 cm", "c": "294 cm²"}, {"n": "Üstü açık küp: ayrıt 3 dm", "c": "45 dm²"}, {"n": "Oda duvarları: 4 m, 3 m, yükseklik 3 m", "c": "42 m²"}]}, {"no": 2, "bas": "Batan cismin hacmi kaç santimetreküptür?", "yon": "Dikdörtgenler prizması biçimindeki kaplarda cisimler suya tamamen batmıştır. Batan cismin hacmini yazınız.", "r": [{"n": "Taban 10 cm ve 8 cm, yükselme 2 cm", "c": "160 cm³"}, {"n": "Taban 12 cm ve 5 cm, yükselme 3 cm", "c": "180 cm³"}, {"n": "Taban 15 cm ve 10 cm, yükselme 1 cm", "c": "150 cm³"}, {"n": "Taban 9 cm ve 9 cm, yükselme 2 cm", "c": "162 cm³"}, {"n": "Taban 11 cm ve 10 cm, 5 eş bilye ile yükselme 2 cm (bir bilye)", "c": "44 cm³"}]}, {"no": 3, "bas": "En fazla kaç kutu sığar?", "yon": "Her durumda sığabilecek en fazla kutu sayısını yazınız.", "r": [{"n": "Kasa 40 cm, 30 cm, 20 cm; küp kutu 10 cm", "c": "24"}, {"n": "Raf 70 cm, 20 cm, 20 cm; küp kutu 20 cm", "c": "3"}, {"n": "Kasa 60 cm, 40 cm, 30 cm; kutu 20 cm, 20 cm, 10 cm", "c": "18"}, {"n": "Raf 1 m, 30 cm, 40 cm; dik duran kutu: taban 30 cm ve 30 cm, yükseklik 20 cm", "c": "6"}, {"n": "Kasa 50 cm, 30 cm, 20 cm; kutu 20 cm, 10 cm, 10 cm (her yönde konabilir)", "c": "15"}]}], "b": [{"no": 1, "on": "<p>Okul bahçesine dikdörtgenler prizması biçiminde bir kum havuzu yapılmıştır. Görevli öğrenciler yapılacak işleri bir karta yazmıştır.</p>", "g": "<svg viewBox=\"0 0 460 188\" width=\"460\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"440\" height=\"172\" rx=\"10\" fill=\"#fff\" stroke=\"#2b8a3e\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"440\" height=\"34\" rx=\"10\" fill=\"#2b8a3e\"/><rect x=\"10\" y=\"30\" width=\"440\" height=\"12\" fill=\"#2b8a3e\"/><text x=\"230.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Kum havuzu için yapılacak işler</text><line x1=\"22\" y1=\"75\" x2=\"438\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">1. Havuzun tahta kenarlarını boyamak</text><line x1=\"22\" y1=\"105\" x2=\"438\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">2. Havuzu kumla doldurmak</text><line x1=\"22\" y1=\"135\" x2=\"438\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">3. Havuzun çevresine ip germek</text><line x1=\"22\" y1=\"165\" x2=\"438\" y2=\"165\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">4. Havuzun tabanına branda sermek</text></svg>", "son": "", "k": "Buna göre, karttaki işlerden hangileri alan hesaplamayı gerektirir?", "sec": ["2 ve 3", "1 ve 2", "1 ve 4", "3 ve 4"], "secg": null, "c": "C", "a": ["Boyamak ve branda sermek yüzeyleri kaplar; alan gerekir.", "Kumla doldurmak hacim, çevreye ip germek uzunluk gerektirir."], "t": "2 ve 3: hacim ve uzunluk seçilmiş; 1 ve 2 ile 3 ve 4: bileşenler karıştırılmış", "d": "Her işin hangi bileşeni istediğini düşününüz: yüzeyi örten işler alan, içini dolduran işler hacim, çevresini dolaşan işler uzunluk gerektirir.", "ses": "b01"}, {"no": 2, "on": "<p>Mert, ölçüleri görselde verilen kapalı hediye kutusunun bütün yüzlerini kare biçimindeki bir ambalaj kâğıdıyla kaplayacaktır.</p>", "g": "<svg viewBox=\"0 0 615 266\" width=\"615\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><g transform=\"translate(0,0)\"><polygon points=\"26.0,142.0 181.9,232.0 181.9,172.0 26.0,82.0\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"285.8,172.0 181.9,232.0 181.9,172.0 285.8,112.0\" fill=\"#f4b77a\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"129.9,22.0 285.8,112.0 181.9,172.0 26.0,82.0\" fill=\"#ffe8cc\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><text x=\"95.9\" y=\"205.8\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">30 cm</text><text x=\"241.8\" y=\"220.8\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">20 cm</text><text x=\"309.8\" y=\"146.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">10 cm</text></g><g transform=\"translate(365.8076211353316,0)\"><rect x=\"10\" y=\"8\" width=\"230\" height=\"112\" rx=\"10\" fill=\"#fff\" stroke=\"#c2255c\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"230\" height=\"34\" rx=\"10\" fill=\"#c2255c\"/><rect x=\"10\" y=\"30\" width=\"230\" height=\"12\" fill=\"#c2255c\"/><text x=\"125.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Ambalaj kâğıdı</text><line x1=\"22\" y1=\"75\" x2=\"228\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Biçimi</text><text x=\"224.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Kare</text><line x1=\"22\" y1=\"105\" x2=\"228\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Bir kenarı</text><text x=\"224.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">50 cm</text></g></svg>", "son": "<p>Kâğıt üst üste bindirilmeden kullanılacaktır.</p>", "k": "Buna göre, kaplamadan sonra kâğıttan kaç cm² artar?", "sec": ["300", "1 400", "2 200", "1 300"], "secg": null, "c": "A", "a": ["Kutunun yüzey alanı: 2 · (600 + 300 + 200) = 2 200 cm².", "Kâğıt: 50 · 50 = 2 500 cm²; artan 2 500 − 2 200 = 300 cm²."], "t": "2 200: kutunun yüzey alanı; 1 400: eş yüzlerin biri alınmış; 1 300: üç yüzün alanı 1 100 alınıp 2 400'den çıkarılmış gibi hesap hatası", "d": "Kapalı kutunun altı yüzü de kaplanır. Karşılıklı yüzler eştir; üç farklı yüzün alanlarını toplayıp 2 ile çarpınız.", "ses": "b02"}, {"no": 3, "on": "<p>Bir evin çatısındaki su deposunun iç ölçüleri ve içindeki suyun yüksekliği görselde verilmiştir.</p>", "g": "<svg viewBox=\"0 0 413.8076211353316 270.0\" width=\"414\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><polygon points=\"70.0,142.0 225.9,232.0 225.9,208.0 70.0,118.0\" fill=\"#a5d8ff\" stroke=\"#1c7ed6\" stroke-width=\"1\" stroke-linejoin=\"round\"/><polygon points=\"329.8,172.0 225.9,232.0 225.9,208.0 329.8,148.0\" fill=\"#74c0fc\" stroke=\"#1c7ed6\" stroke-width=\"1\" stroke-linejoin=\"round\"/><polygon points=\"173.9,58.0 329.8,148.0 225.9,208.0 70.0,118.0\" fill=\"#d0ebff\" stroke=\"#1c7ed6\" stroke-width=\"1\" stroke-linejoin=\"round\"/><line x1=\"173.9\" y1=\"82.0\" x2=\"329.8\" y2=\"172.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"173.9\" y1=\"82.0\" x2=\"70.0\" y2=\"142.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"173.9\" y1=\"82.0\" x2=\"173.9\" y2=\"22.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"329.8\" y1=\"172.0\" x2=\"225.9\" y2=\"232.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"70.0\" y1=\"142.0\" x2=\"225.9\" y2=\"232.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"329.8\" y1=\"172.0\" x2=\"329.8\" y2=\"112.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"225.9\" y1=\"232.0\" x2=\"225.9\" y2=\"172.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"70.0\" y1=\"142.0\" x2=\"70.0\" y2=\"82.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"173.9\" y1=\"22.0\" x2=\"329.8\" y2=\"112.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"329.8\" y1=\"112.0\" x2=\"225.9\" y2=\"172.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"225.9\" y1=\"172.0\" x2=\"70.0\" y2=\"82.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"70.0\" y1=\"82.0\" x2=\"173.9\" y2=\"22.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><text x=\"138.9\" y=\"207.5\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">3 m</text><text x=\"286.8\" y=\"222.5\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">2 m</text><text x=\"351.8\" y=\"146.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">1 m</text><text x=\"44.0\" y=\"134.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#1c7ed6\" text-anchor=\"middle\">0,4 m</text></svg>", "son": "", "k": "Buna göre, depoda kaç litre su vardır?", "sec": ["240", "6 000", "24 000", "2 400"], "secg": null, "c": "D", "a": ["Suyun hacmi: 3 · 2 · 0,4 = 2,4 m³.", "1 m³ = 1 000 L: 2 400 L."], "t": "240 ve 24 000: dönüşüm hatası; 6 000: deponun tamamı", "d": "Depodaki su, tabanı depoyla aynı ve yüksekliği su seviyesi olan bir prizmadır. Sonucu metreküpten litreye çeviriniz.", "ses": "b03"}, {"no": 4, "on": "<p>Zeynep, iç ölçüleri görselde verilen kek kalıbına hamuru 4 cm yüksekliğe kadar dökmüştür.</p>", "g": "<svg viewBox=\"0 0 431.1281292110204 284.0\" width=\"431\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><polygon points=\"70.0,126.0 277.8,246.0 277.8,214.0 70.0,94.0\" fill=\"#a5d8ff\" stroke=\"#1c7ed6\" stroke-width=\"1\" stroke-linejoin=\"round\"/><polygon points=\"347.1,206.0 277.8,246.0 277.8,214.0 347.1,174.0\" fill=\"#74c0fc\" stroke=\"#1c7ed6\" stroke-width=\"1\" stroke-linejoin=\"round\"/><polygon points=\"139.3,54.0 347.1,174.0 277.8,214.0 70.0,94.0\" fill=\"#d0ebff\" stroke=\"#1c7ed6\" stroke-width=\"1\" stroke-linejoin=\"round\"/><line x1=\"139.3\" y1=\"86.0\" x2=\"347.1\" y2=\"206.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"139.3\" y1=\"86.0\" x2=\"70.0\" y2=\"126.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"139.3\" y1=\"86.0\" x2=\"139.3\" y2=\"22.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"347.1\" y1=\"206.0\" x2=\"277.8\" y2=\"246.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"70.0\" y1=\"126.0\" x2=\"277.8\" y2=\"246.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"347.1\" y1=\"206.0\" x2=\"347.1\" y2=\"142.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"277.8\" y1=\"246.0\" x2=\"277.8\" y2=\"182.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"70.0\" y1=\"126.0\" x2=\"70.0\" y2=\"62.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"139.3\" y1=\"22.0\" x2=\"347.1\" y2=\"142.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"347.1\" y1=\"142.0\" x2=\"277.8\" y2=\"182.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"277.8\" y1=\"182.0\" x2=\"70.0\" y2=\"62.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"70.0\" y1=\"62.0\" x2=\"139.3\" y2=\"22.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><text x=\"164.9\" y=\"206.5\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">30 cm</text><text x=\"321.5\" y=\"246.5\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">10 cm</text><text x=\"369.1\" y=\"178.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">8 cm</text><text x=\"44.0\" y=\"114.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#1c7ed6\" text-anchor=\"middle\">4 cm</text></svg>", "son": "", "k": "Buna göre, Zeynep kalıba kaç mL hamur dökmüştür?", "sec": ["2 400", "1 200", "120", "12 000"], "secg": null, "c": "B", "a": ["Hamurun hacmi: 30 · 10 · 4 = 1 200 cm³.", "1 cm³ = 1 mL: 1 200 mL."], "t": "2 400: kalıbın tamamı; 120 ve 12 000: dönüşüm hatası", "d": "Hamur kalıbın tamamını değil, 4 cm yüksekliğe kadarını doldurur. 1 cm³ = 1 mL olduğunu unutmayınız.", "ses": "b04"}, {"no": 5, "on": "<p>Defne, iç tabanı 40 cm ve 30 cm olan akvaryumuna bir süs taşı bırakmıştır. Taş suya tamamen batmış ve su taşmamıştır. Görselde akvaryumun ön görünüşü verilmiştir.</p>", "g": "<svg viewBox=\"0 0 410 222\" width=\"410\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"50\" y=\"36.0\" width=\"320\" height=\"152.0\" fill=\"#a5d8ff\"/><line x1=\"50.0\" y1=\"60.0\" x2=\"370.0\" y2=\"60.0\" stroke=\"#1c7ed6\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"50.0\" y1=\"36.0\" x2=\"370.0\" y2=\"36.0\" stroke=\"#1c7ed6\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><path d=\"M188.0 186 L184.0 168 L204.0 156 L230.0 164 L234.0 184 Z\" fill=\"#adb5bd\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M50 20 L50 188 L370 188 L370 20\" fill=\"none\" stroke=\"#5c7cfa\" stroke-width=\"2.6\"/><line x1=\"32.0\" y1=\"20.0\" x2=\"32.0\" y2=\"188.0\" stroke=\"#111111\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"188.0\" x2=\"32.0\" y2=\"188.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"193.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">0</text><line x1=\"27.0\" y1=\"180.0\" x2=\"32.0\" y2=\"180.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"172.0\" x2=\"32.0\" y2=\"172.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"164.0\" x2=\"32.0\" y2=\"164.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"156.0\" x2=\"32.0\" y2=\"156.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"148.0\" x2=\"32.0\" y2=\"148.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"153.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">5</text><line x1=\"27.0\" y1=\"140.0\" x2=\"32.0\" y2=\"140.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"132.0\" x2=\"32.0\" y2=\"132.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"124.0\" x2=\"32.0\" y2=\"124.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"116.0\" x2=\"32.0\" y2=\"116.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"108.0\" x2=\"32.0\" y2=\"108.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"113.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">10</text><line x1=\"27.0\" y1=\"100.0\" x2=\"32.0\" y2=\"100.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"92.0\" x2=\"32.0\" y2=\"92.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"84.0\" x2=\"32.0\" y2=\"84.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"76.0\" x2=\"32.0\" y2=\"76.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"68.0\" x2=\"32.0\" y2=\"68.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"73.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">15</text><line x1=\"27.0\" y1=\"60.0\" x2=\"32.0\" y2=\"60.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"52.0\" x2=\"32.0\" y2=\"52.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"44.0\" x2=\"32.0\" y2=\"44.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"36.0\" x2=\"32.0\" y2=\"36.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"28.0\" x2=\"32.0\" y2=\"28.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"33.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">20</text><line x1=\"27.0\" y1=\"20.0\" x2=\"32.0\" y2=\"20.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><text x=\"28.0\" y=\"14.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">cm</text><text x=\"210.0\" y=\"210.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Ön görünüş</text></svg>", "son": "", "k": "Buna göre, süs taşının hacmi kaç litredir?", "sec": ["3,6", "36", "0,36", "19"], "secg": null, "c": "A", "a": ["Su 16 cm'den 19 cm'ye çıkmıştır; yükselme 3 cm.", "Taşın hacmi: 40 · 30 · 3 = 3 600 cm³ = 3,6 L."], "t": "36 ve 0,36: dönüşüm hatası; 19: son su yüksekliği", "d": "Taşın hacmi, suyun yükselen kısmının hacmidir: taban alanı · yükselme. Yükselmeyi iki seviyenin farkından bulunuz.", "ses": "b05"}, {"no": 6, "on": "<p>Ödev kartında bir öğrencinin sınıfının hacmini bulmak için yaptığı çözüm verilmiştir.</p>", "g": "<svg viewBox=\"0 0 400 218\" width=\"400\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"380\" height=\"202\" rx=\"10\" fill=\"#fff\" stroke=\"#5f3dc4\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"380\" height=\"34\" rx=\"10\" fill=\"#5f3dc4\"/><rect x=\"10\" y=\"30\" width=\"380\" height=\"12\" fill=\"#5f3dc4\"/><text x=\"200.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Ödev · Sınıfımızın hacmi</text><line x1=\"22\" y1=\"75\" x2=\"378\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Uzunluk</text><text x=\"374.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">8 m</text><line x1=\"22\" y1=\"105\" x2=\"378\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Genişlik</text><text x=\"374.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">7 m</text><line x1=\"22\" y1=\"135\" x2=\"378\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Yükseklik</text><text x=\"374.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">3 m</text><line x1=\"22\" y1=\"165\" x2=\"378\" y2=\"165\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">İşlem</text><text x=\"374.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">8 · 7 · 3 = 168</text><line x1=\"22\" y1=\"195\" x2=\"378\" y2=\"195\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"186.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Sonuç</text><text x=\"374.0\" y=\"186.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Sınıfın hacmi 168 L</text></svg>", "son": "", "k": "Buna göre, aşağıdakilerden hangisi doğrudur?", "sec": ["Sonuç makuldür.", "Çarpma yanlıştır; sınıfın hacmi 56 m³'tür.", "Birim yanlıştır; sınıfın hacmi 168 m³ yani 168 000 L'dir.", "Birim yanlıştır; sınıfın hacmi 168 m³ yani 1 680 L'dir."], "secg": null, "c": "C", "a": ["Ölçüler metre olduğu için 8 · 7 · 3 = 168 m³.", "168 L bir küveti bile doldurmaz; sonuç makul değildir. 168 m³ = 168 000 L."], "t": "Makul: birime bakılmamış; 56: yükseklik unutulmuş; 1 680: m³ L'ye 10 ile çarpılarak çevrilmiş", "d": "Sonucun birimini ölçülerin birimine göre yazınız ve büyüklüğün makul olup olmadığını günlük hayatla karşılaştırınız.", "ses": "b06"}, {"no": 7, "on": "<p>Bir yüzme havuzunun iç ölçüleri görselde verilmiştir. Havuzun tabanı ve dört yan yüzü kare biçimindeki eş fayanslarla kaplanacaktır.</p>", "g": "<svg viewBox=\"0 0 647 276\" width=\"647\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><g transform=\"translate(0,0)\"><polygon points=\"26.0,122.0 233.8,242.0 233.8,202.0 26.0,82.0\" fill=\"#a5d8ff\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"337.8,182.0 233.8,242.0 233.8,202.0 337.8,142.0\" fill=\"#74c0fc\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"129.9,22.0 337.8,142.0 233.8,202.0 26.0,82.0\" fill=\"#d0ebff\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><text x=\"121.9\" y=\"200.8\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">6 m</text><text x=\"293.8\" y=\"230.8\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">3 m</text><text x=\"361.8\" y=\"166.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">1 m</text></g><g transform=\"translate(417.7691453623979,0)\"><rect x=\"10\" y=\"8\" width=\"210\" height=\"112\" rx=\"10\" fill=\"#fff\" stroke=\"#1c7ed6\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"210\" height=\"34\" rx=\"10\" fill=\"#1c7ed6\"/><rect x=\"10\" y=\"30\" width=\"210\" height=\"12\" fill=\"#1c7ed6\"/><text x=\"115.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Fayans</text><line x1=\"22\" y1=\"75\" x2=\"208\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Biçimi</text><text x=\"204.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Kare</text><line x1=\"22\" y1=\"105\" x2=\"208\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Bir kenarı</text><text x=\"204.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">20 cm</text></g></svg>", "son": "<p>Fayanslar arasında boşluk bırakılmayacaktır.</p>", "k": "Buna göre, kaç fayans gerekir?", "sec": ["1 350", "450", "90", "900"], "secg": null, "c": "D", "a": ["Kaplanacak alan: taban 6 · 3 = 18 m²; yan yüzler 2 · (6 + 3) · 1 = 18 m²; toplam 36 m² = 360 000 cm².", "Bir fayans 20 · 20 = 400 cm²; 360 000 : 400 = 900 fayans."], "t": "1 350: üst yüz de kaplanmış sayılmış; 450: yalnız taban; 90: m² cm²'ye 1 000 ile çarpılmış", "d": "Havuzun üstü açıktır; yalnız taban ve dört yan yüz kaplanır. Fayansın alanını aynı birime çevirip bölünüz.", "ses": "b07"}, {"no": 8, "on": "<p>Bahçedeki boş çocuk havuzu bir muslukla doldurulacaktır. Havuzun iç ölçüleri ve musluktan bir dakikada akan su görselde verilmiştir.</p>", "g": "<svg viewBox=\"0 0 627 216\" width=\"627\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><g transform=\"translate(0,0)\"><line x1=\"95.3\" y1=\"58.0\" x2=\"233.8\" y2=\"138.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"95.3\" y1=\"58.0\" x2=\"26.0\" y2=\"98.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"95.3\" y1=\"58.0\" x2=\"95.3\" y2=\"22.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"233.8\" y1=\"138.0\" x2=\"164.6\" y2=\"178.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"26.0\" y1=\"98.0\" x2=\"164.6\" y2=\"178.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"233.8\" y1=\"138.0\" x2=\"233.8\" y2=\"102.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"164.6\" y1=\"178.0\" x2=\"164.6\" y2=\"142.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"26.0\" y1=\"98.0\" x2=\"26.0\" y2=\"62.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"95.3\" y1=\"22.0\" x2=\"233.8\" y2=\"102.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"233.8\" y1=\"102.0\" x2=\"164.6\" y2=\"142.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"164.6\" y1=\"142.0\" x2=\"26.0\" y2=\"62.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"26.0\" y1=\"62.0\" x2=\"95.3\" y2=\"22.0\" stroke=\"#111111\" stroke-width=\"2\" stroke-linecap=\"round\"/><text x=\"86.3\" y=\"158.5\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">2 m</text><text x=\"208.2\" y=\"178.5\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">1 m</text><text x=\"255.8\" y=\"124.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">0,45 m</text></g><g transform=\"translate(327.8460969082653,0)\"><rect x=\"10\" y=\"8\" width=\"280\" height=\"82\" rx=\"10\" fill=\"#fff\" stroke=\"#1c7ed6\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"280\" height=\"34\" rx=\"10\" fill=\"#1c7ed6\"/><rect x=\"10\" y=\"30\" width=\"280\" height=\"12\" fill=\"#1c7ed6\"/><text x=\"150.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Musluk</text><line x1=\"22\" y1=\"75\" x2=\"278\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Bir dakikada akan su</text><text x=\"274.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">15 L</text></g></svg>", "son": "", "k": "Buna göre, havuz kaç dakikada tamamen dolar?", "sec": ["6", "60", "600", "30"], "secg": null, "c": "B", "a": ["Havuzun hacmi: 2 · 1 · 0,45 = 0,9 m³ = 900 L.", "900 : 15 = 60 dakika."], "t": "6 ve 600: m³ L'ye yanlış çevrilmiş; 30: havuzun yarısı hesaplanmış", "d": "Önce havuzun hacmini litreye çeviriniz; sonra bir dakikada akan suya bölünüz.", "ses": "b08"}, {"no": 9, "on": "<p>Ayşe, 1. kaptaki suyun tamamını boş olan 2. kaba boşaltacaktır. İki kap da dikdörtgenler prizması biçimindedir.</p>", "g": "<svg viewBox=\"0 0 440 218\" width=\"440\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"420\" height=\"202\" rx=\"10\" fill=\"#fff\" stroke=\"#1c7ed6\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"420\" height=\"34\" rx=\"10\" fill=\"#1c7ed6\"/><rect x=\"10\" y=\"30\" width=\"420\" height=\"12\" fill=\"#1c7ed6\"/><text x=\"220.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Kapların iç ölçüleri</text><line x1=\"22\" y1=\"75\" x2=\"418\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">1. kabın tabanı</text><text x=\"414.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">30 cm · 20 cm</text><line x1=\"22\" y1=\"105\" x2=\"418\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">1. kaptaki su yüksekliği</text><text x=\"414.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">20 cm</text><line x1=\"22\" y1=\"135\" x2=\"418\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">2. kabın tabanı</text><text x=\"414.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">20 cm · 20 cm</text><line x1=\"22\" y1=\"165\" x2=\"418\" y2=\"165\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">2. kabın yüksekliği</text><text x=\"414.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">26 cm</text><line x1=\"22\" y1=\"195\" x2=\"418\" y2=\"195\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"186.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">2. kap</text><text x=\"414.0\" y=\"186.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Boş</text></svg>", "son": "", "k": "Buna göre, aşağıdakilerden hangisi doğrudur?", "sec": ["2. kap taşmaz; 1 600 cm³ su daha alır.", "2. kap tam dolar; su artmaz.", "2. kap taşar; 1 600 cm³ su dışarı akar.", "2. kap taşar; 4 cm³ su dışarı akar."], "secg": null, "c": "C", "a": ["Su: 30 · 20 · 20 = 12 000 cm³.", "2. kap: 20 · 20 · 26 = 10 400 cm³.", "12 000 &gt; 10 400; 12 000 − 10 400 = 1 600 cm³ taşar."], "t": "Taşmaz: fark ters yorumlanmış; tam dolar: yükseklikler karşılaştırılmış; 4 cm³: yükseklik farkı birim değiştirilerek yazılmış", "d": "Su aktarılırken hacmi değişmez. Suyun hacmini 2. kabın hacmiyle karşılaştırınız; fazlası taşar.", "ses": "b09"}, {"no": 10, "on": "<p>Bir gemiye yüklenecek konteynerin iç ölçüleri ve bir kolinin ölçüleri görselde verilmiştir. Koliler görseldeki gibi aynı yönde yerleştirilecektir.</p>", "g": "<svg viewBox=\"0 0 627 324\" width=\"627\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><g transform=\"translate(0,0)\"><polygon points=\"106.4,114.2 317.3,236.0 241.0,280.1 30.0,158.3\" fill=\"#f1f3f5\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"219.1,267.5 241.0,280.1 241.0,263.3 219.1,250.7\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"259.2,269.6 241.0,280.1 241.0,263.3 259.2,252.8\" fill=\"#f4b77a\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"237.3,240.2 259.2,252.8 241.0,263.3 219.1,250.7\" fill=\"#ffe8cc\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"197.3,254.9 219.1,267.5 219.1,250.7 197.3,238.1\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"237.3,257.0 219.1,267.5 219.1,250.7 237.3,240.2\" fill=\"#f4b77a\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"215.5,227.6 237.3,240.2 219.1,250.7 197.3,238.1\" fill=\"#ffe8cc\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"175.5,242.3 197.3,254.9 197.3,238.1 175.5,225.5\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"215.5,244.4 197.3,254.9 197.3,238.1 215.5,227.6\" fill=\"#f4b77a\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><polygon points=\"193.7,215.0 215.5,227.6 197.3,238.1 175.5,225.5\" fill=\"#ffe8cc\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linejoin=\"round\"/><text x=\"167.1\" y=\"224.6\" font-family=\"Source Sans 3\",sans-serif font-size=\"22\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">…</text><line x1=\"106.4\" y1=\"114.2\" x2=\"317.3\" y2=\"236.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"106.4\" y1=\"114.2\" x2=\"30.0\" y2=\"158.3\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"106.4\" y1=\"114.2\" x2=\"106.4\" y2=\"26.0\" stroke=\"#8a93a6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"317.3\" y1=\"236.0\" x2=\"241.0\" y2=\"280.1\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"30.0\" y1=\"158.3\" x2=\"241.0\" y2=\"280.1\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"317.3\" y1=\"236.0\" x2=\"317.3\" y2=\"147.8\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"241.0\" y1=\"280.1\" x2=\"241.0\" y2=\"191.9\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"30.0\" y1=\"158.3\" x2=\"30.0\" y2=\"70.1\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"106.4\" y1=\"26.0\" x2=\"317.3\" y2=\"147.8\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"317.3\" y1=\"147.8\" x2=\"241.0\" y2=\"191.9\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"241.0\" y1=\"191.9\" x2=\"30.0\" y2=\"70.1\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><line x1=\"30.0\" y1=\"70.1\" x2=\"106.4\" y2=\"26.0\" stroke=\"#495057\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><text x=\"126.5\" y=\"239.7\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">58 dm</text><text x=\"288.2\" y=\"278.5\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">21 dm</text><text x=\"343.3\" y=\"196.8\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">21 dm</text></g><g transform=\"translate(407.3472289756768,0)\"><rect x=\"10\" y=\"8\" width=\"200\" height=\"142\" rx=\"10\" fill=\"#fff\" stroke=\"#e8590c\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"200\" height=\"34\" rx=\"10\" fill=\"#e8590c\"/><rect x=\"10\" y=\"30\" width=\"200\" height=\"12\" fill=\"#e8590c\"/><text x=\"110.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Koli</text><line x1=\"22\" y1=\"75\" x2=\"198\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Uzunluk</text><text x=\"194.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">6 dm</text><line x1=\"22\" y1=\"105\" x2=\"198\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Genişlik</text><text x=\"194.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">5 dm</text><line x1=\"22\" y1=\"135\" x2=\"198\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Yükseklik</text><text x=\"194.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">4 dm</text></g></svg>", "son": "<p>Kolinin 6 dm'lik ayrıtı konteynerin 58 dm'lik ayrıtı boyunca, 4 dm'lik ayrıtı yukarı doğru olacaktır.</p>", "k": "Buna göre, konteynere <u>en fazla</u> kaç koli sığar?", "sec": ["180", "213", "200", "225"], "secg": null, "c": "A", "a": ["58 : 6 → 9; 21 : 5 → 4; 21 : 4 → 5 (yalnız tam koliler).", "9 · 4 · 5 = 180."], "t": "213: hacim bölmenin sonucu; 200 ve 225: bölümlerden biri ya da ikisi yukarı yuvarlanmış", "d": "Hacim bölme boşlukları da koliyle dolu sayar. Her ayrıtta kaç tam koli sığdığını ayrı ayrı bulup çarpınız.", "ses": "b10"}, {"no": 11, "on": "<p>Bir ayrıtı 6 cm olan 4 eş küp kutu, görseldeki gibi yüzleri tam olarak birbirine değecek şekilde dizilip tek paket hâlinde ambalaj kâğıdıyla sarılacaktır.</p>", "g": "<svg viewBox=\"0 0 398 150\" width=\"398\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><g transform=\"translate(0,0)\"><polygon points=\"14.0,94.0 83.3,134.0 83.3,94.0 14.0,54.0\" fill=\"#ffd8a8\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"152.6,94.0 83.3,134.0 83.3,94.0 152.6,54.0\" fill=\"#f4b77a\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"83.3,14.0 152.6,54.0 83.3,94.0 14.0,54.0\" fill=\"#ffe8cc\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><line x1=\"117.9\" y1=\"34.0\" x2=\"48.6\" y2=\"74.0\" stroke=\"#8a6d3b\" stroke-width=\"0.7\" stroke-linecap=\"round\"/><line x1=\"48.6\" y1=\"114.0\" x2=\"48.6\" y2=\"74.0\" stroke=\"#8a6d3b\" stroke-width=\"0.7\" stroke-linecap=\"round\"/><line x1=\"48.6\" y1=\"34.0\" x2=\"117.9\" y2=\"74.0\" stroke=\"#8a6d3b\" stroke-width=\"0.7\" stroke-linecap=\"round\"/><line x1=\"117.9\" y1=\"114.0\" x2=\"117.9\" y2=\"74.0\" stroke=\"#8a6d3b\" stroke-width=\"0.7\" stroke-linecap=\"round\"/><polygon points=\"83.3,14.0 152.6,54.0 83.3,94.0 14.0,54.0\" fill=\"none\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"152.6,94.0 83.3,134.0 83.3,94.0 152.6,54.0\" fill=\"none\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"14.0,94.0 83.3,134.0 83.3,94.0 14.0,54.0\" fill=\"none\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/></g><g transform=\"translate(178.5640646055102,0)\"><rect x=\"10\" y=\"8\" width=\"200\" height=\"82\" rx=\"10\" fill=\"#fff\" stroke=\"#e8590c\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"200\" height=\"34\" rx=\"10\" fill=\"#e8590c\"/><rect x=\"10\" y=\"30\" width=\"200\" height=\"12\" fill=\"#e8590c\"/><text x=\"110.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Bir küp kutu</text><line x1=\"22\" y1=\"75\" x2=\"198\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Ayrıtı</text><text x=\"194.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">6 cm</text></g></svg>", "son": "", "k": "Buna göre, kutuları ayrı ayrı sarmaya göre kaç cm² daha az kâğıt kullanılır?", "sec": ["576", "864", "144", "288"], "secg": null, "c": "D", "a": ["Ayrı ayrı: 4 · 6 · 36 = 864 cm².", "Paket 12 cm · 12 cm · 6 cm: 2 · (144 + 72 + 72) = 576 cm².", "864 − 576 = 288 cm²."], "t": "576: paketin kâğıdı; 864: ayrı ayrı kâğıt; 144: değen yüzlerin yalnız biri sayılmış", "d": "Birleşen yüzler dışarıda kalmaz. Paketi tek bir prizma olarak düşünüp ölçülerini bulunuz.", "ses": "b11"}, {"no": 12, "on": "<p>Bir meyve suyu firması kapalı kutu biçiminde üç ambalaj tasarlamıştır. Üç tasarımın da hacmi 1 L'dir.</p>", "g": "<svg viewBox=\"0 0 420 158\" width=\"420\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"400\" height=\"142\" rx=\"10\" fill=\"#fff\" stroke=\"#2b8a3e\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"400\" height=\"34\" rx=\"10\" fill=\"#2b8a3e\"/><rect x=\"10\" y=\"30\" width=\"400\" height=\"12\" fill=\"#2b8a3e\"/><text x=\"210.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Bir litrelik ambalaj tasarımları</text><line x1=\"22\" y1=\"75\" x2=\"398\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">A</text><text x=\"70.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">10 cm · 10 cm · 10 cm</text><line x1=\"22\" y1=\"105\" x2=\"398\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">B</text><text x=\"70.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">5 cm · 10 cm · 20 cm</text><line x1=\"22\" y1=\"135\" x2=\"398\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">C</text><text x=\"70.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">5 cm · 5 cm · 40 cm</text></svg>", "son": "<p>Firma, en az karton gerektiren tasarımı seçecektir.</p>", "k": "Buna göre, firmanın seçeceği tasarım ve bir kutu için gereken karton aşağıdakilerin hangisinde birlikte verilmiştir?", "sec": ["B, 700 cm²", "A, 600 cm²", "C, 850 cm²", "A, 1 000 cm²"], "secg": null, "c": "B", "a": ["Yüzey alanları: A: 2 · (100 + 100 + 100) = 600; B: 2 · (50 + 100 + 200) = 700; C: 2 · (25 + 200 + 200) = 850.", "En az A'dadır; ayrıtları birbirine en yakın kutudur."], "t": "B ve C: daha çok karton; A, 1 000: hacim yazılmış", "d": "Üç tasarımın hacmi aynıdır; karşılaştırılacak olan yüzey alanlarıdır. Ayrıtları birbirine yakın olan kutuyu inceleyiniz.", "ses": "b12"}, {"no": 13, "on": "<p>Bir sünger bloğun üst ön ayrıtının ortasından, bir ayrıtı 4 cm olan küp biçiminde parça kesilip çıkarılmıştır.</p>", "g": "<svg viewBox=\"0 0 411.7691453623979 346.0\" width=\"412\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><polygon points=\"28.0,180.0 235.8,300.0 235.8,204.0 28.0,84.0\" fill=\"#d3f9d8\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"339.8,240.0 235.8,300.0 235.8,204.0 339.8,144.0\" fill=\"#b2f2bb\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"131.9,24.0 339.8,144.0 235.8,204.0 28.0,84.0\" fill=\"#ebfbee\" stroke=\"#111111\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><polygon points=\"111.1,180.0 152.7,204.0 152.7,156.0 111.1,132.0\" fill=\"#fff\" stroke=\"#111111\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/><polygon points=\"152.7,108.0 194.3,132.0 152.7,156.0 111.1,132.0\" fill=\"#fff\" stroke=\"#111111\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/><polygon points=\"152.7,156.0 194.3,180.0 152.7,204.0 111.1,180.0\" fill=\"#ebfbee\" stroke=\"#111111\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/><polygon points=\"152.7,156.0 111.1,180.0 111.1,132.0 152.7,108.0\" fill=\"#b2f2bb\" stroke=\"#111111\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/><polygon points=\"152.7,156.0 194.3,180.0 194.3,132.0 152.7,108.0\" fill=\"#d3f9d8\" stroke=\"#111111\" stroke-width=\"1.6\" stroke-linejoin=\"round\"/><text x=\"123.9\" y=\"258.8\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">20 cm</text><text x=\"295.8\" y=\"288.8\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">10 cm</text><text x=\"363.8\" y=\"196.9\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">8 cm</text></svg>", "son": "", "k": "Buna göre, bloğun yeni yüzey alanı kaç cm²'dir?", "sec": ["912", "880", "848", "1 536"], "secg": null, "c": "A", "a": ["İlk yüzey alanı: 2 · (200 + 160 + 80) = 880 cm².", "Çıkan parçanın yerine oyukta 2 kare yüz eksilip 4 kare yüz oluşur; 2 kare yüz artar: 2 · 16 = 32.", "880 + 32 = 912 cm²."], "t": "880: değişmediği sanılmış; 848: artış çıkarılmış; 1 536: yeni hacim", "d": "Parça çıkarılınca hacim azalır; yüzey alanında ise giden ve oyukta oluşan kare yüzleri sayınız.", "ses": "b13"}, {"no": 14, "on": "<p>Bir reçel üreticisi, silindir biçimindeki 6 eş kavanozu görseldeki gibi 2 sıra hâlinde dik olarak kapalı bir koliye koyacaktır. Kolinin iç ölçüleri kavanozlara tam uyacaktır.</p>", "g": "<svg viewBox=\"0 0 454 140\" width=\"454\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><g transform=\"translate(0,0)\"><rect x=\"30\" y=\"20\" width=\"144\" height=\"96\" fill=\"#fff4e6\" stroke=\"#111111\" stroke-width=\"2\"/><circle cx=\"54.0\" cy=\"44.0\" r=\"23.2\" fill=\"#d0ebff\" stroke=\"#1c5fbf\" stroke-width=\"1.4\"/><circle cx=\"54.0\" cy=\"92.0\" r=\"23.2\" fill=\"#d0ebff\" stroke=\"#1c5fbf\" stroke-width=\"1.4\"/><circle cx=\"102.0\" cy=\"44.0\" r=\"23.2\" fill=\"#d0ebff\" stroke=\"#1c5fbf\" stroke-width=\"1.4\"/><circle cx=\"102.0\" cy=\"92.0\" r=\"23.2\" fill=\"#d0ebff\" stroke=\"#1c5fbf\" stroke-width=\"1.4\"/><circle cx=\"150.0\" cy=\"44.0\" r=\"23.2\" fill=\"#d0ebff\" stroke=\"#1c5fbf\" stroke-width=\"1.4\"/><circle cx=\"150.0\" cy=\"92.0\" r=\"23.2\" fill=\"#d0ebff\" stroke=\"#1c5fbf\" stroke-width=\"1.4\"/><text x=\"54.0\" y=\"134.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">çap 8 cm</text></g><g transform=\"translate(214.0,0)\"><rect x=\"10\" y=\"8\" width=\"220\" height=\"112\" rx=\"10\" fill=\"#fff\" stroke=\"#e8590c\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"220\" height=\"34\" rx=\"10\" fill=\"#e8590c\"/><rect x=\"10\" y=\"30\" width=\"220\" height=\"12\" fill=\"#e8590c\"/><text x=\"120.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Bir kavanoz</text><line x1=\"22\" y1=\"75\" x2=\"218\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Çapı</text><text x=\"214.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">8 cm</text><line x1=\"22\" y1=\"105\" x2=\"218\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Yüksekliği</text><text x=\"214.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">12 cm</text></g></svg>", "son": "<p>Görselde koli tabanının üstten görünüşü verilmiştir.</p>", "k": "Buna göre, koli için <u>en az</u> kaç cm² karton gerekir?", "sec": ["4 608", "1 344", "1 728", "864"], "secg": null, "c": "C", "a": ["Yan yana 3 kavanoz: 3 · 8 = 24 cm; 2 sıra: 2 · 8 = 16 cm; yükseklik 12 cm.", "Kolinin yüzey alanı: 2 · (384 + 288 + 192) = 1 728 cm²."], "t": "4 608: kolinin hacmi; 1 344: üst yüz kaplanmamış; 864: yüzlerin yarısı alınmış", "d": "Kavanozlar yan yana dizilince koli uzunluğu kavanoz sayısı · çap olur. Silindirin kendi hacmi hesaplanmaz.", "ses": "b14"}, {"no": 15, "on": "<p>Bir akvaryumla ilgili bilgiler görselde verilmiştir. Öğretmen, öğrencilerden bu bilgilerle cevabı 15 L olan bir problem kurmalarını istemiştir.</p>", "g": "<svg viewBox=\"0 0 400 158\" width=\"400\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"380\" height=\"142\" rx=\"10\" fill=\"#fff\" stroke=\"#1c7ed6\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"380\" height=\"34\" rx=\"10\" fill=\"#1c7ed6\"/><rect x=\"10\" y=\"30\" width=\"380\" height=\"12\" fill=\"#1c7ed6\"/><text x=\"200.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Akvaryumun bilgileri</text><line x1=\"22\" y1=\"75\" x2=\"378\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Taban (iç)</text><text x=\"374.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">50 cm · 30 cm</text><line x1=\"22\" y1=\"105\" x2=\"378\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Yükseklik (iç)</text><text x=\"374.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">40 cm</text><line x1=\"22\" y1=\"135\" x2=\"378\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Su yüksekliği</text><text x=\"374.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">30 cm</text></svg>", "son": "", "k": "Buna göre, aşağıdaki problemlerden hangisinin cevabı 15 L'dir?", "sec": ["Akvaryumda kaç litre su vardır?", "Akvaryum tamamen dolunca kaç litre su alır?", "Akvaryumun tabanını kaplamak için kaç dm² örtü gerekir?", "Akvaryumu doldurmak için kaç litre su daha gerekir?"], "secg": null, "c": "D", "a": ["Boş kısım: 50 · 30 · (40 − 30) = 15 000 cm³ = 15 L.", "Öbür problemlerin cevapları: 45 L, 60 L ve 15 dm²; sonuncusu alan sorusudur, cevabı litre olamaz."], "t": "Su miktarı ve tamamı farklı hacimlerdir; örtü sorusunda birim alan birimidir", "d": "Her seçeneğin cevabını hesaplayıp birimine de bakınız. Litre ile cevaplanan soru bir hacim sorusudur.", "ses": "b15"}, {"no": 16, "on": "<p>Bir depo sahibi, deponun iç yüzeyini boyatmak için iki ustadan teklif almıştır. Teklifler görselde verilmiştir.</p>", "g": "<svg viewBox=\"0 0 470 188\" width=\"470\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"450\" height=\"172\" rx=\"10\" fill=\"#fff\" stroke=\"#5f3dc4\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"450\" height=\"34\" rx=\"10\" fill=\"#5f3dc4\"/><rect x=\"10\" y=\"30\" width=\"450\" height=\"12\" fill=\"#5f3dc4\"/><text x=\"235.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Depo iç yüzeyi boyama teklifleri</text><line x1=\"22\" y1=\"75\" x2=\"448\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Deponun iç ölçüleri</text><text x=\"444.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">4 m · 3 m · 2 m</text><line x1=\"22\" y1=\"105\" x2=\"448\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Boyanacak</text><text x=\"444.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Taban ve 4 yan yüz</text><line x1=\"22\" y1=\"135\" x2=\"448\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">A ustası</text><text x=\"444.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Metrekaresi 90 TL</text><line x1=\"22\" y1=\"165\" x2=\"448\" y2=\"165\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">B ustası</text><text x=\"444.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">1 000 TL + metrekaresi 60 TL</text></svg>", "son": "", "k": "Buna göre, aşağıdakilerden hangisi doğrudur?", "sec": ["A ustası daha ucuzdur; fark 200 TL'dir.", "B ustası daha ucuzdur; fark 200 TL'dir.", "İki teklif eşittir.", "B ustası daha ucuzdur; fark 560 TL'dir."], "secg": null, "c": "B", "a": ["Boyanacak alan: taban 4 · 3 = 12 m²; yan yüzler 2 · (4 + 3) · 2 = 28 m²; toplam 40 m².", "A: 40 · 90 = 3 600 TL; B: 1 000 + 40 · 60 = 3 400 TL.", "B ustası 200 TL daha ucuzdur."], "t": "A ustası: sabit ücret iki kez sayılmış; eşit: alan yanlış bulunmuş; 560 TL: tavan da boyanacak sanılmış", "d": "Önce boyanacak alanı bulunuz (tavan boyanmaz). Sonra iki teklifi aynı alan için hesaplayıp karşılaştırınız.", "ses": "b16"}, {"no": 17, "on": "<p>Bir kamyonun kasasına eş koliler yüklenecektir. Kasanın ve kolinin ölçüleri ile iki yerleşim biçimi görselde verilmiştir.</p>", "g": "<svg viewBox=\"0 0 500 188\" width=\"500\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"480\" height=\"172\" rx=\"10\" fill=\"#fff\" stroke=\"#e8590c\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"480\" height=\"34\" rx=\"10\" fill=\"#e8590c\"/><rect x=\"10\" y=\"30\" width=\"480\" height=\"12\" fill=\"#e8590c\"/><text x=\"250.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Kamyon kasası ve koliler</text><line x1=\"22\" y1=\"75\" x2=\"478\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Kasanın iç ölçüleri</text><text x=\"474.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">4 m · 2 m · 2 m</text><line x1=\"22\" y1=\"105\" x2=\"478\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Bir koli</text><text x=\"474.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">80 cm · 60 cm · 50 cm</text><line x1=\"22\" y1=\"135\" x2=\"478\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">1. yerleşim</text><text x=\"474.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">80 cm ileri, 60 cm yana, 50 cm yukarı</text><line x1=\"22\" y1=\"165\" x2=\"478\" y2=\"165\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">2. yerleşim</text><text x=\"474.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">50 cm ileri, 80 cm yana, 60 cm yukarı</text></svg>", "son": "<p>Her yerleşimde bütün koliler aynı yönde konacaktır.</p>", "k": "Buna göre, 1. yerleşimde 2. yerleşime göre kaç koli fazla yüklenir?", "sec": ["6", "18", "12", "0"], "secg": null, "c": "C", "a": ["1. yerleşim: 400 : 80 = 5; 200 : 60 → 3; 200 : 50 = 4; 5 · 3 · 4 = 60.", "2. yerleşim: 400 : 50 = 8; 200 : 80 → 2; 200 : 60 → 3; 8 · 2 · 3 = 48.", "60 − 48 = 12."], "t": "0: hacim aynı olduğu için koli sayısının da aynı olduğu sanılmış; 6 ve 18: bölümler yanlış yuvarlanmış", "d": "Hacimler aynı olsa da yerleşime göre sığan koli sayısı değişir. Her yerleşimde ayrıtları ayrı ayrı bölünüz.", "ses": "b17"}, {"no": 18, "on": "<p>Ece, bir taşın hacmini bulmak için taşı dikdörtgenler prizması biçimindeki bir kaba bırakmıştır. Taş suya tamamen batmış, su taşmamıştır. Ece'nin çözümü görselde verilmiştir.</p>", "g": "<svg viewBox=\"0 0 470 188\" width=\"470\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"450\" height=\"172\" rx=\"10\" fill=\"#fff\" stroke=\"#c2255c\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"450\" height=\"34\" rx=\"10\" fill=\"#c2255c\"/><rect x=\"10\" y=\"30\" width=\"450\" height=\"12\" fill=\"#c2255c\"/><text x=\"235.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Ece'nin çözümü</text><line x1=\"22\" y1=\"75\" x2=\"448\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Soru</text><text x=\"80.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">Taban 50 cm · 20 cm, su 3 cm yükseldi.</text><line x1=\"22\" y1=\"105\" x2=\"448\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">I.</text><text x=\"80.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">50 · 20 = 1 000 cm²</text><line x1=\"22\" y1=\"135\" x2=\"448\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">II.</text><text x=\"80.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">1 000 · 3 = 3 000 cm³</text><line x1=\"22\" y1=\"165\" x2=\"448\" y2=\"165\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">III.</text><text x=\"80.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"start\">3 000 cm³ = 30 L</text></svg>", "son": "", "k": "Buna göre, Ece'nin hatalı adımı ve taşın doğru hacmi aşağıdakilerin hangisinde birlikte verilmiştir?", "sec": ["III. adım, 3 L", "II. adım, 300 cm³", "Hata yoktur, 30 L", "I. adım, 0,3 L"], "secg": null, "c": "A", "a": ["I ve II doğrudur: taban alanı 1 000 cm², taşın hacmi 3 000 cm³.", "1 L = 1 000 cm³: 3 000 cm³ = 3 L. Hata III. adımdadır."], "t": "II. adım: çarpma doğrudur; hata yoktur: 30 L bir taş için makul değildir; I. adım: taban alanı doğrudur", "d": "Her adımı kontrol ediniz. 1 L = 1 000 cm³ olduğuna ve sonucun bir taş için makul olup olmadığına bakınız.", "ses": "b18"}, {"no": 19, "on": "<p>Ela ile Can kolilerini aynı kargo firmasıyla gönderecektir. Firmanın ücret tarifesi ve kolilerin ölçüleri görselde verilmiştir.</p>", "g": "<svg viewBox=\"0 0 480 218\" width=\"480\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><rect x=\"10\" y=\"8\" width=\"460\" height=\"202\" rx=\"10\" fill=\"#fff\" stroke=\"#1c7ed6\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"460\" height=\"34\" rx=\"10\" fill=\"#1c7ed6\"/><rect x=\"10\" y=\"30\" width=\"460\" height=\"12\" fill=\"#1c7ed6\"/><text x=\"240.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Kargo ücret tarifesi (koli hacmine göre)</text><line x1=\"22\" y1=\"75\" x2=\"458\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">10 L'ye kadar</text><text x=\"454.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">40 TL</text><line x1=\"22\" y1=\"105\" x2=\"458\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">10 L'den fazla, 30 L'ye kadar</text><text x=\"454.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">60 TL</text><line x1=\"22\" y1=\"135\" x2=\"458\" y2=\"135\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">30 L'den fazla</text><text x=\"454.0\" y=\"126.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">90 TL</text><line x1=\"22\" y1=\"165\" x2=\"458\" y2=\"165\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Ela'nın kolisi</text><text x=\"454.0\" y=\"156.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">40 cm · 30 cm · 20 cm</text><line x1=\"22\" y1=\"195\" x2=\"458\" y2=\"195\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"186.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Can'ın kolisi</text><text x=\"454.0\" y=\"186.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">50 cm · 40 cm · 20 cm</text></svg>", "son": "", "k": "Buna göre, iki koli için toplam kaç TL ödenir?", "sec": ["180", "120", "130", "150"], "secg": null, "c": "D", "a": ["Ela: 40 · 30 · 20 = 24 000 cm³ = 24 L → 60 TL.", "Can: 50 · 40 · 20 = 40 000 cm³ = 40 L → 90 TL.", "60 + 90 = 150 TL."], "t": "180: ikisi de 30 L'den fazla sanılmış; 120: ikisi de 10 L ile 30 L arasında sanılmış; 130: Ela'nın kolisi 10 L'ye kadar sanılmış", "d": "Koli hacimlerini litreye çevirip tarifedeki aralığa yerleştiriniz; sonra ücretleri toplayınız.", "ses": "b19"}, {"no": 20, "on": "<p>Bir öğrenci, batan cisimlerin hacmini bulma yolları için görseldeki deneyi yapıp aşağıdaki genellemeleri yazmıştır.</p>", "g": "<svg viewBox=\"0 0 540 201\" width=\"540\" xmlns=\"http://www.w3.org/2000/svg\" class=\"fig\"><g transform=\"translate(0,0)\"><rect x=\"50\" y=\"62.0\" width=\"140\" height=\"105.0\" fill=\"#a5d8ff\"/><line x1=\"50.0\" y1=\"83.0\" x2=\"190.0\" y2=\"83.0\" stroke=\"#1c7ed6\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"5 4\"/><line x1=\"50.0\" y1=\"62.0\" x2=\"190.0\" y2=\"62.0\" stroke=\"#1c7ed6\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><path d=\"M98.0 165 L94.0 147 L114.0 135 L140.0 143 L144.0 163 Z\" fill=\"#adb5bd\" stroke=\"#495057\" stroke-width=\"1.4\"/><path d=\"M50 20 L50 167 L190 167 L190 20\" fill=\"none\" stroke=\"#5c7cfa\" stroke-width=\"2.6\"/><line x1=\"32.0\" y1=\"20.0\" x2=\"32.0\" y2=\"167.0\" stroke=\"#111111\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"167.0\" x2=\"32.0\" y2=\"167.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"172.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">0</text><line x1=\"27.0\" y1=\"160.0\" x2=\"32.0\" y2=\"160.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"153.0\" x2=\"32.0\" y2=\"153.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"146.0\" x2=\"32.0\" y2=\"146.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"139.0\" x2=\"32.0\" y2=\"139.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"132.0\" x2=\"32.0\" y2=\"132.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"137.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">5</text><line x1=\"27.0\" y1=\"125.0\" x2=\"32.0\" y2=\"125.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"118.0\" x2=\"32.0\" y2=\"118.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"111.0\" x2=\"32.0\" y2=\"111.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"104.0\" x2=\"32.0\" y2=\"104.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"97.0\" x2=\"32.0\" y2=\"97.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"102.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">10</text><line x1=\"27.0\" y1=\"90.0\" x2=\"32.0\" y2=\"90.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"83.0\" x2=\"32.0\" y2=\"83.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"76.0\" x2=\"32.0\" y2=\"76.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"69.0\" x2=\"32.0\" y2=\"69.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"62.0\" x2=\"32.0\" y2=\"62.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"67.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">15</text><line x1=\"27.0\" y1=\"55.0\" x2=\"32.0\" y2=\"55.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"48.0\" x2=\"32.0\" y2=\"48.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"41.0\" x2=\"32.0\" y2=\"41.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"27.0\" y1=\"34.0\" x2=\"32.0\" y2=\"34.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><line x1=\"22.0\" y1=\"27.0\" x2=\"32.0\" y2=\"27.0\" stroke=\"#111111\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><text x=\"18.0\" y=\"32.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"end\">20</text><line x1=\"27.0\" y1=\"20.0\" x2=\"32.0\" y2=\"20.0\" stroke=\"#111111\" stroke-width=\"0.8\" stroke-linecap=\"round\"/><text x=\"28.0\" y=\"14.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"13\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">cm</text><text x=\"120.0\" y=\"189.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"14\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"middle\">Taş batınca</text></g><g transform=\"translate(240.0,0)\"><rect x=\"10\" y=\"8\" width=\"280\" height=\"112\" rx=\"10\" fill=\"#fff\" stroke=\"#5f3dc4\" stroke-width=\"2\"/><rect x=\"10\" y=\"8\" width=\"280\" height=\"34\" rx=\"10\" fill=\"#5f3dc4\"/><rect x=\"10\" y=\"30\" width=\"280\" height=\"12\" fill=\"#5f3dc4\"/><text x=\"150.0\" y=\"31.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"16\" font-weight=\"800\" fill=\"#fff\" text-anchor=\"middle\">Notlar</text><line x1=\"22\" y1=\"75\" x2=\"278\" y2=\"75\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Kap</text><text x=\"274.0\" y=\"66.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Dikdörtgenler prizması</text><line x1=\"22\" y1=\"105\" x2=\"278\" y2=\"105\" stroke=\"#dee2e6\" stroke-width=\"1\"/><text x=\"26.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"700\" fill=\"#111111\" text-anchor=\"start\">Su</text><text x=\"274.0\" y=\"96.0\" font-family=\"Source Sans 3\",sans-serif font-size=\"15\" font-weight=\"800\" fill=\"#111111\" text-anchor=\"end\">Taşmadı</text></g></svg>", "son": "<div style=\"margin:1mm 0 1mm 2mm\"><div style=\"margin:.6mm 0\">I. Su taşmadıysa batan cismin hacmi, kabın taban alanı ile suyun yükselme miktarının çarpımıdır.</div><div style=\"margin:.6mm 0\">II. Kap ağzına kadar doluysa batan cismin hacmi, taşan suyun hacmine eşittir.</div><div style=\"margin:.6mm 0\">III. Aynı taş, tabanı daha büyük olan bir kaba bırakılırsa su daha çok yükselir.</div></div>", "k": "Buna göre, öğrencinin genellemelerinden hangileri doğrudur?", "sec": ["Yalnız I", "I ve II", "I ve III", "I, II ve III"], "secg": null, "c": "B", "a": ["I: Yükselen su prizma biçimindedir; hacmi taban alanı · yükselmedir. Doğrudur.", "II: Taşan su cismin yerini aldığı sudur. Doğrudur.", "III: Aynı hacim daha büyük tabana yayılır; su daha az yükselir. Yanlıştır."], "t": "Yalnız I: taşma durumu atlanmış; III'ü içerenler: taban alanı ile yükselmenin ilişkisi ters düşünülmüş", "d": "Her genellemeyi bir örnekle sınayınız. Aynı hacim daha büyük bir tabana yayılırsa yükseklik ne olur?", "ses": "b20"}]};
+const $=s=>document.querySelector(s);$("#kod").textContent=V.kod;$("#bas").textContent=V.baslik+" · Çözümler";
+const q=new URLSearchParams(location.search);const tek=["s","k","b"].find(x=>q.has(x));
+const esc=s=>String(s);
+function sesKutu(ad){return document.createComment("");}   /* 06.10.2026: ses kaldırıldı */
+function adimAdim(kap,list,son){let i=0;const dd=document.createElement("div");dd.className="dug";
+  const n=document.createElement("button");n.className="btn";n.type="button";const t=document.createElement("button");t.className="btn ghost";t.type="button";t.textContent="Bütün adımları göster";
+  const ciz=()=>{n.textContent=i<list.length?`${i+1}. adımı göster (${list.length} adım)`:"Çözüm tamamlandı";n.disabled=i>=list.length;t.hidden=i>=list.length;};
+  const ekle=()=>{const x=document.createElement("div");x.className="adim";x.innerHTML=`<b>${i+1}. adım</b> · ${list[i]}`;kap.insertBefore(x,dd);i++;if(i>=list.length&&son)son();ciz();};
+  n.onclick=ekle;t.onclick=()=>{while(i<list.length)ekle();};dd.append(n,t);kap.appendChild(dd);ciz();}
+function kartS(s){const k=document.createElement("section");k.className="kart";k.style.setProperty("--c","var(--ss)");k.id="s"+s.no;
+  k.innerHTML=`<span class="et">SIRA SENDE · ${s.no}</span><h2>${s.bas}</h2>`;
+  s.q.forEach((x,j)=>{const w=document.createElement("div");w.innerHTML=`<div class="soru"><b>${j+1}.</b> ${x.k}</div>`;k.appendChild(w);
+    k.appendChild(sesKutu(`s${s.no}-${j+1}`));adimAdim(w,x.a,()=>{const c=document.createElement("p");c.className="cevap";c.innerHTML="<b>Cevap:</b> "+x.c;w.appendChild(c);});});return k;}
+function kartK(s){const k=document.createElement("section");k.className="kart";k.style.setProperty("--c","var(--kk)");k.id="k"+s.no;
+  k.innerHTML=`<span class="et">KALEM KÂĞIT · ${s.no}</span><h2>${s.bas}</h2><p>${s.yon}</p><table><thead><tr><th>SAYI</th><th>CEVAP</th></tr></thead><tbody>${s.r.map(r=>`<tr><td><b>${r.n}</b></td><td>${r.c}</td></tr>`).join("")}</tbody></table>`;return k;}
+function kartB(s){const k=document.createElement("section");k.className="kart";k.style.setProperty("--c","var(--b)");k.id="b"+s.no;
+  const L="ABCD";const sec=s.sec?`<ol class="sec">${s.sec.map((x,i)=>`<li class="${L[i]===s.c?"":""}" data-h="${L[i]}"><b>${L[i]})</b> ${x}</li>`).join("")}</ol>`:"";
+  k.innerHTML=`<span class="et">${V.bet||"BAĞLAM TEMELLİ SORU"} · ${s.no}</span><h2>${window.CANL&&CANL[s.no]?"Canlandırın, deneyin, çözümü görün":"Adım adım çözüm"}</h2><div class="soru">${s.on||""}${s.g?`<div>${s.g}</div>`:""}${s.son||""}<p><b>${s.k}</b></p>${sec}${s.secg?'<p><i>Seçenekler kitaptaki görsellerdir.</i></p>':""}</div>`;
+  let cozKap=k;
+  if(window.CANL&&CANL[s.no]){const sek=document.createElement("div");sek.className="sek";sek.setAttribute("role","tablist");
+    sek.innerHTML=`<button type="button" role="tab" aria-selected="true">▶ Canlandır ve dene<span class="yeni">YENİ</span></button><button type="button" role="tab" aria-selected="false">Adım adım çözüm</button>`;
+    const p1=document.createElement("div");p1.className="cn";p1.setAttribute("role","tabpanel");const p2=document.createElement("div");p2.setAttribute("role","tabpanel");p2.hidden=true;
+    k.append(sesKutu(s.ses),sek,p1,p2);let kur=false;const ac=i=>{sek.querySelectorAll("button").forEach((b,j)=>b.setAttribute("aria-selected",i===j));p1.hidden=i!==0;p2.hidden=i!==1;if(i===0&&!kur){kur=true;CANL[s.no](p1);}};
+    sek.querySelectorAll("button").forEach((b,i)=>b.onclick=()=>ac(i));ac(q.get("g")==="cozum"?1:0);cozKap=p2;}
+  if(cozKap===k)k.appendChild(sesKutu(s.ses));const w=document.createElement("div");cozKap.appendChild(w);
+  adimAdim(w,s.a,()=>{const c=document.createElement("p");c.className="cevap";c.innerHTML=`<b>Doğru cevap:</b> ${s.c}`;w.appendChild(c);
+    k.querySelectorAll("ol.sec li").forEach(li=>{if(li.dataset.h===s.c)li.classList.add("dogru");});
+    if(s.t){const t=document.createElement("p");t.className="tuzak";t.innerHTML="<b>Diğer seçenekler neden yanlış?</b> "+s.t;w.appendChild(t);}});
+  const d=document.createElement("div");d.className="dikkat";d.innerHTML=`<b>Dikkat!</b> ${s.d}`;cozKap.appendChild(d);return k;}
+const ic=$("#ic");
+const BOL=[["s","Sıra Sende",V.s,kartS],["k","Kalem Kâğıt",V.k,kartK],["b",V.bad||"Bağlam Soruları",V.b,kartB]].filter(x=>x[2].length);
+if(tek&&BOL.some(x=>x[0]===tek)){const n=+q.get(tek);const [,,L,f]=BOL.find(x=>x[0]===tek);const s=L.find(x=>x.no===n)||L[0];ic.appendChild(f(s));$("#tum").hidden=false;$("#nav").remove();}
+else{let akt=BOL[0][0];const nav=$("#nav");const ciz=()=>{ic.innerHTML="";nav.innerHTML=BOL.map(([k,a,L])=>`<button type="button" data-k="${k}" aria-pressed="${k===akt}">${a} (${L.length})</button>`).join("");
+  nav.querySelectorAll("button").forEach(b=>b.onclick=()=>{akt=b.dataset.k;ciz();});const [,,L,f]=BOL.find(x=>x[0]===akt);L.forEach(s=>ic.appendChild(f(s)));};ciz();}
+</script></body></html><script>
+/* İŞLEM BÖLÜNMEZ (01.10.2026, ANA_KURALLAR §5.x-5)
+   Bir işlem (7⁰ = 1, (−4)⁰ = 1, 2/5 · 3 …) satır sonunda asla ikiye bölünmez.
+   1) Metinde işlem işaretlerinin (= ≠ + − · : × < > ≤ ≥ ≈) iki yanındaki boşluklar bölünmez boşluğa çevrilir.
+   2) Üs (sup/sub), kesir (.frac) ve bunlara bitişik metin tek bir "nowrap" kutuya alınır.
+   Virgülden sonraki boşluk bölünebilir kalır; böylece uzun işlem dizileri satırlara işlem işlem dağılır (alt alta).
+   Kitap (PDF) ve çevrim içi sayfaların hepsinde aynı betik çalışır. */
+(function(){
+  const NB=" ";
+  const OP="=≠+−·×<>≤≥≈:";  // ":" yalnız iki yanında boşluk varken (düz yazıda iki noktadan önce boşluk olmaz)
+  const reOp=new RegExp("[ \\t]+(["+OP+"])[ \\t]+","g");
+  // ":" yalnız sayılar arasında bölme işaretidir (düz yazıdaki iki nokta etkilenmez)
+  const reBol=/([\d)])[ \t]+:[ \t]+(?=[\d(−])/g;
+  const ATOM=el=>el.nodeType===1&&(/^(SUP|SUB)$/.test(el.tagName)||el.classList.contains("frac")||el.classList.contains("kes")||el.classList.contains("krk")||el.classList.contains("nw")||el.classList.contains("nw-islem"));
+  const ATLA=/^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|SVG|CANVAS|CODE|PRE)$/i;
+  function metin(s){return s.replace(reOp,NB+"$1"+NB).replace(reBol,"$1"+NB+":"+NB).replace(/\|\u00a0/g,"|\u2060\u00a0").replace(/([“"(\[])([+−·×:=]) (?=[\d(])/g,"$1$2"+NB);}  // "|" sonrasında satır kırılabilir; WJ ile yapıştırılır (mutlak değer)
+  function isle(kok){
+    if(!kok||kok.nodeType!==1||ATLA.test(kok.tagName)||kok.closest&&kok.closest("svg,.nw-islem"))return;
+    // 1) metin düğümleri
+    const w=document.createTreeWalker(kok,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;return !p||p.closest("script,style,textarea,svg,code,pre")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+    const tl=[];while(w.nextNode())tl.push(w.currentNode);
+    for(const t of tl){const y=metin(t.data);if(y!==t.data)t.data=y;}
+    // 2) atomları bitişik metinle birleştir
+    const ebeveyn=new Set();
+    kok.querySelectorAll("sup,sub,.frac,.kes,.krk,.nw").forEach(a=>{if(!a.closest("svg,.nw-islem")&&a.parentElement&&!(a.parentElement.classList.contains("frac")||a.parentElement.parentElement&&a.parentElement.parentElement.classList.contains("frac")))ebeveyn.add(a.parentElement);});
+    if(ATOM(kok)&&kok.parentElement)ebeveyn.add(kok.parentElement);
+    ebeveyn.forEach(yapistir);
+    // 3) işaretle başlayan öğeden (<small>= 16</small>) önceki boşluk da bölünmez
+    kok.querySelectorAll("*").forEach(el=>{const o=el.previousSibling;if(!o||o.nodeType!==3||!/[ \t\n]+$/.test(o.data))return;
+      if(/^[ \t\n]+$/.test(o.data)&&!o.previousSibling)return;
+      const t=(el.textContent||"").trimStart();if(t&&"=≠+·×<>≤≥≈:".includes(t[0])&&/^[=≠+·×<>≤≥≈:][ \u00a0]/.test(t))o.data=o.data.replace(/[ \t\n]+$/,NB);});
+    // 5) yalnız boşluktan oluşan düğüm: önceki öğe işaretle bitiyorsa ("… 3 ·" + " " + "C = 12") bölünmez
+    kok.querySelectorAll("*").forEach(el=>{const o=el.nextSibling;if(!o||o.nodeType!==3||!/^[ \t\n]+$/.test(o.data)||!o.nextSibling)return;
+      const t=(el.textContent||"").replace(/[ \t\n]+$/,"");if(/[ \u00a0][=≠+−·×<>≤≥≈:]$/.test(t))o.data=NB;});
+    // 4) düğüm sınırında kalan işaret: "… 3 ·" + " C = 12" ya da "A = 3" + " · C"
+    tl.forEach(t=>{if(!t.isConnected)return;let y=t.data;
+      y=y.replace(/(^|[ \u00a0])([=≠+−·×<>≤≥≈:])[ \t\n]+$/,"$1$2"+NB);
+      y=y.replace(/^[ \t\n]+([=≠+·×<>≤≥≈:])(?=[ \u00a0]|$)/,NB+"$1");
+      if(y!==t.data)t.data=y;});
+  }
+  function yapistir(p){
+    if(p.closest(".nw-islem")||p.closest(".frac"))return;
+    const d=[...p.childNodes];let i=0;
+    while(i<d.length){
+      if(!ATOM(d[i])||d[i].classList&&d[i].classList.contains("nw-islem")){i++;continue;}
+      // sola: bitişik metin parçası (son boşluktan sonrası)
+      let bas=i, sagSon=i;
+      let solMetin=null, solKes=0;
+      if(i>0&&d[i-1].nodeType===3){const s=d[i-1].data;const m=s.match(/[^ \t\n\r]*$/);if(m&&m[0].length){solMetin=d[i-1];solKes=s.length-m[0].length;}}
+      // sağa: atom/metin zinciri
+      let j=i+1, sagMetin=null, sagKes=0;
+      while(j<d.length){
+        const n=d[j];
+        if(ATOM(n)){sagSon=j;j++;continue;}
+        if(n.nodeType===3){
+          const m=n.data.match(/^[^ \t\n\r]*/);const k=m?m[0].length:0;
+          if(k===n.data.length&&j+1<d.length&&ATOM(d[j+1])){sagSon=j;j++;continue;} // tamamı bitişik, arkasında yine atom
+          if(k>0){sagMetin=n;sagKes=k;}
+        }
+        break;
+      }
+      const sp=document.createElement("span");sp.className="nw-islem";
+      p.insertBefore(sp,d[bas]);
+      if(solMetin){const r=solMetin.splitText(solKes);sp.appendChild(r);}
+      for(let x=bas;x<=sagSon;x++)sp.appendChild(d[x]);
+      if(sagMetin){const kalan=sagMetin.splitText(sagKes);sp.appendChild(sagMetin);d[j]=kalan;}
+      i=sagSon+1;
+    }
+  }
+  const st=document.createElement("style");
+  st.textContent=".nw-islem{white-space:nowrap}";
+  (document.head||document.documentElement).appendChild(st);
+  window.islemTut=isle;
+  let bekle=false;const kuyruk=new Set();
+  function calis(){bekle=false;gozcu.disconnect();kuyruk.forEach(n=>{try{isle(n.nodeType===1?n:n.parentElement)}catch(e){}});kuyruk.clear();gozcu.observe(document.body,{childList:true,subtree:true,characterData:true});}
+  const gozcu=new MutationObserver(ms=>{for(const m of ms){if(m.type==="characterData")kuyruk.add(m.target.parentElement);else m.addedNodes.forEach(n=>kuyruk.add(n.nodeType===1?n:n.parentElement));}if(!bekle){bekle=true;Promise.resolve().then(calis);}});
+  function basla(){isle(document.body);gozcu.observe(document.body,{childList:true,subtree:true,characterData:true});}
+  if(document.body)basla();else document.addEventListener("DOMContentLoaded",basla);
+})();
+
+</script>
