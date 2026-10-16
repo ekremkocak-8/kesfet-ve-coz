@@ -1202,13 +1202,13 @@ const asm=(n,ne,kur,yon2)=>Object.assign(deney(n,ne,yon2),{kur});
 const kendi=(soru,secs,ok,ip)=>kendiA((m,son)=>{soruY(m,soru,secs,ok,ip,son);});
 
 /* ================================================================================================
-   1 · KURDELE Mİ, KÂĞIT MI, LOKUM MU? — iş kartına göre ayrıtları, yüzleri ya da iç hacmi renklendirmek */
-const IS1=[{ad:"Kutunun bütün ayrıtlarına kurdele yapıştırmak",b:"u"},{ad:"Kutuyu ambalaj kâğıdıyla sarmak",b:"a"},{ad:"Kutuyu lokumla doldurmak",b:"h"},{ad:"Kutunun kapağına etiket yapıştırmak",b:"a"}];
+   1 · BANT MI, CİLA MI, BİLYE Mİ? — iş kartına göre ayrıtları, yüzleri ya da iç hacmi renklendirmek */
+const IS1=[{ad:"Saklama kutusunun bütün ayrıtlarına renkli bant yapıştırmak",b:"u"},{ad:"Kutunun bütün dış yüzlerini cilalamak",b:"a"},{ad:"Kutuyu bilyeyle doldurmak",b:"h"},{ad:"Kutunun kapağına isim etiketi yapıştırmak",b:"a"}];
 const BL={u:"Uzunluk",a:"Alan",h:"Hacim"};
 function e_bilesen(p){const D=defterY(["İş","Bileşen","Hesap"]);const a=20,b=12,c=8;
   const hesap=s=>{const i=IS1[s.i];if(s.b!==i.b)return "uygun değil";if(s.b==="u")return `4 · (20 + 12 + 8) = 160 cm`;if(s.b==="h")return `20 · 12 · 8 = ${Sn(1920)} cm³`;return s.i===1?`2 · (240 + 160 + 96) = 992 cm²`:"20 · 12 = 240 cm²";};
-  asamali(p,{tahmin:{giris:["Bir lokum kutusu 20 cm, 12 cm ve 8 cm ölçülerindedir.","Kutunun bütün ayrıtlarına kurdele yapıştırılacaktır."],soru:"Kurdele miktarını bulmak için ne hesaplanır?",
-      secs:[["a","Ayrıtların uzunlukları toplamı"],["b","Yüzey alanı"],["c","Hacim"]],dogru:"a",neden:"Kurdele ayrıtlar boyunca uzanır; uzunluk hesaplanır."},
+  asamali(p,{tahmin:{giris:["Ahşap bir saklama kutusu 20 cm, 12 cm ve 8 cm ölçülerindedir.","Kutunun bütün ayrıtlarına renkli bant yapıştırılacaktır."],soru:"Bant miktarını bulmak için ne hesaplanır?",
+      secs:[["a","Ayrıtların uzunlukları toplamı"],["b","Yüzey alanı"],["c","Hacim"]],dogru:"a",neden:"Bant ayrıtlar boyunca uzanır; uzunluk hesaplanır."},
     asamalar:[asm(4,"Görev kartındaki iş için bileşen düğmesini seçiniz; kutuda ayrıtlar, yüzler ya da iç hacim renklenir.",(k,A)=>lab(k,A,D,{st:{i:0,b:""},W:340,H:250,
         kont:[{t:"sec",key:"b",ad:"Bu iş için hesaplanan:",liste:[["u","Uzunluk"],["a","Alan"],["h","Hacim"]]}],
         ciz:s=>{const {s:s_,O}=sigdir(a,b,c,320,240,40),P=(x,y,z)=>I(x,y,z,s_,O);let h=kutu(a,b,c,s_,O,GR);
@@ -1220,10 +1220,10 @@ function e_bilesen(p){const D=defterY(["İş","Bileşen","Hesap"]);const a=20,b=
         satir:s=>[IS1[s.i].ad,BL[s.b]||"",hesap(s)],anahtar:s=>s.i+s.b,yazKos:s=>s.b?"":"Önce bir bileşen seçiniz.",
         gorev:IS1.map((x,i)=>({m:`İş kartı: <b>${x.ad}</b>. Uygun bileşeni seçip deftere yazınız.`,st0:{i,b:""},ist:{b:x.b},
           yan:s=>s.b==="h"?"Bu iş kutunun içini doldurmaz.":s.b==="u"?"Bu iş yalnız ayrıtlar boyunca değil, bir yüzeyi örter.":"Bu iş yüzeyi örtmez.",
-          ...(i===0?{soru:"Kurdele için kaç cm gerekir?",dogru:160,ip:"Kutunun 12 ayrıtı vardır: dördü 20 cm, dördü 12 cm, dördü 8 cm.",dm:"4 · (20 + 12 + 8) = 160 cm."}:{})}))})),
-      kuralA(D,[["Defterdeki işlerde bileşen nasıl seçildi?",["Ayrıt boyunca uzanan iş uzunluk, yüzeyi örten iş alan, içini dolduran iş hacim","Her işte hacim","Büyük işlerde hacim, küçük işlerde alan"],"Doğru! Bileşeni işin ne yaptığı belirler.",["Etiket kutunun içini doldurur mu?","Kurdele bir yüzeyi örter mi?"]]],"Her işin hangi bileşeni istediğini buldunuz."),
+          ...(i===0?{soru:"Bant için kaç cm gerekir?",dogru:160,ip:"Kutunun 12 ayrıtı vardır: dördü 20 cm, dördü 12 cm, dördü 8 cm.",dm:"4 · (20 + 12 + 8) = 160 cm."}:{})}))})),
+      kuralA(D,[["Defterdeki işlerde bileşen nasıl seçildi?",["Ayrıt boyunca uzanan iş uzunluk, yüzeyi örten iş alan, içini dolduran iş hacim","Her işte hacim","Büyük işlerde hacim, küçük işlerde alan"],"Doğru! Bileşeni işin ne yaptığı belirler.",["Etiket kutunun içini doldurur mu?","Bant bir yüzeyi örter mi?"]]],"Her işin hangi bileşeni istediğini buldunuz."),
       kendi("Bir akvaryumun camlarını silmek için hangi bileşen düşünülür?",["Alan","Hacim","Uzunluk"],"Doğru! Silinen camların yüzeyidir.",["Akvaryum suyla doldurulmuyor.","Yalnız kenarlar silinmiyor."])],
-    kural:"Bir problemde önce <b>bileşen</b> belirlenir: ayrıtlar boyunca uzanan iş (kurdele, şerit) <b>uzunluk</b>, yüzeyi örten iş (kâğıt, boya, etiket) <b>alan</b>, içini dolduran iş (lokum, su, kum) <b>hacim</b> gerektirir."});}
+    kural:"Bir problemde önce <b>bileşen</b> belirlenir: ayrıtlar boyunca uzanan iş (bant, şerit) <b>uzunluk</b>, yüzeyi örten iş (cila, boya, etiket) <b>alan</b>, içini dolduran iş (bilye, su, kum) <b>hacim</b> gerektirir."});}
 
 /* 2 · METİNDEN ŞEKLE — problem cümlesindeki ölçüleri prizmanın ayrıtlarına yerleştirmek */
 const MT=[{ad:"Uzunluğu 30 cm, genişliği 20 cm, yüksekliği 10 cm olan bir ayakkabı kutusu",o:[30,20,10],b:"cm"},
@@ -1273,25 +1273,25 @@ function e_kaplama(p){const D=defterY(["Durum","Kaplanan yüzler","Alan (cm²)"]
       kendi("Ölçüleri 10 cm, 10 cm ve 5 cm olan üstü açık bir kutunun dışı kaç cm² kâğıtla kaplanır?",["300","400","500"],"Doğru! 100 + 4 · 50 = 300.",["Üst yüz de eklenmiş.","Hacim hesaplanmış."])],
     kural:"Kaplama problemlerinde önce <b>hangi yüzlerin kaplanacağı</b> belirlenir: kapalı kutuda 6, üstü açık kutuda ve havuzun iç yüzeyinde 5 (taban ve dört yan yüz), odanın duvarlarında 4 yüz. Sonra yalnız bu yüzlerin alanları toplanır."});}
 
-/* 4 · BOYA HESAPLAYICI — oda ölçüleri, kapı ve pencere; en az kaç kutu */
-function e_boya(p){const D=defterY(["Oda (m)","Kapı · pencere","Boyanacak (m²)","Bölüm","En az kutu"]);const H=3,KUT=12;
+/* 4 · SERA ÖRTÜSÜ HESAPLAYICI — seranın dört yan yüzü, kapı ve havalandırma penceresi; en az kaç rulo */
+function e_boya(p){const D=defterY(["Sera (m)","Kapı · pencere","Örtülecek (m²)","Bölüm","En az rulo"]);const H=3,KUT=12;
   const alan=s=>2*(s.u+s.g)*H-2*s.k-2*s.p;const bol=s=>alan(s)/KUT;const enaz=s=>Math.ceil(bol(s)-1e-9);
-  asamali(p,{tahmin:{giris:["Boyanacak alan 50 m², bir kutu boya 12 m² boyamaktadır.","50 : 12 ≈ 4,2"],soru:"En az kaç kutu boya alınmalıdır?",secs:[["a","5"],["b","4"],["c","4,2"]],dogru:"a",neden:"4 kutu 48 m² boyar; kalan 2 m² için bir kutu daha gerekir."},
-    asamalar:[asm(4,"Odanın uzunluğunu, genişliğini, kapı ve pencere sayısını ayarlayınız. Yükseklik 3 m, kapı ve pencere 2'şer m², bir kutu boya 12 m² boyar.",(k,A)=>lab(k,A,D,{st:{u:4,g:3,k:1,p:1},W:340,H:180,
+  asamali(p,{tahmin:{giris:["Örtülecek alan 40 m², bir rulo naylon örtü 12 m² kaplamaktadır.","40 : 12 ≈ 3,3"],soru:"En az kaç rulo örtü alınmalıdır?",secs:[["a","4"],["b","3"],["c","3,3"]],dogru:"a",neden:"3 rulo 36 m² kaplar; kalan 4 m² için bir rulo daha gerekir."},
+    asamalar:[asm(4,"Seranın uzunluğunu, genişliğini, kapı ve havalandırma penceresi sayısını ayarlayınız. Yan yüzlerin yüksekliği 3 m, kapı ve pencere 2'şer m² (açık kalır), bir rulo örtü 12 m² kaplar.",(k,A)=>lab(k,A,D,{st:{u:4,g:3,k:1,p:1},W:340,H:180,
         kont:[{t:"say",key:"u",ad:"Uzunluk (m)",min:3,max:8},{t:"say",key:"g",ad:"Genişlik (m)",min:3,max:6},{t:"say",key:"k",ad:"Kapı",min:0,max:2},{t:"say",key:"p",ad:"Pencere",min:0,max:3}],
         ciz:s=>{const L=2*(s.u+s.g),sc=300/L;let h="",x=20;[s.u,s.g,s.u,s.g].forEach((w,j)=>{h+=`<rect x="${x}" y="40" width="${w*sc}" height="${H*sc}" fill="#fff3bf" stroke="#1d2433" stroke-width="1.2"/>`+tx(x+w*sc/2,40+H*sc+16,`${w} m`,{fs:13});x+=w*sc;});
           for(let j=0;j<s.k;j++)h+=`<rect x="${26+j*30}" y="${40+H*sc-2*sc}" width="${sc}" height="${2*sc}" fill="#ced4da" stroke="#1d2433"/>`;
           for(let j=0;j<s.p;j++)h+=`<rect x="${26+(s.u)*sc+j*28}" y="${50}" width="${sc*1.4}" height="${sc*1.4}" fill="#d0ebff" stroke="#1d2433"/>`;
-          return h+tx(170,24,"Dört duvar yan yana (yükseklik 3 m)",{fs:13});},
-        bilgi:s=>`<span>Boyanacak: <b>${alan(s)} m²</b></span><span>${alan(s)} : 12 ≈ <b>${Sn(Math.round(bol(s)*100)/100)}</b></span><span>En az <b>${enaz(s)}</b> kutu</span>`,
+          return h+tx(170,24,"Seranın dört yan yüzü yan yana (yükseklik 3 m)",{fs:13});},
+        bilgi:s=>`<span>Örtülecek: <b>${alan(s)} m²</b></span><span>${alan(s)} : 12 ≈ <b>${Sn(Math.round(bol(s)*100)/100)}</b></span><span>En az <b>${enaz(s)}</b> rulo</span>`,
         satir:s=>[`${s.u} · ${s.g}`,`${s.k} · ${s.p}`,alan(s),Sn(Math.round(bol(s)*100)/100),enaz(s)],anahtar:s=>[s.u,s.g,s.k,s.p].join("-"),
-        gorev:[{m:"Oda <b>4 m · 3 m</b>, <b>1 kapı</b> ve <b>1 pencere</b>. Deftere yazınız.",st0:{u:5,g:4,k:0,p:0},ist:{u:4,g:3,k:1,p:1},soru:"En az kaç kutu boya alınmalıdır?",dogru:4,ip:"38 : 12 ≈ 3,2; 3 kutu yetmez.",dm:"Bir üst doğal sayı: 4 kutu."},
-          {m:"Oda <b>5 m · 4 m</b>, <b>1 kapı</b>, pencere yok.",ist:{u:5,g:4,k:1,p:0}},
-          {m:"Oda <b>6 m · 4 m</b>, <b>1 kapı</b>, <b>2 pencere</b>.",ist:{u:6,g:4,k:1,p:2}},
-          {m:"Oda <b>5 m · 3 m</b>, kapı ve pencere yok.",ist:{u:5,g:3,k:0,p:0},soru:"Bu odada bölüm tam çıktı. Kaç kutu gerekir?",dogru:4,ip:"48 : 12 kaçtır?",dm:"48 : 12 = 4; bölüm tam olunca yuvarlama gerekmez."}]})),
-      kuralA(D,[["“En az kaç kutu?” sorusunda bölüm tam çıkmazsa ne yapılır?",["Bir üst doğal sayı alınır.","Aşağı yuvarlanır.","Bölüm olduğu gibi yazılır."],"Doğru! Eksik kalan yer de boyanmalıdır.",["3 kutu 36 m² boyar; 38 m² boyanabilir mi?","Kutu parça parça satılmaz."]]],"Yuvarlama yönünü buldunuz."),
-      kendi("Boyanacak alan 70 m², bir kutu 15 m² boyuyor. En az kaç kutu gerekir?",["5","4","6"],"Doğru! 70 : 15 ≈ 4,7; bir üst doğal sayı 5.",["4 kutu 60 m² boyar.","5 kutu 75 m² boyar; yeter."])],
-    kural:"Boyama problemlerinde boyanacak alan = duvarların alanı − kapı ve pencerelerin alanı. <b>“En az kaç kutu?”</b> sorusunda bölüm tam çıkmazsa <b>bir üst doğal sayı</b> alınır; çünkü eksik kalan yer de boyanmalıdır."});}
+        gorev:[{m:"Sera <b>4 m · 3 m</b>, <b>1 kapı</b> ve <b>1 pencere</b>. Deftere yazınız.",st0:{u:5,g:4,k:0,p:0},ist:{u:4,g:3,k:1,p:1},soru:"En az kaç rulo örtü alınmalıdır?",dogru:4,ip:"38 : 12 ≈ 3,2; 3 rulo yetmez.",dm:"Bir üst doğal sayı: 4 rulo."},
+          {m:"Sera <b>5 m · 4 m</b>, <b>1 kapı</b>, pencere yok.",ist:{u:5,g:4,k:1,p:0}},
+          {m:"Sera <b>6 m · 4 m</b>, <b>1 kapı</b>, <b>2 pencere</b>.",ist:{u:6,g:4,k:1,p:2}},
+          {m:"Sera <b>5 m · 3 m</b>, kapı ve pencere yok.",ist:{u:5,g:3,k:0,p:0},soru:"Bu serada bölüm tam çıktı. Kaç rulo gerekir?",dogru:4,ip:"48 : 12 kaçtır?",dm:"48 : 12 = 4; bölüm tam olunca yuvarlama gerekmez."}]})),
+      kuralA(D,[["“En az kaç rulo?” sorusunda bölüm tam çıkmazsa ne yapılır?",["Bir üst doğal sayı alınır.","Aşağı yuvarlanır.","Bölüm olduğu gibi yazılır."],"Doğru! Eksik kalan yer de örtülmelidir.",["3 rulo 36 m² kaplar; 38 m² örtülebilir mi?","Rulo parça parça satılmaz."]]],"Yuvarlama yönünü buldunuz."),
+      kendi("Örtülecek alan 58 m², bir rulo 14 m² kaplıyor. En az kaç rulo gerekir?",["5","4","6"],"Doğru! 58 : 14 ≈ 4,1; bir üst doğal sayı 5.",["4 rulo 56 m² kaplar; 2 m² açıkta kalır.","5 rulo 70 m² kaplar; yeter."])],
+    kural:"Kaplama problemlerinde kaplanacak alan = kaplanan yüzlerin alanı − açık kalan yerlerin (kapı, pencere) alanı. <b>“En az kaç rulo?”</b> sorusunda bölüm tam çıkmazsa <b>bir üst doğal sayı</b> alınır; çünkü eksik kalan yer de örtülmelidir."});}
 
 /* 5 · DEPO VE BİDON — hacim → litre → bidon zinciri */
 const DP=[{o:[2,1,1],bd:20},{o:[3,1,0.5],bd:25},{o:[4,1,0.5],bd:40}];
@@ -1311,20 +1311,20 @@ function e_depo(p){const D=defterY(["Depo (m)","Hacim","Litre","Bidon (L)","Dök
     kural:"Doldurma problemlerinde zincir: <b>ayrıtlar → hacim (m³) → litre (· 1 000) → bidon sayısı (: bir bidon)</b>. Birimler aynı olmadan bölme yapılmaz."});}
 
 /* 6 · KAPTAN KABA — su aktarılınca yükseklik değişir, hacim değişmez */
-function e_aktar(p){const D=defterY(["2. kabın tabanı","Taban alanı","Yeni yükseklik","Hacim"]);const VS=30*20*12;
+function e_aktar(p){const D=defterY(["2. kabın tabanı","Taban alanı","Yeni yükseklik","Hacim"]);const VS=40*15*12;
   const yuk=s=>VS/(s.a*s.b);
-  asamali(p,{tahmin:{giris:["Tabanı 30 cm · 20 cm olan kapta 12 cm su vardır.","Su, tabanı 40 cm · 30 cm olan kaba dökülecektir."],soru:"Yeni kapta su kaç cm yükseklikte olur?",secs:[["a","6"],["b","12"],["c","24"]],dogru:"a",neden:"7 200 : 1 200 = 6 cm."},
-    asamalar:[asm(4,"2. kabın taban ayrıtlarını seçiniz; su dökülür ve yeni yükseklik ölçekli çizilir.",(k,A)=>lab(k,A,D,{st:{a:30,b:20},W:340,H:220,
+  asamali(p,{tahmin:{giris:["Tabanı 40 cm · 15 cm olan kapta 12 cm su vardır.","Su, tabanı 40 cm · 30 cm olan kaba dökülecektir."],soru:"Yeni kapta su kaç cm yükseklikte olur?",secs:[["a","6"],["b","12"],["c","24"]],dogru:"a",neden:"7 200 : 1 200 = 6 cm."},
+    asamalar:[asm(4,"2. kabın taban ayrıtlarını seçiniz; su dökülür ve yeni yükseklik ölçekli çizilir.",(k,A)=>lab(k,A,D,{st:{a:20,b:15},W:340,H:220,
         kont:[{t:"sec",key:"a",ad:"2. kabın önden görünen ayrıtı (cm):",num:true,liste:[15,20,30,40].map(v=>[v,v])},{t:"sec",key:"b",ad:"2. kabın derinliği (cm):",num:true,liste:[15,20,30].map(v=>[v,v])}],
-        ciz:s=>{const k_=4,h=yuk(s);return yanK(20,190,30*k_,30*k_,12*k_)+tx(80,210,"1. kap: 30 · 20",{fs:13})+yanK(190,190,s.a*k_*0.8,30*k_,Math.min(h,30)*k_)+tx(190+s.a*k_*0.4,210,`2. kap: ${s.a} · ${s.b}`,{fs:13})+
+        ciz:s=>{const k_=4,h=yuk(s);return yanK(20,190,40*k_*0.8,30*k_,12*k_)+tx(84,210,"1. kap: 40 · 15",{fs:13})+yanK(190,190,s.a*k_*0.8,30*k_,Math.min(h,30)*k_)+tx(190+s.a*k_*0.4,210,`2. kap: ${s.a} · ${s.b}`,{fs:13})+
           tx(190+s.a*k_*0.4,190-Math.min(h,30)*k_-8,`${Sn(h)} cm`,{fs:14,r:"#1c5fbf"})+tx(80,134,"12 cm",{fs:14,r:"#1c5fbf"});},
         bilgi:s=>`<span>Hacim: <b>${Sn(VS)} cm³</b></span><span>Yeni yükseklik: ${Sn(VS)} : ${Sn(s.a*s.b)} = <b>${Sn(yuk(s))} cm</b></span>`,
         satir:s=>[`${s.a} · ${s.b}`,Sn(s.a*s.b),Sn(yuk(s)),Sn(VS)],anahtar:s=>s.a+"-"+s.b,
         gorev:[{m:"2. kabın tabanını <b>40 cm · 30 cm</b> yapınız.",ist:{a:40,b:30}},{m:"2. kabın tabanını <b>20 cm · 20 cm</b> yapınız.",ist:{a:20,b:20}},
-          {m:"2. kabın tabanını <b>40 cm · 15 cm</b> yapınız.",ist:{a:40,b:15},soru:"Yükseklik neden ilk kaptakiyle aynı çıktı?",secs:["İki kabın taban alanı eşit (600 cm²).","Kaplar aynı yükseklikte.","Su azaldı."],ip:["Kapların yükseklikleri sorulmadı.","Su dökülürken kaybolmadı."],dm:"40 · 15 = 30 · 20 = 600 cm²."},
+          {m:"2. kabın tabanını <b>30 cm · 20 cm</b> yapınız.",ist:{a:30,b:20},soru:"Yükseklik neden ilk kaptakiyle aynı çıktı?",secs:["İki kabın taban alanı eşit (600 cm²).","Kaplar aynı yükseklikte.","Su azaldı."],ip:["Kapların yükseklikleri sorulmadı.","Su dökülürken kaybolmadı."],dm:"30 · 20 = 40 · 15 = 600 cm²."},
           {m:"2. kabın tabanını <b>30 cm · 30 cm</b> yapınız.",ist:{a:30,b:30},soru:"Defterdeki dört satırda değişmeyen nedir?",secs:["Suyun hacmi","Suyun yüksekliği","Taban alanı"],ip:["Yükseklik sütununa bakınız.","Taban alanı sütununa bakınız."],dm:"Hacim hep 7 200 cm³'tür."}]})),
       kuralA(D,[["Taban alanı büyüyünce aynı suyun yüksekliği nasıl değişir?",["Azalır","Artar","Değişmez"],"Doğru! Aynı hacim daha geniş tabana yayılır.",["40 · 30'luk kapta yükseklik kaç oldu?","20 · 20'lik kapta yükseklik kaç oldu?"]]],"Aktarmada hacmin korunduğunu gördünüz."),
-      kendi("Tabanı 20 cm · 10 cm olan kapta 15 cm su var. Su tabanı 30 cm · 25 cm olan kaba dökülürse yükseklik kaç cm olur?",["4","15","8"],"Doğru! 3 000 : 750 = 4.",["Yükseklik aynı kalmaz.","Taban alanı yanlış hesaplanmış."])],
+      kendi("Tabanı 20 cm · 10 cm olan kapta 18 cm su var. Su tabanı 30 cm · 15 cm olan kaba dökülürse yükseklik kaç cm olur?",["8","18","4"],"Doğru! 3 600 : 450 = 8.",["Yükseklik aynı kalmaz.","Taban alanı yanlış hesaplanmış."])],
     kural:"Su bir kaptan başka bir kaba aktarılınca <b>hacmi değişmez</b>; yalnız biçimi değişir. Yeni yükseklik = <b>hacim : yeni taban alanı</b>. Taban alanı büyürse yükseklik azalır."});}
 
 /* 7 · EKSİK AYRIT — litre ve iki ayrıttan yükseklik */
@@ -1518,28 +1518,28 @@ function e_genel(p){const D=defterY(["1. kutu","2. kutu","Hacimler","Yüzey alan
       kendi("“Yüzey alanı büyük olan kutunun hacmi de büyüktür.” önermesi için hangisi karşı örnektir?",["1 · 1 · 9 ile 2 · 2 · 3","2 · 2 · 2 ile 3 · 3 · 3","1 · 2 · 3 ile 2 · 3 · 4"],"Doğru! 38 > 32 ama 9 < 12.",["Küçük küpün iki değeri de küçüktür.","Bu çiftte ikisi de büyüktür."])],
     kural:"Bir genelleme (önerme) <b>örneklerle sınanır</b>. Önermeye uymayan <b>tek bir karşı örnek</b> onun her zaman doğru olmadığını gösterir. Hacim ve yüzey alanı birlikte artmak zorunda değildir."});}
 
-/* 18 · İKİ YOL BİR SONUÇ — tamamdan dolu kısmı çıkarma ve boş kısmı doğrudan hesaplama */
-function e_ikiyol(p){const D=defterY(["Tank yüksekliği (dm)","Su (dm)","1. yol (L)","2. yol (L)"]);const a=20,b=10;
-  asamali(p,{tahmin:{giris:["Tabanı 20 dm · 10 dm olan bir tankta su var.","Ela tamamın hacminden suyun hacmini çıkarıyor; Yusuf boş kısmı doğrudan hesaplıyor."],soru:"İki yolun sonuçları için ne söylenebilir?",secs:[["a","Hep aynı çıkar."],["b","Ela'nınki büyük çıkar."],["c","Tank büyükse farklı çıkar."]],dogru:"a",neden:"İkisi de boş kısmın hacmini bulur."},
-    asamalar:[asm(3,"Tank yüksekliğini ve su yüksekliğini sayaçlarla ayarlayınız; iki yolun işlemleri yan yana yazılır.",(k,A)=>lab(k,A,D,{st:{h:10,s:4},W:340,H:220,
-        kont:[{t:"say",key:"h",ad:"Tank yüksekliği (dm)",min:6,max:15},{t:"say",key:"s",ad:"Su (dm)",min:1,max:14}],
-        ciz:s=>{const sv_=Math.min(s.s,s.h),{s:sc,O}=sigdir(a,b,15,340,200,30);return kapSu(a,b,s.h,sc,O,sv_/s.h)+(s.s>s.h?tx(170,214,"Su tanktan yüksek olamaz",{fs:14,r:"#c92a2a"}):"");},
+/* 18 · İKİ YOL BİR SONUÇ — tamamdan dolu kısmı çıkarma ve boş kısmı doğrudan hesaplama (bağlam: büyük akvaryum) */
+function e_ikiyol(p){const D=defterY(["Akvaryum yüksekliği (dm)","Su (dm)","1. yol (L)","2. yol (L)"]);const a=20,b=10;
+  asamali(p,{tahmin:{giris:["Bir hayvanat bahçesindeki büyük akvaryumun tabanı 20 dm · 10 dm'dir; içinde bir miktar su var.","1. yol tamamın hacminden suyun hacmini çıkarıyor; 2. yol boş kısmı doğrudan hesaplıyor."],soru:"İki yolun sonuçları için ne söylenebilir?",secs:[["a","Hep aynı çıkar."],["b","1. yolunki büyük çıkar."],["c","Akvaryum büyükse farklı çıkar."]],dogru:"a",neden:"İkisi de boş kısmın hacmini bulur."},
+    asamalar:[asm(3,"Akvaryumun yüksekliğini ve su yüksekliğini sayaçlarla ayarlayınız; iki yolun işlemleri yan yana yazılır.",(k,A)=>lab(k,A,D,{st:{h:10,s:4},W:340,H:220,
+        kont:[{t:"say",key:"h",ad:"Akvaryum yüksekliği (dm)",min:6,max:15},{t:"say",key:"s",ad:"Su (dm)",min:1,max:14}],
+        ciz:s=>{const sv_=Math.min(s.s,s.h),{s:sc,O}=sigdir(a,b,15,340,200,30);return kapSu(a,b,s.h,sc,O,sv_/s.h)+(s.s>s.h?tx(170,214,"Su akvaryumdan yüksek olamaz",{fs:14,r:"#c92a2a"}):"");},
         bilgi:s=>`<span>1. yol: ${a} · ${b} · ${s.h} − ${a} · ${b} · ${s.s} = <b>${Sn(a*b*(s.h-s.s))} dm³</b></span><span>2. yol: ${a} · ${b} · (${s.h} − ${s.s}) = <b>${Sn(a*b*(s.h-s.s))} dm³</b></span>`,
-        satir:s=>[s.h,s.s,Sn(a*b*s.h-a*b*s.s),Sn(a*b*(s.h-s.s))],anahtar:s=>s.h+"-"+s.s,yazKos:s=>s.s>=s.h?"Su yüksekliği tank yüksekliğinden küçük olmalıdır.":"",
-        gorev:[{m:"Tank <b>10 dm</b>, su <b>4 dm</b>.",ist:{h:10,s:4}},{m:"Tank <b>12 dm</b>, su <b>9 dm</b>.",ist:{h:12,s:9}},
-          {m:"Tank <b>8 dm</b>, su <b>3 dm</b>.",ist:{h:8,s:3},soru:"Hangi yol daha az işlem gerektirir?",secs:["Boş kısmı doğrudan hesaplamak (2. yol)","Tamamdan dolu kısmı çıkarmak (1. yol)","İkisi eşit işlem gerektirir"],ip:["1. yolda kaç çarpma var?","2. yolda kaç çarpma var?"],dm:"2. yolda bir çarpma daha azdır; iki yol aynı sonucu verir."}]})),
-      kuralA(D,[["İki yolun sonuçları her satırda nasıl çıktı?",["Hep eşit","Hep 1. yol büyük","Bazen eşit"],"Doğru! İki yol da boş kısmı bulur; biri ötekinin kontrolüdür.",["Defterin son iki sütununu karşılaştırınız.","Tank yüksekliği değişince eşitlik bozuldu mu?"]]],"Bir problemi iki yolla çözüp karşılaştırdınız."),
+        satir:s=>[s.h,s.s,Sn(a*b*s.h-a*b*s.s),Sn(a*b*(s.h-s.s))],anahtar:s=>s.h+"-"+s.s,yazKos:s=>s.s>=s.h?"Su yüksekliği akvaryum yüksekliğinden küçük olmalıdır.":"",
+        gorev:[{m:"Akvaryum <b>10 dm</b>, su <b>4 dm</b>.",ist:{h:10,s:4}},{m:"Akvaryum <b>12 dm</b>, su <b>9 dm</b>.",ist:{h:12,s:9}},
+          {m:"Akvaryum <b>8 dm</b>, su <b>3 dm</b>.",ist:{h:8,s:3},soru:"Hangi yol daha az işlem gerektirir?",secs:["Boş kısmı doğrudan hesaplamak (2. yol)","Tamamdan dolu kısmı çıkarmak (1. yol)","İkisi eşit işlem gerektirir"],ip:["1. yolda kaç çarpma var?","2. yolda kaç çarpma var?"],dm:"2. yolda bir çarpma daha azdır; iki yol aynı sonucu verir."}]})),
+      kuralA(D,[["İki yolun sonuçları her satırda nasıl çıktı?",["Hep eşit","Hep 1. yol büyük","Bazen eşit"],"Doğru! İki yol da boş kısmı bulur; biri ötekinin kontrolüdür.",["Defterin son iki sütununu karşılaştırınız.","Akvaryum yüksekliği değişince eşitlik bozuldu mu?"]]],"Bir problemi iki yolla çözüp karşılaştırdınız."),
       kendi("Bir problemi ikinci bir yolla çözmek neye yarar?",["Sonucu kontrol etmeye ve daha kısa yolu seçmeye","Sonucu değiştirmeye","Birimleri değiştirmeye"],"Doğru! İkinci yol bir kontroldür.",["Doğru iki yol farklı sonuç verir mi?","Birim yolla değişmez."])],
     kural:"Bir problem birden çok yolla çözülebilir. İki yol <b>aynı sonucu</b> vermelidir; bu, çözümün <b>kontrolüdür</b>. Yollar karşılaştırılarak daha az işlem gerektiren seçilir."});}
 
 /* 19 · HATA AVCISI — hatalı adımı ve hata türünü bulmak */
-const HA=[{ad:"Boya: 50 m² alan, kutu 12 m². I. 50 : 12 ≈ 4,2 · II. Aşağı yuvarlarım: 4 · III. En az 4 kutu.",a:"2",t:"y"},
-  {ad:"Sandık 2 m, 50 cm, 40 cm. I. 2 · 50 · 40 = 4 000 · II. Birim cm³ · III. Hacim 4 000 cm³.",a:"1",t:"b"},
-  {ad:"Üstü açık kutu 10 · 6 · 4. I. 2 · (60 + 40 + 24) = 248 · II. Kutunun kâğıdı 248 cm² · III. Bitti.",a:"1",t:"u"},
+const HA=[{ad:"Kumaş: 9 m² yüzey, bir top 2 m². I. 9 : 2 = 4,5 · II. Aşağı yuvarlarım: 4 · III. En az 4 top.",a:"2",t:"y"},
+  {ad:"Bavul 1 m, 40 cm, 30 cm. I. 1 · 40 · 30 = 1 200 · II. Birim cm³ · III. Hacim 1 200 cm³.",a:"1",t:"b"},
+  {ad:"Havuz iç yüzeyi 5 · 3 · 2 m. I. 2 · (15 + 10 + 6) = 62 · II. Fayans 62 m² · III. Bitti.",a:"1",t:"u"},
   {ad:"Taş: taban 30 · 20, yükselme 2 cm. I. 30 · 20 = 600 · II. 600 · 2 = 1 200 cm³ · III. 1,2 L.",a:"0",t:"0"}];
 const HT={"0":"Hata yok","y":"Yuvarlama","b":"Birim","u":"Yüz sayma"};
 function e_hata(p){const D=defterY(["Çözüm","Hatalı adım","Hata türü"]);
-  asamali(p,{tahmin:{giris:["Bir öğrenci “en az kaç kutu boya” sorusunda 4,2'yi 4'e yuvarlamıştır."],soru:"Bu hata hangi türdendir?",secs:[["a","Yuvarlama hatası"],["b","Birim hatası"],["c","İşlem hatası"]],dogru:"a",neden:"“En az” sorusunda yukarı yuvarlanır."},
+  asamali(p,{tahmin:{giris:["Bir öğrenci “en az kaç top kumaş” sorusunda 4,5'i 4'e yuvarlamıştır."],soru:"Bu hata hangi türdendir?",secs:[["a","Yuvarlama hatası"],["b","Birim hatası"],["c","İşlem hatası"]],dogru:"a",neden:"“En az” sorusunda yukarı yuvarlanır."},
     asamalar:[asm(4,"Çözüm kartını okuyunuz; hatalı adımı ve hata türünü seçip deftere yazınız. Hata yoksa “Hata yok” seçiniz.",(k,A)=>lab(k,A,D,{st:{i:0,a:"0",t:"0"},W:340,H:150,
         kont:[{t:"sec",key:"a",ad:"Hatalı adım:",liste:[["0","Hata yok"],["1","I"],["2","II"],["3","III"]]},{t:"sec",key:"t",ad:"Hata türü:",liste:Object.entries(HT)}],
         ciz:s=>{const p_=HA[s.i].ad.split(/ I\. | · II\. | · III\. /);return `<rect x="10" y="8" width="320" height="134" rx="10" fill="#fff" stroke="#c2255c" stroke-width="2"/>`+tx(170,32,p_[0],{fs:13})+
@@ -1547,8 +1547,8 @@ function e_hata(p){const D=defterY(["Çözüm","Hatalı adım","Hata türü"]);
         satir:s=>[HA[s.i].ad.split(" I. ")[0],s.a==="0"?"Yok":["","I","II","III"][+s.a],HT[s.t]],anahtar:s=>s.i+s.a+s.t,
         yazKos:s=>(s.a==="0")!==(s.t==="0")?"Hatalı adım ile hata türü birbirine uymuyor.":"",
         gorev:HA.map((h,i)=>({m:`Çözüm ${i+1}: hatalı adımı ve hata türünü bulunuz.`,st0:{i,a:"0",t:"0"},ist:{a:h.a,t:h.t},yan:s=>s.a!==h.a?"Hatalı adım bu değil; her adımı kontrol ediniz.":"Adım doğru; hatanın türünü yeniden düşününüz.",
-          ...(i===1?{soru:"Sandığın doğru hacmi kaç m³'tür?",dogru:[2,5],opt:{bicim:"ondalik",ph:"ör. 0,5"},ip:"200 · 50 · 40 = 400 000 cm³",dm:"400 000 cm³ = 0,4 m³."}:{})}))})),
-      kuralA(D,[["Defterdeki hatalar hangi kontrollerle yakalanır?",["Birim, yuvarlama yönü ve kaplanan yüzlerin kontrolüyle","Yalnız işlemleri yeniden yaparak","Cevabı tahmin ederek"],"Doğru! Her hata türünün bir kontrolü vardır.",["Sandıkta işlem doğruydu; hata neredeydi?","Kutuda hangi yüz kaplanmamalıydı?"]]],"Hata türlerini sınıfladınız."),
+          ...(i===1?{soru:"Bavulun doğru hacmi kaç m³'tür?",dogru:[3,25],opt:{bicim:"ondalik",ph:"ör. 0,5"},ip:"100 · 40 · 30 = 120 000 cm³",dm:"120 000 cm³ = 0,12 m³."}:{})}))})),
+      kuralA(D,[["Defterdeki hatalar hangi kontrollerle yakalanır?",["Birim, yuvarlama yönü ve kaplanan yüzlerin kontrolüyle","Yalnız işlemleri yeniden yaparak","Cevabı tahmin ederek"],"Doğru! Her hata türünün bir kontrolü vardır.",["Bavulda işlem doğruydu; hata neredeydi?","Havuzda hangi yüz kaplanmamalıydı?"]]],"Hata türlerini sınıfladınız."),
       kendi("“En fazla kaç kutu sığar?” sorusunda bölüm 7,8 çıktı. Doğru cevap hangisidir?",["7","8","7,8"],"Doğru! Kutu bölünemez; aşağı yuvarlanır.",["8. kutu sığmaz.","Kutu sayısı ondalık olamaz."])],
     kural:"Çözüm kontrol edilirken üç sık hataya bakılır: <b>birim</b> (ölçüler aynı birimde mi?), <b>yuvarlama</b> (“en az” yukarı, “en fazla” aşağı) ve <b>yüz sayma</b> (kaplanmayan yüz düşüldü mü?). Sonuç ayrıca makullükle kontrol edilir."});}
 
@@ -1572,10 +1572,10 @@ function e_kur(p){const D=defterY(["Bağlam","Soru","Cevap","Hedef"]);const cv=s
     kural:"Bir bağlamdan farklı bileşenlere yönelik problemler kurulabilir: <b>hacim</b> (kaç litre alır, kaç litre gerekir), <b>yüzey alanı</b> (kaç cm² kaplama) ya da <b>uzunluk</b>. Kurulan problemin cevabı çözülerek ve birimi kontrol edilerek doğrulanır."});}
 
 const ACT=[
- {ad:"Kurdele mi, Kâğıt mı, Lokum mu?",amac:"İş kartlarına göre kutunun ayrıtlarını, yüzlerini ya da iç hacmini renklendirip her işin hangi bileşeni gerektirdiğini bulmak.",adimlar:[TAH,"<b>Deney:</b> Dört iş kartını inceleyiniz.",SON],sure:5,ciz:e_bilesen},
+ {ad:"Bant mı, Cila mı, Bilye mi?",amac:"İş kartlarına göre saklama kutusunun ayrıtlarını, yüzlerini ya da iç hacmini renklendirip her işin hangi bileşeni gerektirdiğini bulmak.",adimlar:[TAH,"<b>Deney:</b> Dört iş kartını inceleyiniz.",SON],sure:5,ciz:e_bilesen},
  {ad:"Metinden Şekle",amac:"Problem cümlesindeki ölçüleri prizmanın ayrıtlarına yerleştirip çizimi metinle uyumlu hâle getirmek.",adimlar:[TAH,"<b>Deney:</b> Üç metni çiziniz.",SON],sure:6,ciz:e_metin},
  {ad:"Kaplama Atölyesi",amac:"Açınımda kaplanacak yüzleri durumlara göre seçip alanlarını toplamak.",adimlar:[TAH,"<b>Deney:</b> Dört durumu inceleyiniz.",SON],sure:6,ciz:e_kaplama},
- {ad:"Boya Hesaplayıcı",amac:"Oda ölçülerini ve kapı–pencere sayısını değiştirip gereken en az boya kutusunu bulmak.",adimlar:[TAH,"<b>Deney:</b> Dört odayı hesaplayınız.",SON],sure:6,ciz:e_boya},
+ {ad:"Sera Örtüsü Hesaplayıcı",amac:"Seranın ölçülerini ve kapı–pencere sayısını değiştirip gereken en az örtü rulosunu bulmak.",adimlar:[TAH,"<b>Deney:</b> Dört odayı hesaplayınız.",SON],sure:6,ciz:e_boya},
  {ad:"Depo ve Bidon",amac:"Depoyu bidon bidon doldurup hacim, litre ve bidon sayısı zincirini kurmak.",adimlar:[TAH,"<b>Deney:</b> Üç depoyu doldurunuz.",SON],sure:6,ciz:e_depo},
  {ad:"Kaptan Kaba",amac:"Suyu farklı tabanlı kaplara aktarıp yükseklik değişse de hacmin değişmediğini görmek.",adimlar:[TAH,"<b>Deney:</b> Dört kaba aktarınız.",SON],sure:6,ciz:e_aktar},
  {ad:"Eksik Ayrıt",amac:"Litre olarak verilen kapasite ve iki ayrıttan kabın yüksekliğini bulup kabı doldurarak denetlemek.",adimlar:[TAH,"<b>Deney:</b> Dört kabı kurunuz.",SON],sure:6,ciz:e_eksik},
@@ -1589,7 +1589,7 @@ const ACT=[
  {ad:"Aynı Hacim Fabrikası",amac:"Aynı sayıda küple farklı prizmalar kurup yüzey alanlarını sıralamak.",adimlar:[TAH,"<b>Deney:</b> Dört prizma kurunuz.",SON],sure:5,ciz:e_aynihacim},
  {ad:"Karton Ustası",amac:"Aynı hacimli kutuların açınımlarını kartona yerleştirip kullanılan kartonu karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Üç kutuyu inceleyiniz.",SON],sure:5,ciz:e_karton},
  {ad:"Genelleme Laboratuvarı",amac:"Önermeler için kutu çiftleriyle karşı örnek arayıp önermenin geçerliliğine karar vermek.",adimlar:[TAH,"<b>Deney:</b> Üç önermeyi sınayınız.",SON],sure:6,ciz:e_genel},
- {ad:"İki Yol Bir Sonuç",amac:"Tankı doldurmak için gereken suyu iki yolla bulup sonuçları ve işlem sayısını karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Üç tankı hesaplayınız.",SON],sure:5,ciz:e_ikiyol},
+ {ad:"İki Yol Bir Sonuç",amac:"Akvaryumu doldurmak için gereken suyu iki yolla bulup sonuçları ve işlem sayısını karşılaştırmak.",adimlar:[TAH,"<b>Deney:</b> Üç tankı hesaplayınız.",SON],sure:5,ciz:e_ikiyol},
  {ad:"Hata Avcısı",amac:"Adım adım verilen çözümlerde hatalı adımı bulup hata türünü sınıflamak.",adimlar:[TAH,"<b>Deney:</b> Dört çözümü inceleyiniz.",SON],sure:6,ciz:e_hata},
  {ad:"Problem Atölyesi",amac:"Bağlam ve soru kartlarıyla problem kurup cevabı hedef cevaba ulaştırmak.",adimlar:[TAH,"<b>Deney:</b> Üç problem kurunuz.",SON],sure:6,ciz:e_kur}];
 kesifBaslat(ACT,{baslik:"Prizma Problemleri Keşif Atölyesi",kisa:"Prizma Problemleri Keşif Atölyesi",kod:"MAT.7.4.6",ust:"7. Sınıf · Geometrik Nicelikler · MAT.7.4.6",
