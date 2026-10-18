@@ -21,7 +21,7 @@ svg{display:block;width:100%;height:auto;min-width:1250px}
 .baglanti{display:none}.baglantili .baglanti{display:inline}
 .yok{padding:40px;text-align:center;color:var(--soluk)}
 @media (max-width:1500px){main{grid-template-columns:1fr}.bilgi{position:static}}
-@media print{@page{size:A4 landscape;margin:8mm}html,body{background:#fff}header .araclar,.bilgi{display:none}main{display:block;padding:0}.sahne{border:0}svg{min-width:0}}
+@media print{@page{size:A4 landscape;margin:7mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}html,body{background:#fff;height:auto}header{padding:0 0 2mm;display:block;break-after:avoid}h1{font-size:15pt}.alt{font-size:9pt;max-width:none;margin-top:1mm}header .araclar,.bilgi{display:none}main{display:block;padding:0}.sahne{border:0;border-radius:0;overflow:visible;break-inside:avoid;page-break-inside:avoid}svg{min-width:0;width:100%;height:174mm;max-height:174mm}}
 </style></head><body>
 <header><div><h1 id="baslik">Kavram haritası</h1><p class="alt" id="ozet"></p></div>
 <div class="araclar"><button id="bBag" aria-pressed="false">Bağlantıları göster</button><button id="bBos" aria-pressed="false">Boş harita (kendini dene)</button><button id="bYaz">Yazdır</button></div></header>
@@ -81,6 +81,8 @@ function ciz(V) {
     const ys = el("text", { x: lx, y: ly, "text-anchor": dis != null ? (a.yon > 0 ? "start" : "end") : "middle", style: "font:700 11.5px 'Nunito Sans', system-ui, sans-serif", fill: "#5e6b7a", "paint-order": "stroke", stroke: "#fff", "stroke-width": 4 }, document.createTextNode(b.etiket || "")); katBag.append(ys); });
   svg.prepend(el("defs", {}, el("marker", { id: "ok", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, el("path", { d: "M0,0 L10,5 L0,10 z", fill: "#5e6b7a" }))));
   const s = document.getElementById("sahne"); s.innerHTML = ""; s.append(svg);
+  // görünüm kutusu içeriğe göre daraltılır: ekranda ve baskıda harita boş kenar bırakmadan sayfayı doldurur
+  try { const bb = svg.getBBox(), p = 16; if (bb.width > 0) svg.setAttribute("viewBox", `${Math.floor(bb.x - p)} ${Math.floor(bb.y - p)} ${Math.ceil(bb.width + 2 * p)} ${Math.ceil(bb.height + 2 * p)}`); } catch (e) {}
 }
 function sec(g, v) {
   if (document.body.classList.contains("bos") && g.classList.contains("yaprak")) g.classList.toggle("acik");
