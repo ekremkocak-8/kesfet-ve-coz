@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kavram Haritası · Keşfet ve Çöz</title><meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;700&family=Nunito+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--murekkep:#1d2a3a;--soluk:#5e6b7a;--kagit:#f6f4ef;--yuzey:#fff;--cizgi:#e2ded4;--lacivert:#24466b}
+*{box-sizing:border-box}html,body{margin:0;background:var(--kagit);color:var(--murekkep);font:500 15px "Nunito Sans",system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:16px 20px 8px}
+h1{font:700 22px Lexend,sans-serif;margin:0}.alt{color:var(--soluk);margin:4px 0 0;max-width:760px}
+.araclar{display:flex;gap:8px;flex-wrap:wrap}
+button{font:800 13px "Nunito Sans",sans-serif;border:0;border-radius:10px;padding:8px 14px;background:#e6edf5;color:var(--lacivert);cursor:pointer}
+button[aria-pressed="true"]{background:var(--lacivert);color:#fff}
+main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;padding:8px 20px 20px;align-items:start}
+.sahne{background:var(--yuzey);border:1px solid var(--cizgi);border-radius:16px;overflow:auto}
+svg{display:block;width:100%;height:auto;min-width:1250px}
+.bilgi{position:sticky;top:12px;background:var(--yuzey);border:1px solid var(--cizgi);border-radius:16px;padding:16px;min-height:160px}
+.bilgi h2{font:700 17px Lexend,sans-serif;margin:0 0 6px}.bilgi .kod{font:800 12px "Nunito Sans";color:var(--soluk);letter-spacing:.04em}
+.bilgi .ornek{margin-top:10px;background:var(--kagit);border-radius:10px;padding:10px 12px}.bilgi .ornek b{display:block;font-size:12px;color:var(--soluk)}
+.dugum{cursor:pointer}.dugum:focus{outline:none}.dugum:focus rect,.dugum:hover rect{stroke-width:2.6}
+.bos .yaprak .yazi{visibility:hidden}.bos .yaprak .soru{visibility:visible}.yaprak .soru{visibility:hidden}.bos .yaprak.acik .yazi{visibility:visible}.bos .yaprak.acik .soru{visibility:hidden}
+.baglanti{display:none}.baglantili .baglanti{display:inline}
+.yok{padding:40px;text-align:center;color:var(--soluk)}
+@media (max-width:1500px){main{grid-template-columns:1fr}.bilgi{position:static}}
+@media print{@page{size:A4 landscape;margin:8mm}html,body{background:#fff}header .araclar,.bilgi{display:none}main{display:block;padding:0}.sahne{border:0}svg{min-width:0}}
+</style></head><body>
+<header><div><h1 id="baslik">Kavram haritası</h1><p class="alt" id="ozet"></p></div>
+<div class="araclar"><button id="bBag" aria-pressed="false">Bağlantıları göster</button><button id="bBos" aria-pressed="false">Boş harita (kendini dene)</button><button id="bYaz">Yazdır</button></div></header>
+<main><div class="sahne" id="sahne"><p class="yok">Yükleniyor…</p></div>
+<aside class="bilgi" id="bilgi" aria-live="polite"><p class="alt" style="margin:0">Bir kavrama tıkla: açıklaması ve örneği burada görünür. “Boş harita”da kutulara tıklayarak cevabını kontrol et.</p></aside></main>
+<script>
+"use strict";
+const RENK = ["#24466b", "#1f6fd1", "#1f9d55", "#c98a12", "#b5302a", "#8a3ffc", "#0f7c86", "#9b4d22"];
+const kac = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const NS = "http://www.w3.org/2000/svg";
+const el = (t, a = {}, ...c) => { const e = document.createElementNS(NS, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); c.forEach(x => e.append(x)); return e; };
+// metni genişliğe göre satırlara böler (ölçü: canvas)
+const olc = document.createElement("canvas").getContext("2d");
+function sarmala(metin, en, font) { olc.font = font; const k = metin.split(" "), s = []; let a = "";
+  k.forEach(w => { const d = a ? a + " " + w : w; if (olc.measureText(d).width > en && a) { s.push(a); a = w; } else a = d; }); if (a) s.push(a); return s; }
+const kimlik = new URLSearchParams(location.search).get("h") || "MAT.7.T1";
+fetch(`${encodeURIComponent(kimlik)}.json`).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(ciz).catch(() => { document.getElementById("sahne").innerHTML = '<p class="yok">Bu kavram haritası bulunamadı.</p>'; });
+function ciz(V) {
+  document.title = `${V.tema} · Kavram haritası`;
+  document.getElementById("baslik").textContent = `Tema ${V.tema_no} · ${V.tema}`; document.getElementById("ozet").textContent = V.ozet || "";
+  const D = V.dallar, sag = D.slice(0, Math.ceil(D.length / 2)), sol = D.slice(Math.ceil(D.length / 2));
+  const W = 1800, cx = W / 2, YK = 236, YH = 40, DK = 200, DH = 52, BOS = 26, FY = "700 13px 'Nunito Sans', system-ui, sans-serif", FD = "700 14px Lexend, system-ui, sans-serif";
+  const yukseklik = dal => dal.kavramlar.reduce((a, k) => a + Math.max(YH, sarmala(k.ad, YK - 20, FY).length * 17 + 14) + 8, 0) - 8;
+  const blok = taraf => { let y = 0; return taraf.map(d => { const hh = Math.max(yukseklik(d), DH); const r = { d, y, hh }; y += hh + BOS; return r; }); };
+  const SG = blok(sag), SL = blok(sol); const H = Math.max(SG.reduce((a, b) => a + b.hh + BOS, 0), SL.reduce((a, b) => a + b.hh + BOS, 0)) + 60, cy = H / 2;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${V.tema} kavram haritası` });
+  const katKenar = el("g"), katBag = el("g", { class: "baglanti" }), katDugum = el("g"); svg.append(katKenar, katBag, katDugum);
+  const KONUM = {};
+  const egri = (x1, y1, x2, y2, renk, kal) => el("path", { d: `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`, fill: "none", stroke: renk, "stroke-width": kal, "stroke-linecap": "round", opacity: .85 });
+  const kutu = (x, y, en, boy, dolgu, kenar, satirlar, font, renkY, sinif, veri) => {
+    const g = el("g", { class: "dugum " + (sinif || ""), tabindex: 0, role: "button", "aria-label": satirlar.join(" ") });
+    g.append(el("rect", { x, y, width: en, height: boy, rx: 12, fill: dolgu, stroke: kenar, "stroke-width": 1.6 }));
+    const t = el("text", { class: "yazi", x: x + en / 2, y: y + boy / 2 - (satirlar.length - 1) * 8.5 + 5, "text-anchor": "middle", fill: renkY, style: `font:${font}` });
+    satirlar.forEach((s, i) => t.append(el("tspan", { x: x + en / 2, dy: i ? 17 : 0 }, document.createTextNode(s)))); g.append(t);
+    if (sinif === "yaprak") g.append(el("text", { class: "soru", x: x + en / 2, y: y + boy / 2 + 6, "text-anchor": "middle", fill: kenar, style: "font:800 18px Lexend, system-ui, sans-serif" }, document.createTextNode("?")));
+    g.addEventListener("click", () => sec(g, veri)); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sec(g, veri); } });
+    katDugum.append(g); return g; };
+  // merkez
+  const ms = sarmala(V.tema, 170, "700 17px Lexend, system-ui, sans-serif"), mh = ms.length * 20 + 34;
+  kutu(cx - 105, cy - mh / 2, 210, mh, "#1d2a3a", "#1d2a3a", ms, "700 17px Lexend, system-ui, sans-serif", "#fff", "merkez", { ad: V.tema, aciklama: V.ozet, kod: `Tema ${V.tema_no}` });
+  const yerlestir = (B, yon, dy0) => B.forEach((b, i) => { const d = b.d, renk = RENK[D.indexOf(d) % RENK.length], y0 = dy0 + b.y;
+    const dx = yon > 0 ? cx + 170 : cx - 170 - DK, dyy = y0 + b.hh / 2 - DH / 2;
+    katKenar.append(egri(yon > 0 ? cx + 105 : cx - 105, cy, yon > 0 ? dx : dx + DK, dyy + DH / 2, renk, 4));
+    const ds = sarmala(d.ad, DK - 22, FD); kutu(dx, dyy, DK, Math.max(DH, ds.length * 17 + 18), renk, renk, ds, FD, "#fff", "dal", d);
+    let y = y0; d.kavramlar.forEach(k => { const ks = sarmala(k.ad, YK - 20, FY), kh = Math.max(YH, ks.length * 17 + 14);
+      const kx = yon > 0 ? dx + DK + 46 : dx - 46 - YK;
+      katKenar.append(egri(yon > 0 ? dx + DK : dx, dyy + DH / 2, yon > 0 ? kx : kx + YK, y + kh / 2, renk, 2));
+      kutu(kx, y, YK, kh, "#fff", renk, ks, FY, "#1d2a3a", "yaprak", { ...k, dal: d.ad, kod: d.kod });
+      KONUM[k.id] = { x: yon > 0 ? kx + YK : kx, y: y + kh / 2, yon, renk }; y += kh + 8; }); });
+  const ust = (H - (SG.reduce((a, b) => a + b.hh + BOS, 0) - BOS)) / 2, ust2 = (H - (SL.reduce((a, b) => a + b.hh + BOS, 0) - BOS)) / 2;
+  yerlestir(SG, 1, ust); yerlestir(SL, -1, ust2);
+  (V.baglantilar || []).forEach(b => { const a = KONUM[b.kaynak], c = KONUM[b.hedef]; if (!a || !c) return;
+    const x1 = a.x + (a.yon > 0 ? 6 : -6), x2 = c.x + (c.yon > 0 ? 6 : -6), dis = a.yon === c.yon ? (a.yon > 0 ? Math.max(x1, x2) + 70 : Math.min(x1, x2) - 70) : null;
+    const d = dis != null ? `M${x1},${a.y} C${dis},${a.y} ${dis},${c.y} ${x2},${c.y}` : `M${x1},${a.y} C${cx},${a.y - 60} ${cx},${c.y + 60} ${x2},${c.y}`;
+    katBag.append(el("path", { d, fill: "none", stroke: "#5e6b7a", "stroke-width": 1.6, "stroke-dasharray": "6 5", "marker-end": "url(#ok)" }));
+    const lx = dis != null ? dis + (a.yon > 0 ? 6 : -6) : cx, ly = (a.y + c.y) / 2;
+    const ys = el("text", { x: lx, y: ly, "text-anchor": dis != null ? (a.yon > 0 ? "start" : "end") : "middle", style: "font:700 11.5px 'Nunito Sans', system-ui, sans-serif", fill: "#5e6b7a", "paint-order": "stroke", stroke: "#fff", "stroke-width": 4 }, document.createTextNode(b.etiket || "")); katBag.append(ys); });
+  svg.prepend(el("defs", {}, el("marker", { id: "ok", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, el("path", { d: "M0,0 L10,5 L0,10 z", fill: "#5e6b7a" }))));
+  const s = document.getElementById("sahne"); s.innerHTML = ""; s.append(svg);
+}
+function sec(g, v) {
+  if (document.body.classList.contains("bos") && g.classList.contains("yaprak")) g.classList.toggle("acik");
+  const b = document.getElementById("bilgi");
+  b.innerHTML = `<div class="kod">${kac(v.kod || "")}${v.dal ? " · " + kac(v.dal) : ""}</div><h2>${kac(v.ad)}</h2><p style="margin:0">${kac(v.aciklama || "")}</p>` + (v.ornek ? `<div class="ornek"><b>Örnek</b>${kac(v.ornek)}</div>` : "");
+}
+const tg = (id, sinif) => { const d = document.getElementById(id); d.onclick = () => { const a = document.body.classList.toggle(sinif); d.setAttribute("aria-pressed", String(a)); if (sinif === "bos") document.querySelectorAll(".yaprak.acik").forEach(x => x.classList.remove("acik")); }; };
+tg("bBag", "baglantili"); tg("bBos", "bos"); document.getElementById("bYaz").onclick = () => print();
+</script></body></html>
