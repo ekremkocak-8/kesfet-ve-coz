@@ -1,7 +1,7 @@
 // Keşfet ve Çöz · telefon uygulaması önbelleği (01.11.2026)
 // Portal açılışında önce internetten en yeni sürüm alınır; internet yoksa son kaydedilen sürüm açılır.
 // Supabase verileri, giriş, ödeme ve korumalı içerik (soru, PDF, çözüm) önbelleğe ALINMAZ.
-const ONBELLEK = "kvc-portal-v1";
+const ONBELLEK = "kvc-portal-v2";
 const KABUK = ["./", "./index.html", "./supabase.js", "./manifest.webmanifest", "./ikon/ikon-192.png", "./ikon/ikon-512.png", "./ikon/apple-touch-icon.png", "./ikon/favicon-32.png"];
 const YAZI_TIPI = /^https:\/\/fonts\.(googleapis|gstatic)\.com\//;
 
@@ -35,4 +35,21 @@ self.addEventListener("fetch", e => {
   // önce internet (en yeni sürüm), olmazsa önbellek
   e.respondWith(fetch(r).then(x => { if (x.ok) { const kop = x.clone(); caches.open(ONBELLEK).then(c => c.put(anahtar, kop)); } return x; })
     .catch(async () => (await caches.match(anahtar)) || (sayfa ? new Response(CEVRIMDISI, { headers: { "Content-Type": "text/html; charset=utf-8" } }) : Response.error())));
+});
+
+// ---------- bildirimler (52_bildirim.sql + "bildirim" Edge Function) ----------
+self.addEventListener("push", e => {
+  let v = {}; try { v = e.data ? e.data.json() : {}; } catch (er) { v = { baslik: "Keşfet ve Çöz", govde: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(v.baslik || "Keşfet ve Çöz", {
+    body: v.govde || "", icon: "ikon/ikon-192.png", badge: "ikon/favicon-32.png", tag: v.etiket || undefined, lang: "tr",
+    data: { url: new URL(v.url || "./", self.registration.scope).href } }));
+});
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  const hedef = (e.notification.data && e.notification.data.url) || self.registration.scope;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(L => {
+    const acik = L.find(c => c.url.startsWith(self.registration.scope));
+    if (acik) { acik.navigate(hedef).catch(() => {}); return acik.focus(); }
+    return self.clients.openWindow(hedef);
+  }));
 });
