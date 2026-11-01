@@ -91,4 +91,19 @@ function sec(g, v) {
 }
 const tg = (id, sinif) => { const d = document.getElementById(id); d.onclick = () => { const a = document.body.classList.toggle(sinif); d.setAttribute("aria-pressed", String(a)); if (sinif === "bos") document.querySelectorAll(".yaprak.acik").forEach(x => x.classList.remove("acik")); }; };
 tg("bBag", "baglantili"); tg("bBos", "bos"); document.getElementById("bYaz").onclick = () => print();
-</script></body></html>
+</script>
+<style>.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.1;margin:0 2px;font-size:.92em}.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 2px}</style>
+<script>/* ANA_KURALLAR §4.y-3: çözüm ve cevap metinlerindeki a/b kesirleri kesir çizgisiyle gösterilir ("/" görünmez). Yalnız çözüm alanlarında çalışır; sayaç, tarih gibi arayüz metinlerine dokunmaz. */
+(function(){if(window.__kesirCizgi)return;window.__kesirCizgi=1;
+var KAP="body";
+var RX=/(^|[^\w\/.,:%])([−-])?(?:(\d+) )?(\d{1,4})\/(\d{1,4})(?![\w\/.,]\d|\w)/g;
+var ATLA="script,style,svg,textarea,input,select,code,a,.frac,[data-duz]";
+function esc(x){return x.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function cevir(kok){var w=document.createTreeWalker(kok,NodeFilter.SHOW_TEXT,{acceptNode:function(t){if(!/\d\/\d/.test(t.nodeValue))return NodeFilter.FILTER_REJECT;var p=t.parentElement;return(!p||p.closest(ATLA))?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}});
+var L=[],t;while((t=w.nextNode()))L.push(t);
+L.forEach(function(t){var d=false;var h=esc(t.nodeValue).replace(RX,function(m,a,sg,tam,p,q){d=true;return a+(sg?"−":"")+(tam?tam+" ":"")+'<span class="frac"><span>'+p+"</span><span>"+q+"</span></span>"});if(!d)return;var k=document.createElement("span");k.innerHTML=h;t.replaceWith.apply(t,[].slice.call(k.childNodes))})}
+function bak(n){if(!n)return;if(n.nodeType===3)n=n.parentElement;if(!n||n.nodeType!==1)return;var c=n.closest(KAP);if(c){cevir(c);return}n.querySelectorAll&&n.querySelectorAll(KAP).forEach(cevir)}
+var B=new Set(),P=0;function calis(){P=0;var b=B;B=new Set();b.forEach(bak)}
+function bas(){bak(document.body);new MutationObserver(function(ms){ms.forEach(function(m){if(m.type==="characterData")B.add(m.target);else m.addedNodes.forEach(function(x){B.add(x)})});if(!P)P=requestAnimationFrame(calis)}).observe(document.body,{childList:true,subtree:true,characterData:true})}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bas);else bas()})();</script>
+</body></html>
