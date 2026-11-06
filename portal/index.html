@@ -1406,6 +1406,11 @@ tr.soluk-satir td{color:var(--soluk)}
 .yuk-panel.bitti{border-color:var(--iyi)}.yuk-panel.bitti .yuk-yuzde{color:var(--iyi)}
 .yuk-panel.hatali{border-color:var(--zayif)}.yuk-panel.hatali .yuk-ust b{color:var(--zayif)}
 .yuk-satir{display:flex;align-items:center;gap:10px;margin:4px 0 10px}.yuk-satir[hidden]{display:none}.yuk-satir b{font-size:18px;min-width:52px;text-align:right}
+
+/* 06.11.2026 Denetçi: giriş formunda "Göster" düğmesi */
+.sifre-kap{position:relative;display:block}.sifre-kap>input{width:100%;padding-right:76px!important;box-sizing:border-box}
+.sifre-goster{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--ana,#3a7563);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer}
+.sifre-goster:hover,.sifre-goster:focus-visible{background:rgba(58,117,99,.1)}
 </style>
 </head><body>
 <div id="kok"></div>
@@ -1503,11 +1508,12 @@ const logoNokta = () => h("div", { class: "logo", "aria-hidden": "true" }, h("i"
 const logo = () => { const k = h("span", { class: "logo-kap", "aria-hidden": "true" }); const im = h("img", { src: "../logo.png", alt: "" }); im.onerror = () => k.replaceChildren(logoNokta()); k.append(im); return k; };
 function hataMetni(e) {
   const m = (e && (e.message || e.error_description || e)) + "";
-  if (/invalid login/i.test(m)) return "Bilgiler yanlış. Tekrar dene.";
-  if (/could not find the (table|function)|does not exist|PGRST20[25]/i.test(m)) return "Portal veritabanı kurulmamış görünüyor: 01_kurulum.sql ve 02_veri.sql bu Supabase projesinde çalıştırılmalı.";
-  if (/email not confirmed/i.test(m)) return "E-posta onaylanmamış. Supabase'te Confirm email kapatılıp bu hesap silinmeli, sonra yeniden açılmalı.";
+  if (/invalid login/i.test(m)) return "E-posta ya da parola yanlış. Tekrar deneyin.";
+  // 06.11.2026 Denetçi: kurulum ayrıntısı öğrenciye/veliye gösterilmez; yalnız yönetici ve konsol görür
+  if (/could not find the (table|function)|does not exist|PGRST20[25]/i.test(m)) { console.warn("Kurulum eksiği (Supabase SQL dosyaları):", m); return ROL === "yon" ? "Veritabanında eksik kurulum var: " + m : "Bu bölüm şu an açılamıyor. Biraz sonra yeniden deneyin; sürerse yöneticiye bildirin."; }
+  if (/email not confirmed/i.test(m)) { console.warn("Supabase: Confirm email açık", m); return ROL === "yon" ? "E-posta onaylanmamış (Supabase'te Confirm email kapalı olmalı)." : "Hesabınız henüz etkinleşmedi. Lütfen yöneticiyle iletişime geçin."; }
   if (/failed to fetch|network/i.test(m)) return "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et.";
-  if (/password should be at least/i.test(m)) return "Parola en az 6 karakter olmalı.";
+  if (/password should be at least/i.test(m)) return "Parola en az 8 karakter olmalı.";
   if (/rate limit|too many/i.test(m)) return "Çok fazla deneme yapıldı. Birkaç dakika sonra tekrar dene.";
   if (/already registered|already exists/i.test(m)) return "Bu e-posta ile zaten bir hesap var. Giriş yap.";
   return m.replace(/^Error:\s*/, "");
@@ -1545,44 +1551,7 @@ function videoYukle(rows) { VIDEO = {}; (rows || []).forEach(v => { (VIDEO[v.tes
 async function q(p) { const r = await Promise.race([p, new Promise((_, red) => setTimeout(() => red(new Error("Sunucu 20 saniyedir yanıt vermiyor. Supabase projesi uyuyor olabilir.")), 20000))]); if (r.error) throw r.error; return r.data; }
 
 // ---------- giriş ----------
-function giris(mesaj) {
-  const k = $("#kok"); k.innerHTML = ""; let rol = depo.al("rol", "ogr"), yeni = false;
-  // ana sayfadan gelen istek: /portal/?giris=veli&uye=1 (veli üyeliği formu), ?giris=ogr|ogt
-  try { const u = new URLSearchParams(location.search), g = u.get("giris");
-    if (["ogr", "veli", "ogt"].includes(g)) { rol = g; yeni = g === "veli" && u.get("uye") === "1"; history.replaceState(null, "", location.pathname + location.hash); } } catch (e) {}
-  const durum = h("p", { class: "not", role: "status", style: "margin:0;min-height:1.2em" }, mesaj || "");
-  const kart = h("form", { class: "giris-kart", on: { submit: async e => { e.preventDefault(); const btn = kart.querySelector("button[type=submit]"); btn.disabled = true; durum.style.color = ""; durum.textContent = "Giriş yapılıyor…";
-    try { depo.yaz("rol", rol); GIRIS_SEKME = rol; if (rol === "ogr") await ogrGiris($("#g-sinif").value, $("#g-no").value, $("#g-pin").value);
-      else if (rol === "veli" && yeni) await veliKayit($("#g-ad").value, $("#g-tel").value, $("#g-eposta").value, $("#g-parola").value, $("#g-kvkk").checked, $("#g-sozl").checked);
-      else if (yeni) await ogtKayit($("#g-ad").value, $("#g-davet").value, $("#g-eposta").value, $("#g-parola").value); else await ogtGiris($("#g-eposta").value, $("#g-parola").value); await yukle(); }
-    catch (er) { durum.style.color = "var(--zayif)"; durum.textContent = hataMetni(er); btn.disabled = false; } } } });
-  const marka = h("div", { class: "marka" }, logo(), h("div", {}, h("h1", {}, "Keşfet ve Çöz"), h("small", {}, "Öğrenci ve öğretmen portalı")));
-  const sek = h("div", { class: "sekme sekme3", role: "tablist" });
-  const alan = h("div", { style: "display:flex;flex-direction:column;gap:12px" });
-  const ciz = () => { sek.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.r === rol)); alan.innerHTML = "";
-    const TANIT = { ogr: ["🎒", "Öğrenci girişi", "Okulda öğretmeninin verdiği bilgilerle gir."], veli: ["👪", yeni ? "Veli üyeliği" : "Veli girişi", "Çocuklarınızın profillerini açın, ilerlemelerini izleyin ve kredi alın."], ogt: ["🧑‍🏫", yeni ? "Öğretmen hesabı aç" : "Öğretmen girişi", "Öğretmenler ve yönetici bu sekmeden girer."] }[rol];
-    alan.append(h("div", { class: "rol-tanit" }, h("span", { class: "rol-ikon", "aria-hidden": "true" }, TANIT[0]), h("div", {}, h("b", {}, TANIT[1]), h("span", {}, TANIT[2]))));
-    if (rol === "ogr") alan.append(h("label", {}, "Sınıfın", h("input", { id: "g-sinif", value: depo.al("sinif_kodu", ""), placeholder: "örn. 7", autocomplete: "off", autocapitalize: "characters", required: true })), h("div", { class: "izgara i2" }, h("label", {}, "Okul numarası", h("input", { id: "g-no", value: depo.al("numara", ""), inputmode: "numeric", required: true })), h("label", {}, "Şifre (4 hane)", h("input", { id: "g-pin", type: "password", inputmode: "numeric", maxlength: "4", required: true }))),
-      h("p", { class: "not", style: "margin:0" }, "Ad ya da e-posta gerekmez. Sınıfını (5, 6, 7 ya da 8), okul numaranı ve öğretmeninin verdiği 4 haneli şifreni yaz."));
-    else if (rol === "veli") {
-      if (yeni) alan.append(h("label", {}, "Adınız soyadınız", h("input", { id: "g-ad", autocomplete: "name", required: true })), h("label", {}, "Cep telefonu (isteğe bağlı)", h("input", { id: "g-tel", type: "tel", autocomplete: "tel", placeholder: "0532 123 45 67" })));
-      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", autocomplete: "username", value: depo.al("eposta", ""), required: true })), h("label", {}, yeni ? "Parola (en az 8 karakter)" : "Parola", h("input", { id: "g-parola", type: "password", autocomplete: yeni ? "new-password" : "current-password", minlength: yeni ? "8" : "6", required: true })));
-      if (yeni) alan.append(h("label", { class: "secim onay" }, h("input", { id: "g-kvkk", type: "checkbox", required: true }), h("span", {}, h("button", { type: "button", class: "bag", on: { click: () => metinGoster("kvkk") } }, "Aydınlatma metnini"), " okudum.")),
-        h("label", { class: "secim onay" }, h("input", { id: "g-sozl", type: "checkbox", required: true }), h("span", {}, h("button", { type: "button", class: "bag", on: { click: () => metinGoster("sozlesme") } }, "Üyelik sözleşmesini"), " okudum ve kabul ediyorum.")));
-      alan.append(h("button", { type: "button", class: yeni ? "btn bag-dug" : "btn uye-dug", on: { click: () => { yeni = !yeni; ciz(); } } }, yeni ? "Hesabım var, giriş yapacağım" : "Hesabım yok: ücretsiz veli üyeliği aç (50 hoş geldin kredisi)")); }
-    else { if (yeni) alan.append(h("label", {}, "Adınız soyadınız", h("input", { id: "g-ad", required: true })), h("label", {}, "Öğretmen davet kodu", h("input", { id: "g-davet", autocomplete: "off", autocapitalize: "characters", required: true })));
-      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", value: depo.al("eposta", ""), required: true })), h("label", {}, "Parola", h("input", { id: "g-parola", type: "password", minlength: "6", required: true })));
-      alan.append(h("button", { type: "button", class: "btn bag-dug", on: { click: () => { yeni = !yeni; ciz(); } } }, yeni ? "Hesabım var, giriş yapacağım" : "Hesabım yok: öğretmen hesabı aç (davet kodu gerekir)")); }
-    alan.append(h("button", { class: "btn ana", type: "submit" }, rol !== "ogr" && yeni ? (rol === "veli" ? "Üye ol" : "Hesap aç") : { ogr: "Öğrenci olarak gir", veli: "Veli olarak gir", ogt: "Öğretmen olarak gir" }[rol]), durum); };
-  [["ogr", "Öğrenci"], ["veli", "Veli"], ["ogt", "Öğretmen"]].forEach(([r, a]) => sek.append(h("button", { type: "button", role: "tab", "data-r": r, on: { click: () => { if (rol !== r) { yeni = false; unut = false; if (mod === "unuttum") mod = "giris"; } rol = r; durum.textContent = ""; ciz(); } } }, a)));
-  kart.append(marka, sek, alan);
-  const tanit = h("aside", { class: "giris-tanit" }, h("span", { class: "logo-kap buyuk" }, h("img", { src: "../logo.png", alt: "Keşfet ve Çöz" })),
-    h("h2", {}, "Matematiği keşfederek öğren, çözerek pekiştir."),
-    h("ul", {}, h("li", {}, "Konu anlatımı, testler ve etkileşimli etkinlikler"), h("li", {}, "Adım adım çözümler ve canlı dersler"), h("li", {}, "Öğrenci ve öğretmen için ayrı ekran")),
-    h("a", { href: "../", class: "giris-geri" }, "← Ana sayfa"));
-  k.append(h("div", { class: "giris" }, h("div", { class: "giris-duzen" }, tanit, kart))); ciz();
-  { const yb = uygulamaYukleDugme(); if (yb) { yb.classList.add("giris-uygulama"); k.querySelector(".giris").append(yb); } }
-}
+// (06.11.2026 Denetçi) eski giris() kaldırıldı: aşağıdaki yeni giris() onu eziyordu.
 async function veliKayit(ad, tel, email, password, kvkk, sozl) {
   if (ad.trim().length < 2) throw new Error("Adınızı ve soyadınızı yazın.");
   if (!kvkk || !sozl) throw new Error("Üye olmak için aydınlatma metnini ve üyelik sözleşmesini onaylayın.");
@@ -1650,7 +1619,7 @@ async function ogrGiris(kod, no, pin, hatirla = true) {
 }
 async function ogtGiris(email, password) { depo.yaz("eposta", email.trim()); const g = await sb.auth.signInWithPassword({ email: email.trim(), password }); if (g.error) throw g.error; }
 async function ogtKayit(ad, davet, email, password) {
-  if (!ad.trim()) throw new Error("Adınızı yazın."); depo.yaz("eposta", email.trim());
+  if (!ad.trim()) throw new Error("Adınızı yazın."); if ((password || "").length < 8) throw new Error("Parola en az 8 karakter olmalı."); depo.yaz("eposta", email.trim());
   let r = await sb.auth.signUp({ email: email.trim(), password });
   if (r.error) throw r.error;
   if (!r.data.session) throw new Error("E-posta onayı açık görünüyor. Supabase'te 'Confirm email' ayarını kapatın.");
@@ -2495,8 +2464,7 @@ async function duyuruYukle() {
 const duyuruGelen_ = () => DUYURU.filter(d => d.gonderen !== (KULLANICI && KULLANICI.id));
 const duyuruOkunmamis = () => duyuruGelen_().filter(d => !DUYURU_OKU.has(d.id));
 const HEDEF_AD = { herkes: "Herkes", ogrenciler: "Bütün öğrenciler", veliler: "Bütün veliler", ogretmenler: "Bütün öğretmenler", sinif: "Sınıf", kisi: "Seçilen öğrenciler" };
-function rozetYenile() { document.querySelectorAll(".duyuru.yeni[data-id]").forEach(k => { if (DUYURU_OKU.has(k.dataset.id)) { k.classList.remove("yeni"); const y = k.querySelector(".e-mavi"); if (y && y.textContent === "Yeni") y.remove(); } }); document.querySelectorAll("button[data-m]").forEach(b => { const n = menuRozet(b.dataset.m), k = b.querySelector(".nav-ikon"); let r_ = k && k.querySelector(".rozet-say");
-  if (!n && r_) r_.remove(); else if (n) { if (!r_) { r_ = h("span", { class: "rozet-say" }); k.append(r_); } r_.textContent = n > 9 ? "9+" : String(n); } }); }
+// (06.11.2026 Denetçi) eski rozetYenile() kaldırıldı; duyuru kartlarındaki "Yeni" etiketini temizleme işi dosya sonundaki rozetYenile()'ye taşındı.
 function duyuruKart(d, ac) {
   const yeni = !DUYURU_OKU.has(d.id) && d.gonderen !== (KULLANICI && KULLANICI.id);
   const metin = h("p", { class: "duyuru-metin" + (ac ? " acik" : "") }, d.metin);
@@ -2577,25 +2545,7 @@ function onemliDuyuruGoster() {
 // ---------- öğrenci bilgileri (24_ogrenci_bilgi.sql) ----------
 const dogumYaz = o => o && o.dogum_gun && o.dogum_ay ? `${o.dogum_gun} ${AYLAR_TAM[o.dogum_ay - 1]}` : "";
 const ogrBilgiOzet = o => [o.okul_sinif, o.okul, o.sehir || [o.il, o.ilce].filter(Boolean).join(" / "), o.kullanici_adi, dogumYaz(o) && "🎂 " + dogumYaz(o), yakinYaz(o.veli_yakinlik, o.veli_ad, o.veli_tel), yakinYaz(o.ikinci_yakinlik, o.anne_ad, o.anne_tel)].filter(Boolean).join(" · ");
-function ogrBilgiPencere(o, kaydedildi) {
-  const yon = ROL === "yon";
-  const okul = h("input", { value: o.okul || "", maxlength: "120", placeholder: "örn. Atatürk Ortaokulu" }), sehir = h("input", { value: o.sehir || "", maxlength: "60", placeholder: "örn. Ankara" });
-  const [g, a] = dogumSecici(); g.value = o.dogum_gun || ""; a.value = o.dogum_ay || "";
-  const vad = h("input", { value: o.veli_ad || "", maxlength: "80", placeholder: "Velinin adı soyadı" }), vtel = h("input", { value: o.veli_tel || "", type: "tel", maxlength: "20", placeholder: "0532 123 45 67" });
-  const durum = h("p", { class: "not", role: "status" });
-  const kay = h("button", { class: "btn ana", type: "button", on: { click: async () => { kay.disabled = true; durum.textContent = "Kaydediliyor…";
-    try { await q(sb.rpc("ogrenci_bilgi_kaydet", { p_ogr: o.id, p_okul: okul.value, p_sehir: sehir.value, p_veli_ad: yon ? vad.value : null, p_veli_tel: yon ? vtel.value : null, p_gun: g.value ? +g.value : null, p_ay: a.value ? +a.value : null }));
-      Object.assign(o, { okul: okul.value.trim() || null, sehir: sehir.value.trim() || null, dogum_gun: g.value ? +g.value : null, dogum_ay: a.value ? +a.value : null }, yon ? { veli_ad: vad.value.trim() || null, veli_tel: vtel.value.trim() || null } : {});
-      $("#dlgKapat").click(); kaydedildi && kaydedildi(o); }
-    catch (e) { kay.disabled = false; durum.textContent = /ogrenci_bilgi_kaydet|could not find|PGRST20[25]/i.test(String(e && e.message)) ? "Öğrenci bilgileri kurulmamış: Supabase'te 24_ogrenci_bilgi.sql çalıştırılmalı." : hataMetni(e); } } } }, "Kaydet");
-  $("#dlgIc").innerHTML = "";
-  $("#dlgIc").append(h("h3", { style: "margin-bottom:4px" }, `${o.numara ? o.numara + " · " : ""}${o.takma_ad}`), h("p", { class: "not", style: "margin:0 0 12px" }, "Öğrenci bilgileri. Doğum günü yalnız gün ve ay olarak tutulur; o gün doğum günü ödülü kendiliğinden verilir."),
-    h("div", { class: "izgara i2" }, h("label", {}, "Okulu", okul), h("label", {}, "Yaşadığı şehir", sehir)),
-    h("label", { style: "margin-top:10px" }, "Doğum günü", h("div", { style: "display:flex;gap:8px" }, g, a)),
-    yon ? h("div", { class: "izgara i2", style: "margin-top:10px" }, h("label", {}, "Veli adı soyadı", vad), h("label", {}, "Veli telefonu", vtel)) : h("p", { class: "not" }, "Veli bilgileri sizin hesabınızdan gelir."),
-    h("div", { style: "display:flex;gap:10px;align-items:center;margin-top:14px" }, kay, durum));
-  const d = $("#dlg"); try { d.showModal(); } catch (e) { d.setAttribute("open", ""); }
-}
+// (06.11.2026 Denetçi) eski ogrBilgiPencere() kaldırıldı: aşağıdaki async sürüm onu eziyordu.
 // ---------- sadeleştirme: her sayfa çizildikten sonra kendiliğinden ----------
 // 1) uzun sayfa açıklaması → ilk cümle + "ⓘ Nasıl çalışır?"  2) "Yeni …" formları → "+ Yeni …" düğmesiyle açılır
 // 3) uzun yardım metinleri → katlanır ipucu  4) satırdaki ikincil düğmeler → "⋯" ile açılır  5) boş bölümler küçük
@@ -3925,7 +3875,7 @@ async function cozumSayfaAc(f, tur) {
   if (!V.some(x => x[0] === tur)) tur = V[0][0];
   const sekme = h("div", { class: "sekme", role: "tablist", style: "max-width:760px;background:var(--cizgi)" });
   V.forEach(([t, a]) => sekme.append(h("button", { type: "button", role: "tab", "aria-selected": String(t === tur), on: { click: () => cozumSayfaAc(f, t) } }, a)));
-  const cer = h("iframe", { class: "etk-cerceve", title: `${f.kod} ${(V.find(x => x[0] === tur) || [])[1]}` }), not = h("p", { class: "not" }, "Yükleniyor…");
+  const cer = h("iframe", { class: "etk-cerceve", title: `${f.kod} ${(V.find(x => x[0] === tur) || [])[1]}`, allow: "autoplay; fullscreen" }), not = h("p", { class: "not" }, "Yükleniyor…");
   yer.append(V.length > 1 ? sekme : h("span"), not, cer);
   try { const d = await sb.storage.from(DEPO).download(`cozum/${f.kod}/${V.find(x => x[0] === tur)[2]}`); if (d.error) throw d.error;
     let t = await d.data.text();
@@ -4004,7 +3954,7 @@ const kvEtkStil = () => { if (document.getElementById("kvetk-stil")) return; doc
 function kvEtkAc(e, yer, oyn, sonra) {
   kvEtkStil(); try { const P = oyn && oyn(); if (P && P.pauseVideo) P.pauseVideo(); } catch (x) {}
   const fe = document.fullscreenElement || document.webkitFullscreenElement; if (fe && fe !== yer) try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (x) {}
-  const fr = h("iframe", { title: e.baslik, allow: "fullscreen" }), don = h("button", { class: "kvetk-don", type: "button" }, "Videoya dön ▶");
+  const fr = h("iframe", { title: e.baslik, allow: "autoplay; fullscreen" }), don = h("button", { class: "kvetk-don", type: "button" }, "Videoya dön ▶");
   const kat = h("div", { class: "kvetk", role: "dialog", "aria-modal": "true", "aria-label": "Video İçi Pekiştirme Etkinliği" },
     h("div", { class: "kvetk-ust" }, h("span", { class: "cip" }, "VİDEO İÇİ PEKİŞTİRME ETKİNLİĞİ"), h("b", {}, e.baslik), don), fr);
   (fe && fe === yer ? yer : document.body).append(kat);
@@ -4108,7 +4058,7 @@ async function yonKonuVideo(ic) {
 const atoBtn = f => ATOLYE[f.kod] ? h("button", { type: "button", class: "b-ato", on: { click: () => atolyeAc(f.kod) } }, ATOLYE[f.kod].length > 1 ? `🧪 Atölyeler (${ATOLYE[f.kod].length})` : "🧪 Atölye") : null;
 const etkHedef = (u, tur, no) => u.endsWith("?") ? `${u}${tur === "kesif" ? "e" : "p"}=${no}` : `${u}#${tur === "kesif" ? "e" : "p"}${no}`;
 function etkCerceve(f, tur, no, baslik) {
-  const fr = h("iframe", { class: "etk-cerceve", title: baslik }), kap = h("div", { class: "etk-kap" }, h("p", { class: "not etk-yuk" }, "Etkinlik yükleniyor…"), fr);
+  const fr = h("iframe", { class: "etk-cerceve", title: baslik, allow: "autoplay; fullscreen" }), kap = h("div", { class: "etk-kap" }, h("p", { class: "not etk-yuk" }, "Etkinlik yükleniyor…"), fr);
   etkAdres(f, tur).then(u => { fr.src = etkHedef(u, tur, no); const y = kap.querySelector(".etk-yuk"); if (y) y.remove(); })
     .catch(e => { kap.innerHTML = ""; kap.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, hataMetni(e)))); });
   return kap;
@@ -6935,7 +6885,7 @@ async function ogrKullaniciGiris(kad, sifre, no) {
   kad = latinKucuk(kad); no = no ? parseInt(no, 10) : null;
   if (!kad) throw new Error("Kullanıcı adını yaz."); if (!sifre) throw new Error("Şifreni yaz.");
   depo.yaz("kad", kad); if (no) depo.yaz("numara", String(no));
-  const yanlis = "Kullanıcı adı ya da şifre yanlış.";
+  const yanlis = "Kullanıcı adı ya da şifre yanlış. İlk kez giriyorsan “İlk kez mi giriyorsun?”u seç.";
   let r = no ? await sb.rpc("ogrenci_eposta", { p_kad: kad, p_numara: no }) : await sb.rpc("ogrenci_eposta_kad", { p_kad: kad });
   if (r.error) { if (!/ogrenci_eposta|could not find|PGRST20[25]/i.test(r.error.message || "")) throw new Error(hataMetni(r.error));
     // 61_giris_ve_bilgi.sql kurulmadıysa: okul dışından kaydolan öğrenci doğrudan girer, okul öğrencisinden numarası istenir
@@ -6944,7 +6894,7 @@ async function ogrKullaniciGiris(kad, sifre, no) {
   if (r.data && r.data.hata) throw new Error(r.data.hata);
   const g = await sb.auth.signInWithPassword({ email: r.data.eposta, password: sifre });
   if (g.error) throw new Error(/invalid login/i.test(g.error.message) ? yanlis : hataMetni(g.error));
-  sb.rpc("giris_yazildi").then(() => {});
+  sb.rpc("giris_yazildi").then(() => {}); sb.rpc("giris_deneme_temizle").then(() => {}, () => {});   // 64_giris_guvenlik.sql
 }
 async function ogrKaydol(kad, sifre, sifre2, no, sev, form, onay) {
   kad = latinKucuk(kad); no = parseInt(no, 10);
@@ -7075,12 +7025,12 @@ function giris(mesaj) {
         h("button", { class: "btn ana", type: "submit" }, "Gir ve hesabımı kur"), durum, h("div", { class: "giris-alt" }, modDug("giris", "← Kullanıcı adımla gireceğim"))); }
     else if (rol === "ogr") { tanit("📝", "Ücretsiz kayıt", "Dört kısa adım. Kaydolunca hesabına hoş geldin kredisi yüklenir."); kayitCiz(); }
     else if (unut) { tanit("🔑", "Parolamı unuttum", "E-posta adresinizi yazın, parola yenileme bağlantısı gönderilir.");
-      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", value: depo.al("eposta", ""), required: true })),
+      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", autocomplete: "username", autocapitalize: "none", spellcheck: "false", value: depo.al("eposta", ""), required: true })),
         h("button", { class: "btn ana", type: "submit" }, "Yenileme bağlantısı gönder"), durum,
         h("div", { class: "giris-alt" }, h("button", { type: "button", class: "btn bag-dug", on: { click: () => { unut = false; durum.textContent = ""; ciz(); } } }, "← Girişe dön"))); }
     else if (rol === "veli") { tanit("👪", yeni ? "Veli üyeliği" : "Veli girişi", yeni ? "Ücretsiz üye olun, çocuklarınızın profillerini açın ve ilerlemelerini izleyin." : "Çocuklarınızın ekranına buradan geçersiniz.");
       if (yeni) alan.append(h("label", {}, "Adınız soyadınız", h("input", { id: "g-ad", autocomplete: "name", required: true })), h("label", {}, "Cep telefonu (isteğe bağlı)", h("input", { id: "g-tel", type: "tel", autocomplete: "tel", placeholder: "0532 123 45 67" })));
-      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", autocomplete: "username", value: depo.al("eposta", ""), required: true })),
+      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", autocomplete: "username", autocapitalize: "none", spellcheck: "false", value: depo.al("eposta", ""), required: true })),
         h("label", {}, yeni ? "Parola (en az 8 karakter)" : "Parola", h("input", { id: "g-parola", type: "password", autocomplete: yeni ? "new-password" : "current-password", required: true })));
       if (yeni) alan.append(...onaylar());
       alan.append(h("button", { class: "btn ana", type: "submit" }, yeni ? "Üye ol" : "Veli olarak gir"), durum,
@@ -7088,7 +7038,7 @@ function giris(mesaj) {
         h("button", { type: "button", class: yeni ? "btn bag-dug" : "btn uye-dug", on: { click: () => { yeni = !yeni; durum.textContent = ""; ciz(); } } }, yeni ? "Hesabım var, giriş yapacağım" : "Hesabınız yok mu? Ücretsiz veli üyeliği açın")); }
     else { tanit("🧑‍🏫", yeni ? "Öğretmen hesabı aç" : "Öğretmen girişi", yeni ? "Yöneticinin verdiği davet koduyla hesap açın." : "Öğretmenler ve yönetici bu sekmeden girer.");
       if (yeni) alan.append(h("label", {}, "Adınız soyadınız", h("input", { id: "g-ad", required: true })), h("label", {}, "Öğretmen davet kodu", h("input", { id: "g-davet", autocomplete: "off", autocapitalize: "characters", required: true })));
-      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", value: depo.al("eposta", ""), required: true })), h("label", {}, "Parola", h("input", { id: "g-parola", type: "password", minlength: "6", required: true })),
+      alan.append(h("label", {}, "E-posta", h("input", { id: "g-eposta", type: "email", autocomplete: "username", autocapitalize: "none", spellcheck: "false", value: depo.al("eposta", ""), required: true })), h("label", {}, yeni ? "Parola (en az 8 karakter)" : "Parola", h("input", { id: "g-parola", type: "password", autocomplete: yeni ? "new-password" : "current-password", minlength: yeni ? "8" : null, required: true })),
         h("button", { class: "btn ana", type: "submit" }, yeni ? "Hesap aç" : "Öğretmen olarak gir"), durum,
         h("div", { class: "giris-alt" }, yeni ? null : h("button", { type: "button", class: "btn bag-dug", on: { click: () => { unut = true; durum.textContent = ""; ciz(); } } }, "Parolamı unuttum"),
           h("button", { type: "button", class: "btn bag-dug", on: { click: () => { yeni = !yeni; ciz(); } } }, yeni ? "Hesabım var, giriş yapacağım" : "Hesabım yok: öğretmen hesabı aç (davet kodu gerekir)"))); } };
@@ -7099,6 +7049,11 @@ function giris(mesaj) {
     h("ul", {}, h("li", {}, "Konu anlatımı, testler ve etkileşimli etkinlikler"), h("li", {}, "Adım adım çözümler ve canlı dersler"), h("li", {}, "LGS, YKS, KPSS ve ALES için sınav sayacı ve çalışma programı")),
     h("a", { href: "../", class: "giris-geri" }, "← Ana sayfa"));
   k.append(h("div", { class: "giris" }, h("div", { class: "giris-duzen" }, yan, kart))); ciz();
+  // 06.11.2026 Denetçi: parola alanlarına "Göster" düğmesi (giriş kartı her çizildiğinde)
+  const gosterEkle = () => kart.querySelectorAll('input[type="password"]:not([data-goster])').forEach(i => { i.dataset.goster = "1"; const s = h("span", { class: "sifre-kap" }); i.replaceWith(s);
+    const d = h("button", { type: "button", class: "sifre-goster", "aria-label": "Şifreyi göster", "aria-pressed": "false", on: { click: () => { const ac = i.type === "password"; i.type = ac ? "text" : "password"; d.textContent = ac ? "Gizle" : "Göster"; d.setAttribute("aria-pressed", String(ac)); d.setAttribute("aria-label", ac ? "Şifreyi gizle" : "Şifreyi göster"); i.focus(); } } }, "Göster");
+    s.append(i, d); });
+  new MutationObserver(gosterEkle).observe(kart, { childList: true, subtree: true }); gosterEkle();
   { const yb = uygulamaYukleDugme(); if (yb) { yb.classList.add("giris-uygulama"); k.querySelector(".giris").append(yb); } }
 }
 // e-postadaki "parolayı yenile" bağlantısıyla gelen öğretmen yeni parolasını belirler
@@ -9336,6 +9291,7 @@ const MENU_TAKMA = { ogr: { test: "kitap", acik: "odevler", yol: "kitap" }, ogt:
 let ROZET_EK = { dersler: 0, gelisim: 0, yazili: 0 };
 function rozetAd(id) { return { duyuru: "okunmamış duyuru", iletisim: "okunmamış duyuru", odevler: "bekleyen ödev", ana: "bekleyen ödev", dersler: "bugünkü canlı ders ya da izlenmemiş video", gelisim: "geride kalınan konu", yazili: "yeni yazılı" }[id] || "yeni"; }
 function rozetYenile() {
+  document.querySelectorAll(".duyuru.yeni[data-id]").forEach(k => { if (DUYURU_OKU.has(k.dataset.id)) { k.classList.remove("yeni"); const y = k.querySelector(".e-mavi"); if (y && y.textContent === "Yeni") y.remove(); } });
   document.querySelectorAll("nav button[data-m]").forEach(b => { const id = b.dataset.m, n = menuRozet(id), ik = b.querySelector(".nav-ikon"); if (!ik) return;
     let r = ik.querySelector(".rozet-say"); if (!n) { if (r) r.remove(); return; }
     if (!r) { r = h("span", { class: "rozet-say" }); ik.append(r); } r.textContent = n > 9 ? "9+" : String(n); r.setAttribute("aria-label", `${n} ${rozetAd(id)}`); b.title = `${b.textContent.trim()} · ${n} ${rozetAd(id)}`; });
