@@ -4955,6 +4955,17 @@ function konuDoldur(sel, anahtar, suz = () => true) {
 
 // ---------- özel depo (kılavuz, föyler, ek soru setleri) ----------
 const DEPO = "kaynak";
+// 06.11.2026 Denetçi: etkinliklerin sesli yönergeleri özel depoda: kaynak/ses/<anahtarın son harfi>/<anahtar>.mp3 (63_etkinlik_ses.sql).
+// Etkinlik sayfası (portal içindeki çerçeve) okunacak cümlelerin anahtarlarını sorar; portal kısa süreli imzalı adres döner.
+const SES_ADRES = {};
+addEventListener("message", async e => { const d = e.data; if (!d || d.kvc !== "ses-adres" || !Array.isArray(d.ids)) return;
+  if (![...document.querySelectorAll("iframe")].some(f => f.contentWindow === e.source)) return;
+  const A = {}, simdi = Date.now(), yok = [];
+  d.ids.filter(k => typeof k === "string" && /^[0-9a-z]{1,13}$/.test(k)).slice(0, 80).forEach(k => { const s = SES_ADRES[k]; if (s && s.t > simdi) { if (s.u) A[k] = s.u; } else yok.push(k); });
+  if (yok.length) { try { const yol = k => `ses/${k.slice(-1)}/${k}.mp3`, r = await sb.storage.from(DEPO).createSignedUrls(yok.map(yol), 3600), Y = {};
+      (r.data || []).forEach(x => { if (x && x.path && x.signedUrl && !x.error) Y[x.path] = x.signedUrl; });
+      yok.forEach(k => { const u = Y[yol(k)] || null; SES_ADRES[k] = { u, t: simdi + (u ? 50 * 60e3 : 10 * 60e3) }; if (u) A[k] = u; }); } catch (x) {} }
+  try { e.source.postMessage({ kvc: "ses-adres-cevap", n: d.n, adresler: A }, "*"); } catch (x) {} });
 const imzaliAdres = async yol => { const r = await sb.storage.from(DEPO).createSignedUrl(yol, 3600); if (r.error) throw new Error(/not.?found|bulunamad/i.test(r.error.message || "") ? "Dosya bulunamadı ya da size açık değil." : r.error.message); return r.data.signedUrl; };
 // 25.10.2026: konu anlatımı PDF'leri (pdf/) ve soru dosyaları (soru/) özel depoda. Geçiş bitene kadar
 // depoda bulunamayan dosya eski açık adresten okunur (ESKI_ACIK); taşıma bitince false yapılır.
@@ -5113,6 +5124,7 @@ function depoYeri(tam, C, E) {
   if ((m = tam.match(/(?:^|\/)pdf\/([^/]+\.pdf)$/i))) return `pdf/${m[1]}`;
   if ((m = tam.match(/(?:^|\/)soru\/([^/]+\.js)$/i))) return `soru/${m[1]}`;
   if ((m = tam.match(/(?:^|\/)ekran\/(?:MAT\.)?(.+?)_Ekran\.html$/i))) return `ekran/${m[1]}.html`;
+  if ((m = tam.match(/(?:^|\/)ses\/([0-9a-z])\/([0-9a-z]{1,13}\.mp3)$/))) return `ses/${m[1]}/${m[2]}`;
   if ((m = tam.match(/(?:^|\/)((?:5-sinif|6-sinif|7-sinif|8-sinif|lgs)\/.+\.html)$/))) return C.get(m[1]) || E.get(m[1]) || null;
   return null;
 }
@@ -5135,7 +5147,7 @@ function icerikTasimaKarti() {
       const TOP = G.reduce((a, d) => a + d.f.size, 0) || 1, YK = new Map(); yukPlan(G.map(d => d.f));
       yukSat.hidden = !G.length; const cizC = () => { const y = [...YK.values()].reduce((a, b) => a + b, 0), p = Math.min(100, Math.floor(100 * y / TOP)); cubuk.firstChild.style.width = p + "%"; cubuk.setAttribute("aria-valuenow", p); yuzde.textContent = `%${p}`; };
       cizC();
-      const tipi = y => /\.pdf$/i.test(y) ? "application/pdf" : /\.html$/i.test(y) ? "text/html" : "text/javascript";
+      const tipi = y => /\.pdf$/i.test(y) ? "application/pdf" : /\.html$/i.test(y) ? "text/html" : /\.mp3$/i.test(y) ? "audio/mpeg" : "text/javascript";
       const isci = async () => { while (sira < G.length) { const d = G[sira++];
         for (let dn = 1; dn <= 3; dn++) { const r = await depoYukle(DEPO, d.yol, d.f, { upsert: true, contentType: tipi(d.yol), cacheControl: "3600", ilerle: y => { YK.set(d.yol, y); cizC(); } });
           if (!r.error) break; if (dn === 3) hata.push(`${d.yol}: ${r.error.message}`); else await new Promise(ok => setTimeout(ok, 1500 * dn)); }
@@ -5144,7 +5156,7 @@ function icerikTasimaKarti() {
       await Promise.all([isci(), isci(), isci()]); yukPlanBitir();
       durum.textContent = hata.length ? `Bitti ama ${hata.length} dosya yüklenemedi (ilki: ${hata[0]}). Aynı klasörü yeniden seçerseniz yalnız eksikler denenir.`
         : `Tamam: ${ad} özel depoda (${D.length} dosya).`;
-      if (hata.length && /row-level|policy|unauthori|mime/i.test(hata[0])) durum.textContent += ad === "içerikler" ? " Supabase'te 13, 21 ve 35 numaralı SQL dosyaları çalıştırıldı mı?" : ad === "çözüm sayfaları" ? " Supabase'te 21_cozum_sayfalari.sql çalıştırıldı mı?" : " Supabase'te 13_ozel_icerik.sql çalıştırıldı mı?";
+      if (hata.length && /row-level|policy|unauthori|mime/i.test(hata[0])) durum.textContent += ad === "içerikler" ? (/^ses\//.test(hata[0]) ? " Ses dosyaları için Supabase'te 63_etkinlik_ses.sql çalıştırıldı mı?" : " Supabase'te 13, 21 ve 35 numaralı SQL dosyaları çalıştırıldı mı?") : ad === "çözüm sayfaları" ? " Supabase'te 21_cozum_sayfalari.sql çalıştırıldı mı?" : " Supabase'te 13_ozel_icerik.sql çalıştırıldı mı?";
     } catch (e) { durum.textContent = "Yükleme durdu: " + hataMetni(e); yukPlanBitir(); }
     kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = false);
   }
@@ -5155,7 +5167,7 @@ function icerikTasimaKarti() {
     else durum.textContent = "Seçilen klasörde yüklenecek içerik bulunamadı. “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin."; };
   const dug = h("button", { class: "btn ana tasi-dug", type: "button", on: { click: () => inp.click() } }, "📁 _ozel_icerik klasörünü seç ve yükle");
   const kart = h("div", { class: "kart" }, h("h3", {}, "İçerikleri özel depoya taşı"), durum, yukSat,
-    h("p", { class: "not" }, "“_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
+    h("p", { class: "not" }, "“_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru), etkinliklerin sesli yönergeleri (ses) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
     h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, dug, inp), say);
   return kart;
 }
