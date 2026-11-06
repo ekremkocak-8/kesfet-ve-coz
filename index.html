@@ -181,6 +181,30 @@ footer a{color:var(--soluk)}
 }
 @media (max-width:420px){.w{padding:0 16px}.marka b{display:none}.karekod{padding:22px 20px}.eylem .btn,.karekod .btn{width:100%}.giris p.alt{font-size:17px}}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}.btn{transition:none}}
+
+/* sınava göre kartlar ve bilgi formu (06.11.2026) */
+.sinav-kartlar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;grid-auto-rows:1fr}
+.sk{background:var(--yuzey);border:1px solid var(--cizgi);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;transition:border-color .15s}
+.sk:hover{border-color:var(--ana)}
+.sk .sk-ust{font:600 12px var(--f-sayi);letter-spacing:.05em;text-transform:uppercase;color:var(--ana)}
+.sk h3{font-size:19px}
+.sk p{margin:0;color:var(--soluk);font-size:15px;line-height:1.45}
+.sk .sk-gun{margin-top:auto;padding-top:10px;border-top:1px dashed var(--cizgi);font-size:14px;color:var(--soluk)}
+.sk .sk-gun b{font:700 24px var(--f-sayi);color:var(--murekkep);margin-right:4px}
+.bilgi{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:start}
+.bilgi-form{background:var(--yuzey);border:1px solid var(--cizgi);border-radius:18px;padding:24px;display:grid;gap:12px;box-shadow:var(--golge)}
+.bilgi-form .iki{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bilgi-form label{display:flex;flex-direction:column;gap:5px;font-weight:700;font-size:15px}
+.bilgi-form input,.bilgi-form select,.bilgi-form textarea{font:16px var(--f-govde);padding:11px 12px;border:1.5px solid var(--cizgi);border-radius:10px;background:var(--kagit);color:inherit;width:100%}
+.bilgi-form textarea{min-height:84px;resize:vertical}
+.bilgi-form input:focus,.bilgi-form select:focus,.bilgi-form textarea:focus{outline:none;border-color:var(--ana)}
+.bilgi-form .onay{flex-direction:row;align-items:flex-start;gap:9px;font-weight:400;font-size:14px;color:var(--soluk)}
+.bilgi-form .onay input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:var(--ana)}
+.bilgi-form details{font-size:13.5px;color:var(--soluk)}.bilgi-form summary{cursor:pointer;font-weight:700;color:var(--ana)}
+.bilgi-durum{margin:0;min-height:1.3em;font-size:15px}.bilgi-durum.iyi{color:var(--ana-koyu);font-weight:700}.bilgi-durum.kotu{color:#b3402f}
+.bilgi ul{padding-left:20px;color:var(--soluk)}.bilgi ul li{margin:6px 0}
+@media (max-width:900px){.sinav-kartlar{grid-template-columns:1fr;grid-auto-rows:auto}.bilgi{grid-template-columns:1fr;gap:20px}}
+@media (max-width:420px){.bilgi-form .iki{grid-template-columns:1fr}.bilgi-form{padding:18px}}
 </style>
 </head>
 <body>
@@ -202,7 +226,9 @@ footer a{color:var(--soluk)}
     <a class="marka" href="/" aria-label="Keşfet ve Çöz ana sayfa"><img src="/logo.png" alt=""><b>Keşfet ve Çöz</b></a>
     <nav aria-label="Ana menü">
       <a class="bag" href="#neler">Neler var</a>
+      <a class="bag" href="#sinavlar">Sınavlar</a>
       <a class="bag" href="#kimler">Kimler için</a>
+      <a class="bag" href="#bilgi">Bilgi al</a>
       <a class="bag" href="/etkinlikler/">Örnek etkinlikler</a>
       <a class="btn ana" href="/portal/">Giriş yap</a>
     </nav>
@@ -335,6 +361,20 @@ footer a{color:var(--soluk)}
     </div>
   </section>
 
+  <section class="bolum" id="sinavlar">
+    <div class="w">
+      <h2>Hangi sınava hazırlanıyorsun?</h2>
+      <p class="giris-metni">Kaydolurken sınıfını ve sınavını seç. Ana sayfan, çalışma programın ve sınav sayacın buna göre hazırlanır.</p>
+      <div class="sinav-kartlar">
+        <a class="sk" href="/portal/?giris=kayit" data-sinav="lgs"><span class="sk-ust">Ortaokul · 5–8. sınıf</span><h3>LGS</h3><p>Kitabın bütün konuları, keşif etkinlikleri, testler ve adım adım çözümler.</p><span class="sk-gun" data-gun>LGS 13 Haziran 2027</span></a>
+        <a class="sk" href="/portal/?giris=kayit" data-sinav="yks"><span class="sk-ust">Lise · 9–12. sınıf</span><h3>YKS</h3><p>Canlı dersler, çalışma programı, ödev takibi ve YKS sayacı.</p><span class="sk-gun" data-gun>YKS 19 Haziran 2027</span></a>
+        <a class="sk" href="/portal/?giris=kayit" data-sinav="yks"><span class="sk-ust">Mezun</span><h3>YKS</h3><p>Okul bilgisi istenmez. Kendi programını kur, birebir canlı derse katıl.</p><span class="sk-gun" data-gun>YKS 19 Haziran 2027</span></a>
+        <a class="sk" href="/portal/?giris=kayit" data-sinav="kpss,ales"><span class="sk-ust">Üniversite</span><h3>KPSS · ALES</h3><p>Sayısal bölüm için canlı dersler, çalışma programı ve sınav sayacı.</p><span class="sk-gun" data-gun>ALES 29 Kasım 2026</span></a>
+        <a class="sk" href="/portal/?giris=kayit" data-sinav="olimpiyat"><span class="sk-ust">5–12. sınıf</span><h3>Olimpiyat</h3><p>Matematik olimpiyatına hazırlık için problem çözme ve canlı dersler.</p><span class="sk-gun" data-gun>Tarih açıklanınca burada</span></a>
+      </div>
+    </div>
+  </section>
+
   <section class="bolum beyaz" id="neler">
     <div class="w">
       <h2>Neler var?</h2>
@@ -353,7 +393,7 @@ footer a{color:var(--soluk)}
   <section class="bolum" id="kimler">
     <div class="w">
       <h2>Kimler için?</h2>
-      <p class="giris-metni">Öğrenci ve öğretmen aynı kapıdan girer. Herkes yalnız kendi ekranını görür.</p>
+      <p class="giris-metni">Öğrenci, veli ve öğretmen aynı kapıdan girer. Herkes yalnız kendi ekranını görür.</p>
       <div class="roller">
         <article class="rol">
           <div class="bas"><svg class="ikon"><use href="#i-ogrenci"/></svg><h3>Öğrenci</h3></div>
@@ -392,13 +432,54 @@ footer a{color:var(--soluk)}
       <h2>Nasıl başlarım?</h2>
       <p class="giris-metni">Okulundan gelen öğrenci, öğretmeninin verdiği ilk şifreyle girer ve kendi kullanıcı adını belirler. Okul dışından katılmak için kaydolman yeterli.</p>
       <div class="adimlar">
-        <div class="adim"><h3>Kaydol</h3><p>Kullanıcı adını, şifreni ve bilgilerini yaz. İki dakika sürer.</p></div>
+        <div class="adim"><h3>Kaydol</h3><p>Sınıfını ve sınavını seç, kullanıcı adını ve şifreni belirle. Dört kısa adım.</p></div>
         <div class="adim"><h3>Kredini al</h3><p>Kaydolunca hesabına hoş geldin kredisi yüklenir.</p></div>
         <div class="adim"><h3>Çalışmaya başla</h3><p>Konunu seç, yolu izle. Gelişimini Analizim sayfasında görürsün.</p></div>
       </div>
     </div>
   </section>
 
+
+  <section class="bolum beyaz" id="bilgi">
+    <div class="w bilgi">
+      <div>
+        <h2>Bilgi almak ister misin?</h2>
+        <p class="giris-metni">Adını ve telefonunu bırak, seni arayıp sorularını yanıtlayalım.</p>
+        <ul>
+          <li>Hangi sınıfa ve sınava uygun olduğunu anlatırız.</li>
+          <li>Canlı ders ve kredi sistemini birlikte inceleriz.</li>
+          <li>Okulun için toplu kayıt istiyorsan yol gösteririz.</li>
+        </ul>
+      </div>
+      <form class="bilgi-form" id="bilgiForm" novalidate>
+        <div class="iki">
+          <label>Adın soyadın<input name="ad" maxlength="80" autocomplete="name" required></label>
+          <label>Telefonun<input name="tel" type="tel" inputmode="tel" maxlength="20" placeholder="0532 123 45 67" autocomplete="tel" required></label>
+        </div>
+        <label>Ne için bilgi istiyorsun?
+          <select name="hedef">
+            <option value="">Seç (isteğe bağlı)</option>
+            <option value="lgs">LGS (ortaokul)</option>
+            <option value="yks">YKS (lise ya da mezun)</option>
+            <option value="kpss">KPSS</option>
+            <option value="ales">ALES</option>
+            <option value="olimpiyat">Matematik olimpiyatı</option>
+            <option value="ogretmen">Öğretmenim, okulum için</option>
+            <option value="diger">Başka bir konu</option>
+          </select>
+        </label>
+        <label>Notun (isteğe bağlı)<textarea name="not" maxlength="500" placeholder="Örn. 8. sınıftayım, haftada iki canlı ders düşünüyorum."></textarea></label>
+        <details>
+          <summary>Bilgi talebi aydınlatma metni</summary>
+          <p>Adın, telefonun ve notun yalnız seni geri aramak ve sorduğun konuda bilgi vermek için Keşfet ve Çöz tarafından işlenir. Bilgiler en çok 1 yıl saklanır, sonra silinir. Üçüncü kişilere satılmaz, verilmez. Bilgilerinin silinmesini istediğin zaman isteyebilirsin. 18 yaşından küçüksen formu velinle birlikte doldur.</p>
+        </details>
+        <label class="onay"><input type="checkbox" name="kvkk" required><span>Aydınlatma metnini okudum, geri aranmak için bilgilerimin işlenmesini kabul ediyorum.</span></label>
+        <label class="onay"><input type="checkbox" name="izin"><span>Kampanya ve yeniliklerden telefonla ya da kısa mesajla haberdar olmak istiyorum (isteğe bağlı).</span></label>
+        <button class="btn ana" type="submit">Beni arayın</button>
+        <p class="bilgi-durum" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
   <section class="bolum">
     <div class="w">
       <div class="karekod">
@@ -415,7 +496,7 @@ footer a{color:var(--soluk)}
 <footer>
   <div class="w">
     <span>© <span id="yil">2026</span> Keşfet ve Çöz</span>
-    <span><a href="/portal/">Giriş</a> · <a href="/etkinlikler/">Örnek etkinlikler</a></span>
+    <span><a href="/portal/">Giriş</a> · <a href="#bilgi">Bilgi al</a> · <a href="/etkinlikler/">Örnek etkinlikler</a></span>
   </div>
 </footer>
 <script>try{document.getElementById("yil").textContent=new Date().getFullYear()}catch(e){}</script>
@@ -433,6 +514,43 @@ footer a{color:var(--soluk)}
   v.addEventListener("touchend",function(e){if(x0==null)return;var d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>40){git(i+(d<0?1:-1));bas();}x0=null;});
   git(0);bas();
 }catch(e){}})();
+</script>
+
+<script>
+// sınav kartlarında kalan gün (tarihler yönetici panelindeki Sınav takviminden gelir, gelmezse aşağıdaki liste)
+(function () {
+  var ILK = [["ales", "ALES", "2026-11-29"], ["ales", "ALES", "2027-04-18"], ["lgs", "LGS", "2027-06-13"], ["yks", "YKS", "2027-06-19"], ["ales", "ALES", "2027-07-11"], ["kpss", "KPSS", "2027-09-12"], ["ales", "ALES", "2027-11-28"]];
+  var AD = { lgs: "LGS", yks: "YKS", kpss: "KPSS", ales: "ALES", olimpiyat: "Olimpiyat" };
+  var URL_ = "https://apyizgkaiogaqgnjruna.supabase.co", ANAHTAR = "sb_publishable_EfSQPWg-nCbKr_FFdBMxVQ_FUk5h1fh";
+  function gun(t) { var a = new Date(); a.setHours(0, 0, 0, 0); return Math.round((new Date(t + "T00:00:00") - a) / 864e5); }
+  function ciz(L) {
+    document.querySelectorAll(".sk[data-sinav]").forEach(function (k) {
+      var S = k.getAttribute("data-sinav").split(","), x = L.filter(function (r) { return S.indexOf(r[0]) >= 0 && gun(r[2]) >= 0; }).sort(function (a, b) { return a[2] < b[2] ? -1 : 1; })[0], e = k.querySelector("[data-gun]");
+      if (!x) { e.textContent = "Tarih açıklanınca burada"; return; }
+      var g = gun(x[2]); e.innerHTML = g === 0 ? "<b>Bugün</b> " + AD[x[0]] + " günü" : "<b>" + g + "</b> gün · " + AD[x[0]] + " " + new Date(x[2] + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+    });
+  }
+  ciz(ILK);
+  try { fetch(URL_ + "/rest/v1/sinav_takvimi?select=sinav,ad,tarih&order=tarih", { headers: { apikey: ANAHTAR, Authorization: "Bearer " + ANAHTAR } })
+    .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && d.length) ciz(d.map(function (r) { return [r.sinav, r.ad, String(r.tarih).slice(0, 10)]; })); }).catch(function () {}); } catch (e) {}
+
+  // bilgi al formu
+  var f = document.getElementById("bilgiForm"); if (!f) return;
+  var d = f.querySelector(".bilgi-durum"), b = f.querySelector("button[type=submit]");
+  f.addEventListener("submit", function (ev) {
+    ev.preventDefault(); d.className = "bilgi-durum kotu";
+    var ad = f.ad.value.trim(), tel = f.tel.value.trim(), rakam = tel.replace(/[^0-9]/g, "");
+    if (ad.length < 2) { d.textContent = "Adını ve soyadını yaz."; f.ad.focus(); return; }
+    if (rakam.length < 10 || rakam.length > 13) { d.textContent = "Telefon numarasını kontrol et (örn. 0532 123 45 67)."; f.tel.focus(); return; }
+    if (!f.kvkk.checked) { d.textContent = "Aydınlatma metnini okuduğunu onayla."; return; }
+    b.disabled = true; d.className = "bilgi-durum"; d.textContent = "Gönderiliyor…";
+    fetch(URL_ + "/rest/v1/rpc/bilgi_talebi_gonder", { method: "POST", headers: { apikey: ANAHTAR, Authorization: "Bearer " + ANAHTAR, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_ad: ad, p_telefon: tel, p_hedef: f.hedef.value || null, p_not: f.not.value.trim() || null, p_kvkk: true, p_izin: f.izin.checked }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) { if (!x.ok) throw new Error((x.j && x.j.message) || "Gönderilemedi."); d.className = "bilgi-durum iyi"; d.textContent = "Teşekkürler, bilgilerin bize ulaştı. En kısa sürede seni arayacağız."; f.reset(); })
+      .catch(function (e) { b.disabled = false; d.className = "bilgi-durum kotu"; d.textContent = /bilgi_talebi|function|PGRST/i.test(e.message) ? "Form şu an çalışmıyor. Biraz sonra yeniden dene." : e.message; });
+  });
+})();
 </script>
 </body>
 </html>
