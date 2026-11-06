@@ -6,8 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="ikon/favicon-32.png"><link rel="apple-touch-icon" href="ikon/apple-touch-icon.png">
 <script>try{if(localStorage.getItem("kvcp_tema")!=='"sistem"')document.documentElement.dataset.theme="light"}catch(e){document.documentElement.dataset.theme="light"}</script>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Keşfet ve Çöz"><meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/fonts/site.css">
 <style>
 /* Düzen: üstte sabit uygulama çubuğu, solda (masaüstü) / altta (telefon) gezinme; içerik kartları optik form kâğıdı diliyle */
 :root{
@@ -1411,6 +1410,10 @@ tr.soluk-satir td{color:var(--soluk)}
 .sifre-kap{position:relative;display:block}.sifre-kap>input{width:100%;padding-right:76px!important;box-sizing:border-box}
 .sifre-goster{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--ana,#3a7563);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer}
 .sifre-goster:hover,.sifre-goster:focus-visible{background:rgba(58,117,99,.1)}
+
+/* 06.11.2026 Denetçi: veli sekmesi kalktı → iki eşit sekme; kayıt türü 2 × 2 eşit kart */
+.sekme2{grid-template-columns:1fr 1fr}
+.kayit-tur{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 </style>
 </head><body>
 <div id="kok"></div>
@@ -1598,7 +1601,7 @@ function metinGoster(k) { const [b, m] = METIN[k]; bilgi(`<h3>${b}</h3>${m}`); }
 async function ogrGiris(kod, no, pin, hatirla = true) {
   kod = kod.trim().toUpperCase().replace(/[.\s-]*SINIF$|\.$/i, ""); no = String(parseInt(no, 10)); pin = pin.trim();
   if (!kod || no === "NaN") throw new Error("Sınıfını ve okul numaranı yaz.");
-  if (!/^\d{4}$/.test(pin)) throw new Error("Şifre 4 rakamdan oluşur.");
+  if (!/^(\d{4}|\d{6})$/.test(pin)) throw new Error("İlk şifre 6 rakamdan oluşur.");   // 06.11.2026: yeni şifreler 6 hane; eski 6 haneliler çalışır
   if (hatirla) { depo.yaz("sinif_kodu", kod); depo.yaz("numara", no); }
   if (/^\d{1,2}$/.test(kod)) {   // sınıf seviyesi yazıldı: seviye + numara + şifreden sınıfı bul
     const b = await sb.rpc("ogrenci_sinif_bul", { p_seviye: +kod, p_numara: +no, p_pin: pin });
@@ -1652,7 +1655,9 @@ async function yukleIc() {
   KULLANICI = user;
   ONIZLEME = null; BULUT_YOK = false;
   try { const sp = new URLSearchParams(location.search).get("sayfa"); if (sp && /^[a-z0-9_]{2,20}$/.test(sp)) { SAYFA = sp; history.replaceState(null, "", location.pathname); } } catch (e) {}
-  let yon = false; try { yon = (await sb.rpc("ben_yonetici")).data === true; } catch (e) {}
+  let yon = false; try { let r = await sb.rpc("yonetici_mi"); if (r.error) r = await sb.rpc("ben_yonetici"); yon = r.data === true; } catch (e) {}
+  // 06.11.2026 Denetçi: yönetici hesabı iki adımlı doğrulamayla girer (65_guvenlik_kvkk.sql; ilk girişte doğrulama uygulaması bağlanır)
+  if (yon && !(await yonIkiAdim(user))) return;
   YON_GERCEK = yon;
   let ot0 = null; if (yon) { try { ot0 = await q(sb.from("ogretmenler").select("*").eq("id", user.id).maybeSingle()); } catch (e) {} }
   YON_IKI = !!(yon && ot0); if (YON_IKI && depo.al("panel", "yon") === "ogt") yon = false;
@@ -2368,7 +2373,7 @@ const MENU = {
         ["canlilar", "Dersler", "canli", [["canli", "Canlı ders planı"], ["tahta", "Online tahta"], ["ders", "Video dersler"], ["video", "Soru videoları"]], "turkuaz"],
         ["kaynaklar", "Özel İçerikler", "kaynak", [["kaynak", "Dosyalarım"], ["yazili", "Yazılı ve sorular"], ["evrak", "Evrak şablonları"]], "mor"], ["iletisim", "Duyuru ve bildirim", "yorum", [["duyuru", "Duyurular"], ["bildirim", "Geri bildirimler"]], "pembe"], ["profil", "Profilim", "profil", null, "gri"]],
   veli: [["cocuk", "Çocuklarım", "ogr", null, "mavi"]],
-  yon: [["genel", "Genel bakış", "analiz", null, "mavi"], ["kullanici", "Kullanıcılar", "ogr", [["ogretmen", "Öğretmenler"], ["ogrenciler", "Tüm öğrenciler"], ["bilgitalebi", "Bilgi talepleri"], ["sinif", "Sınıflar ve öğrenciler"], ["bireysel", "Okul dışı öğrenciler"], ["okullar", "Okullar"]], "mor"],
+  yon: [["genel", "Genel bakış", "analiz", null, "mavi"], ["kullanici", "Kullanıcılar", "ogr", [["ogretmen", "Öğretmenler"], ["ogrenciler", "Tüm öğrenciler"], ["bilgitalebi", "Bilgi talepleri"], ["kvkk", "KVKK talepleri"], ["sinif", "Sınıflar ve öğrenciler"], ["bireysel", "Okul dışı öğrenciler"], ["okullar", "Okullar"]], "mor"],
         ["duyuru", "Duyurular", "yorum", null, "pembe"], ["icerikler", "İçerik", "kitap", [["icerik", "İçerik inceleme"], ["sinavtakvim", "Sınav takvimi"], ["kvideo", "Konu videoları"], ["rehber", "Rehberlik köşesi"], ["yazili", "Yazılı ve PDF'ler"], ["yillik", "Yıllık planlar"], ["bildirim", "Geri bildirimler"]], "yesil"],
         ["odemeler", "Kredi ve ödeme", "tablo", [["odul", "Hediye ve ödüller"], ["kredi", "Kredi hareketleri"], ["odeme", "Kartla ödemeler"]], "turuncu"],
         ["gelisim", "Güncellemeler", "odev", [["guncellemeler", "Son güncellemeler"], ["yapilacak", "Yapılacaklar"]], "gri"],
@@ -2386,7 +2391,7 @@ function uygulama(kabuk) {   // kabuk === true: yalnız menü ve çerçeve (sayf
     const git = () => { let s = S[0]; if (A) { const son = depo.al("grup_" + id, ""); if (S.includes(son)) s = son; } SAYFA = s; uygulama(); scrollTo(0, 0); };
     const rz = menuRozet(id), b = () => h("button", { type: "button", class: "r-" + renk, "data-m": id, "aria-current": aktif ? "page" : false, title: rz ? `${ad} · ${rz} ${rozetAd(id)}` : null, on: { click: git } },
       h("span", { class: "nav-ikon" }, ikon(ik), rz ? h("span", { class: "rozet-say", "aria-label": `${rz} ${rozetAd(id)}` }, rz > 9 ? "9+" : String(rz)) : null), h("span", {}, ad)); nav.append(b()); mnav.append(b()); });
-  const kim = ROL === "veli" ? h("div", { class: "kim" }, h("b", {}, VELI.ad), (KULLANICI && KULLANICI.email) || "") : ROL === "yon" ? h("div", { class: "kim" }, h("b", {}, "Yönetici"), (KULLANICI && KULLANICI.email) || "") : ROL === "ogr" ? h("div", { class: "kim" }, h("b", {}, `${BEN.numara} · ${BEN.takma_ad}`), `${SINIF.ad}${/sınıf$/.test(SINIF.ad) ? "" : " sınıfı"}`, KREDI ? h("span", { class: "kredi-cip sayi" }, `${KREDI.bakiye.toplam || 0} kredi`) : null) : h("div", { class: "kim" }, h("b", {}, OGT.ad), SINIF ? `${SINIF.ad} · ${OGR.length} öğrenci` : "Henüz sınıf yok");
+  const kim = ROL === "veli" ? h("div", { class: "kim" }, h("b", {}, VELI.ad), (KULLANICI && KULLANICI.email) || "") : ROL === "yon" ? h("div", { class: "kim" }, h("b", {}, "Yönetici"), (KULLANICI && KULLANICI.email) || "") : ROL === "ogr" ? h("div", { class: "kim" }, h("b", {}, BEN.takma_ad || BEN.kullanici_adi || "Öğrenci"), `${SINIF.ad}${/sınıf$/.test(SINIF.ad) ? "" : " sınıfı"}`, KREDI ? h("span", { class: "kredi-cip sayi" }, `${KREDI.bakiye.toplam || 0} kredi`) : null) : h("div", { class: "kim" }, h("b", {}, OGT.ad), SINIF ? `${SINIF.ad} · ${OGR.length} öğrenci` : "Henüz sınıf yok");
   kim.append(h("span", { class: "kim-prf" }, ikon("profil"), "Profil ve şifre")); kim.classList.add("tikla"); kim.setAttribute("role", "button"); kim.tabIndex = 0; kim.title = "Profilim"; const prfAc = () => { SAYFA = "profil"; uygulama(); scrollTo(0, 0); }; kim.onclick = prfAc; kim.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); prfAc(); } };
   const cik = h("button", { type: "button", class: "btn", style: "margin-top:8px;width:100%;display:flex;gap:8px;align-items:center;justify-content:center", on: { click: ONIZLEME ? () => gorunumDon("yon") : cikis } }, ikon("cikis"), ONIZLEME ? "Yönetime dön" : ROL === "ogr" && VELI_DON ? "Veli paneline dön" : "Çıkış");
   const gec = YON_GERCEK ? gorunumSec() : null;
@@ -4212,8 +4217,8 @@ ogrenci(ic) {
   const l = h("div", { class: "liste" }), durum = h("p", { class: "not" });
   const ciz = () => { l.innerHTML = ""; if (!OGR.length) l.append(h("p", { class: "ekran-yok" }, "Henüz öğrenci yok."));
     OGR.forEach(o => l.append(h("div", { class: "satir" }, h("div", { class: "ad" }, `${o.numara} · ${o.takma_ad}`, h("small", {}, o.kullanici ? `son giriş: ${once(o.son_giris)}` : "henüz girmedi")), h("span", { class: "etiket e-mavi sayi" }, `şifre ${o.pin}`),
-      !SAHIP() ? null : h("button", { class: "btn", type: "button", title: "Şifreyi kendiniz belirleyin (4 rakam)", on: { click: e => { const b = e.currentTarget, gir = h("input", { inputmode: "numeric", maxlength: "4", value: o.pin, "aria-label": `${o.numara} numaralı öğrencinin yeni şifresi`, style: "width:72px;text-align:center", class: "sayi" });
-        const kay = h("button", { class: "btn ana", type: "button", on: { click: async () => { const v = gir.value.trim(); if (!/^\d{4}$/.test(v)) { durum.textContent = "Şifre 4 rakam olmalı."; gir.focus(); return; } kay.disabled = true;
+      !SAHIP() ? null : h("button", { class: "btn", type: "button", title: "Şifreyi kendiniz belirleyin (6 rakam)", on: { click: e => { const b = e.currentTarget, gir = h("input", { inputmode: "numeric", maxlength: "6", value: o.pin, "aria-label": `${o.numara} numaralı öğrencinin yeni şifresi`, style: "width:96px;text-align:center", class: "sayi" });
+        const kay = h("button", { class: "btn ana", type: "button", on: { click: async () => { const v = gir.value.trim(); if (!/^\d{6}$/.test(v)) { durum.textContent = "Şifre 6 rakam olmalı."; gir.focus(); return; } kay.disabled = true;
           try { o.pin = await q(sb.rpc("sifre_belirle", { p_ogrenci: o.id, p_pin: v })); o.kullanici = null; durum.textContent = `${o.numara} · ${o.takma_ad}: yeni şifre ${o.pin}. Öğrenci bu şifreyle yeniden giriş yapar; sonuçları korunur.`; ciz(); }
           catch (er) { kay.disabled = false; durum.textContent = /sifre_belirle|could not find|PGRST20[25]/i.test(String(er && er.message)) ? "Şifre belirleme için Supabase'te 09_kolay_giris.sql yeniden çalıştırılmalı." : hataMetni(er); } } } }, "Kaydet");
         gir.addEventListener("keydown", ev => { if (ev.key === "Enter") kay.click(); if (ev.key === "Escape") ciz(); });
@@ -4222,7 +4227,7 @@ ogrenci(ic) {
       null))); };
   ic.append(h("div", { class: "kart" }, h("p", { class: "not", style: "margin:0" }, "Öğrenci ekleme ve silme yöneticidedir. Yeni öğrenci için yöneticiye yazın. Şifresini unutan öğrencinin şifresini buradan yenileyebilir ya da belirleyebilirsiniz.")),
     h("div", { class: "kart" }, h("h3", {}, `${OGR.length} öğrenci`), l, durum),
-    SAHIP() ? h("p", { class: "not" }, "Öğrenci girişte sınıfını (ör. 7), okul numarasını ve 4 haneli şifresini yazar; sınıf kodu yedek olarak da çalışır. Şifreyi kendiniz vermek için \"Şifre belirle\", rastgele yeni şifre için \"Şifreyi yenile\"ye basın; eski şifre geçersiz olur, sonuçları korunur.") : null, sinifAyarKarti()); ciz();
+    SAHIP() ? h("p", { class: "not" }, "Öğrenci girişte sınıfını (ör. 7), okul numarasını ve 6 haneli şifresini yazar; sınıf kodu yedek olarak da çalışır. Şifreyi kendiniz vermek için \"Şifre belirle\", rastgele yeni şifre için \"Şifreyi yenile\"ye basın; eski şifre geçersiz olur, sonuçları korunur.") : null, sinifAyarKarti()); ciz();
 },
 video(ic) {
   ic.append(bas("Video çözümler", "YouTube'a liste dışı yüklediğiniz videonun bağlantısını sorunun yanına yapıştırın; öğrenci sonuç ekranında “▶ Video” düğmesini görür."));
@@ -5756,7 +5761,7 @@ function ogrenciEkleKarti(sinif, numaralar, eklendi) {
   const satir = (n = "", t = "", p = "") => {
     const N = h("input", { inputmode: "numeric", maxlength: "5", placeholder: "125", value: n, "aria-label": "Okul numarası", class: "sayi" });
     const T = h("input", { maxlength: "30", placeholder: "Martı", value: t, "aria-label": "Takma ad" });
-    const P = h("input", { inputmode: "numeric", maxlength: "4", placeholder: "otomatik", value: p, "aria-label": "Şifre (4 rakam, boş bırakılabilir)", class: "sayi" });
+    const P = h("input", { inputmode: "numeric", maxlength: "6", placeholder: "otomatik", value: p, "aria-label": "Şifre (6 rakam, boş bırakılabilir)", class: "sayi" });
     const tr = h("tr", {}, h("td", {}, N), h("td", {}, T), h("td", {}, P),
       h("td", {}, h("button", { type: "button", class: "ok-sil", title: "Satırı kaldır", "aria-label": "Satırı kaldır", on: { click: () => { tr.remove(); if (!govde.children.length) govde.append(satir()); } } }, "×")));
     N.addEventListener("paste", e => { const m = (e.clipboardData || window.clipboardData).getData("text"); if (!/[\n,;\t]/.test(m.trim())) return; e.preventDefault(); yapistir(m, tr); });
@@ -5774,7 +5779,7 @@ function ogrenciEkleKarti(sinif, numaralar, eklendi) {
     R.forEach(r => { let e = false;
       if (!/^\d{1,5}$/.test(r.n) || +r.n < 1 || varO.has(+r.n) || gor.has(+r.n)) { r.N.classList.add("hatali"); e = true; }
       if (!r.t) { r.T.classList.add("hatali"); e = true; }
-      if (r.p && !/^\d{4}$/.test(r.p)) { r.P.classList.add("hatali"); e = true; }
+      if (r.p && !/^\d{6}$/.test(r.p)) { r.P.classList.add("hatali"); e = true; }
       gor.add(+r.n); if (e) hata++; });
     if (hata) { durum.textContent = `${hata} satırda düzeltilecek yer var (kırmızı kutular). Numara 1–99999 olmalı ve sınıfta tekrar etmemeli; takma ad boş kalmamalı; şifre ya boş ya da 4 rakam olmalı.`; return; }
     kaydet.disabled = true; durum.textContent = "Kaydediliyor…";
@@ -5786,7 +5791,7 @@ function ogrenciEkleKarti(sinif, numaralar, eklendi) {
     catch (e) { durum.textContent = /row-level|policy/i.test(String(e && e.message)) ? "Kaydedilemedi: öğrenci kaydı yalnız yöneticide. Supabase'te 15_ogrenci_kaydi_yonetici.sql çalıştırıldı mı?" : hataMetni(e); }
     kaydet.disabled = false; } } }, "Öğrencileri kaydet");
   return h("div", { class: "kart" }, h("h3", {}, `Öğrenci ekle · ${sinif.ad}`),
-    h("p", { class: "not" }, "Gerçek ad yazmayın; okul numarası ve takma ad yeterli (KVKK). Şifreyi boş bırakırsanız 4 haneli şifre otomatik verilir. Excel'den kopyaladığınız satırları ilk numara kutusuna yapıştırabilirsiniz."),
+    h("p", { class: "not" }, "Gerçek ad yazmayın; okul numarası ve takma ad yeterli (KVKK). Şifreyi boş bırakırsanız 6 haneli şifre otomatik verilir. Excel'den kopyaladığınız satırları ilk numara kutusuna yapıştırabilirsiniz."),
     h("div", { class: "ok-tablo" }, h("table", {}, h("thead", {}, h("tr", {}, h("th", {}, "Okul no"), h("th", {}, "Takma ad"), h("th", {}, "Şifre"), h("th", {}, h("span", { class: "gizli" }, "Kaldır")))), govde)),
     h("div", { class: "ok-alt" }, h("button", { class: "btn", type: "button", on: { click: () => { const y = satir(); govde.append(y); y.querySelector("input").focus(); } } }, "+ Satır ekle"), kaydet, durum));
 }
@@ -5803,7 +5808,7 @@ async function yonOgrenciKarti(s) {
   catch (e) { kap.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, hataMetni(e)))); return kap; }
   ciz();
   kap.append(ogrenciEkleKarti(s, () => L.map(o => o.numara), r => { L = L.concat(r).sort((a, b) => a.numara - b.numara); ciz(); }),
-    h("div", { class: "kart" }, h("h3", {}, "Öğrenciler ve şifreleri"), h("p", { class: "not" }, `Öğrenci girişte sınıf seviyesini (${s.seviye || 7}), okul numarasını ve 4 haneli şifresini yazar. Liste boş görünüyorsa Supabase'te 15_ogrenci_kaydi_yonetici.sql çalıştırılmalı.`), liste, durum));
+    h("div", { class: "kart" }, h("h3", {}, "Öğrenciler ve şifreleri"), h("p", { class: "not" }, `Öğrenci girişte sınıf seviyesini (${s.seviye || 7}), okul numarasını ve 6 haneli şifresini yazar. Liste boş görünüyorsa Supabase'te 15_ogrenci_kaydi_yonetici.sql çalıştırılmalı.`), liste, durum));
   return kap;
 }
 // ---------- kredi yönetimi (yönetici) ----------
@@ -6159,14 +6164,14 @@ function ogrProfil(ic) {
     h("p", { class: "not" }, "Sınıfın ya da numaran yanlışsa öğretmenine söyle; bunları yalnız öğretmenin değiştirebilir."),
     h("div", { class: "prf-alt" }, kay, h("button", { class: "btn", type: "button", on: { click: () => ogrBilgiPencere(BEN, x => { Object.assign(BEN, x); uygulama(); }) } }, "Bilgilerimi düzenle"), d1));
   // şifre
-  const [l1, eski] = prfSifreAlan("prf-eski", "Şu anki şifren", { inputmode: "numeric", maxlength: "4", autocomplete: "current-password" });
-  const [l2, yeni] = prfSifreAlan("prf-yeni", "Yeni şifre (4 rakam)", { inputmode: "numeric", maxlength: "4" });
-  const [l3, yeni2] = prfSifreAlan("prf-yeni2", "Yeni şifre (tekrar)", { inputmode: "numeric", maxlength: "4" });
+  const [l1, eski] = prfSifreAlan("prf-eski", "Şu anki şifren", { inputmode: "numeric", maxlength: "6", autocomplete: "current-password" });
+  const [l2, yeni] = prfSifreAlan("prf-yeni", "Yeni şifre (6 rakam)", { inputmode: "numeric", maxlength: "6" });
+  const [l3, yeni2] = prfSifreAlan("prf-yeni2", "Yeni şifre (tekrar)", { inputmode: "numeric", maxlength: "6" });
   const d2 = h("p", { class: "not", role: "status" }), deg = h("button", { class: "btn ana", type: "submit" }, "Şifremi değiştir");
   const f2 = h("form", { class: "kart prf-kart", on: { submit: async e => { e.preventDefault();
     const a = eski.value.trim(), b = yeni.value.trim(), c = yeni2.value.trim();
-    if (!/^\d{4}$/.test(a)) { d2.textContent = "Şu anki şifreni yaz (4 rakam)."; return; }
-    if (!/^\d{4}$/.test(b)) { d2.textContent = "Yeni şifre 4 rakamdan oluşmalı."; return; }
+    if (!/^(\d{4}|\d{6})$/.test(a)) { d2.textContent = "Şu anki şifreni yaz."; return; }
+    if (!/^\d{6}$/.test(b)) { d2.textContent = "Yeni şifre 6 rakamdan oluşmalı."; return; }
     if (b !== c) { d2.textContent = "Yeni şifre iki kutuda aynı olmalı."; return; }
     if (a === b) { d2.textContent = "Yeni şifre eskisinden farklı olmalı."; return; }
     if (/^(\d)\1{3}$/.test(b) || "0123456789".includes(b) || "9876543210".includes(b)) { d2.textContent = "Bu şifre kolay tahmin edilir (1111, 1234 gibi). Başka bir şifre seç."; return; }
@@ -6914,18 +6919,16 @@ async function ogrKaydol(kad, sifre, sifre2, no, sev, form, onay) {
   depo.yaz("kad", kad); depo.yaz("numara", String(no)); if (k.data && k.data.hosgeldin) depo.yaz("hosgeldin_goster", String(k.data.hosgeldin));
 }
 // ---------- giriş (06.11.2026): Öğrenci · Veli · Öğretmen; öğrenci kullanıcı adı ve şifreyle girer; kayıt adım adım ----------
-const KAYIT_TUR = [
+const KAYIT_TUR = [   // 06.11.2026: veli üyeliği kaldırıldı (30.10 kararı); öğretmen kaydı "Öğretmen" sekmesinde
   ["ortaokul", "🎒", "Ortaokul", "5–8. sınıf öğrencisi · LGS"],
   ["lise", "📘", "Lise", "9–12. sınıf öğrencisi · YKS"],
   ["mezun", "🎓", "Mezun", "Liseyi bitirdim · YKS"],
-  ["universite", "🏛", "Üniversite", "Öğrencisi ya da mezunu · KPSS, ALES"],
-  ["veli", "👪", "Veli", "Çocuğumun gelişimini izleyeceğim"],
-  ["ogretmen", "🧑‍🏫", "Öğretmen", "Davet koduyla hesap açacağım"]];
+  ["universite", "🏛", "Üniversite", "Öğrencisi ya da mezunu · KPSS, ALES"]];
 function giris(mesaj) {
   const k = $("#kok"); k.innerHTML = ""; let rol = depo.al("rol", "ogr"), yeni = false, unut = false, mod = "giris", numaraIste = false;
-  if (!["ogr", "veli", "ogt"].includes(rol)) rol = "ogr";
+  if (!["ogr", "ogt"].includes(rol)) rol = "ogr";
   try { const u = new URLSearchParams(location.search), g = u.get("giris");
-    if (g === "kayit") { rol = "ogr"; mod = "kayit"; } else if (g === "veli") { rol = "veli"; yeni = u.get("uye") === "1"; } else if (g === "ogr" || g === "ogt") rol = g;
+    if (g === "kayit") { rol = "ogr"; mod = "kayit"; } else if (g === "veli") { rol = "ogr"; } else if (g === "ogr" || g === "ogt") rol = g;
     if (g) history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
   if (!depo.al("kad", "") && depo.al("sinif_kodu", "") && rol === "ogr" && mod === "giris") mod = "ilk";
   const durum = h("p", { class: "not", role: "status", style: "margin:0;min-height:1.2em" }, mesaj || "");
@@ -6949,8 +6952,8 @@ function giris(mesaj) {
       else await ogtGiris($("#g-eposta").value, $("#g-parola").value);
       await yukle(); }
     catch (er) { durum.style.color = "var(--zayif)"; durum.textContent = hataMetni(er); btn.disabled = false; } } } });
-  const marka = h("div", { class: "marka" }, logo(), h("div", {}, h("h1", {}, "Keşfet ve Çöz"), h("small", {}, "Öğrenci, veli ve öğretmen portalı")));
-  const sek = h("div", { class: "sekme sekme3", role: "tablist" });
+  const marka = h("div", { class: "marka" }, logo(), h("div", {}, h("h1", {}, "Keşfet ve Çöz"), h("small", {}, "Öğrenci ve öğretmen portalı")));
+  const sek = h("div", { class: "sekme sekme2", role: "tablist" });
   const alan = h("div", { style: "display:flex;flex-direction:column;gap:12px" });
   const modDug = (m, yazi) => h("button", { type: "button", class: "btn bag-dug", on: { click: () => { mod = m; numaraIste = false; durum.textContent = ""; KS.adim = 1; ciz(); } } }, yazi);
   const tanit = (ik, b, a) => alan.append(h("div", { class: "rol-tanit" }, h("span", { class: "rol-ikon", "aria-hidden": "true" }, ik), h("div", {}, h("b", {}, b), h("span", {}, a))));
@@ -7021,7 +7024,7 @@ function giris(mesaj) {
         h("div", { class: "giris-alt" }, modDug("giris", "← Girişe dön"))); }
     else if (rol === "ogr" && mod === "ilk") { tanit("🔑", "İlk giriş", "Öğretmeninin verdiği ilk şifreyle gir. Sonra kendi kullanıcı adını ve şifreni belirleyeceksin.");
       alan.append(h("label", {}, "Sınıfın", h("input", { id: "g-sinif", value: depo.al("sinif_kodu", ""), placeholder: "örn. 7 (ya da sınıf kodu)", autocomplete: "off", autocapitalize: "characters", required: true })),
-        h("div", { class: "izgara i2" }, h("label", {}, "Okul numarası", h("input", { id: "g-no", value: depo.al("numara", ""), inputmode: "numeric", required: true })), h("label", {}, "İlk şifre (4 hane)", h("input", { id: "g-pin", type: "password", inputmode: "numeric", maxlength: "4", autocomplete: "off", required: true }))),
+        h("div", { class: "izgara i2" }, h("label", {}, "Okul numarası", h("input", { id: "g-no", value: depo.al("numara", ""), inputmode: "numeric", required: true })), h("label", {}, "İlk şifre", h("input", { id: "g-pin", type: "password", inputmode: "numeric", maxlength: "6", autocomplete: "off", required: true }))),
         h("button", { class: "btn ana", type: "submit" }, "Gir ve hesabımı kur"), durum, h("div", { class: "giris-alt" }, modDug("giris", "← Kullanıcı adımla gireceğim"))); }
     else if (rol === "ogr") { tanit("📝", "Ücretsiz kayıt", "Dört kısa adım. Kaydolunca hesabına hoş geldin kredisi yüklenir."); kayitCiz(); }
     else if (unut) { tanit("🔑", "Parolamı unuttum", "E-posta adresinizi yazın, parola yenileme bağlantısı gönderilir.");
@@ -7042,7 +7045,7 @@ function giris(mesaj) {
         h("button", { class: "btn ana", type: "submit" }, yeni ? "Hesap aç" : "Öğretmen olarak gir"), durum,
         h("div", { class: "giris-alt" }, yeni ? null : h("button", { type: "button", class: "btn bag-dug", on: { click: () => { unut = true; durum.textContent = ""; ciz(); } } }, "Parolamı unuttum"),
           h("button", { type: "button", class: "btn bag-dug", on: { click: () => { yeni = !yeni; ciz(); } } }, yeni ? "Hesabım var, giriş yapacağım" : "Hesabım yok: öğretmen hesabı aç (davet kodu gerekir)"))); } };
-  [["ogr", "Öğrenci"], ["veli", "Veli"], ["ogt", "Öğretmen"]].forEach(([r, a]) => sek.append(h("button", { type: "button", role: "tab", "data-r": r, on: { click: () => { if (rol !== r) { yeni = false; unut = false; numaraIste = false; if (mod !== "giris") mod = "giris"; } rol = r; durum.textContent = ""; ciz(); } } }, a)));
+  [["ogr", "Öğrenci"], ["ogt", "Öğretmen"]].forEach(([r, a]) => sek.append(h("button", { type: "button", role: "tab", "data-r": r, on: { click: () => { if (rol !== r) { yeni = false; unut = false; numaraIste = false; if (mod !== "giris") mod = "giris"; } rol = r; durum.textContent = ""; ciz(); } } }, a)));
   kart.append(marka, sek, alan);
   const yan = h("aside", { class: "giris-tanit" }, h("span", { class: "logo-kap buyuk" }, h("img", { src: "../logo.png", alt: "Keşfet ve Çöz" })),
     h("h2", {}, "Matematiği keşfederek öğren, çözerek pekiştir."),
@@ -7179,7 +7182,7 @@ function ogtOgrenciler(ic) {
   // liste
   const l = h("div");
   const ciz = () => { l.innerHTML = ""; if (!OGR.length) { l.append(h("p", { class: "ekran-yok" }, "Henüz öğrenci yok. \"＋ Öğrenci ekle\" ile Excel'den toplu kaydedin.")); return; }
-    const sifreBelirle = async o => { const v = prompt(`${ogrAd(o)} için yeni ilk giriş şifresi (4 rakam):`, ""); if (v == null) return; if (!/^\d{4}$/.test(v.trim())) { durum.textContent = "Şifre 4 rakam olmalı."; return; }
+    const sifreBelirle = async o => { const v = prompt(`${ogrAd(o)} için yeni ilk giriş şifresi (6 rakam):`, ""); if (v == null) return; if (!/^\d{6}$/.test(v.trim())) { durum.textContent = "Şifre 6 rakam olmalı."; return; }
       try { o.pin = await q(sb.rpc("sifre_belirle", { p_ogrenci: o.id, p_pin: v.trim() })); o.kullanici = null; o.hesap_kuruldu = false; durum.textContent = `${ogrAd(o)}: yeni ilk şifre ${o.pin}. Öğrenci "İlk giriş"ten girip yeni şifresini belirler; sonuçları korunur.`; ciz(); } catch (er) { durum.textContent = hataMetni(er); } };
     const sifreYenile = async (o, b) => { b.disabled = true; try { o.pin = await q(sb.rpc("sifre_yenile", { p_ogrenci: o.id })); o.kullanici = null; o.hesap_kuruldu = false; durum.textContent = `${ogrAd(o)}: yeni ilk şifre ${o.pin}.`; ciz(); } catch (er) { b.disabled = false; durum.textContent = hataMetni(er); } };
     l.append(yonTablo(["No", "Ad soyad", "Şube", "Giriş", "Son giriş", "Test", "Ortalama", "Kayıt", ""], OGR.map(o => { const S = Object.values(SONUC[o.id] || {}), ort = S.length ? Math.round(S.reduce((x, y) => x + y.yuzde, 0) / S.length) : null;
@@ -8050,8 +8053,8 @@ OGRS.rehber = ic => rehberSayfa(ic); OGTS.rehber = ic => rehberSayfa(ic); YONS.r
 
 OGRS.yol = ic => konuYoluSayfa(ic); OGRS.terim = ic => terimSayfa(ic); OGTS.ana = ic => ogtAnaSayfa(ic); OGTS.sinav = ic => ogtSinavSayfa(ic); OGTS.coklu = ic => { depo.yaz("odev_sekme", "coklu"); return OGTS.odev(ic); }; OGTS.bakis = ic => ogtBakis(ic);
 OGRS.havuz = ic => havuzSayfa(ic); OGRS.karne = ogrAnaliz; OGRS.program = ogrProgram; OGTS.program = ogtProgram; OGTS.ogrenci = ogtOgrenciler; OGRS.ogretmen = ogrOgretmenlerim;
-OGRS.profil = async ic => { await ogrProfil(ic); const k = uygulamaKarti(); if (k) ic.append(k); };
-OGTS.profil = async ic => { await ogtProfil(ic); const k = uygulamaKarti(); if (k) ic.append(k); }; YONS.profil = OGTS.profil; YONS.odeme = ic => yonOdemeler(ic); YONS.odul = ic => yonOdul(ic);
+OGRS.profil = async ic => { await ogrProfil(ic); const k = uygulamaKarti(); if (k) ic.append(k); ic.append(kvkkKarti()); };
+OGTS.profil = async ic => { await ogtProfil(ic); const k = uygulamaKarti(); if (k) ic.append(k); if (ROL !== "yon") ic.append(kvkkKarti()); }; YONS.profil = OGTS.profil; YONS.odeme = ic => yonOdemeler(ic); YONS.odul = ic => yonOdul(ic);
 OGRS.duyuru = VELIS.duyuru = ic => duyuruGelen(ic); OGTS.duyuru = YONS.duyuru = ic => duyuruYonet(ic);
 
 // ---------- online ders: test soruları, konu anlatımı PDF'leri ve öğretmenin föyleri tahtada (kalem, fosfor, perde, kareli alan) ----------
@@ -8938,6 +8941,74 @@ YONS.bilgitalebi = async ic => {
       ["Sil", async () => { if (!confirm(`${x.ad} silinsin mi?`)) return; try { await q(sb.from("bilgi_talebi").delete().eq("id", x.id)); yenile(); } catch (e) { durum.textContent = hataMetni(e); } }]])))), { araYok: true })
     : h("div", { class: "kart" }, h("p", { class: "ekran-yok", style: "margin:0" }, "Bu bölümde kimse yok.")), durum,
     h("p", { class: "not" }, "Tanıtım izni vermeyen kişiye yalnız sorduğu konuda geri dönün; kampanya mesajı göndermeyin (KVKK ve ticari ileti kuralları)."));
+};
+
+
+
+// ---------- yönetici iki adımlı doğrulama (TOTP) ----------
+async function yonIkiAdim(user) {
+  let mfa; try { mfa = sb.auth.mfa; const a = await mfa.getAuthenticatorAssuranceLevel(); if (a.data && a.data.currentLevel === "aal2") return true; } catch (e) { console.warn("2FA denetimi yapılamadı", e); return true; }
+  const lf = await mfa.listFactors(); const T = ((lf.data && lf.data.all) || []).filter(f => f.factor_type === "totp");
+  let fak = T.find(f => f.status === "verified"), kurulum = null;
+  if (!fak) { for (const f of T) { try { await mfa.unenroll({ factorId: f.id }); } catch (e) {} }
+    const en = await mfa.enroll({ factorType: "totp", friendlyName: "Keşfet ve Çöz yönetici " + new Date().toISOString().slice(0, 10) });
+    if (en.error) { console.warn(en.error); return true; } kurulum = en.data; }
+  return new Promise(cozum => {
+    const k = $("#kok"); k.innerHTML = ""; const durum = h("p", { class: "not", role: "status", style: "margin:0;min-height:1.2em" });
+    const kod = h("input", { id: "g-2fa", inputmode: "numeric", autocomplete: "one-time-code", maxlength: "6", pattern: "[0-9]{6}", required: true, placeholder: "000000", style: "letter-spacing:.3em;text-align:center;font-size:22px" });
+    const f = h("form", { class: "giris-kart", on: { submit: async e => { e.preventDefault(); const b = f.querySelector("button[type=submit]"); const c = kod.value.replace(/\D/g, "");
+      if (c.length !== 6) { durum.textContent = "Uygulamadaki 6 haneli kodu yazın."; return; } b.disabled = true; durum.textContent = "Doğrulanıyor…";
+      const r = await mfa.challengeAndVerify({ factorId: (fak || kurulum).id, code: c });
+      if (r.error) { b.disabled = false; durum.style.color = "var(--zayif)"; durum.textContent = "Kod yanlış ya da süresi geçti. Uygulamadaki güncel kodu yazın."; kod.select(); return; }
+      cozum(true); } } },
+      h("div", { class: "marka" }, logo(), h("div", {}, h("h1", {}, "Keşfet ve Çöz"), h("small", {}, "Yönetici · iki adımlı doğrulama"))),
+      kurulum ? h("div", { class: "rol-tanit" }, h("span", { class: "rol-ikon", "aria-hidden": "true" }, "🔐"), h("div", {}, h("b", {}, "Doğrulama uygulamasını bağlayın (bir kez)"),
+        h("span", {}, "Telefonunuzda Google Authenticator, Microsoft Authenticator ya da benzeri bir uygulamayı açın, aşağıdaki karekodu okutun ve uygulamanın gösterdiği 6 haneli kodu yazın."))) :
+        h("div", { class: "rol-tanit" }, h("span", { class: "rol-ikon", "aria-hidden": "true" }, "🔐"), h("div", {}, h("b", {}, "Doğrulama kodu"), h("span", {}, "Telefonunuzdaki doğrulama uygulamasında görünen 6 haneli kodu yazın."))),
+      kurulum ? h("div", { style: "display:flex;flex-direction:column;align-items:center;gap:6px" }, h("img", { src: kurulum.totp.qr_code, alt: "Doğrulama uygulaması karekodu", width: "200", height: "200", style: "background:#fff;border-radius:12px;padding:8px" }),
+        h("small", { class: "not" }, "Karekod okunmazsa anahtarı elle girin: ", h("code", { style: "user-select:all" }, kurulum.totp.secret))) : null,
+      h("label", {}, "6 haneli kod", kod), h("button", { class: "btn ana", type: "submit" }, "Doğrula ve gir"), durum,
+      h("div", { class: "giris-alt" }, h("button", { type: "button", class: "btn bag-dug", on: { click: async () => { await sb.auth.signOut().catch(() => {}); cozum(false); giris(); } } }, "Çıkış yap")),
+      h("p", { class: "not", style: "margin:0" }, "Telefonunuzu kaybederseniz: Supabase → Authentication → Users → hesabınız → MFA factors bölümünden doğrulayıcıyı silin; sonraki girişte yeniden bağlanır."));
+    k.append(h("div", { class: "giris" }, f)); setTimeout(() => kod.focus(), 50);
+  });
+}
+
+// ---------- KVKK m.11: verilerimi indir, düzeltme/silme talebi (06.11.2026 Denetçi; 65_guvenlik_kvkk.sql) ----------
+const KVKK_TUR = { bilgi: "Verilerim hakkında bilgi", duzeltme: "Düzeltme", silme: "Hesabımın silinmesi" };
+const KVKK_DURUM = [["yeni", "Yeni"], ["islemde", "İşlemde"], ["tamam", "Tamamlandı"], ["red", "Reddedildi"]];
+function kvkkKarti() {
+  const durum = h("p", { class: "not", role: "status", style: "margin:0" }), ac = h("textarea", { rows: "3", maxlength: "1000", placeholder: "İsteğinizi kısaca yazın (isteğe bağlı)", "aria-label": "Talep açıklaması" });
+  const sec = h("select", { "aria-label": "Talep türü" }, ...Object.entries(KVKK_TUR).map(([k, a]) => h("option", { value: k }, a)));
+  const indir = async b => { b.disabled = true; durum.textContent = "Hazırlanıyor…";
+    try { const v = await q(sb.rpc("kvkk_verilerim")); const a = h("a", { href: URL.createObjectURL(new Blob([JSON.stringify(v, null, 2)], { type: "application/json" })), download: `verilerim_${new Date().toISOString().slice(0, 10)}.json` }); document.body.append(a); a.click(); a.remove(); durum.textContent = "Verileriniz indirildi."; }
+    catch (e) { durum.textContent = hataMetni(e); } b.disabled = false; };
+  const gonder = async b => { if (sec.value === "silme" && !confirm("Hesabınızın ve verilerinizin silinmesini istiyorsunuz. Talebiniz yöneticiye iletilecek; silindikten sonra sonuçlarınız ve kredileriniz geri getirilemez. Devam edilsin mi?")) return;
+    b.disabled = true; try { const r = await q(sb.rpc("kvkk_talep_gonder", { p_tur: sec.value, p_aciklama: ac.value.trim() })); durum.textContent = (r && r.mesaj) || "Talebiniz alındı."; ac.value = ""; } catch (e) { durum.textContent = hataMetni(e); } b.disabled = false; };
+  return h("section", { class: "kart" }, h("h3", { style: "margin-top:0" }, "Kişisel verilerim"),
+    h("p", { class: "not", style: "margin:0 0 10px" }, "Kişisel Verilerin Korunması Kanunu (madde 11) gereği verilerinizi indirebilir; düzeltilmesini ya da hesabınızın silinmesini isteyebilirsiniz. Talepler en geç 30 gün içinde yanıtlanır."),
+    h("div", { style: "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px" }, h("button", { class: "btn", type: "button", on: { click: e => indir(e.currentTarget) } }, "Verilerimi indir (JSON)")),
+    h("label", {}, "Talep türü", sec), h("label", {}, "Açıklama", ac), h("div", {}, h("button", { class: "btn ana", type: "button", style: "margin-top:8px", on: { click: e => gonder(e.currentTarget) } }, "Talebi gönder")), durum);
+}
+YONS.kvkk = async ic => {
+  ic.append(bas("KVKK talepleri", "Kullanıcıların veri, düzeltme ve hesap silme talepleri. Yasal süre 30 gündür."));
+  const yer = h("div", {}, h("p", { class: "not" }, "Yükleniyor…")); ic.append(yer);
+  let L; try { L = await q(sb.rpc("yon_kvkk_talepleri")); } catch (e) { yer.innerHTML = ""; yer.append(h("div", { class: "kart uyari-kart" }, h("p", { style: "margin:0" }, "KVKK talepleri için Supabase'te 65_guvenlik_kvkk.sql çalıştırılmalı."))); return; }
+  yer.innerHTML = ""; const durum = h("p", { class: "not", role: "status" }); let sek = depo.al("kvkk_sekme", "yeni");
+  const yenile = () => { SAYFA = "kvkk"; uygulama(); };
+  const guncelle = async (id, d, not_) => { try { await q(sb.rpc("yon_kvkk_guncelle", { p_id: id, p_durum: d, p_not: not_ == null ? null : not_ })); yenile(); } catch (e) { durum.textContent = hataMetni(e); } };
+  const bar = h("div", { class: "devam-sekme", role: "tablist", style: "margin:0 0 10px" });
+  KVKK_DURUM.forEach(([d, a]) => bar.append(h("button", { type: "button", role: "tab", "aria-selected": String(d === sek), on: { click: () => { depo.yaz("kvkk_sekme", d); yenile(); } } }, `${a} (${(L || []).filter(x => x.durum === d).length})`)));
+  const X = (L || []).filter(x => x.durum === sek);
+  yer.append(bar, X.length ? yonTablo(["Tarih", "Kullanıcı", "Tür", "Açıklama", "Kalan gün", ""], X.map(x => { const kalan = 30 - Math.floor((Date.now() - new Date(x.olusturma)) / 864e5); return h("tr", {},
+    h("td", { "data-s": x.olusturma }, new Date(x.olusturma).toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })),
+    h("td", {}, x.kim || "–", h("small", { class: "not", style: "display:block" }, x.rol || "")), h("td", {}, KVKK_TUR[x.tur] || x.tur),
+    h("td", {}, x.aciklama || "", x.yonetici_notu ? h("small", { class: "not", style: "display:block" }, "Notum: " + x.yonetici_notu) : null),
+    h("td", { style: kalan < 7 && x.durum !== "tamam" && x.durum !== "red" ? "color:var(--zayif);font-weight:700" : "" }, x.durum === "tamam" || x.durum === "red" ? "–" : String(kalan)),
+    h("td", { class: "vt-islem" }, satirMenu(x.kim || "talep", [...KVKK_DURUM.filter(([d]) => d !== x.durum).map(([d, a]) => [a, () => guncelle(x.id, d, null)]),
+      ["Not yaz", () => { const t = prompt("Not", x.yonetici_notu || ""); if (t !== null) guncelle(x.id, x.durum, t.trim().slice(0, 500)); }]]))); }), { araYok: true })
+    : h("div", { class: "kart" }, h("p", { class: "ekran-yok", style: "margin:0" }, "Bu bölümde talep yok.")), durum,
+    h("p", { class: "not" }, "Silme talebinde: öğrenciyi Kullanıcılar bölümünden arşivleyin ya da silin, sonra talebi \"Tamamlandı\" yapın. Ödeme ve fatura kayıtları yasal saklama süresince tutulur."));
 };
 
 // ---------- ders kaydı: ekran + mikrofon, tarayıcıda kaydedilir, bilgisayara indirilir (sunucuya gitmez) ----------
