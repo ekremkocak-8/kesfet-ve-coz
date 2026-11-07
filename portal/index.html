@@ -4040,7 +4040,7 @@ function kvEtkYonetim(v, degisti) {
         const e = L.find(x => (x.baslik || "").trim() === bas); if (!e) { esl.push(f.name); continue; }
         try { await q(sb.from("konu_video_etkinlik").update({ html: t }).eq("id", e.id)); delete KVETK_HTML[e.id]; n++; } catch (x) { esl.push(f.name + " (" + hataMetni(x) + ")"); } }
       durum.textContent = `${n} etkinlik yenilendi.` + (esl.length ? ` Eşleşmeyen: ${esl.join(", ")} — bunları satırdaki "Dosyayı yenile" ile tek tek seçin.` : ""); topluDosya.value = ""; };
-    if (L.length) kap.append(h("div", { style: "margin-top:8px" }, topluDosya, h("button", { class: "btn", type: "button", on: { click: () => topluDosya.click() } }, "Bu videonun etkinlik dosyalarını toplu yenile")));
+    if (L.length) kap.append(h("div", { style: "margin-top:8px" }, topluDosya, h("button", { class: "btn ana", type: "button", on: { click: () => topluDosya.click() } }, "Bu videonun etkinlik dosyalarını toplu yenile")));
     kap.append(h("h4", { style: "margin:12px 0 6px" }, "Yeni etkinlik"), h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;align-items:center" }, dosya, h("label", {}, "Durma anı ", zm), bs, ekle), durum); };
   ciz(); return kap;
 }
@@ -4077,8 +4077,8 @@ async function yonKonuVideo(ic) {
     L.forEach(v => { const id = ytKimlik(v.url), sat = h("div", { class: "satir" });
       sat.append(id ? h("img", { src: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`, alt: "", loading: "lazy", style: "width:120px;border-radius:8px" }) : null,
         h("div", { class: "ad" }, `${v.sira}. ${v.baslik}`, h("small", {}, [VTUR[v.tur || "anlatim"], v.anlatici, snYaz(v.sure_sn), v.ozet_sn != null ? `Toparlayalım ${snYaz(v.ozet_sn) || "0:00"}` : "", v.yayinda ? "yayında" : "yayında değil", v.url].filter(Boolean).join(" · "))),
-        h("button", { class: "btn", type: "button", on: { click: e => { e.currentTarget.disabled = true; sat.after(form(v)); } } }, "Düzenle"),
-        h("button", { class: "btn", type: "button", title: "Video İçi Pekiştirme Etkinlikleri", on: { click: e => { const b = e.currentTarget, ac = sat.nextElementSibling && sat.nextElementSibling.classList.contains("kvetk-yon"); if (ac) { sat.nextElementSibling.remove(); return; } sat.after(kvEtkYonetim(v, () => { b.textContent = `Etkinlikler (${(KVETK[v.id] || []).length})`; })); } } }, `Etkinlikler (${(KVETK[v.id] || []).length})`),
+        h("button", { class: "btn ana", type: "button", on: { click: e => { e.currentTarget.disabled = true; sat.after(form(v)); } } }, "Düzenle"),
+        h("button", { class: "btn ana", type: "button", title: "Video İçi Pekiştirme Etkinlikleri", on: { click: e => { const b = e.currentTarget, ac = sat.nextElementSibling && sat.nextElementSibling.classList.contains("kvetk-yon"); if (ac) { sat.nextElementSibling.remove(); return; } sat.after(kvEtkYonetim(v, () => { b.textContent = `🧩 Etkinlikler (${(KVETK[v.id] || []).length})`; })); } } }, `🧩 Etkinlikler (${(KVETK[v.id] || []).length})`),
         h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz?"; return; }
           try { await q(sb.from("konu_video").delete().eq("id", v.id)); await kvideoYukle(); konuDoldur(); ciz(); } catch (er) { durum.textContent = hataMetni(er); } } } }, "Sil"));
       liste.append(sat); }); };

@@ -1,7 +1,7 @@
 // Keşfet ve Çöz · telefon uygulaması önbelleği (01.11.2026)
 // Portal açılışında önce internetten en yeni sürüm alınır; internet yoksa son kaydedilen sürüm açılır.
 // Supabase verileri, giriş, ödeme ve korumalı içerik (soru, PDF, çözüm) önbelleğe ALINMAZ.
-const ONBELLEK = "kvc-portal-v4";   // 07.11.2026: tam ekran düğmesi yanıp söner, video etkinliği dosya yenileme
+const ONBELLEK = "kvc-portal-v5";   // 07.11.2026: tam ekran düğmesi yanıp söner, video etkinliği dosya yenileme
 const KABUK = ["./", "./index.html", "./supabase.js", "./manifest.webmanifest", "./ikon/ikon-192.png", "./ikon/ikon-512.png", "./ikon/apple-touch-icon.png", "./ikon/favicon-32.png"];
 const YAZI_TIPI = /^https?:\/\/[^/]+\/fonts\/[^/]+\.(css|woff2)$/;   // 06.11.2026: Google yerine sitenin /fonts/ klasörü
 
