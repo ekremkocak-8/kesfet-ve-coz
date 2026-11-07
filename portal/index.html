@@ -1415,6 +1415,11 @@ tr.soluk-satir td{color:var(--soluk)}
 /* 06.11.2026 Denetçi: veli sekmesi kalktı → iki eşit sekme; kayıt türü 2 × 2 eşit kart */
 .sekme2{grid-template-columns:1fr 1fr}
 .kayit-tur{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+
+/* Etkinlik açılınca "Tam ekran aç" düğmesi 3 kez yanıp söner (07.11.2026, Ekrem KOÇAK) */
+@keyframes tamYanip{0%,100%{background:var(--ana2)}50%{background:var(--ana);color:#fff;box-shadow:0 0 0 5px var(--ana2)}}
+.tam-yanip{animation:tamYanip .7s ease-in-out 3}
+@media (prefers-reduced-motion:reduce){.tam-yanip{animation:none}}
 </style>
 </head><body>
 <div id="kok"></div>
@@ -3933,7 +3938,7 @@ function atolyeAc(kod, i) {
   if (L.length > 1) { const sekme = h("div", { class: "sekme", role: "tablist", style: "background:var(--cizgi);flex-wrap:wrap" });
     L.forEach((x, j) => sekme.append(h("button", { type: "button", role: "tab", "aria-selected": String(j === i), on: { click: () => atolyeAc(kod, j) } }, x[1]))); ic.append(sekme); }
   const fr = h("iframe", { class: "etk-cerceve", title: a[1], allow: "fullscreen; autoplay" }), kap = h("div", { class: "etk-kap" }, h("p", { class: "not etk-yuk" }, "Atölye yükleniyor…"), fr);
-  ic.append(h("div", { class: "etk-ust" }, h("b", {}, a[1]), h("button", { class: "btn gb-kucuk", type: "button", on: { click: async e => { const w = window.open("", "_blank"); try { const u = await atoAdres(a); if (w) w.location = u; } catch (x) { if (w) w.close(); bilgi(`<p>${kac(hataMetni(x))}</p>`); } } } }, "Tam ekran aç ↗")), kap);
+  ic.append(h("div", { class: "etk-ust" }, h("b", {}, a[1]), h("button", { class: "btn gb-kucuk tam-yanip", type: "button", on: { click: async e => { const w = window.open("", "_blank"); try { const u = await atoAdres(a); if (w) w.location = u; } catch (x) { if (w) w.close(); bilgi(`<p>${kac(hataMetni(x))}</p>`); } } } }, "Tam ekran aç ↗")), kap);
   atoAdres(a).then(u => { fr.src = u; const y = kap.querySelector(".etk-yuk"); if (y) y.remove(); }).catch(e => { kap.innerHTML = ""; kap.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, hataMetni(e)))); });
 }
 // ---------- konu anlatım videoları (38_konu_video.sql) ----------
@@ -4013,6 +4018,8 @@ function kvEtkYonetim(v, degisti) {
         h("button", { class: "btn", type: "button", on: { click: async () => { const sn = snOku(zm.value); if (sn == null) { durum.textContent = "Süreyi dk:sn biçiminde yazın (ör. 3:20)."; return; }
           try { await q(sb.from("konu_video_etkinlik").update({ sn, baslik: bs.value.trim() || e.baslik }).eq("id", e.id)); await kvEtkYukle(); ciz(); degisti(); durum.textContent = "Kaydedildi."; } catch (x) { durum.textContent = hataMetni(x); } } } }, "Kaydet"),
         h("button", { class: "btn", type: "button", on: { click: () => kvEtkAc(e, document.body, null) } }, "Önizle"),
+        h("button", { class: "btn", type: "button", title: "Bu etkinliğin HTML dosyasını yenisiyle değiştirir (durma anı ve başlık korunur)", on: { click: () => { const inp = h("input", { type: "file", accept: ".html,text/html" }); inp.onchange = async () => { const f = inp.files[0]; if (!f) return; if (f.size > 2.5e6) { durum.textContent = "Dosya 2,5 MB'tan büyük."; return; }
+          try { const yeni = await f.text(); await q(sb.from("konu_video_etkinlik").update({ html: yeni }).eq("id", e.id)); delete KVETK_HTML[e.id]; durum.textContent = `${i + 1}) yenilendi: ${f.name}`; } catch (x) { durum.textContent = hataMetni(x); } }; inp.click(); } } }, "Dosyayı yenile"),
         h("button", { class: "btn", type: "button", on: { click: async x => { const b = x.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz?"; return; }
           try { await q(sb.from("konu_video_etkinlik").delete().eq("id", e.id)); delete KVETK_HTML[e.id]; await kvEtkYukle(); ciz(); degisti(); } catch (er) { durum.textContent = hataMetni(er); } } } }, "Sil"))); });
     // ekleme
@@ -4026,6 +4033,14 @@ function kvEtkYonetim(v, degisti) {
       if (v.sure_sn && sn >= v.sure_sn) { durum.textContent = `Durma anı videonun süresinden (${snYaz(v.sure_sn)}) küçük olmalı.`; return; }
       ekle.disabled = true; try { await q(sb.from("konu_video_etkinlik").insert({ video_id: v.id, sn, baslik: bs.value.trim(), html, sira: (KVETK[v.id] || []).length + 1 })); await kvEtkYukle(); ciz(); degisti(); durum.textContent = "Etkinlik eklendi."; }
       catch (x) { ekle.disabled = false; durum.textContent = hataMetni(x); } } } }, "Ekle");
+    // toplu yenileme: seçilen HTML dosyalarının <title>'ı etkinlik başlığıyla eşleşirse o etkinliğin dosyası yenilenir (07.11.2026)
+    const topluDosya = h("input", { type: "file", accept: ".html,text/html", multiple: true, style: "display:none" });
+    topluDosya.onchange = async () => { const fs = [...topluDosya.files]; if (!fs.length) return; let n = 0; const esl = [];
+      for (const f of fs) { const t = await f.text(); const bas = ((new DOMParser().parseFromString(t, "text/html").querySelector("title") || {}).textContent || "").trim();
+        const e = L.find(x => (x.baslik || "").trim() === bas); if (!e) { esl.push(f.name); continue; }
+        try { await q(sb.from("konu_video_etkinlik").update({ html: t }).eq("id", e.id)); delete KVETK_HTML[e.id]; n++; } catch (x) { esl.push(f.name + " (" + hataMetni(x) + ")"); } }
+      durum.textContent = `${n} etkinlik yenilendi.` + (esl.length ? ` Eşleşmeyen: ${esl.join(", ")} — bunları satırdaki "Dosyayı yenile" ile tek tek seçin.` : ""); topluDosya.value = ""; };
+    if (L.length) kap.append(h("div", { style: "margin-top:8px" }, topluDosya, h("button", { class: "btn", type: "button", on: { click: () => topluDosya.click() } }, "Bu videonun etkinlik dosyalarını toplu yenile")));
     kap.append(h("h4", { style: "margin:12px 0 6px" }, "Yeni etkinlik"), h("div", { style: "display:flex;gap:8px;flex-wrap:wrap;align-items:center" }, dosya, h("label", {}, "Durma anı ", zm), bs, ekle), durum); };
   ciz(); return kap;
 }
@@ -4109,7 +4124,7 @@ async function etkinlikAc(kod, tur, no) {
       try { if (tamam) { await q(sb.from("etkinlik_kayit").delete().eq("ogrenci_id", BEN.id).eq("kod", kod).eq("tur", tur).eq("no", no)); delete E[anahtar(no)]; }
             else { await q(sb.from("etkinlik_kayit").upsert({ ogrenci_id: BEN.id, kod, tur, no })); E[anahtar(no)] = true; if (no < L.length) no++; }
             ciz(); } catch (e) { btn.disabled = false; bilgi(`<h3>Kaydedilemedi</h3><p>${kac(hataMetni(e))}</p>`); } } } }, tamam ? "✓ Bitirdim (geri al)" : "Bitirdim ✓");
-    ana.append(h("div", { class: "etk-ust" }, h("div", {}, h("b", {}, `${ad} ${no}`), h("span", { class: "not" }, ` · ${L[no - 1]}`)), h("div", { style: "display:flex;gap:10px;align-items:center" }, gbDugme({ brans: fBrans(f), cikti_kod: kod, tur: "etkinlik", alt: tur, no }, "💬 Geri bildirim", "btn gb-kucuk"), kilitli ? null : h("button", { class: "btn gb-kucuk", type: "button", on: { click: e => etkYeniSekme(f, tur, no, e.currentTarget) } }, "Tam ekran aç ↗"))),
+    ana.append(h("div", { class: "etk-ust" }, h("div", {}, h("b", {}, `${ad} ${no}`), h("span", { class: "not" }, ` · ${L[no - 1]}`)), h("div", { style: "display:flex;gap:10px;align-items:center" }, gbDugme({ brans: fBrans(f), cikti_kod: kod, tur: "etkinlik", alt: tur, no }, "💬 Geri bildirim", "btn gb-kucuk"), kilitli ? null : h("button", { class: "btn gb-kucuk tam-yanip", type: "button", on: { click: e => etkYeniSekme(f, tur, no, e.currentTarget) } }, "Tam ekran aç ↗"))),
       kilitli ? h("div", { class: "kart kilit-kart" }, h("b", {}, `🔒 ${ad} ${no} · ${L[no - 1]}`), h("p", { class: "not" }, `Bu etkinlik ${krediFiyat("etkinlik")} kredi. Bir kez açtığın etkinlik hep açık kalır.`),
         h("button", { class: "btn ana", type: "button", on: { click: async () => { if (await krediAc("etkinlik", anahtar(no), `${ad} ${no} · ${L[no - 1]}`)) ciz(); } } }, `${krediFiyat("etkinlik")} krediyle aç`))
       : etkCerceve(f, tur, no, `${ad} etkinliği ${no}: ${L[no - 1]}`),
