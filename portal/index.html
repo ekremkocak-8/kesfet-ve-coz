@@ -2688,7 +2688,7 @@ kitap(ic) {
   const PL = programlarim(BEN), pr = kitapProgram(PL); if (pr !== "okul") return programKitap(ic, pr, PL);
   ic.append(bas("Kitaplığım", "Bir konunun kartında \"Konuyu öğren\" düğmesine bas. Konu anlatımı, videolar, etkinlikler, testler ve çözümler orada sırayla durur."));
   if (PL.length > 1) ic.append(progSekme(PL, pr));
-  const ara = h("input", { id: "kitapAra", placeholder: "Konu ara: kesir, olasılık, küp…", "aria-label": "Konu ara" }); ic.append(ara);
+  const ara = h("input", { id: "kitapAra", placeholder: "Konu ara: kesir, olasılık, küp…", "aria-label": "Konu ara" }); if (seviyeIcerikVar()) ic.append(ara);
   const paylas = h("div"); ic.append(paylas); ogrPaylasilanlar(paylas);
   const alan = h("div", { style: "display:flex;flex-direction:column;gap:14px" }); ic.append(alan);
   const ciz = () => { alan.innerHTML = ""; const qq = ara.value.toLocaleLowerCase("tr"); let son = null; let g = null, TS = null;
@@ -2715,12 +2715,14 @@ kitap(ic) {
         h("div", { class: "baglar" }, f.ek ? null : h("button", { type: "button", class: "b-yol", on: { click: () => konuYolu(f, {}) } }, "Konuyu öğren →"), f.ek ? h("button", { type: "button", on: { click: ev => dosyaAc(ekPdfYol(`${f.kod}-${f.testler[0].tip}${f.testler[0].no}`), ev.currentTarget) } }, "Soru kitapçığı (PDF)") : null,
           h("button", { type: "button", class: "b-test", on: { click: () => { depo.yaz("test_konu", VERI.indexOf(f)); SAYFA = "test"; uygulama(); } } }, "Testler"),
           null))); });
-    if (!alan.children.length) alan.append(h("p", { class: "ekran-yok" }, "Bu aramayla eşleşen konu yok.")); };
+    if (!alan.children.length) alan.append(qq ? h("p", { class: "ekran-yok" }, "Bu aramayla eşleşen konu yok.")
+      : bosEkran("📚", `${seviyeAdi()} içerikleri hazırlanıyor`, "Konu anlatımları, videolar, etkinlikler ve testler yüklendiği anda burada görünecek.")); };
   ara.oninput = ciz; ciz();
 },
 test(ic) {
   ic.append(bas("Testlerim", "Bir test seç: sorular tek tek gelir, cevabını yandaki optik forma işaretlersin."));
   const sec = h("select", { id: "testFas", "aria-label": "Konu seç" }); konuDoldur(sec, "test_konu");
+  if (!sec.options.length) { ic.append(h("div", { class: "kart" }, bosEkran("📝", `${seviyeAdi()} testleri hazırlanıyor`, "Bu düzeyin testleri yüklendiği anda burada görünecek."))); return; }
   const L = h("div", { class: "kart" }); ic.append(sec, L);
   const ciz = () => { depo.yaz("test_konu", +sec.value); L.innerHTML = ""; const f = VERI[+sec.value]; const li = h("div", { class: "liste" });
     f.testler.forEach(t => { const tid = `${f.kod}-${t.tip}${t.no}`; const s = benimSonuc()[tid]; const od = ODEV.some(o => o.test_id === tid); const tas = taslak(tid);
@@ -5238,8 +5240,14 @@ let BRANS = depo.al("brans", KATALOG_BRANS[0] || "MAT");
 let SINIF_OGT = [], OGT_ADLARI = {};   // sinif_ogretmen satırları (sınıfıma katılanlar ve katıldıklarım), öğretmen adları
 let SEVIYE_SEC = null;   // öğretmen/yönetici başka seviyeye geçtiyse
 const SEVIYE_AD = { 5: "5. sınıf", 6: "6. sınıf", 7: "7. sınıf", 8: "8. sınıf" };
-const aktifSeviye = () => ROL === "ogr" ? Math.min(8, Math.max(5, +((SINIF && SINIF.seviye) || 7))) : +(SEVIYE_SEC || (SINIF && SINIF.seviye) || 7);
+// 13.11.2026: Öğrencinin sınıf seviyesi artık 5–8 aralığına sıkıştırılmıyor. Eskiden Math.min(8, Math.max(5, …))
+// yüzünden 3. sınıf öğrencisine 5. sınıf konuları görünüyordu. Artık içeriği henüz hazırlanmamış bir seviyede
+// "hazırlanıyor" ekranı çıkar; o seviyenin konuları VERI'ye eklendiği anda hiçbir değişiklik gerekmeden görünür.
+const aktifSeviye = () => ROL === "ogr" ? +((SINIF && SINIF.seviye) || 7) : +(SEVIYE_SEC || (SINIF && SINIF.seviye) || 7);
 const VB = f => okulAcik() && fBrans(f) === BRANS && +(f.seviye || 7) === aktifSeviye();
+// seçili branş ve seviyede yayımlanmış konu var mı? (yoksa öğrenciye boş ekran gösterilir)
+const seviyeIcerikVar = () => VERI.some(f => VB(f));
+const seviyeAdi = () => { const s = aktifSeviye(); return s >= 1 && s <= 12 ? `${s}. sınıf` : "Bu düzeyin"; };
 const surecAd = (su, f) => SURECA[su] || (f && f.dizi === "LGS" && /^\d$/.test(su) ? `${f.kod.split(".").slice(0, 4).join(".")}.${su} kazanımı` : su);
 const SAHIP = () => !!(SINIF && OGT && SINIF.ogretmen_id === OGT.id);
 function bransListesi() {
