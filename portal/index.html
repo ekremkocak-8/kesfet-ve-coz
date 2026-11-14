@@ -2981,15 +2981,19 @@ async function sinavTakvimYukle(zorla) {
   return SINAV_TAKVIM;
 }
 // LGS yalnız 8. sınıf; YKS 11., 12. sınıf ve mezun; KPSS 12. sınıf, mezun ve üniversite; ALES üniversite; olimpiyat 5–12. sınıf
-const sinavUygun = d => { d = +d || 0; return Object.keys(SINAV_TUR).filter(k => k === "lgs" ? d === 8 : k === "yks" ? d >= 11 && d <= 13 : k === "kpss" ? d >= 12 : k === "ales" ? d === 14 : d >= 5 && d <= 12); };
-const sinavVarsayilan = d => { d = +d || 0; return d === 8 ? ["lgs"] : d === 12 || d === 13 ? ["yks"] : d === 14 ? ["kpss", "ales"] : []; };
+// 14.11.2026: YKS sınavı artık lisenin tamamından seçilebilir (eskiden 11-13). 9. sınıftan
+// erken hazırlanmak isteyen öğrenci sınav sayacını ve takvimini de açabilsin. Varsayılan
+// olarak 11. sınıfta geliyor; 9-10'da öğrenci isterse Sınavlarım'dan ekliyor.
+const sinavUygun = d => { d = +d || 0; return Object.keys(SINAV_TUR).filter(k => k === "lgs" ? d === 8 : k === "yks" ? d >= 9 && d <= 13 : k === "kpss" ? d >= 12 : k === "ales" ? d === 14 : d >= 5 && d <= 12); };
+const sinavVarsayilan = d => { d = +d || 0; return d === 8 ? ["lgs"] : d >= 11 && d <= 13 ? ["yks"] : d === 14 ? ["kpss", "ales"] : []; };
 const ogrDuzey = o => +(o && o.duzey) || +(o && o.seviye) || (typeof SINIF !== "undefined" && SINIF && +SINIF.seviye) || 0;
 const sinavlarim = o => { const d = ogrDuzey(o), U = sinavUygun(d), L = o && o.sinavlar && o.sinavlar.length ? o.sinavlar : sinavVarsayilan(d); return L.filter(k => U.includes(k)); };
 // ---------- programlar (69_programlar.sql, 09.11.2026): öğrenci Kitaplığım'da yalnız kendi programının içeriğini görür ----------
 const PROGRAM_TUR = {
   okul: { ad: "Okul konuları", alt: "Kendi sınıf düzeyinin müfredatı", ik: "🎒" },
   lgs: { ad: "LGS", alt: "LGS hazırlık · 8. sınıf", ik: "🎯" },
-  yks: { ad: "YKS", alt: "YKS hazırlık · TYT ve AYT", ik: "📘" },
+  tyt: { ad: "TYT", alt: "Temel Yeterlilik Testi · tüm alanlar", ik: "📘" },
+  ayt: { ad: "AYT", alt: "Alan Yeterlilik Testi · matematik", ik: "📗" },
   olimpiyat: { ad: "Matematik olimpiyatı", alt: "Düzeyine göre föyler ve testler", ik: "🏅" },
   kpss: { ad: "KPSS", alt: "Kamu Personel Seçme Sınavı", ik: "🏛" },
   ales: { ad: "ALES", alt: "Lisansüstü eğitime giriş sınavı", ik: "🎓" } };
@@ -2997,13 +3001,20 @@ const PTUR_AD = { foy: "Föy (konu anlatımı)", test: "Test", video: "Video", b
 // Seçilmemişse sınıf düzeyinden. 14.11.2026 · OKUL DERSİ ile SINAV HAZIRLIĞI ayrıldı:
 //   okul : sınıf müfredatı (1–12), tema/kazanım yapısıyla, yıllık plana bağlı
 //   lgs  : LGS hazırlığı (8. sınıf) — okul dersinden ayrı bölüm
-//   yks  : YKS hazırlığı (TYT + AYT) — 9–12 okul dersinden ayrı bölüm
+//   tyt  : TYT hazırlığı — 9–12 okul dersinden ayrı bölüm
+//   ayt  : AYT hazırlığı — TYT'den de ayrı: iki bağımsız sınav, içerikleri bambaşka.
+//          Yalnız TYT'ye girecek öğrenci (dil alanı gibi) AYT'yi kullanmaz; sekme açık
+//          kalsa da krediyle girdiği için tercih öğrencinin kendisindedir.
 //   kpss / ales / olimpiyat : kendi hazırlık programları
 // Mezun (13) yalnız YKS'den sorumludur; 9–12 okul dersleriyle ilgisi yoktur.
 // Üniversite (14) KPSS/ALES. Öğretmen öğrenci bilgisinden başka birleşim seçebilir.
 const programVarsayilan = d => { d = +d || 0;
-  return !d || d <= 7 ? ["okul"] : d === 8 ? ["okul", "lgs"] : d <= 12 ? ["okul", "yks"] : d === 13 ? ["yks"] : ["kpss"]; };
-const programlarim = o => { const L = o && Array.isArray(o.programlar) && o.programlar.length ? o.programlar : programVarsayilan(ogrDuzey(o)); return Object.keys(PROGRAM_TUR).filter(k => L.includes(k)); };
+  return !d || d <= 7 ? ["okul"] : d === 8 ? ["okul", "lgs"] : d <= 12 ? ["okul", "tyt", "ayt"] : d === 13 ? ["tyt", "ayt"] : ["kpss"]; };
+// 14.11.2026 öncesinde TYT ile AYT tek "yks" programıydı; eski kayıtlar ikisine açılır.
+const PROG_ESKI = { yks: ["tyt", "ayt"] };
+const programlarim = o => { const L0 = o && Array.isArray(o.programlar) && o.programlar.length ? o.programlar : programVarsayilan(ogrDuzey(o));
+  const L = L0.reduce((a, k) => a.concat(PROG_ESKI[k] || [k]), []);
+  return Object.keys(PROGRAM_TUR).filter(k => L.includes(k)); };
 const programDuzey = o => +(o && o.program_duzey) || ogrDuzey(o);
 const okulAcik = () => ROL !== "ogr" || typeof BEN === "undefined" || !BEN || programlarim(BEN).includes("okul");
 const menuGoster = m => !(ROL === "ogr" && ["havuz", "yazili"].includes(m[0]) && !okulAcik());
@@ -5536,7 +5547,7 @@ async function programKlasorPlani(F) {
   const bolum = (pr, dz, ad) => { const [no, bad] = pkNo(ad), k = `${pr}|${dz ?? ""}|${bad}`; if (!B.has(k)) B.set(k, { pr, dz, ad: bad, no, dosya: [], anahtar: {}, video: [] }); return B.get(k); };
   for (const f of F) {
     const yol = (f.webkitRelativePath || f.name).replace(/\\/g, "/"), P = yol.split("/"), i = P.findIndex(x => x.toLowerCase() === "program");
-    if (i < 0) continue; const S = P.slice(i + 1); const pr = (S[0] || "").toLowerCase(); if (!["olimpiyat", "yks", "kpss", "ales"].includes(pr)) continue;
+    if (i < 0) continue; const S = P.slice(i + 1); const pr = (S[0] || "").toLowerCase(); if (!["olimpiyat", "tyt", "ayt", "kpss", "ales"].includes(pr)) continue;   // 14.11.2026: yks yerine tyt ve ayt
     let dz = null, R = S.slice(1);
     if (R.length >= 3) { const d = R[0].toLowerCase(); dz = /^\d{1,2}$/.test(d) ? +d : d === "mezun" ? 13 : null; if (!(dz >= 1 && dz <= 14)) dz = null; R = R.slice(1); }
     if (R.length !== 2) { if (/\.(pdf|txt)$/i.test(yol)) uyari.push(`Yeri anlaşılamadı: ${S.join("/")}`); continue; }
@@ -5639,7 +5650,7 @@ function icerikTasimaKarti() {
     else durum.textContent = "Seçilen klasörde yüklenecek içerik bulunamadı. “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin."; };
   const dug = h("button", { class: "btn ana tasi-dug", type: "button", on: { click: () => inp.click() } }, "📁 _ozel_icerik klasörünü seç ve yükle");
   const kart = h("div", { class: "kart" }, h("h3", {}, "İçerikleri özel depoya taşı"), durum, yukSat,
-    h("p", { class: "not" }, "“_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru), etkinliklerin sesli yönergeleri (ses) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; program klasöründeki olimpiyat, YKS, KPSS ve ALES föyleri, testleri ve çözümleri de Program içerikleri listesine eklenir. Depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
+    h("p", { class: "not" }, "“_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru), etkinliklerin sesli yönergeleri (ses) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; program klasöründeki olimpiyat, TYT, AYT, KPSS ve ALES föyleri, testleri ve çözümleri de Program içerikleri listesine eklenir (klasör adları: olimpiyat, tyt, ayt, kpss, ales). Depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
     h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, dug, inp), say);
   return kart;
 }
@@ -6813,7 +6824,7 @@ function gorevAd(x) {
 }
 const GOREV_RENK = { konu: "mavi", kesif: "yesil", pek: "turuncu", test: "kirmizi", au: "mor", tekrar: "turkuaz", pfoy: "mavi", ptest: "kirmizi", pvideo: "turkuaz", pbelge: "mor" };
 const GOREV_ETIKET = { konu: "Konu", kesif: "Keşif", pek: "Pekiştirme", test: "Test", au: "Açık uçlu", tekrar: "Tekrar", pfoy: "Föy", ptest: "Test", pvideo: "Video", pbelge: "Belge" };
-// program görevleri (olimpiyat, YKS, KPSS, ALES): k = bölüm adı, r = içerik kimliği
+// program görevleri (olimpiyat, TYT, AYT, KPSS, ALES): k = bölüm adı, r = içerik kimliği
 const PGOREV = new Set(["pfoy", "ptest", "pvideo", "pbelge"]);
 const progIcerik = (pr, o) => { const d = programDuzey(o); return PROG.L.filter(i => i.program === pr && i.yayinda !== false && (i.duzey == null || +i.duzey === d)); };
 function progBasari(L) { const M = {}; pGruplar(L).forEach(g => { const Y = g.L.filter(i => i.tur === "test").map(i => (PROG.sonuc[i.id] || []).slice(-1)[0]).filter(Boolean); if (Y.length) M[g.ad] = Math.round(Y.reduce((a, x) => a + x.yuzde, 0) / Y.length); }); return M; }
@@ -9363,6 +9374,13 @@ YONS.ogrenciler = ic => yonOgrenciler(ic);
 // Her güncellemede en üste yeni kayıt eklenir (KURULUM_ADIMLARI.txt ile aynı numaralar). Sayfa son 10 kaydı gösterir.
 const GUNCELLEMELER = [
   { no: 77, tarih: "2026-11-12", baslik: "Program testlerinde soru soru gösterim altyapısı", maddeler: ["Bir program testinin sorularının her biri ortaokuldaki gibi tek tek kesilip paketlendiyse (soru/<kimlik>.js), test artık ortaokuldaki testlerle birebir aynı şekilde açılıyor: soru soru, sağda tam optik form, numaralarla gezinme.", "Böyle bir paket henüz yoksa (bugün çoğu program testinde durum bu) otomatik olarak kitapçığın sayfa sayfa gösterildiği görünüme düşülüyor; öğrenci için fark görünmez, içerik hazır oldukça kendiliğinden soru soru gösterime geçer."] },
+  { no: 77, tarih: "2026-11-14", baslik: "Okul dersleri ile sınav hazırlığı ayrıldı · Yıllık plan sayfası", maddeler: [
+    "Kitaplığım artık okul derslerini ve sınav hazırlığını ayrı sekmelerde gösteriyor: 8. sınıfta “Okul konuları” ve “LGS”, lisede “Okul konuları”, “TYT” ve “AYT”. TYT ile AYT bağımsız iki sınav olduğu için içerikleri de ayrı duruyor; yalnız TYT'ye girecek öğrenci AYT'yi kullanmaz.",
+    "Lise öğrencileri de kendi sınıf düzeyinin okul müfredatını görüyor. Mezunlar yalnız sınav hazırlığından sorumlu.",
+    "Gelişimim altına Yıllık plan sayfası eklendi: sınıfında hangi hafta hangi konunun işlendiği, aylara bölünmüş olarak baştan sona görünüyor. Bulunduğun hafta işaretli ve sayfa açılırken oraya geliyor; içeriği hazır konulara oradan girilebiliyor.",
+    "Kitaplığım'daki temalar artık okulda işlenme sırasına göre diziliyor — kitaptaki numara sırasına göre değil — ve o hafta işlenen temada “Bu hafta” etiketi çıkıyor.",
+    "YKS sınav sayacı 9. sınıftan itibaren açılabiliyor; erken hazırlanmak isteyen öğrenci Sınavlarım'dan ekliyor.",
+    "Kendi sınıf düzeyinin içeriği henüz hazırlanmamışsa artık başka bir sınıfın konuları gösterilmiyor; “içerikler hazırlanıyor” bilgisi veriliyor."] },
   { no: 76, tarih: "2026-11-12", baslik: "Program testleri de ortaokuldaki gibi tek ekranda", maddeler: ["Olimpiyat, lise · YKS, KPSS ve ALES testlerinde soru kitapçığı artık ayrı bir pencerede açılmıyor; sayfalar ortaokuldaki konu anlatımı gibi doğrudan ekranda, sayfa sayfa görünüyor.", "Cevap formu (optik) aynı ekranda sağda duruyor; kitapçığı okurken aynı anda işaretlenebiliyor."] },
   { no: 75, tarih: "2026-11-10", baslik: "Programlarda konu sayfası", maddeler: ["Olimpiyat, YKS, KPSS ve ALES'te her konunun ortaokuldaki gibi kendi sayfası var: solda video, sağda adım listesi (konu anlatımı, videolar, testler ve çözümler) ve bölüm paketi.", "Kitaplığım'da bölümün içinde konu kartları durur; \"Konuyu öğren\" düğmesi konu sayfasını açar.", "Aynı numarayı ya da aynı başlığı taşıyan föy, test ve videolar tek konuda toplanır. Video eklenince konu sayfasının başına yerleşir; kaldığın yerden sürer."] },
   { no: 74, tarih: "2026-11-10", baslik: "Program föyleri ortaokuldaki gibi kayan ekranda", maddeler: ["Olimpiyat, YKS, KPSS ve ALES föyleri artık sayfa sayfa değil, ortaokuldaki konu anlatımı gibi aşağı kayan tek ekranda açılıyor. Kalem, fosforlu kalem ve kareli çözüm alanı aynı şekilde duruyor.", "Test kitapçığı, çözüm ve belge PDF'leri soru numarasıyla eşleşsin diye sayfa sayfa kalmaya devam ediyor."] },
@@ -9662,8 +9680,12 @@ const yplanAra = (sev, brans, prog) => (YPLAN || []).find(p => +p.seviye === +se
   && p.egitim_yili === EGITIM_YILI && p.durum === "onayli" && (p.program || "okul") === prog);
 const yplanBul = (sev, brans = "MAT", prog = "okul") => yplanAra(sev, brans, prog) || (prog === "okul" ? null : yplanAra(sev, brans, "okul"));
 // öğrencinin programlarından plana sahip olanlar (Yıllık plan sayfasındaki sekmeler)
+// Okul dersinin planı sınıf düzeyinden, hazırlık programlarının planı öğrencinin PROGRAM
+// DÜZEYİNDEN gelir: 8. sınıfta olup 10. düzey olimpiyat çalışan öğrenci 10. düzey planını görür.
 const yplanProgramlar = () => { const PL = benProgramlar() || ["okul"], G = [];
-  PL.forEach(k => { const p = yplanBul(aktifSeviye(), BRANS, k); if (p && !G.some(x => x.p.id === p.id)) G.push({ k, p }); });
+  const pd = typeof BEN !== "undefined" && BEN ? programDuzey(BEN) : 0;
+  PL.forEach(k => { const p = yplanBul(k === "okul" ? aktifSeviye() : pd || aktifSeviye(), BRANS, k);
+    if (p && !G.some(x => x.p.id === p.id)) G.push({ k, p }); });
   return G; };
 // ---------- Kitaplığım'ın sırası: okulda işlenme sırası (yıllık plandan), 14.11.2026 ----------
 // VERI'deki tema_no kitabın kendi tema numarasıdır; okullarda temalar başka sırada işlenir
@@ -9916,12 +9938,12 @@ OGTS.yillik = ic => ogtYillik(ic); YONS.yillik = ic => yonYillik(ic);
 YONS.kvideo = ic => yonKonuVideo(ic);
 YONS.picerik = ic => yonProgramIcerik(ic);
 async function yonProgramIcerik(ic) {
-  ic.append(bas("Program içerikleri", "Olimpiyat, lise · YKS, KPSS ve ALES öğrencilerinin Kitaplığım'ında görünen föyler, testler, çözümler ve videolar. Öğrenci yalnız kendi programını ve düzeyini görür."));
+  ic.append(bas("Program içerikleri", "Olimpiyat, TYT, AYT, KPSS ve ALES öğrencilerinin Kitaplığım'ında görünen föyler, testler, çözümler ve videolar. Öğrenci yalnız kendi programını ve düzeyini görür."));
   let L = [], A = {};
   const oku_ = async () => { L = await q(sb.from("program_icerik").select("*").order("sira")); A = Object.fromEntries((await q(sb.from("program_anahtar").select("*"))).map(x => [x.icerik_id, x.cevap])); };
   try { await oku_(); }
   catch (e) { ic.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, /program_|PGRST20[25]|does not exist|42P01/i.test(String(e && (e.message || e.code))) ? "Bu bölüm kurulmamış: Supabase'te 69_programlar.sql çalıştırılmalı." : hataMetni(e)))); return; }
-  const PR = ["olimpiyat", "yks", "kpss", "ales"];
+  const PR = ["olimpiyat", "tyt", "ayt", "kpss", "ales"];
   const ps = h("select", { "aria-label": "Program" }, ...PR.map(k => h("option", { value: k }, PROGRAM_TUR[k].ad))); ps.value = PR.includes(depo.al("pi_prog", "")) ? depo.al("pi_prog", "") : "olimpiyat";
   const ds = h("select", { "aria-label": "Düzey" }, h("option", { value: "*" }, "Bütün düzeyler"), h("option", { value: "" }, "Düzeysiz (programdaki herkes)"), ...DUZEY.map(v => h("option", { value: String(v) }, duzeyAd(v)))); ds.value = depo.al("pi_duz", "*");
   const liste = h("div"), formYer = h("div"), durum = h("p", { class: "not", role: "status" }), bl = h("datalist", { id: "pi-bolumler" });
