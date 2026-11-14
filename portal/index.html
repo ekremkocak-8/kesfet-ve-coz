@@ -2154,6 +2154,7 @@ async function ogrYukle() {
   await auYukle();
   await krediYukle();
   await programYukle();
+  try { await yplanYukle(); } catch (e) {}   // 14.11.2026: Kitaplığım'ın tema sırası ve "bu hafta" kartı ilk açılışta doğru olsun
   await dosyaOdevYukle();
   await planYukle([BEN.id]);
   await girisYukle([BEN.id]);
@@ -2692,13 +2693,16 @@ kitap(ic) {
   const paylas = h("div"); ic.append(paylas); ogrPaylasilanlar(paylas);
   const alan = h("div", { style: "display:flex;flex-direction:column;gap:14px" }); ic.append(alan);
   const ciz = () => { alan.innerHTML = ""; const qq = ara.value.toLocaleLowerCase("tr"); let son = null; let g = null, TS = null;
-    VERI.filter(f => VB(f) && (!qq || (f.ad + f.kod + f.tema).toLocaleLowerCase("tr").includes(qq))).forEach(f => {
+    // temalar okulda işlenme sırasına göre (yıllık plan); plan yoksa kitap sırası
+    const L = kitapPlanSirasi(VERI.filter(f => VB(f) && (!qq || (f.ad + f.kod + f.tema).toLocaleLowerCase("tr").includes(qq)))), BH = kitapBuHafta(L);
+    L.forEach(f => {
       if (`${f.dizi}|${f.tema_no}|${f.tema}` !== son) { son = `${f.dizi}|${f.tema_no}|${f.tema}`; const km = kavramKimlik(f);
         const tk = son, A = depo.al("kitap_acik", null), acik = !!qq || (A ? A.includes(tk) : !alan.children.length);
         TS = { n: 0, cz: 0, tt: 0, el: h("small", { class: "tema-say" }) };
         const tb = h("div", { class: "tema tema-satir r-" + temaRenk(f) + (acik ? "" : " kapali"), role: "button", tabIndex: 0, "aria-expanded": String(acik) },
           h("span", { class: "tema-no sayi", "aria-hidden": "true" }, f.ek ? "+" : String(f.tema_no || "•")),
-          h("span", { class: "tema-baslik" }, h("small", {}, f.ek ? "Ek" : f.dizi === "LGS" ? `LGS · Ünite ${f.tema_no}` : `Tema ${f.tema_no}`), h("b", {}, f.tema), TS.el),
+          h("span", { class: "tema-baslik" }, h("small", {}, f.ek ? "Ek" : f.dizi === "LGS" ? `LGS · Ünite ${f.tema_no}` : `Tema ${f.tema_no}`), h("b", {}, f.tema),
+            BH.has(tk) ? h("span", { class: "etiket e-mavi", style: "margin-left:8px" }, "Bu hafta") : null, TS.el),
           h("span", { class: "tema-ok", "aria-hidden": "true" }, "⌄"));
         const gg = h("div", { class: "izgara i3" + (acik ? "" : " gizli") }); g = gg;
         const cevir = e => { if (e.target.closest("a")) return; const a = gg.classList.toggle("gizli") === false; tb.classList.toggle("kapali", !a); tb.setAttribute("aria-expanded", String(a));
@@ -2718,6 +2722,7 @@ kitap(ic) {
     if (!alan.children.length) alan.append(qq ? h("p", { class: "ekran-yok" }, "Bu aramayla eşleşen konu yok.")
       : bosEkran("📚", `${seviyeAdi()} içerikleri hazırlanıyor`, "Konu anlatımları, videolar, etkinlikler ve testler yüklendiği anda burada görünecek.")); };
   ara.oninput = ciz; ciz();
+  if (!YPLAN) yplanYukle().then(() => { if (SAYFA === "kitap") ciz(); });   // plan gelince sıra okul sırasına döner
 },
 test(ic) {
   ic.append(bas("Testlerim", "Bir test seç: sorular tek tek gelir, cevabını yandaki optik forma işaretlersin."));
@@ -2976,14 +2981,18 @@ const ogrDuzey = o => +(o && o.duzey) || +(o && o.seviye) || (typeof SINIF !== "
 const sinavlarim = o => { const d = ogrDuzey(o), U = sinavUygun(d), L = o && o.sinavlar && o.sinavlar.length ? o.sinavlar : sinavVarsayilan(d); return L.filter(k => U.includes(k)); };
 // ---------- programlar (69_programlar.sql, 09.11.2026): öğrenci Kitaplığım'da yalnız kendi programının içeriğini görür ----------
 const PROGRAM_TUR = {
-  okul: { ad: "Okul konuları", alt: "5–8. sınıf müfredatı · LGS", ik: "🎒" },
-  yks: { ad: "Lise · YKS", alt: "9–12. sınıf ve mezun", ik: "📘" },
+  okul: { ad: "Okul konuları", alt: "Kendi sınıf düzeyinin müfredatı", ik: "🎒" },
+  yks: { ad: "Lise · YKS", alt: "YKS hazırlık · 9–12 ve mezun", ik: "📘" },
   olimpiyat: { ad: "Matematik olimpiyatı", alt: "Düzeyine göre föyler ve testler", ik: "🏅" },
   kpss: { ad: "KPSS", alt: "Kamu Personel Seçme Sınavı", ik: "🏛" },
   ales: { ad: "ALES", alt: "Lisansüstü eğitime giriş sınavı", ik: "🎓" } };
 const PTUR_AD = { foy: "Föy (konu anlatımı)", test: "Test", video: "Video", belge: "Belge" };
-// seçilmemişse sınıf düzeyinden: 1–8 okul, 9–13 lise · YKS, üniversite KPSS
-const programVarsayilan = d => { d = +d || 0; return !d || d <= 8 ? ["okul"] : d <= 13 ? ["yks"] : ["kpss"]; };
+// Seçilmemişse sınıf düzeyinden. 14.11.2026: lise de okul müfredatını görür.
+// Okul müfredatı (ilkokul, ortaokul, lise) "okul" programında tema/kazanım yapısıyla durur;
+// YKS/KPSS/ALES/olimpiyat ise sınava HAZIRLIK programlarıdır. Lise öğrencisi ikisini birden
+// alır (Kitaplığım'da iki sekme): 9–12 okul + YKS. Mezun (13) ve üniversite (14) için okul
+// müfredatı yok, yalnız hazırlık programı.
+const programVarsayilan = d => { d = +d || 0; return !d || d <= 8 ? ["okul"] : d <= 12 ? ["okul", "yks"] : d === 13 ? ["yks"] : ["kpss"]; };
 const programlarim = o => { const L = o && Array.isArray(o.programlar) && o.programlar.length ? o.programlar : programVarsayilan(ogrDuzey(o)); return Object.keys(PROGRAM_TUR).filter(k => L.includes(k)); };
 const programDuzey = o => +(o && o.program_duzey) || ogrDuzey(o);
 const okulAcik = () => ROL !== "ogr" || typeof BEN === "undefined" || !BEN || programlarim(BEN).includes("okul");
@@ -3120,7 +3129,12 @@ function programYoluSayfa(ic) {
 }
 // program sekmeleri (öğrenci birden çok programdaysa)
 const progSekme = (PL, a) => h("div", { class: "prog-sekme", role: "tablist", "aria-label": "Program" }, ...PL.map(k => h("button", { type: "button", role: "tab", "aria-selected": String(k === a), on: { click: () => { depo.yaz("kitap_program", k); uygulama(); } } }, PROGRAM_TUR[k].ad)));
-const kitapProgram = PL => { const a = depo.al("kitap_program", ""); return PL.includes(a) ? a : PL[0] || "okul"; };
+// Öğrencinin seçtiği sekme; seçmediyse İÇERİĞİ OLAN ilk program açılır. 14.11.2026: lise
+// öğrencisi artık okul + YKS programlarını birden alıyor; 9–12 okul içeriği hazırlanana kadar
+// boş "Okul konuları" sekmesine düşmesin diye içerik durumuna bakılıyor.
+const kitapProgram = PL => { const a = depo.al("kitap_program", ""); if (PL.includes(a)) return a;
+  const B = typeof BEN !== "undefined" ? BEN : null;
+  return PL.find(k => k === "okul" ? seviyeIcerikVar() : !!(B && progIcerik(k, B).length)) || PL[0] || "okul"; };
 function programKitap(ic, pr, PL) {
   const T = PROGRAM_TUR[pr], d = programDuzey(BEN);
   ic.append(bas("Kitaplığım", `${T.ad}${pr === "olimpiyat" && d ? ` · ${duzeyAd(d)} düzeyi` : ""} · bir konunun kartında "Konuyu öğren" düğmesine bas. Konu anlatımı, videolar, testler ve çözümler orada sırayla durur.`));
@@ -9614,6 +9628,42 @@ async function yplanYukle(zorla) {
   return YPLAN;
 }
 const yplanBul = (sev, brans = "MAT") => (YPLAN || []).find(p => +p.seviye === +sev && p.brans === brans && p.egitim_yili === EGITIM_YILI && p.durum === "onayli");
+// ---------- Kitaplığım'ın sırası: okulda işlenme sırası (yıllık plandan), 14.11.2026 ----------
+// VERI'deki tema_no kitabın kendi tema numarasıdır; okullarda temalar başka sırada işlenir
+// (5. sınıfta önce "Geometrik Şekiller", sonra "Sayılar ve Nicelikler"…). Onaylı yıllık plan
+// varsa konular plandaki ilk işlenme haftasına göre dizilir; planda geçmeyen konular kitaptaki
+// sırayla en sona kalır. Plan yoksa, taslaktaysa ya da henüz yüklenmediyse sıra eskisi gibidir.
+// Eşleşme kazanım koduyla yapılır, tema numarasıyla DEĞİL: kitabın tema_no'su ile plandaki
+// kazanım kodunun tema basamağı aynı şey değil (5.1.3 kitapta 2. tema, kodda 1. tema).
+let PLAN_HAFTA = null;   // { ak, M: Map(kodKisa -> ilk işlenme haftası) }
+function planHaftaHaritasi() {
+  const p = yplanBul(aktifSeviye(), BRANS), ak = `${aktifSeviye()}|${BRANS}|${p ? p.id : "-"}`;
+  if (PLAN_HAFTA && PLAN_HAFTA.ak === ak) return PLAN_HAFTA.M;
+  let M = null;
+  if (p) { M = new Map(); (p.haftalar || []).forEach(w => (w.konular || []).forEach(k => { const kk = kodKisa(k.kod); if (kk && !M.has(kk)) M.set(kk, w.no); })); }
+  PLAN_HAFTA = { ak, M };
+  return M;
+}
+const SON_SIRA = 9999;
+const temaAnahtar = f => `${f.dizi}|${f.tema_no}|${f.tema}`;
+const planHaftasi = (M, f) => { if (!M) return null; const k = kodKisa(f.kod);
+  const n = M.has(k) ? M.get(k) : M.get(String(k).replace(/[a-z]$/, "")); return n === undefined ? null : n; };
+function kitapPlanSirasi(L) {
+  const M = planHaftaHaritasi(); if (!M) return L;
+  const T = new Map();
+  L.forEach(f => { const n = planHaftasi(M, f); if (n == null) return; const tk = temaAnahtar(f); if (!T.has(tk) || T.get(tk) > n) T.set(tk, n); });
+  if (!T.size) return L;
+  const tSira = f => { const tk = temaAnahtar(f); return T.has(tk) ? T.get(tk) : SON_SIRA; };
+  return L.map((f, i) => ({ f, i })).sort((a, b) => tSira(a.f) - tSira(b.f)
+    || (planHaftasi(M, a.f) ?? SON_SIRA) - (planHaftasi(M, b.f) ?? SON_SIRA) || a.i - b.i).map(x => x.f);
+}
+// bu hafta sınıfta işlenen konuyu içeren temalar ("Bu hafta" etiketi)
+function kitapBuHafta(L) {
+  const S = new Set(), p = yplanBul(aktifSeviye(), BRANS); if (!p) return S;
+  const D = yplanDurum(p); if (!D.su || !D.bu.size) return S;
+  L.forEach(f => { if (planVar(D.bu, kodKisa(f.kod))) S.add(temaAnahtar(f)); });
+  return S;
+}
 const tarihKisa = t => t ? new Date(t + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "short" }) : "";
 const haftaAralik = w => `${tarihKisa(w.bas)} – ${tarihKisa(w.bit)}`;
 const HAFTA_TUR = { ders: ["Ders", ""], tekrar: ["Tekrar", "e-mavi"], sinav: ["Yazılı haftası", "e-orta"], tatil: ["Tatil", "e-iyi"] };
@@ -9629,7 +9679,7 @@ function yplanDurum(p, gun = bugun()) {
 }
 // öğrencinin geride kaldığı konular: planda geçmiş, portalda içeriği olan ama hiç çözülmemiş (ya da %50'nin altında) konular
 function ogrPlanUyari(oid) {
-  if (!SINIF) return null; const p = yplanBul(Math.min(8, +SINIF.seviye || 0)); if (!p) return null;
+  if (!SINIF) return null; const p = yplanBul(+SINIF.seviye || 0); if (!p) return null;   // 14.11.2026: Math.min(8, …) kalkti, 9-12 sinifa 8. sinif plani gosteriyordu
   const D = yplanDurum(p), K = VERI.filter(f => VB(f) && !f.ek), geride = [], zayif = [];
   K.forEach(f => { if (!planVar(D.gecmis, f.kod)) return; const A = konuAnaliz(f, oid); if (!A.n) geride.push(f); else if (A.p < 50) zayif.push({ f, p: A.p }); });
   return { p, D, geride, zayif };
