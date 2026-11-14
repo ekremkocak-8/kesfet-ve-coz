@@ -800,6 +800,10 @@ table.vt th,table.vt td{text-align:left;font-family:inherit}table.vt td{font-siz
 .plan-konu.yok{cursor:default;opacity:.8}.plan-konu.geri{border-color:var(--zayif);background:var(--zayif2)}
 .plan-uyari{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--zayif2);display:flex;flex-direction:column;gap:2px}.plan-uyari b{color:var(--zayif)}.plan-uyari small{color:var(--soluk)}
 .plan-uyari.zayif{background:var(--orta2)}.plan-uyari.zayif b{color:var(--orta)}
+/* öğrenci yıllık planı: ay başlığı ve bu haftanın satırı */
+.yp-ay{margin:14px 0 2px;font:800 13px var(--f-baslik);color:var(--soluk);letter-spacing:.04em;text-transform:uppercase}
+.yp-ay:first-child{margin-top:0}
+.satir.yp-bu{background:var(--kagit);box-shadow:inset 3px 0 0 var(--iyi);border-radius:10px}
 .plan-iyi{margin:8px 0 0;color:var(--iyi);font-weight:700}
 .yplan-ust{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .yplan-simdi{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:12px;background:var(--lacivert2);color:var(--lacivert);margin-bottom:10px}
@@ -2393,7 +2397,7 @@ function ogretmenEtkinlestir() {
 // menü: [kimlik, ad, ikon, alt sayfalar ([[sayfa, sekme adı], …] ya da null), renk]
 const MENU = {
   ogr: [["ana", "Ana sayfa", "ev", null, "mavi"], ["duyuru", "Duyurular", "yorum", null, "pembe"], ["kitap", "Kitaplığım", "kitap", null, "mor"], ["havuz", "Soru havuzu", "kalem", null, "mor"], ["odevler", "Ödevlerim", "odev", null, "turuncu"], ["yazili", "Yazılılar", "yazili", null, "pembe"],
-        ["dersler", "Derslerim", "canli", [["canli", "Canlı dersler"], ["video", "Öğretmenimin videoları"], ["rehber", "Rehberlik"], ["ogretmen", "Öğretmenlerim"]], "turkuaz"], ["gelisim", "Gelişimim", "karne", [["karne", "Analizim"], ["basari", "Başarılarım"], ["hizli", "Hızlı İşlem"], ["program", "Programım"], ["terim", "Terim defterim"]], "yesil"],
+        ["dersler", "Derslerim", "canli", [["canli", "Canlı dersler"], ["video", "Öğretmenimin videoları"], ["rehber", "Rehberlik"], ["ogretmen", "Öğretmenlerim"]], "turkuaz"], ["gelisim", "Gelişimim", "karne", [["karne", "Analizim"], ["basari", "Başarılarım"], ["hizli", "Hızlı İşlem"], ["program", "Programım"], ["yillik", "Yıllık plan"], ["terim", "Terim defterim"]], "yesil"],
         ["hesap", "Hesabım", "profil", [["profil", "Profilim"], ["kredi", "Kredilerim"], ["bildirim", "Geri bildirimlerim"]], "gri"]],
   ogt: [["ana", "Ana sayfa", "ev", null, "mavi"], ["sinifim", "Sınıfım", "tablo", [["tablo", "Sınıf tablosu"], ["takip", "Öğrenci takibi"], ["hizli", "Hızlı İşlem"], ["analiz", "Soru analizi"], ["program", "Çalışma programları"], ["yillik", "Yıllık plan"], ["ogrenci", "Öğrenciler"]], "mavi"],
         ["odevler", "Ödevler", "odev", [["odev", "Ödev ver"], ["sinav", "Sınav ve yaprak"], ["acik", "Açık uçlu"]], "turuncu"],
@@ -2685,16 +2689,18 @@ video(ic) { ogrVideolar(ic); },
 acik(ic) { ogrAcik(ic); },
 canli(ic) { ogrCanli(ic); },
 ana(ic) { ogrAnaSayfa(ic, BEN, false); },
+yillik(ic) { ogrYillikPlan(ic); },
 kitap(ic) {
-  const PL = programlarim(BEN), pr = kitapProgram(PL); if (pr !== "okul") return programKitap(ic, pr, PL);
-  ic.append(bas("Kitaplığım", "Bir konunun kartında \"Konuyu öğren\" düğmesine bas. Konu anlatımı, videolar, etkinlikler, testler ve çözümler orada sırayla durur."));
+  const PL = programlarim(BEN), pr = kitapProgram(PL); if (!VERI_PROG.includes(pr)) return programKitap(ic, pr, PL);
+  ic.append(bas("Kitaplığım", pr === "okul" ? "Sınıfında işlenen konular. Bir konunun kartında \"Konuyu öğren\" düğmesine bas; konu anlatımı, videolar, etkinlikler, testler ve çözümler orada sırayla durur."
+    : `${(PROGRAM_TUR[pr] || {}).ad || ""} hazırlığı · okul derslerinden ayrı bölüm. Bir konunun kartında "Konuyu öğren" düğmesine bas.`));
   if (PL.length > 1) ic.append(progSekme(PL, pr));
-  const ara = h("input", { id: "kitapAra", placeholder: "Konu ara: kesir, olasılık, küp…", "aria-label": "Konu ara" }); if (seviyeIcerikVar()) ic.append(ara);
+  const ara = h("input", { id: "kitapAra", placeholder: "Konu ara: kesir, olasılık, küp…", "aria-label": "Konu ara" }); if (seviyeIcerikVar(pr)) ic.append(ara);
   const paylas = h("div"); ic.append(paylas); ogrPaylasilanlar(paylas);
   const alan = h("div", { style: "display:flex;flex-direction:column;gap:14px" }); ic.append(alan);
   const ciz = () => { alan.innerHTML = ""; const qq = ara.value.toLocaleLowerCase("tr"); let son = null; let g = null, TS = null;
     // temalar okulda işlenme sırasına göre (yıllık plan); plan yoksa kitap sırası
-    const L = kitapPlanSirasi(VERI.filter(f => VB(f) && (!qq || (f.ad + f.kod + f.tema).toLocaleLowerCase("tr").includes(qq)))), BH = kitapBuHafta(L);
+    const L = kitapPlanSirasi(VERI.filter(f => VBK(f, pr) && (!qq || (f.ad + f.kod + f.tema).toLocaleLowerCase("tr").includes(qq))), pr), BH = kitapBuHafta(L, pr);
     L.forEach(f => {
       if (`${f.dizi}|${f.tema_no}|${f.tema}` !== son) { son = `${f.dizi}|${f.tema_no}|${f.tema}`; const km = kavramKimlik(f);
         const tk = son, A = depo.al("kitap_acik", null), acik = !!qq || (A ? A.includes(tk) : !alan.children.length);
@@ -2720,7 +2726,7 @@ kitap(ic) {
           h("button", { type: "button", class: "b-test", on: { click: () => { depo.yaz("test_konu", VERI.indexOf(f)); SAYFA = "test"; uygulama(); } } }, "Testler"),
           null))); });
     if (!alan.children.length) alan.append(qq ? h("p", { class: "ekran-yok" }, "Bu aramayla eşleşen konu yok.")
-      : bosEkran("📚", `${seviyeAdi()} içerikleri hazırlanıyor`, "Konu anlatımları, videolar, etkinlikler ve testler yüklendiği anda burada görünecek.")); };
+      : bosEkran("📚", bosBaslik(pr), "Konu anlatımları, videolar, etkinlikler ve testler yüklendiği anda burada görünecek.")); };
   ara.oninput = ciz; ciz();
   if (!YPLAN) yplanYukle().then(() => { if (SAYFA === "kitap") ciz(); });   // plan gelince sıra okul sırasına döner
 },
@@ -2982,17 +2988,21 @@ const sinavlarim = o => { const d = ogrDuzey(o), U = sinavUygun(d), L = o && o.s
 // ---------- programlar (69_programlar.sql, 09.11.2026): öğrenci Kitaplığım'da yalnız kendi programının içeriğini görür ----------
 const PROGRAM_TUR = {
   okul: { ad: "Okul konuları", alt: "Kendi sınıf düzeyinin müfredatı", ik: "🎒" },
-  yks: { ad: "Lise · YKS", alt: "YKS hazırlık · 9–12 ve mezun", ik: "📘" },
+  lgs: { ad: "LGS", alt: "LGS hazırlık · 8. sınıf", ik: "🎯" },
+  yks: { ad: "YKS", alt: "YKS hazırlık · TYT ve AYT", ik: "📘" },
   olimpiyat: { ad: "Matematik olimpiyatı", alt: "Düzeyine göre föyler ve testler", ik: "🏅" },
   kpss: { ad: "KPSS", alt: "Kamu Personel Seçme Sınavı", ik: "🏛" },
   ales: { ad: "ALES", alt: "Lisansüstü eğitime giriş sınavı", ik: "🎓" } };
 const PTUR_AD = { foy: "Föy (konu anlatımı)", test: "Test", video: "Video", belge: "Belge" };
-// Seçilmemişse sınıf düzeyinden. 14.11.2026: lise de okul müfredatını görür.
-// Okul müfredatı (ilkokul, ortaokul, lise) "okul" programında tema/kazanım yapısıyla durur;
-// YKS/KPSS/ALES/olimpiyat ise sınava HAZIRLIK programlarıdır. Lise öğrencisi ikisini birden
-// alır (Kitaplığım'da iki sekme): 9–12 okul + YKS. Mezun (13) ve üniversite (14) için okul
-// müfredatı yok, yalnız hazırlık programı.
-const programVarsayilan = d => { d = +d || 0; return !d || d <= 8 ? ["okul"] : d <= 12 ? ["okul", "yks"] : d === 13 ? ["yks"] : ["kpss"]; };
+// Seçilmemişse sınıf düzeyinden. 14.11.2026 · OKUL DERSİ ile SINAV HAZIRLIĞI ayrıldı:
+//   okul : sınıf müfredatı (1–12), tema/kazanım yapısıyla, yıllık plana bağlı
+//   lgs  : LGS hazırlığı (8. sınıf) — okul dersinden ayrı bölüm
+//   yks  : YKS hazırlığı (TYT + AYT) — 9–12 okul dersinden ayrı bölüm
+//   kpss / ales / olimpiyat : kendi hazırlık programları
+// Mezun (13) yalnız YKS'den sorumludur; 9–12 okul dersleriyle ilgisi yoktur.
+// Üniversite (14) KPSS/ALES. Öğretmen öğrenci bilgisinden başka birleşim seçebilir.
+const programVarsayilan = d => { d = +d || 0;
+  return !d || d <= 7 ? ["okul"] : d === 8 ? ["okul", "lgs"] : d <= 12 ? ["okul", "yks"] : d === 13 ? ["yks"] : ["kpss"]; };
 const programlarim = o => { const L = o && Array.isArray(o.programlar) && o.programlar.length ? o.programlar : programVarsayilan(ogrDuzey(o)); return Object.keys(PROGRAM_TUR).filter(k => L.includes(k)); };
 const programDuzey = o => +(o && o.program_duzey) || ogrDuzey(o);
 const okulAcik = () => ROL !== "ogr" || typeof BEN === "undefined" || !BEN || programlarim(BEN).includes("okul");
@@ -3132,9 +3142,15 @@ const progSekme = (PL, a) => h("div", { class: "prog-sekme", role: "tablist", "a
 // Öğrencinin seçtiği sekme; seçmediyse İÇERİĞİ OLAN ilk program açılır. 14.11.2026: lise
 // öğrencisi artık okul + YKS programlarını birden alıyor; 9–12 okul içeriği hazırlanana kadar
 // boş "Okul konuları" sekmesine düşmesin diye içerik durumuna bakılıyor.
+// Öğrencinin seçtiği sekme; seçmediyse İÇERİĞİ EN DOLU program açılır. Böylece 8. sınıf
+// öğrencisi (okul dersi az, LGS dolu) bugün gördüğü listeyle karşılaşmaya devam eder; okul
+// dersi içeriği çoğaldıkça sekme kendiliğinden ona döner. Hiçbirinde içerik yoksa ilk program.
 const kitapProgram = PL => { const a = depo.al("kitap_program", ""); if (PL.includes(a)) return a;
   const B = typeof BEN !== "undefined" ? BEN : null;
-  return PL.find(k => k === "okul" ? seviyeIcerikVar() : !!(B && progIcerik(k, B).length)) || PL[0] || "okul"; };
+  const say = k => VERI_PROG.includes(k) ? VERI.filter(f => VBK(f, k)).length : (B ? progIcerik(k, B).length : 0);
+  let en = null, n = 0;
+  PL.forEach(k => { const m = say(k); if (m > n) { n = m; en = k; } });
+  return en || PL[0] || "okul"; };
 function programKitap(ic, pr, PL) {
   const T = PROGRAM_TUR[pr], d = programDuzey(BEN);
   ic.append(bas("Kitaplığım", `${T.ad}${pr === "olimpiyat" && d ? ` · ${duzeyAd(d)} düzeyi` : ""} · bir konunun kartında "Konuyu öğren" düğmesine bas. Konu anlatımı, videolar, testler ve çözümler orada sırayla durur.`));
@@ -5258,10 +5274,22 @@ const SEVIYE_AD = { 5: "5. sınıf", 6: "6. sınıf", 7: "7. sınıf", 8: "8. s�
 // yüzünden 3. sınıf öğrencisine 5. sınıf konuları görünüyordu. Artık içeriği henüz hazırlanmamış bir seviyede
 // "hazırlanıyor" ekranı çıkar; o seviyenin konuları VERI'ye eklendiği anda hiçbir değişiklik gerekmeden görünür.
 const aktifSeviye = () => ROL === "ogr" ? +((SINIF && SINIF.seviye) || 7) : +(SEVIYE_SEC || (SINIF && SINIF.seviye) || 7);
-const VB = f => okulAcik() && fBrans(f) === BRANS && +(f.seviye || 7) === aktifSeviye();
-// seçili branş ve seviyede yayımlanmış konu var mı? (yoksa öğrenciye boş ekran gösterilir)
-const seviyeIcerikVar = () => VERI.some(f => VB(f));
+// 14.11.2026: VERI'deki kayıtlar iki programa ayrıldı. dizi="LGS" olanlar LGS hazırlığı,
+// ötekiler sınıfın okul dersi. İçerik yerinden kıpırdamadı, yalnız hangi programa ait olduğu
+// adlandırıldı. VB: öğrencinin seviyesinde, branşında ve PROGRAMLARINDAN BİRİNDE olan kayıt
+// (karne, analiz, arama, geri bildirim hepsini birden görür). VBK: Kitaplığım'da yalnız
+// açık sekmenin programı.
+const fProgram = f => f && f.dizi === "LGS" ? "lgs" : "okul";
+const VERI_PROG = ["okul", "lgs"];                 // içeriği VERI'de duran programlar
+const benProgramlar = () => ROL === "ogr" && typeof BEN !== "undefined" && BEN ? programlarim(BEN) : null;
+const VB = f => { if (fBrans(f) !== BRANS || +(f.seviye || 7) !== aktifSeviye()) return false;
+  const PL = benProgramlar(); return !PL || PL.includes(fProgram(f)); };
+const VBK = (f, pr) => fProgram(f) === pr && VB(f);
+// seçili branş, seviye ve programda yayımlanmış konu var mı? (yoksa öğrenciye boş ekran)
+const seviyeIcerikVar = pr => VERI.some(f => pr ? VBK(f, pr) : VB(f));
 const seviyeAdi = () => { const s = aktifSeviye(); return s >= 1 && s <= 12 ? `${s}. sınıf` : "Bu düzeyin"; };
+// boş ekran başlığı: okul dersinde sınıf adı, hazırlık programında programın adı
+const bosBaslik = pr => `${pr && pr !== "okul" ? (PROGRAM_TUR[pr] || {}).ad || "Bu bölümün" : seviyeAdi()} içerikleri hazırlanıyor`;
 const surecAd = (su, f) => SURECA[su] || (f && f.dizi === "LGS" && /^\d$/.test(su) ? `${f.kod.split(".").slice(0, 4).join(".")}.${su} kazanımı` : su);
 const SAHIP = () => !!(SINIF && OGT && SINIF.ogretmen_id === OGT.id);
 function bransListesi() {
@@ -9627,7 +9655,16 @@ async function yplanYukle(zorla) {
   try { YPLAN = (await q(sb.from("yillik_plan").select("*").order("seviye"))) || []; } catch (e) { YPLAN = []; YPLAN.hata = e; }
   return YPLAN;
 }
-const yplanBul = (sev, brans = "MAT") => (YPLAN || []).find(p => +p.seviye === +sev && p.brans === brans && p.egitim_yili === EGITIM_YILI && p.durum === "onayli");
+// 14.11.2026: planlar PROGRAM başına tutulur (73_yillik_plan_program.sql). İstenen programın
+// planı yoksa o düzeyin "okul" planına düşülür — tek planlı eski kurulum aynen çalışır ve
+// 8. sınıfın LGS sekmesi de mevcut plandan sıralanır. İkinci plan girildiği an kendine geçer.
+const yplanAra = (sev, brans, prog) => (YPLAN || []).find(p => +p.seviye === +sev && p.brans === brans
+  && p.egitim_yili === EGITIM_YILI && p.durum === "onayli" && (p.program || "okul") === prog);
+const yplanBul = (sev, brans = "MAT", prog = "okul") => yplanAra(sev, brans, prog) || (prog === "okul" ? null : yplanAra(sev, brans, "okul"));
+// öğrencinin programlarından plana sahip olanlar (Yıllık plan sayfasındaki sekmeler)
+const yplanProgramlar = () => { const PL = benProgramlar() || ["okul"], G = [];
+  PL.forEach(k => { const p = yplanBul(aktifSeviye(), BRANS, k); if (p && !G.some(x => x.p.id === p.id)) G.push({ k, p }); });
+  return G; };
 // ---------- Kitaplığım'ın sırası: okulda işlenme sırası (yıllık plandan), 14.11.2026 ----------
 // VERI'deki tema_no kitabın kendi tema numarasıdır; okullarda temalar başka sırada işlenir
 // (5. sınıfta önce "Geometrik Şekiller", sonra "Sayılar ve Nicelikler"…). Onaylı yıllık plan
@@ -9636,8 +9673,8 @@ const yplanBul = (sev, brans = "MAT") => (YPLAN || []).find(p => +p.seviye === +
 // Eşleşme kazanım koduyla yapılır, tema numarasıyla DEĞİL: kitabın tema_no'su ile plandaki
 // kazanım kodunun tema basamağı aynı şey değil (5.1.3 kitapta 2. tema, kodda 1. tema).
 let PLAN_HAFTA = null;   // { ak, M: Map(kodKisa -> ilk işlenme haftası) }
-function planHaftaHaritasi() {
-  const p = yplanBul(aktifSeviye(), BRANS), ak = `${aktifSeviye()}|${BRANS}|${p ? p.id : "-"}`;
+function planHaftaHaritasi(prog = "okul") {
+  const p = yplanBul(aktifSeviye(), BRANS, prog), ak = `${aktifSeviye()}|${BRANS}|${prog}|${p ? p.id : "-"}`;
   if (PLAN_HAFTA && PLAN_HAFTA.ak === ak) return PLAN_HAFTA.M;
   let M = null;
   if (p) { M = new Map(); (p.haftalar || []).forEach(w => (w.konular || []).forEach(k => { const kk = kodKisa(k.kod); if (kk && !M.has(kk)) M.set(kk, w.no); })); }
@@ -9648,8 +9685,8 @@ const SON_SIRA = 9999;
 const temaAnahtar = f => `${f.dizi}|${f.tema_no}|${f.tema}`;
 const planHaftasi = (M, f) => { if (!M) return null; const k = kodKisa(f.kod);
   const n = M.has(k) ? M.get(k) : M.get(String(k).replace(/[a-z]$/, "")); return n === undefined ? null : n; };
-function kitapPlanSirasi(L) {
-  const M = planHaftaHaritasi(); if (!M) return L;
+function kitapPlanSirasi(L, prog = "okul") {
+  const M = planHaftaHaritasi(prog); if (!M) return L;
   const T = new Map();
   L.forEach(f => { const n = planHaftasi(M, f); if (n == null) return; const tk = temaAnahtar(f); if (!T.has(tk) || T.get(tk) > n) T.set(tk, n); });
   if (!T.size) return L;
@@ -9658,8 +9695,8 @@ function kitapPlanSirasi(L) {
     || (planHaftasi(M, a.f) ?? SON_SIRA) - (planHaftasi(M, b.f) ?? SON_SIRA) || a.i - b.i).map(x => x.f);
 }
 // bu hafta sınıfta işlenen konuyu içeren temalar ("Bu hafta" etiketi)
-function kitapBuHafta(L) {
-  const S = new Set(), p = yplanBul(aktifSeviye(), BRANS); if (!p) return S;
+function kitapBuHafta(L, prog = "okul") {
+  const S = new Set(), p = yplanBul(aktifSeviye(), BRANS, prog); if (!p) return S;
   const D = yplanDurum(p); if (!D.su || !D.bu.size) return S;
   L.forEach(f => { if (planVar(D.bu, kodKisa(f.kod))) S.add(temaAnahtar(f)); });
   return S;
@@ -9677,6 +9714,55 @@ function yplanDurum(p, gun = bugun()) {
   const bitti = H.length && gun > H[H.length - 1].bit;
   return { su, sonra, gecmis, bu, bitti, H };
 }
+// ---------- öğrenci: yıllık plan sayfası (14.11.2026) ----------
+// "Şubat'ın ikinci haftasında matematikten ne işlemem gerekiyor?" sorusunun cevabı.
+// Onaylı yıllık planın bütün haftaları, aya göre gruplanmış; bu hafta vurgulu ve
+// açılışta ekrana getirilir. İçeriği hazır olan kazanımlar tıklanabilir.
+const YP_AY = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+const ypKonuBul = k => VERI.find(x => VB(x) && (x.kod === kodKisa(k) || x.kod.replace(/[a-z]$/, "") === kodKisa(k)));
+function ogrYillikPlan(ic) {
+  const G = yplanProgramlar();   // plana sahip programlar; aynı plana düşenler tek sekmede
+  ic.append(bas("Yıllık plan", G.length ? `${seviyeAdi()} · ${BRANS_AD[BRANS] || BRANS} · ${G[0].p.egitim_yili} · sınıfında hangi hafta hangi konunun işlendiğini buradan görürsün.`
+    : "Sınıfında hangi hafta hangi konunun işlendiğini gösterir."));
+  if (!G.length) { ic.append(h("div", { class: "kart" }, bosEkran("📅", "Yıllık plan henüz yayımlanmadı",
+    "Sınıfının yıllık planı onaylandığında hangi hafta hangi konuyu işleyeceğin burada hafta hafta görünecek."))); return; }
+  let a = depo.al("yillik_prog", ""); if (!G.some(x => x.k === a)) a = G[0].k;
+  const govde = h("div");
+  if (G.length > 1) ic.append(h("div", { class: "prog-sekme", role: "tablist", "aria-label": "Program" },
+    ...G.map(({ k }) => h("button", { type: "button", role: "tab", "aria-selected": String(k === a),
+      on: { click: () => { a = k; depo.yaz("yillik_prog", k); ciz(); } } }, (PROGRAM_TUR[k] || {}).ad || k))));
+  ic.append(govde);
+  const ciz = () => { govde.innerHTML = ""; ypHaftalar(govde, (G.find(x => x.k === a) || G[0]).p);
+    [...ic.querySelectorAll('.prog-sekme [role=tab]')].forEach((b, i) => b.setAttribute("aria-selected", String(G[i].k === a))); };
+  ciz();
+}
+// bir planın haftalarını aya göre gruplayıp yazar
+function ypHaftalar(yer, p) {
+  const D = yplanDurum(p), kart = h("div", { class: "kart" }); yer.append(kart);
+  kart.append(h("p", { class: "not", style: "margin:0 0 6px" }, D.bitti ? "Bu eğitim yılının planı tamamlandı. Eksik kaldığın konulara dönebilirsin."
+    : D.su ? `${D.sonra ? "Gelecek hafta" : "Bu hafta"} · ${D.su.no}. hafta · ${haftaAralik(D.su)}` : "Plan henüz başlamadı."));
+  const liste = h("div", { class: "liste" }); kart.append(liste);
+  let buEl = null, sonAy = "";
+  (p.haftalar || []).forEach(w => {
+    const t = new Date(w.bas + "T12:00:00"), ay = `${YP_AY[t.getMonth()]} ${t.getFullYear()}`;
+    if (ay !== sonAy) { sonAy = ay; liste.append(h("div", { class: "yp-ay" }, ay)); }
+    const bu = !!(D.su && w.no === D.su.no), gecti = w.bit < bugun();
+    const konu = (w.konular || []).map(k => { const f = ypKonuBul(k.kod);
+      if (!f) return h("span", { class: "plan-konu yok", title: "İçeriği hazırlanıyor" }, h("span", { class: "sayi" }, kodKisa(k.kod)), " ", k.ad || "");
+      const A = konuAnaliz(f, BEN.id);
+      return h("button", { type: "button", class: "plan-konu" + (!A.n && gecti && !bu ? " geri" : ""), on: { click: () => konuDetay(f) } },
+        h("span", { class: "sayi" }, f.kod), " ", f.ad, A.n ? h("span", { class: "etiket e-" + renk(A.p), style: "margin-left:6px" }, `%${A.p}`) : null); });
+    const satir = h("div", { class: "satir" + (bu ? " yp-bu" : "") },
+      h("div", { class: "ad" }, h("b", {}, `${w.no}. hafta`), h("small", {}, haftaAralik(w) + (w.tema ? ` · ${w.tema}` : "")),
+        konu.length ? h("div", { class: "plan-konular" }, ...konu) : null, w.not ? h("small", { class: "not" }, w.not) : null),
+      h("div", { style: "display:flex;flex-direction:column;gap:4px;align-items:flex-end" },
+        bu ? h("span", { class: "etiket e-iyi" }, D.sonra ? "Gelecek hafta" : "Bu hafta") : null,
+        w.tur && w.tur !== "ders" ? h("span", { class: "etiket " + (HAFTA_TUR[w.tur] || ["", ""])[1] }, (HAFTA_TUR[w.tur] || [w.tur])[0]) : null));
+    if (bu) buEl = satir;
+    liste.append(satir); });
+  if (buEl) setTimeout(() => { try { buEl.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) {} }, 150);
+}
+
 // öğrencinin geride kaldığı konular: planda geçmiş, portalda içeriği olan ama hiç çözülmemiş (ya da %50'nin altında) konular
 function ogrPlanUyari(oid) {
   if (!SINIF) return null; const p = yplanBul(+SINIF.seviye || 0); if (!p) return null;   // 14.11.2026: Math.min(8, …) kalkti, 9-12 sinifa 8. sinif plani gosteriyordu
@@ -9702,7 +9788,7 @@ function ogrPlanKarti(oid, tam) {
 
 // ---------- konu haritası: tema tema ilerleme çubuğu, açılınca konular ----------
 function konuHaritasi(R, oid) {
-  const p = SINIF ? yplanBul(Math.min(8, +SINIF.seviye || 0)) : null, D = p ? yplanDurum(p) : null;
+  const p = SINIF ? yplanBul(+SINIF.seviye || 0) : null, D = p ? yplanDurum(p) : null;   // 14.11.2026: 5-8 sıkıştırması kalktı
   const kart = h("div", { class: "kart" }, h("h3", {}, "Konu haritası"), h("p", { class: "not", style: "margin:0 0 10px" }, "Temaya dokun, konuları aç. Konuya dokun: zorluk ve süreçlere göre ayrıntı, çözdüğün testler ve sınıf ortalaması."),
     h("div", { class: "lejant" }, h("span", {}, h("i", { class: "l-iyi" }), "%75 ve üstü"), h("span", {}, h("i", { class: "l-orta" }), "%50–74"), h("span", {}, h("i", { class: "l-zayif" }), "%50'nin altı"), h("span", {}, h("i", { class: "l-yok" }), "henüz çözülmedi"),
       D ? h("span", {}, "📍 bu hafta") : null, D ? h("span", {}, "⚠ geride") : null));
@@ -9738,12 +9824,18 @@ async function ogtYillik(ic) {
   const yer = h("div", {}, h("p", { class: "not" }, "Yükleniyor…")); ic.append(yer);
   await yplanYukle(true); yer.innerHTML = "";
   if (YPLAN.hata) return yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, /yillik_plan|PGRST20[25]|does not exist/i.test(String(YPLAN.hata.message || YPLAN.hata)) ? "Yıllık plan kurulmamış: Supabase'te 32_yillik_plan.sql çalıştırılmalı." : hataMetni(YPLAN.hata))));
-  const sevler = [...new Set(YPLAN.filter(p => p.durum === "onayli" && p.egitim_yili === EGITIM_YILI).map(p => +p.seviye))].sort();
-  if (!sevler.length) return yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, `${EGITIM_YILI} için onaylanmış yıllık plan henüz yok.`)));
-  let sv = depo.al("yillik_sev", null); if (!sevler.includes(sv)) sv = sevler.includes(Math.min(8, +((SINIF && SINIF.seviye) || 0))) ? Math.min(8, +SINIF.seviye) : sevler[0];
+  // 14.11.2026: sekmeler düzey + program başına (bir düzeyde okul dersi ve sınav hazırlığı planı ayrı olabilir)
+  const PS = YPLAN.filter(p => p.durum === "onayli" && p.egitim_yili === EGITIM_YILI)
+    .map(p => ({ sv: +p.seviye, pr: p.program || "okul", p })).sort((a, b) => a.sv - b.sv || a.pr.localeCompare(b.pr, "tr"));
+  if (!PS.length) return yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, `${EGITIM_YILI} için onaylanmış yıllık plan henüz yok.`)));
+  const sekAd = x => `${x.sv}. Sınıf${x.pr === "okul" ? "" : " · " + ((PROGRAM_TUR[x.pr] || {}).ad || x.pr)}`;
+  const anah = x => `${x.sv}|${x.pr}`;
+  let se = depo.al("yillik_sek", ""); if (!PS.some(x => anah(x) === se)) {
+    const benim = PS.find(x => x.sv === +((SINIF && SINIF.seviye) || 0) && x.pr === "okul") || PS.find(x => x.sv === +((SINIF && SINIF.seviye) || 0));
+    se = anah(benim || PS[0]); }
   const sek = h("div", { class: "belge-sekme", role: "tablist" }), govde = h("div");
-  const ciz = () => { sek.innerHTML = ""; sevler.forEach(s => sek.append(h("button", { type: "button", role: "tab", "aria-selected": String(s === sv), on: { click: () => { sv = s; depo.yaz("yillik_sev", s); ciz(); } } }, `${s}. Sınıf`)));
-    govde.innerHTML = ""; govde.append(yplanTablo(yplanBul(sv), { ogt: true })); };
+  const ciz = () => { sek.innerHTML = ""; PS.forEach(x => sek.append(h("button", { type: "button", role: "tab", "aria-selected": String(anah(x) === se), on: { click: () => { se = anah(x); depo.yaz("yillik_sek", se); ciz(); } } }, sekAd(x))));
+    govde.innerHTML = ""; govde.append(yplanTablo((PS.find(x => anah(x) === se) || PS[0]).p, { ogt: true })); };
   yer.append(sek, govde); ciz();
 }
 // hafta hafta tablo (öğretmen ve yönetici önizleme)
@@ -9776,13 +9868,13 @@ async function yonYillik(ic) {
   // içe aktar (Claude'un hazırladığı plan dosyası)
   const dosya = h("input", { type: "file", accept: ".json,application/json" }), d = h("span", { class: "not", role: "status" });
   dosya.onchange = async () => { const f = dosya.files[0]; if (!f) return; try { let J = JSON.parse(await f.text()); if (!Array.isArray(J)) J = J.planlar || [J];
-      let n = 0; for (const p of J) { if (!p.seviye || !Array.isArray(p.haftalar)) continue; const kayit = { egitim_yili: p.egitim_yili || EGITIM_YILI, brans: p.brans || "MAT", seviye: +p.seviye, baslik: p.baslik || null, haftalar: p.haftalar, katalog: p.katalog || [], kaynak: p.kaynak || null, notlar: p.notlar || null, hazirlayan: p.hazirlayan || "Claude", durum: "taslak" };
-        await q(sb.from("yillik_plan").upsert(kayit, { onConflict: "egitim_yili,brans,seviye" })); n++; }
+      let n = 0; for (const p of J) { if (!p.seviye || !Array.isArray(p.haftalar)) continue; const kayit = { egitim_yili: p.egitim_yili || EGITIM_YILI, brans: p.brans || "MAT", seviye: +p.seviye, program: p.program || "okul", baslik: p.baslik || null, haftalar: p.haftalar, katalog: p.katalog || [], kaynak: p.kaynak || null, notlar: p.notlar || null, hazirlayan: p.hazirlayan || "Claude", durum: "taslak" };
+        await q(sb.from("yillik_plan").upsert(kayit, { onConflict: "egitim_yili,brans,seviye,program" })); n++; }
       d.textContent = `${n} plan taslak olarak yüklendi.`; setTimeout(yenile, 900); } catch (e) { d.textContent = "Dosya okunamadı: " + hataMetni(e); } };
   yer.append(h("div", { class: "kart" }, h("h3", {}, "Plan dosyası yükle"), h("p", { class: "not", style: "margin:0 0 8px" }, "Claude'un hazırladığı .json plan dosyasını seçin. Aynı sınıfın planı varsa yerine geçer ve taslağa döner; onaylayana kadar kimse görmez."), dosya, d));
   if (!YPLAN.length) return yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, "Henüz plan yok. Claude'dan plan isteyin; gelen SQL ya da .json dosyasını yükleyin.")));
   const liste = h("div", { class: "liste" });
-  YPLAN.forEach(p => liste.append(h("div", { class: "satir" }, h("div", { class: "ad" }, `${p.seviye}. sınıf · ${p.brans === "MAT" ? "Matematik" : p.brans} · ${p.egitim_yili}`,
+  YPLAN.forEach(p => liste.append(h("div", { class: "satir" }, h("div", { class: "ad" }, `${p.seviye}. sınıf · ${(p.program || "okul") === "okul" ? "Okul dersi" : ((PROGRAM_TUR[p.program] || {}).ad || p.program)} · ${p.brans === "MAT" ? "Matematik" : p.brans} · ${p.egitim_yili}`,
       h("small", {}, `${(p.haftalar || []).length} hafta · hazırlayan: ${p.hazirlayan || "Claude"} · son değişiklik: ${tarihSaat(p.guncelleme)}${p.onay_tarihi ? " · onay: " + gun(p.onay_tarihi) : ""}`)),
     h("span", { class: "etiket " + (p.durum === "onayli" ? "e-iyi" : "e-orta") }, p.durum === "onayli" ? "onaylı · yayında" : "taslak · kimse görmez"),
     h("button", { class: "btn ana", type: "button", on: { click: () => { liste.closest(".kart").replaceWith(yplanDuzen(p, yenile)); scrollTo(0, 0); } } }, "İncele / düzenle"))));
