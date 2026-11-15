@@ -919,6 +919,8 @@ body.odak .app{grid-template-columns:minmax(0,1fr)}
 /* konu yolu başlığındaki düğmeler: öğrenme ↔ testler geçişi gözden kaçmasın */
 .yol-ust{display:flex;gap:10px;flex-wrap:wrap}
 .yol-ust-dug{font-size:15px;font-weight:600;padding:10px 20px;border-radius:999px}
+/* okuyucu katmanını kapatma düğmesi: dolu renk, büyük, gözden kaçmasın */
+.kapat-dug{font-size:16px;font-weight:600;padding:11px 26px;border-radius:999px;min-width:150px;justify-content:center}
 .odak-cubuk .sure{font:600 15px var(--f-sayi)}
 .nob.sonra,.osat.sonra .no{box-shadow:0 0 0 3px #e7b04a}
 /* her yerden arama (Ctrl+K) */
@@ -2829,10 +2831,12 @@ async function optikAc(tid, ilk, ops) {
   ic.append(bas(`${fAd(x.f)}`, `${tlabel(x)}${x.t.baslik && x.t.tip !== "B" ? " · " + x.t.baslik : ""}${tekrar ? " · tekrar çözüm" : ""}`, h("div", { class: "odak-cubuk" }, odak ? sureS : null, odak ? h("span", { class: "etiket e-mavi", title: "Test bitene kadar menü gizli" }, tekrar ? "Tekrar · odak modu" : "Odak modu") : null,
     dSec, bitti && ROL === "ogr" ? h("button", { class: "btn ana", type: "button", title: "İlk sonucun değişmez; yeni deneme ayrıca kaydedilir", on: { click: () => optikAc(tid, 0, { tekrar: true }) } }, "↻ Tekrar çöz") : null,
     null)));
-  // 16.11.2026: geri düğmesi başlıktaki küçük yerinden alınıp sayfanın ortasına, büyük olarak kondu;
-  // artık ara "Testler" ekranına değil doğrudan Kitaplığım'a döner. İşaretlenen cevaplar taslağa yazıldığı için çıkmak bir şey kaybettirmez.
+  // 16.11.2026: geri düğmesi başlıktaki küçük yerinden alınıp sayfanın ortasına, büyük olarak kondu.
+  // Bir basamak geri gider: konunun testler listesi. "Kapat" denmiyor, çünkü bu bir pencere değil,
+  // sayfanın kendisi; arkada duran bir şey yok. Kitaplığım'a çıkış testler başlığındaki düğmede.
+  // İşaretlenen cevaplar taslağa yazıldığı için çıkmak bir şey kaybettirmez.
   ic.append(h("div", { class: "don-serit" }, h("button", { class: "btn ana don-dug", type: "button",
-    on: { click: () => { if (TUS) removeEventListener("keydown", TUS); SAYFA = "kitap"; uygulama(); } } }, "← Kitaplığım")));
+    on: { click: () => { if (TUS) removeEventListener("keydown", TUS); if (ROL === "ogr" && x.f) testleriAc(x.f); else { SAYFA = "kitap"; uygulama(); } } } }, "← Testler")));
   const serit = h("div", { class: "no-serit", role: "navigation", "aria-label": "Sorular" });
   const sol = h("section", { class: "kart soru-kart tahta-tam", "aria-live": "polite" });
   const sag = h("aside", { class: "optik yan-optik", "aria-label": "Optik form" });
@@ -5505,7 +5509,7 @@ function okuyucuKatman(etiket) {
   const kat = h("div", { class: "okuyucu", role: "dialog", "aria-modal": "true", "aria-label": etiket });
   const esc = e => { if (e.key === "Escape" && !document.fullscreenElement && !$("#dlg").open && kat === [...document.querySelectorAll(".okuyucu")].pop()) kapat(); };
   const kapat = () => { kat.remove(); removeEventListener("keydown", esc); if (!document.querySelector(".okuyucu")) document.body.style.overflow = ""; };
-  kat.append(h("div", { class: "okuyucu-ust" }, h("button", { type: "button", class: "btn", on: { click: kapat } }, "✕ Kapat")));
+  kat.append(h("div", { class: "okuyucu-ust" }, h("button", { type: "button", class: "btn ana kapat-dug", on: { click: kapat } }, "✕ Kapat")));
   document.body.append(kat); document.body.style.overflow = "hidden"; addEventListener("keydown", esc); kat.kapat = kapat; return kat;
 }
 // ekran sürümü: kitabın kaynağından üretilmiş, ekrana göre akan sayfa. Yoksa false döner, PDF açılır.
@@ -9021,7 +9025,7 @@ async function belgeOku(b) {
   const kat = h("div", { class: "okuyucu", role: "dialog", "aria-modal": "true", "aria-label": `${b.ad} · ${b.donem}` });
   const esc = e => { if (e.key === "Escape" && !document.fullscreenElement && !$("#dlg").open) kapat(); };
   const kapat = () => { kat.remove(); removeEventListener("keydown", esc); document.body.style.overflow = ""; };
-  const ust = h("div", { class: "okuyucu-ust" }, h("button", { type: "button", class: "btn", on: { click: kapat } }, "✕ Kapat"));
+  const ust = h("div", { class: "okuyucu-ust" }, h("button", { type: "button", class: "btn ana kapat-dug", on: { click: kapat } }, "✕ Kapat"));
   if (belgeIndirebilir(b)) ust.append(belgeIndirDugme(b, "btn"));
   kat.append(ust); document.body.append(kat); document.body.style.overflow = "hidden"; addEventListener("keydown", esc);
   let adres; try { adres = await belgeAdres(b); } catch (e) { kat.append(h("div", { class: "kart", style: "margin:20px" }, h("p", { class: "ekran-yok" }, hataMetni(e)))); return; }
