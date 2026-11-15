@@ -916,6 +916,9 @@ body.odak .app{grid-template-columns:minmax(0,1fr)}
 /* 16.11.2026: test ekranında Kitaplığım'a dönüş — ortada ve büyük, gözden kaçmasın */
 .don-serit{display:flex;justify-content:center;margin:2px 0 16px}
 .don-dug{font-size:17px;font-weight:600;padding:13px 34px;border-radius:999px;min-width:220px;justify-content:center}
+/* konu yolu başlığındaki düğmeler: öğrenme ↔ testler geçişi gözden kaçmasın */
+.yol-ust{display:flex;gap:10px;flex-wrap:wrap}
+.yol-ust-dug{font-size:15px;font-weight:600;padding:10px 20px;border-radius:999px}
 .odak-cubuk .sure{font:600 15px var(--f-sayi)}
 .nob.sonra,.osat.sonra .no{box-shadow:0 0 0 3px #e7b04a}
 /* her yerden arama (Ctrl+K) */
@@ -3738,14 +3741,14 @@ function konuYolu(f, ops) { if (TUS) { removeEventListener("keydown", TUS); TUS 
 function testleriAc(f) {
   const a = `yol_grup_${(BEN && BEN.id) || ""}_${f.kod}`;
   depo.yaz(a, { ...(depo.al(a, null) || {}), test: true });
-  konuYolu(f, {});
+  konuYolu(f, { kip: "test" });
 }
 function konuYoluSayfa(ic) {
   const f = VERI.find(x => x.kod === depo.al("yol_konu", "")); if (!f) { SAYFA = "kitap"; return uygulama(); }
   const oid = BEN.id, S = benimSonuc(), E = ETKK[oid] || {}, G = kvGruplar(f.kod), ops = YOL_OPS; YOL_OPS = {};
   const okA = `konu_okundu_${oid}_${f.kod}`, okundu = !!depo.al(okA, false), sayfa = okumaSayfa(`konu_${f.kod}`);
   // adımlar
-  const gruplar = [], dk = (n) => Math.round(n);
+  let gruplar = []; const dk = (n) => Math.round(n);
   const adim = (o) => o; let toplam = 0, biten = 0, kalanDk = 0;
   const say = (d, kalan) => { toplam++; if (d === "bitti") biten++; else kalanDk += kalan; };
   const A1 = [adim({ ad: `Konu anlatımı${sayfa > 1 && !okundu ? ` · ${sayfa}. sayfada kaldın` : ""}`, alt: "Oku, örnekleri defterine yaz", durum: okundu ? "bitti" : sayfa > 1 ? "yarim" : "yok", kilit: !krediAcik("konu", f.kod) ? krediFiyat("konu") : 0,
@@ -3769,10 +3772,18 @@ function konuYoluSayfa(ic) {
   if (f.cozum || f.sbcozum) A4.push(adim({ ad: "Çözüm sayfaları", alt: "Testlerden sonra · konu anlatımıyla birlikte açılır", durum: "yok", kilit: !krediAcik("konu", f.kod) ? krediFiyat("konu") : 0, kilitAd: "kredi", eylem: () => cozumSayfaAc(f) }));
   if (A4.length) gruplar.push(["test", `${gruplar.length + 1} · Testler ve çözümler`, A4]);
   if (ATOLYE[f.kod]) gruplar.push(["taktik", `${gruplar.length + 1} · Atölye`, ATOLYE[f.kod].map((a, j) => adim({ ad: a[1], alt: "Etkileşimli atölye · kredisiz", durum: "yok", eylem: () => atolyeAc(f.kod, j) }))]);
+  // 16.11.2026: konu yolu giriş noktasına göre ikiye ayrıldı. "Konuyu öğren" öğrenme adımlarını
+  // (anlatım, video, keşif ve pekiştirme, atölye) gösterir; "Testler" yalnız testleri ve çözüm
+  // sayfalarını gösterir. Kip verilmezse eskisi gibi hepsi görünür.
+  const kip = ops.kip === "test" ? "test" : "ogren";
+  gruplar = gruplar.filter(g => kip === "test" ? g[0] === "test" : g[0] !== "test");
   const tumu = gruplar.flatMap(g => g[2]), sira = tumu.find(x => x.durum !== "bitti");
   // başlık
-  ic.append(bas(`${f.kod} ${f.ad}`, `${f.dizi === "LGS" ? "LGS" : (f.seviye || 7) + ". sınıf"} · ${f.tema || ""}`, h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
-    h("button", { class: "btn", type: "button", on: { click: git_("kitap") } }, "← Kitaplığım"), sira ? h("button", { class: "btn ana", type: "button", on: { click: sira.eylem } }, "Sıradaki adım →") : null)));
+  // 16.11.2026: başlıktaki düğmeler büyütüldü (yol-ust-dug) ve alt başlıkta hangi kipte olunduğu yazıyor
+  ic.append(bas(`${f.kod} ${f.ad}`, `${f.dizi === "LGS" ? "LGS" : (f.seviye || 7) + ". sınıf"} · ${f.tema || ""} · ${kip === "test" ? "testler" : "konu öğrenme"}`, h("div", { class: "yol-ust" },
+    h("button", { class: "btn yol-ust-dug", type: "button", on: { click: git_("kitap") } }, "← Kitaplığım"),
+    h("button", { class: "btn yol-ust-dug", type: "button", on: { click: () => kip === "test" ? konuYolu(f, {}) : testleriAc(f) } }, kip === "test" ? "Konuyu öğren →" : "Testler →"),
+    sira ? h("button", { class: "btn ana yol-ust-dug", type: "button", on: { click: sira.eylem } }, "Sıradaki adım →") : null)));
   const R = cikti(oid)[f.kod], bas_ = R ? Math.round(100 * R.d / R.n) : null, yz = Math.round(100 * biten / Math.max(1, toplam));
   ic.append(h("section", { class: "ozet3", "aria-label": "Konu özeti" },
     h("div", {}, h("span", { class: "o-ad" }, "Tamamlanan adım"), h("span", { class: "o-sayi" }, `${biten} / ${toplam}`), h("div", { class: "cub" }, h("i", { style: `width:${yz}%` })), h("span", { class: "o-alt" }, `%${yz}`)),
