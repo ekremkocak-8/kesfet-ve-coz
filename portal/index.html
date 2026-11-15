@@ -918,6 +918,7 @@ body.odak .app{grid-template-columns:minmax(0,1fr)}
 .don-dug{font-size:17px;font-weight:600;padding:13px 34px;border-radius:999px;min-width:220px;justify-content:center}
 /* konu yolu başlığındaki düğmeler: öğrenme ↔ testler geçişi gözden kaçmasın */
 .yol-ust{display:flex;gap:10px;flex-wrap:wrap}
+body.etk-tam{overflow:hidden}
 .yol-ust-dug{font-size:15px;font-weight:600;padding:10px 20px;border-radius:999px}
 /* okuyucu katmanını kapatma düğmesi: dolu renk, büyük, gözden kaçmasın */
 .kapat-dug{font-size:16px;font-weight:600;padding:11px 26px;border-radius:999px;min-width:150px;justify-content:center}
@@ -2448,7 +2449,7 @@ function uygulama(kabuk) {   // kabuk === true: yalnız menü ve çerçeve (sayf
   const ic = h("div", { class: "ic" }); const main = h("main", { class: "icerik" }, ic);
   if (ONIZLEME) ic.append(h("div", { class: "bakis-serit onizle-serit" }, h("span", {}, `Öğrenci önizlemesi: ${ONIZLEME.ad}. Yalnız bakış; yapılan işlemler kaydedilmez.`),
     h("button", { class: "btn", type: "button", on: { click: () => ogrSecPencere() } }, "Başka öğrenci"), h("button", { class: "btn ana", type: "button", on: { click: () => gorunumDon("yon") } }, "Yönetime dön")));
-  const sev = ROL === "ogr" || (BAKIS && SAYFA === "bakis") ? +((SINIF && SINIF.seviye) || 0) : 0; document.body.classList.remove("odak");
+  const sev = ROL === "ogr" || (BAKIS && SAYFA === "bakis") ? +((SINIF && SINIF.seviye) || 0) : 0; document.body.classList.remove("odak", "etk-tam");
   k.append(h("div", { class: "app" + (sev >= 5 && sev <= 8 ? " sev-" + sev : "") }, yan, main), mnav);
   requestAnimationFrame(() => { const c = mnav.querySelector("[aria-current=page]"); if (c && mnav.scrollWidth > mnav.clientWidth) mnav.scrollLeft = c.offsetLeft - (mnav.clientWidth - c.offsetWidth) / 2; });
   if (ROL === "ogt") { ic.append(sinifCubugu()); if (!SINIF && SAYFA !== "profil") return sinifYok(ic); }
@@ -4504,7 +4505,7 @@ const atoBtn = f => ATOLYE[f.kod] ? h("button", { type: "button", class: "b-ato"
 const etkHedef = (u, tur, no) => u.endsWith("?") ? `${u}${tur === "kesif" ? "e" : "p"}=${no}` : `${u}#${tur === "kesif" ? "e" : "p"}${no}`;
 function etkCerceve(f, tur, no, baslik) {
   const fr = h("iframe", { class: "etk-cerceve", title: baslik, allow: "autoplay; fullscreen" }), kap = h("div", { class: "etk-kap" }, h("p", { class: "not etk-yuk" }, "Etkinlik yükleniyor…"), fr);
-  etkAdres(f, tur).then(u => { fr.src = etkHedef(u, tur, no); const y = kap.querySelector(".etk-yuk"); if (y) y.remove(); })
+  etkAdres(f, tur).then(u => { fr.src = etkHedef(u, tur, no); const y = kap.querySelector(".etk-yuk"); if (y) y.remove(); etkSigdir(); })
     .catch(e => { kap.innerHTML = ""; kap.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, hataMetni(e)))); });
   return kap;
 }
@@ -4543,9 +4544,25 @@ async function etkinlikAc(kod, tur, no) {
       : etkCerceve(f, tur, no, `${ad} etkinliği ${no}: ${L[no - 1]}`),
       h("div", { class: "soru-alt" }, h("button", { class: "btn", type: "button", disabled: no === 1, on: { click: () => { no--; ciz(); } } }, "← Önceki"), kilitli ? h("span") : btn,
         h("button", { class: "btn", type: "button", disabled: no === L.length, on: { click: () => { no++; ciz(); } } }, "Sonraki →")));
+    etkSigdir();
   }
   ciz();
 }
+// 16.11.2026: etkinlik çerçevesi ekranı doldurur, sayfa kaymaz. Çerçevenin yüksekliği, "Bitirdim · Önceki · Sonraki" şeridi
+// ekranın en altında görünecek biçimde hesaplanır. Küçük ekranda (dar ya da kısa) eski davranış: sayfa normal kayar.
+function etkSigdir() {
+  const fr = document.querySelector(".etk-ana .etk-cerceve"); if (!fr) return;
+  const kucuk = innerWidth <= 860 || innerHeight < 620;
+  document.body.classList.toggle("etk-tam", !kucuk);
+  if (kucuk) { fr.style.height = ""; return; }
+  scrollTo(0, 0); fr.style.height = "4000px";
+  const fazla = document.documentElement.scrollHeight - innerHeight;
+  const yuk = 4000 - fazla;
+  // belge kaymıyorsa hesap geçersiz; çerçeve 360 pikselden küçük kalacaksa ekran çok kısadır: ikisinde de eski yükseklik ve normal kayma
+  if (fazla <= 0 || yuk > innerHeight || yuk < 360) { fr.style.height = ""; document.body.classList.remove("etk-tam"); return; }
+  fr.style.height = yuk + "px";
+}
+addEventListener("resize", () => { if (document.querySelector(".etk-ana .etk-cerceve")) etkSigdir(); });
 
 // ---------- öğretmen sayfaları ----------
 const soruGorBtn = (tid, no) => h("button", { class: "btn", type: "button", on: { click: async () => { try { await soruPaketi(tid); $("#dlgIc").innerHTML = ""; $("#dlgIc").append(h("h3", { style: "margin-bottom:8px" }, `${no}. soru`), h("img", { src: soruResmi(tid, no), alt: `${no}. soru`, style: "max-width:100%;background:#fff;border-radius:8px" })); const d = $("#dlg"); try { d.showModal(); } catch (e) { d.setAttribute("open", ""); } } catch (e) { bilgi(`<p>${kac(hataMetni(e))}</p>`); } } } }, "Soruyu gör");
