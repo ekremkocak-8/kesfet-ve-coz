@@ -5525,18 +5525,18 @@ function etkinlikEsle() { const M = new Map();
   Object.values(ATOLYE).flat().forEach(a => { const y = siteYolu(a[2]); if (y) M.set(y, `atolye/${a[0]}.html`); });
   return M; }
 // seçilen klasördeki bir dosyanın depodaki yeri (yoksa null):
-//   …/pdf/x.pdf → pdf/x.pdf · …/soru/x.js → soru/x.js · …/<5-sinif|6-sinif|7-sinif|8-sinif|lgs>/… → çözüm, etkinlik ya da atölye
+//   …/pdf/x.pdf → pdf/x.pdf · …/soru/x.js → soru/x.js · …/<1-sinif … 12-sinif | lgs>/… → çözüm, etkinlik ya da atölye
 function depoYeri(tam, C, E) {
   tam = tam.replace(/\\/g, "/"); let m;
   if ((m = tam.match(/(?:^|\/)pdf\/([^/]+\.pdf)$/i))) return `pdf/${m[1]}`;
   if ((m = tam.match(/(?:^|\/)soru\/([^/]+\.js)$/i))) return `soru/${m[1]}`;
   if ((m = tam.match(/(?:^|\/)ekran\/(?:MAT\.)?(.+?)_Ekran\.html$/i))) return `ekran/${m[1]}.html`;
   if ((m = tam.match(/(?:^|\/)ses\/([0-9a-z])\/([0-9a-z]{1,13}\.mp3)$/))) return `ses/${m[1]}/${m[2]}`;
-  if ((m = tam.match(/(?:^|\/)((?:5-sinif|6-sinif|7-sinif|8-sinif|lgs)\/.+\.html)$/))) return C.get(m[1]) || E.get(m[1]) || null;
+  if ((m = tam.match(/(?:^|\/)((?:\d{1,2}-sinif|lgs)\/.+\.html)$/))) return C.get(m[1]) || E.get(m[1]) || null;   // 14.11.2026: 1-12 (eskiden yalnız 5-8); hangi yola gideceğini VERI eşlemesi söyler
   return null;
 }
 // ---------- program içerikleri: _ozel_icerik\program klasöründen toplu yükleme ----------
-// düzen: program\<olimpiyat|yks|kpss|ales>\<düzey: 5…12, 13 (mezun), hepsi>\<NN Bölüm adı>\<NN Tür - Başlık>.pdf
+// düzen: program\<olimpiyat|tyt|ayt|kpss|ales>\<düzey: 1…12, mezun, ya da klasör yok = hepsi>\<NN Bölüm adı>\<NN Tür - Başlık>.pdf
 //   tür: Föy, Test, Çözüm (aynı numaralı testin çözümü), Belge. Düzey klasörü yoksa içerik programdaki herkese açılır.
 //   bölüm klasöründe anahtar.txt: her satır "NN ABCDEABCDE" (testin numarası ve cevapları; 4 şıklıysa sonuna " 4")
 //   bölüm klasöründe videolar.txt: her satır "NN Başlık | https://youtu.be/… | 12:30"
