@@ -6447,33 +6447,132 @@ async bildirim(ic) {
 async icerik(ic) {
   ic.append(bas("İçerik inceleme", "Bütün çalışmaları öğrencinin gördüğü gibi inceleyin; beğenmediğiniz ya da düzeltilmesi gereken yere geri bildirim yazın."));
   try { await yonGb(); } catch (e) { YGB = []; }
+
+  // Üst sekme: Okul dersleri / Programlar
+  let BOLU = depo.al("yon_bolum", "okul"); // "okul" veya "program"
+  const bolumSekme = h("div", { class: "sekme", role: "tablist", style: "margin-bottom:16px" });
+  [["okul", "🎒 Okul dersleri"], ["program", "📋 Hazırlık programları"]].forEach(([v, a]) => {
+    bolumSekme.append(h("button", { type: "button", role: "tab", "aria-selected": String(v === BOLU),
+      on: { click: () => { BOLU = v; depo.yaz("yon_bolum", v); [...bolumSekme.querySelectorAll("[role=tab]")].forEach(b => b.setAttribute("aria-selected", String(b.dataset.v === v))); alan.innerHTML = ""; sekmeKap.innerHTML = ""; filtreSatir.innerHTML = ""; BOLU === "okul" ? okulGoster() : programGoster(); } }, dataset: { v } }, a));
+  });
+  ic.append(bolumSekme);
+
+  const filtreSatir = h("div", { class: "kart", style: "display:flex;gap:10px;flex-wrap:wrap;align-items:center" });
+  const sekmeKap = h("div", { class: "sekme sekme-esnek", role: "tablist", style: "background:var(--cizgi)" });
+  const alan = h("div", { class: "yon-icerik" });
+  ic.append(filtreSatir, sekmeKap, alan);
+
+  // ---- OKUL DERSLERİ ----
   const bS = h("select", { "aria-label": "Branş" }), kS = h("select", { "aria-label": "Konu" });
   KATALOG_BRANS.forEach(b => bS.append(h("option", { value: b }, BRANS_AD[b] || b))); bS.value = KATALOG_BRANS.includes(BRANS) ? BRANS : KATALOG_BRANS[0];
   const sS = h("select", { "aria-label": "Seviye" });
   const kDol = () => { BRANS = bS.value; depo.yaz("brans", BRANS); const SV = [...new Set(VERI.filter(f => fBrans(f) === BRANS).map(f => +(f.seviye || 7)))].sort();
     sS.innerHTML = ""; SV.forEach(v => sS.append(h("option", { value: v }, SEVIYE_AD[v] || `${v}. sınıf`))); if (!SV.includes(aktifSeviye())) SEVIYE_SEC = SV[0] || 7; sS.value = aktifSeviye(); konuDoldur(kS, "yon_konu"); };
-  sS.onchange = () => { SEVIYE_SEC = +sS.value; konuDoldur(kS, "yon_konu"); depo.yaz("yon_soru", 0); ciz(); };
-  const sekme = h("div", { class: "sekme sekme-esnek", role: "tablist", style: "background:var(--cizgi)" }), alan = h("div", { class: "yon-icerik" });
-  ic.append(h("div", { class: "kart", style: "display:flex;gap:10px;flex-wrap:wrap;align-items:center" }, h("label", {}, "Branş", bS), h("label", {}, "Seviye", sS), h("label", { style: "flex:1;min-width:260px" }, "Konu", kS)), sekme, alan);
-  let S_ = depo.al("yon_sekme", "test");
+  sS.onchange = () => { SEVIYE_SEC = +sS.value; konuDoldur(kS, "yon_konu"); depo.yaz("yon_soru", 0); cizOkul(); };
+
   const gbBu = (f, suz) => YGB.filter(r => r.cikti_kod === f.kod && suz(r));
   const gbKutu = (L, on) => { const k = h("div", { class: "kart yon-gb" }, h("div", { class: "baslik-satir", style: "margin:0" }, h("h3", { style: "margin:0" }, `Geri bildirimler · ${gbOzetMetin(L)}`),
-      h("button", { class: "btn ana", type: "button", on: { click: () => gbAc(on, () => { YGB = null; setTimeout(() => yonGb(true).then(ciz), 300); }) } }, "+ Geri bildirim yaz")));
+      h("button", { class: "btn ana", type: "button", on: { click: () => gbAc(on, () => { YGB = null; setTimeout(() => yonGb(true).then(cizOkul), 300); }) } }, "+ Geri bildirim yaz")));
     if (!L.length) k.append(h("p", { class: "not" }, "Bu içerik için henüz bildirim yok."));
-    L.forEach(r => k.append(gbKart(r, { yonetici: true, yenile: ciz }))); return k; };
-  async function ciz() {
-    const f = VERI[+kS.value]; sekme.innerHTML = ""; alan.innerHTML = ""; if (!f) return;
+    L.forEach(r => k.append(gbKart(r, { yonetici: true, yenile: cizOkul }))); return k; };
+
+  let S_ = depo.al("yon_sekme", "test");
+  async function cizOkul() {
+    const f = VERI[+kS.value]; sekmeKap.innerHTML = ""; alan.innerHTML = ""; if (!f) return;
     const S = [["test", `Testler (${f.testler.length})`], ["acik", `Açık uçlu (${(f.au || []).length})`], ["etkinlik", `Etkinlikler (${f.etk ? (f.etk.kesif || []).length + (f.etk.pek || []).length : 0})`], ["konu", "Konu anlatımı"]];
     if (!S.some(x => x[0] === S_)) S_ = "test";
-    S.forEach(([v, a]) => sekme.append(h("button", { type: "button", role: "tab", "aria-selected": String(v === S_), on: { click: () => { S_ = v; depo.yaz("yon_sekme", v); ciz(); } } }, a)));
+    S.forEach(([v, a]) => sekmeKap.append(h("button", { type: "button", role: "tab", "aria-selected": String(v === S_), on: { click: () => { S_ = v; depo.yaz("yon_sekme", v); cizOkul(); } } }, a)));
     if (S_ === "test") return testIncele(f);
     if (S_ === "acik") return acikIncele(f);
     if (S_ === "etkinlik") return etkIncele(f);
     if (S_ === "konu") { const kutu = h("div", {});
       alan.append(kutu, gbKutu(gbBu(f, r => r.tur === "konu"), { brans: fBrans(f), cikti_kod: f.kod, tur: "konu" }));
       ekranTahta(kutu, f, { yukseklik: "calc(100vh - 160px)" }); return; }
-    
   }
+  function okulGoster() {
+    filtreSatir.append(h("label", {}, "Branş", bS), h("label", {}, "Seviye", sS), h("label", { style: "flex:1;min-width:260px" }, "Konu", kS));
+    bS.onchange = () => { kDol(); cizOkul(); }; kS.onchange = () => { depo.yaz("yon_konu", +kS.value); depo.yaz("yon_soru", 0); cizOkul(); };
+    kDol(); cizOkul();
+  }
+
+  // ---- HAZIRLIK PROGRAMLARI ----
+  async function programGoster() {
+    if (!PROG || PROG.yok) { alan.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, "Program içerikleri yüklenemedi."))); return; }
+    if (!PROG.L || !PROG.L.length) {
+      try { await programYukle(); } catch(e) {}
+    }
+    const L = PROG.L || [];
+    // Mevcut programları bul
+    const mevcutProgramlar = [...new Set(L.map(i => i.program))].filter(Boolean);
+    if (!mevcutProgramlar.length) { alan.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, "Henüz program içeriği yüklenmemiş."))); return; }
+
+    const progS = h("select", { "aria-label": "Program" });
+    mevcutProgramlar.forEach(p => { const ad = PROGRAM_TUR[p] ? `${PROGRAM_TUR[p].ik} ${PROGRAM_TUR[p].ad}` : p; progS.append(h("option", { value: p }, ad)); });
+    const duzeyS = h("select", { "aria-label": "Düzey" });
+    const bolumS = h("select", { "aria-label": "Bölüm" });
+    filtreSatir.append(h("label", {}, "Program", progS), h("label", {}, "Düzey", duzeyS), h("label", { style: "flex:1;min-width:260px" }, "Bölüm", bolumS));
+
+    let secProg = depo.al("yon_prog", mevcutProgramlar[0]);
+    if (!mevcutProgramlar.includes(secProg)) secProg = mevcutProgramlar[0];
+    progS.value = secProg;
+
+    const duzeyDoldur = () => {
+      const p = progS.value; secProg = p; depo.yaz("yon_prog", p);
+      const duzeyler = [...new Set(L.filter(i => i.program === p).map(i => i.duzey).filter(Boolean))].sort();
+      duzeyS.innerHTML = "";
+      if (!duzeyler.length) duzeyS.append(h("option", { value: "" }, "—"));
+      else duzeyler.forEach(d => duzeyS.append(h("option", { value: d }, d)));
+      let sd = depo.al("yon_prog_duzey", ""); if (!duzeyler.includes(sd)) sd = duzeyler[0] || "";
+      duzeyS.value = sd;
+      bolumDoldur();
+    };
+    const bolumDoldur = () => {
+      const p = progS.value, d = duzeyS.value; depo.yaz("yon_prog_duzey", d);
+      const bolumler = [...new Set(L.filter(i => i.program === p && i.duzey === d).map(i => i.bolum).filter(Boolean))].sort();
+      bolumS.innerHTML = "";
+      if (!bolumler.length) bolumS.append(h("option", { value: "" }, "—"));
+      else bolumler.forEach(b => bolumS.append(h("option", { value: b }, b)));
+      let sb_ = depo.al("yon_prog_bolum", ""); if (!bolumler.includes(sb_)) sb_ = bolumler[0] || "";
+      bolumS.value = sb_; cizProgram();
+    };
+    const cizProgram = () => {
+      alan.innerHTML = ""; sekmeKap.innerHTML = "";
+      const p = progS.value, d = duzeyS.value, b = bolumS.value; depo.yaz("yon_prog_bolum", b);
+      const liste = L.filter(i => i.program === p && i.duzey === d && i.bolum === b).sort((a, b_) => (+a.sira || 0) - (+b_.sira || 0) || String(a.baslik).localeCompare(String(b_.baslik), "tr"));
+      if (!liste.length) { alan.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, "Bu bölümde içerik yok."))); return; }
+      // İçerik listesi
+      const pano = h("div", { class: "kart" });
+      let acikId = null, pdfDiv = null;
+      liste.forEach(item => {
+        const turAd = PTUR_AD[item.tur] || item.tur || "";
+        const satir = h("div", { class: "satir", style: "cursor:pointer;padding:8px 4px;border-bottom:1px solid var(--cizgi)" },
+          h("span", { style: "flex:1" }, h("b", {}, item.baslik || "—"), item.tur ? h("span", { class: "etiket", style: "margin-left:6px" }, turAd) : null),
+          item.kredi ? h("span", { class: "not", style: "margin-left:8px" }, `${item.kredi} 🪙`) : null);
+        satir.onclick = async () => {
+          if (acikId === item.id) { acikId = null; if (pdfDiv) { pdfDiv.remove(); pdfDiv = null; } return; }
+          acikId = item.id;
+          if (pdfDiv) pdfDiv.remove();
+          pdfDiv = h("div", { style: "padding:8px 0" }, h("p", { class: "not" }, "PDF yükleniyor…"));
+          satir.after(pdfDiv);
+          try {
+            const url = await icerikAdres(item.yol);
+            pdfDiv.innerHTML = "";
+            pdfDiv.append(h("iframe", { src: url, style: "width:100%;height:min(80vh,900px);border:none;border-radius:8px", loading: "lazy" }));
+          } catch(e) { pdfDiv.innerHTML = ""; pdfDiv.append(h("p", { class: "not" }, "PDF açılamadı: " + hataMetni(e))); }
+        };
+        pano.append(satir);
+      });
+      alan.append(pano);
+    };
+    progS.onchange = () => { duzeyDoldur(); };
+    duzeyS.onchange = () => { bolumDoldur(); };
+    bolumS.onchange = () => { depo.yaz("yon_prog_bolum", bolumS.value); cizProgram(); };
+    duzeyDoldur();
+  }
+
+  // Başlangıç
+  if (BOLU === "okul") okulGoster(); else programGoster();
+
   // testler: öğretmen tahtası düzeni + cevap/çözüm kartı + o sorunun bildirimleri
   async function testIncele(f) {
     const tS = h("select", { "aria-label": "Test", class: "ot-sec" }); f.testler.forEach(t => tS.append(h("option", { value: `${f.kod}-${t.tip}${t.no}` }, `${tad(t)}${t.baslik && t.tip !== "E" ? " · " + t.baslik : ""}`)));
@@ -6530,8 +6629,6 @@ async icerik(ic) {
         etkCerceve(f, tur, no, L[no - 1]), gbKutu(YGB.filter(r => r.tur === "etkinlik" && r.cikti_kod === f.kod && r.alt === tur && r.no === no), { brans: fBrans(f), cikti_kod: f.kod, tur: "etkinlik", alt: tur, no })); };
     tc();
   }
-  bS.onchange = () => { kDol(); ciz(); }; kS.onchange = () => { depo.yaz("yon_konu", +kS.value); depo.yaz("yon_soru", 0); ciz(); };
-  kDol(); ciz();
 },
 async genel(ic) {
   ic.append(bas("Genel bakış", "Sitenin bütün kullanımı."));
