@@ -5371,20 +5371,24 @@ function filigranEkle(yer) {
 // konu anlatımını site içinde, indirme düğmesi olmadan açar. Ekran sürümü (ekran/<kod>.html) varsa önce o açılır.
 async function konuOku(f, sayfa = null) {
   if (ROL === "ogr" && !(await krediAc("konu", f.kod, `${f.kod} ${f.ad} · konu anlatımı`))) return;
-  // 02.11.2026: konu anlatımı aşağı kayan ekran sürümüyle, kalem ve kareli çözüm alanıyla açılır.
-  // 16.11.2026: ekran sürümü depoda yoksa konu anlatımı PDF'ine düşülür. İlkokul paketleri kendi
-  // betikleriyle üretildiği için ekran sürümü çıkmıyor; PDF ise hazır. Ekran sürümü olan konularda
-  // hiçbir şey değişmez. depoSayfa adresi önbelleğe aldığından ikinci çağrı ağ isteği yapmaz.
-  let ekranVar = true;
-  try { await depoSayfa(`ekran/${f.kod}.html`, null, "ekran sürümü"); } catch (e) { ekranVar = false; }
-  if (ekranVar) await konuEkranAc(f); else konuPdfAc(f, sayfa);
+  // 02.11.2026: konu anlatımı yalnız aşağı kayan ekran sürümüyle, kalem ve kareli çözüm alanıyla açılır.
+  // 16.11.2026: ekran sürümü depoda yoksa ekranTahta aynı görünümü konu anlatımı PDF'inden üretir;
+  // sayfa sayfa eski görünüm hiçbir durumda açılmaz.
+  await konuEkranAc(f);
 }
 // 02.11.2026: konu anlatımı tahtası — solda araç çubuğu, ortada aşağı kayan ekran sürümü, sağda kareli çözüm alanı.
 // Metnin üstüne çizilen çizgiler metinle birlikte kayar; kareli alandaki çizgiler yerinde kalır.
 const EKRAN_CIZ = {};
 async function ekranTahta(yer, f, opts = {}) {
   let u; try { u = await depoSayfa(`ekran/${f.kod}.html`, null, "ekran sürümü"); }
-  catch (e) { yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, "Bu konunun ekran sürümü henüz depoya yüklenmedi."), ROL !== "ogr" ? h("p", { class: "not" }, "Yönetici → Ayarlar → İçerikleri özel depoya taşı ile _ozel_icerik klasörü yüklenince açılır.") : null)); return false; }
+  catch (e) {
+    // 16.11.2026: ekran sürümü depoda yoksa konu anlatımı PDF'inin bütün sayfaları tek şerit yapılır ve
+    // aynı kayan tahtaya verilir (program föyündeki yol). Sayfa sayfa eski görünüm artık açılmaz.
+    const bek = h("p", { class: "not", style: "padding:20px" }, "Konu anlatımı hazırlanıyor…"); yer.append(bek);
+    try { u = await pFoyGoruntu(null, konuYol(f)); }
+    catch (e2) { bek.remove(); yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, "Bu konunun anlatımı henüz depoya yüklenmedi."), ROL !== "ogr" ? h("p", { class: "not" }, "Yönetici → Ayarlar → İçerikleri özel depoya taşı ile _ozel_icerik klasörü yüklenince açılır.") : null)); return false; }
+    bek.remove();
+  }
   return ekranTahtaGovde(yer, f.kod, u, `${f.kod} ${f.ad} konu anlatımı`, opts);
 }
 // program föyü: PDF'in bütün sayfaları art arda tek resim şeridi yapılır, ortaokuldaki ekran sürümü gibi aşağı kayar.
