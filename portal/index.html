@@ -4292,7 +4292,7 @@ let COZ_URL = null;
 async function cozumSayfaAc(f, tur) {
   if (TUS) { removeEventListener("keydown", TUS); TUS = null; }
   SAYFA = "kitap"; uygulama(); const ic = $(".ic"); ic.innerHTML = ""; scrollTo(0, 0);
-  ic.append(bas(`${f.kod} ${f.ad}`, "Çözümler", h("button", { class: "btn", type: "button", on: { click: () => { SAYFA = "kitap"; uygulama(); } } }, "← Kitaplığım")));
+  ic.append(bas(`${f.kod} ${f.ad}`, "Çözümler", h("button", { class: "btn yol-ust-dug", type: "button", on: { click: () => { SAYFA = "kitap"; uygulama(); } } }, "← Kitaplığım")));
   if (!krediAcik("konu", f.kod)) {
     ic.append(h("div", { class: "kart kilit-kart" }, h("b", {}, "🔒 Bu konunun çözümleri"), h("p", { class: "not" }, `Çözümler konu anlatımıyla birlikte açılır (${krediFiyat("konu")} kredi). Bir kez açtığın konu hep açık kalır.`),
       h("button", { class: "btn ana", type: "button", on: { click: async () => { if (await krediAc("konu", f.kod, `${f.kod} ${f.ad} · konu anlatımı ve çözümleri`)) cozumSayfaAc(f, tur); } } }, `${krediFiyat("konu")} krediyle aç`)));
@@ -4347,7 +4347,7 @@ function atolyeAc(kod, i) {
   if (TUS) { removeEventListener("keydown", TUS); TUS = null; }
   const f = VERI.find(x => x.kod === kod), L = ATOLYE[kod] || []; i = i || 0; const a = L[i]; if (!a) return;
   const geri = SAYFA; SAYFA = "kitap"; uygulama(); const ic = $(".ic"); ic.innerHTML = ""; scrollTo(0, 0);
-  ic.append(bas(`${f.kod} ${f.ad}`, "Atölye", h("button", { class: "btn", type: "button", on: { click: () => { SAYFA = geri || "kitap"; uygulama(); } } }, "← Geri")));
+  ic.append(bas(`${f.kod} ${f.ad}`, "Atölye", h("button", { class: "btn yol-ust-dug", type: "button", on: { click: () => { SAYFA = geri || "kitap"; uygulama(); } } }, "← Geri")));
   if (L.length > 1) { const sekme = h("div", { class: "sekme", role: "tablist", style: "background:var(--cizgi);flex-wrap:wrap" });
     L.forEach((x, j) => sekme.append(h("button", { type: "button", role: "tab", "aria-selected": String(j === i), on: { click: () => atolyeAc(kod, j) } }, x[1]))); ic.append(sekme); }
   const fr = h("iframe", { class: "etk-cerceve", title: a[1], allow: "fullscreen; autoplay" }), kap = h("div", { class: "etk-kap" }, h("p", { class: "not etk-yuk" }, "Atölye yükleniyor…"), fr);
@@ -4520,7 +4520,7 @@ async function etkinlikAc(kod, tur, no) {
   if (!no) { no = L.findIndex((_, i) => !E[`${kod}|${tur}|${i + 1}`]) + 1 || 1; }
   SAYFA = "kitap"; uygulama(); const ic = $(".ic"); ic.innerHTML = ""; scrollTo(0, 0);
   const ad = tur === "kesif" ? "Keşfetme" : "Pekiştirme";
-  ic.append(bas(`${f.kod} ${f.ad}`, `${ad} etkinlikleri`, h("button", { class: "btn", type: "button", on: { click: () => { SAYFA = "kitap"; uygulama(); } } }, "← Kitaplığım")));
+  ic.append(bas(`${f.kod} ${f.ad}`, `${ad} etkinlikleri`, h("button", { class: "btn yol-ust-dug", type: "button", on: { click: () => { SAYFA = "kitap"; uygulama(); } } }, "← Kitaplığım")));
   const sekme = h("div", { class: "sekme", role: "tablist", style: "max-width:420px;background:var(--cizgi)" });
   [["kesif", "Keşfetme"], ["pek", "Pekiştirme"]].forEach(([t, a]) => sekme.append(h("button", { type: "button", role: "tab", "aria-selected": String(t === tur), on: { click: () => etkinlikAc(kod, t) } }, `${a} (${f.etk[t].length})`)));
   const liste = h("nav", { class: "kart etk-liste", "aria-label": `${ad} etkinlikleri` }), ana = h("section", { class: "etk-ana" });
