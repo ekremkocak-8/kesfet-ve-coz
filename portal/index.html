@@ -913,6 +913,9 @@ table.vt th,table.vt td{text-align:left;font-family:inherit}table.vt td{font-siz
 body.odak .yan,body.odak .mobil-nav{display:none}
 body.odak .app{grid-template-columns:minmax(0,1fr)}
 .odak-cubuk{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+/* 16.11.2026: test ekranında Kitaplığım'a dönüş — ortada ve büyük, gözden kaçmasın */
+.don-serit{display:flex;justify-content:center;margin:2px 0 16px}
+.don-dug{font-size:17px;font-weight:600;padding:13px 34px;border-radius:999px;min-width:220px;justify-content:center}
 .odak-cubuk .sure{font:600 15px var(--f-sayi)}
 .nob.sonra,.osat.sonra .no{box-shadow:0 0 0 3px #e7b04a}
 /* her yerden arama (Ctrl+K) */
@@ -2724,7 +2727,7 @@ kitap(ic) {
         h("span", { class: "not" }, f.ek ? (cz ? "Çözüldü" : "Henüz çözülmedi") : `Testler ${cz}/${tt} · Etkinlikler ${e.k + e.p}/${e.n}`),
         f.ek ? null : h("div", { class: "fas-ilerle", title: "İlerleme" }, h("i", { style: `width:${Math.round(100 * (cz + e.k + e.p) / Math.max(1, tt + e.n))}%` })),
         h("div", { class: "baglar" }, f.ek ? null : h("button", { type: "button", class: "b-yol", on: { click: () => konuYolu(f, {}) } }, "Konuyu öğren →"), f.ek ? h("button", { type: "button", on: { click: ev => dosyaAc(ekPdfYol(`${f.kod}-${f.testler[0].tip}${f.testler[0].no}`), ev.currentTarget) } }, "Soru kitapçığı (PDF)") : null,
-          h("button", { type: "button", class: "b-test", on: { click: () => { depo.yaz("test_konu", VERI.indexOf(f)); SAYFA = "test"; uygulama(); } } }, "Testler"),
+          h("button", { type: "button", class: "b-test", on: { click: () => testleriAc(f) } }, "Testler"),
           null))); });
     if (!alan.children.length) alan.append(qq ? h("p", { class: "ekran-yok" }, "Bu aramayla eşleşen konu yok.")
       : bosEkran("📚", bosBaslik(pr), "Konu anlatımları, videolar, etkinlikler ve testler yüklendiği anda burada görünecek.")); };
@@ -2822,7 +2825,11 @@ async function optikAc(tid, ilk, ops) {
   if (dSec) dSec.value = String(Math.max(0, DL.indexOf(s)));
   ic.append(bas(`${fAd(x.f)}`, `${tlabel(x)}${x.t.baslik && x.t.tip !== "B" ? " · " + x.t.baslik : ""}${tekrar ? " · tekrar çözüm" : ""}`, h("div", { class: "odak-cubuk" }, odak ? sureS : null, odak ? h("span", { class: "etiket e-mavi", title: "Test bitene kadar menü gizli" }, tekrar ? "Tekrar · odak modu" : "Odak modu") : null,
     dSec, bitti && ROL === "ogr" ? h("button", { class: "btn ana", type: "button", title: "İlk sonucun değişmez; yeni deneme ayrıca kaydedilir", on: { click: () => optikAc(tid, 0, { tekrar: true }) } }, "↻ Tekrar çöz") : null,
-    h("button", { class: "btn", type: "button", on: { click: () => { if (TUS) removeEventListener("keydown", TUS); SAYFA = "test"; uygulama(); } } }, "← Testler"))));
+    null)));
+  // 16.11.2026: geri düğmesi başlıktaki küçük yerinden alınıp sayfanın ortasına, büyük olarak kondu;
+  // artık ara "Testler" ekranına değil doğrudan Kitaplığım'a döner. İşaretlenen cevaplar taslağa yazıldığı için çıkmak bir şey kaybettirmez.
+  ic.append(h("div", { class: "don-serit" }, h("button", { class: "btn ana don-dug", type: "button",
+    on: { click: () => { if (TUS) removeEventListener("keydown", TUS); SAYFA = "kitap"; uygulama(); } } }, "← Kitaplığım")));
   const serit = h("div", { class: "no-serit", role: "navigation", "aria-label": "Sorular" });
   const sol = h("section", { class: "kart soru-kart tahta-tam", "aria-live": "polite" });
   const sag = h("aside", { class: "optik yan-optik", "aria-label": "Optik form" });
@@ -3725,6 +3732,14 @@ function videoKontrol(yer, oyn, yenidenKur) {
 }
 function kvideoAc(kod, i) { const f = VERI.find(x => x.kod === kod), G = kvGruplar(kod); konuYolu(f, { sira: G[i] ? G[i].sira : null }); }
 function konuYolu(f, ops) { if (TUS) { removeEventListener("keydown", TUS); TUS = null; } YOL_OPS = ops || {}; depo.yaz("yol_konu", f.kod); SAYFA = "yol"; uygulama(); scrollTo(0, 0); }
+// 16.11.2026: ara "Testler" ekranı kaldırıldı. "Testler" düğmesi artık konu yolunu açıyor ve
+// testler bölümünü açık getiriyor. Öğrenci her zaman Kitaplığım üzerinden ilerler; testlerin
+// sonucu, deneme sayısı, eğilimi ve çözüm sayfaları zaten konu yolunda duruyor.
+function testleriAc(f) {
+  const a = `yol_grup_${(BEN && BEN.id) || ""}_${f.kod}`;
+  depo.yaz(a, { ...(depo.al(a, null) || {}), test: true });
+  konuYolu(f, {});
+}
 function konuYoluSayfa(ic) {
   const f = VERI.find(x => x.kod === depo.al("yol_konu", "")); if (!f) { SAYFA = "kitap"; return uygulama(); }
   const oid = BEN.id, S = benimSonuc(), E = ETKK[oid] || {}, G = kvGruplar(f.kod), ops = YOL_OPS; YOL_OPS = {};
@@ -6953,7 +6968,7 @@ function gorevBasla(x) {
   if (x.t === "kesif" || x.t === "pek") { const [a, b] = String(x.r).split("-").map(Number), E = ETKK[BEN.id] || {}; let no = a; for (let i = a; i <= b; i++) if (!E[`${x.k}|${x.t}|${i}`]) { no = i; break; } return etkinlikAc(x.k, x.t, no); }
   if (x.t === "test") return optikAc(x.r);
   if (x.t === "au") { SAYFA = "acik"; uygulama(); return; }
-  depo.yaz("test_konu", VERI.indexOf(f)); SAYFA = "test"; uygulama();
+  testleriAc(f);
 }
 
 // ---------- planlayıcı ----------
@@ -7396,7 +7411,7 @@ function konuDetay(f) {
   const kapat = () => $("#dlgKapat").click();
   kap.append(h("div", { class: "baglar", style: "margin-top:12px" }, h("button", { type: "button", class: "b-konu", on: { click: () => { kapat(); konuOku(f); } } }, "Konu anlatımı" + krediEtiket("konu", f.kod)),
     h("button", { type: "button", class: "b-kesif", on: { click: () => { kapat(); etkinlikAc(f.kod, "kesif"); } } }, "Keşif"), h("button", { type: "button", class: "b-pek", on: { click: () => { kapat(); etkinlikAc(f.kod, "pek"); } } }, "Pekiştirme"),
-    h("button", { type: "button", class: "b-test", on: { click: () => { kapat(); depo.yaz("test_konu", VERI.indexOf(f)); SAYFA = "test"; uygulama(); } } }, "Testler")));
+    h("button", { type: "button", class: "b-test", on: { click: () => { kapat(); testleriAc(f); } } }, "Testler")));
   $("#dlgIc").append(kap); const d = $("#dlg"); try { d.showModal(); } catch (e) { d.setAttribute("open", ""); }
 }
 async function ogrAnaliz(ic) {
