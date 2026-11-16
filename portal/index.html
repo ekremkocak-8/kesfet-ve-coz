@@ -10408,6 +10408,8 @@ OGRS.odevler = ic => ogrOdevlerim(ic);
 // ---------- başlat ----------
 (async () => { try { const u = new URLSearchParams(location.search), rt = u.get("rapor"); if (rt && /^[0-9a-f-]{36}$/i.test(rt)) return raporGoster(rt);
     const sv = u.get("sinav"); if (sv && /^[0-9a-f-]{36}$/i.test(sv)) { depo.yaz("ac_sinav", { id: sv, k: u.get("k") || "" }); history.replaceState(null, "", location.pathname + location.hash); } } catch (e) {}
+  // 17.11.2026: veri_ek.json — index.html'de kaydı olmayan konular (veri_tara.py üretir); yeni konu için index.html düzenlenmez
+  try { const r = await fetch("veri_ek.json?v=" + Date.now(), { cache: "no-store" }); if (r.ok) { const E = await r.json(); (E.konular || []).forEach(e => { if (e && e.kod && !VERI.some(f => f.kod === e.kod)) VERI.push(e); }); } } catch (e) {}
   try { const { data } = await sb.auth.getSession(); if (data.session && KURTARMA) parolaYenileEkrani(); else if (data.session) await yukle(); else giris(); } catch (e) { giris(hataMetni(e)); } })();
 
 </script>
