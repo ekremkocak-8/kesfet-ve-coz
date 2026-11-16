@@ -9005,7 +9005,7 @@ function pdfTahta(ic, adres, anahtar, baslik, gb, ilk = 1, sayfaDegisti = null) 
 
 // ---------- yazılılar ve PDF'ler: yönetici yükler; öğrenci ve öğretmen sınıf → başlık → ders düzeninde görür ----------
 // Dosyalar özel "belge" deposunda (<id>.pdf). Satırlar belgeler tablosunda; kim neyi göreceği veritabanında (27_belgeler.sql) denetlenir.
-const BELGE_DEPO = "belge", BELGE_SINIFLAR = [5, 6, 7, 8], BELGE_EN_COK = 50 * 1024 * 1024;
+const BELGE_DEPO = "belge", BELGE_SINIFLAR = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], BELGE_EN_COK = 50 * 1024 * 1024;
 const BELGE_DONEM = ["1. Dönem 1. Yazılı", "1. Dönem 2. Yazılı", "2. Dönem 1. Yazılı", "2. Dönem 2. Yazılı"];
 const BELGE_DERS = [["Türkçe", "TR", "#ff7b7b"], ["Matematik", "MAT", "#6ea8ff"], ["Fen Bilimleri", "FEN", "#a3e05a"], ["Sosyal Bilgiler", "SOS", "#ffc163"],
   ["T.C. İnkılap Tarihi ve Atatürkçülük", "İNK", "#ff9f6b"], ["Din Kültürü", "DİN", "#a98bff"], ["İngilizce", "İNG", "#5fd9cf"]];
@@ -9074,9 +9074,9 @@ async function belgeSayfa(ic) {
   let L; try { L = await belgeListe(); } catch (e) { yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, belgeKurulmamis(e)))); if (yon) yer.prepend(belgeYukleKarti([], () => { SAYFA = "yazili"; uygulama(); })); return; }
   const yenile = () => { SAYFA = "yazili"; uygulama(); };
   let sv = BELGE_SINIF ?? depo.al("belge_sinif", null);
-  if (!BELGE_SINIFLAR.includes(sv)) { const s = ROL === "ogr" && SINIF ? Math.min(8, Math.max(5, +SINIF.seviye || 8)) : null; sv = s || (BELGE_SINIFLAR.find(x => L.some(b => b.sinif === x)) || 5); }
+  if (!BELGE_SINIFLAR.includes(sv)) { const s = ROL === "ogr" ? Math.min(12, Math.max(1, aktifSeviye())) : null; sv = s || (BELGE_SINIFLAR.find(x => L.some(b => b.sinif === x)) || 5); }
   const yk = yon ? belgeYukleKarti(L, yenile, sv) : null; if (yk) ic.insertBefore(yk, yer);
-  const ogrSv = ROL === "ogr" && SINIF ? Math.min(8, Math.max(5, +SINIF.seviye || 8)) : null;
+  const ogrSv = ROL === "ogr" ? Math.min(12, Math.max(1, aktifSeviye())) : null;
   if (ogrSv) { sv = ogrSv; L = L.filter(b => b.sinif === ogrSv); depo.yaz("yazili_gordu", new Date().toISOString()); if (typeof ROZET_EK !== "undefined") { ROZET_EK.yazili = 0; setTimeout(rozetYenile, 50); } }
   const sekme = h("div", { class: "belge-sekme", role: "tablist", "aria-label": "Sınıf", hidden: !!ogrSv }), govde = h("div");
   const ciz = () => {
@@ -10295,7 +10295,7 @@ async function rozetHesapla() {
     const izlenmedi = DERSLER.filter(d => d.yayinda && (!d.tarih || d.tarih <= bugun()) && !IZLEME.some(z => z.ders_id === d.id)).length;
     const U = ogrPlanUyari(BEN.id);
     ROZET_EK = { dersler: bugunCanli + izlenmedi, gelisim: U ? U.geride.length : 0, yazili: 0 };
-    try { const r = await sb.from("belgeler").select("id,olusturma,sinif,kitle,yayinda"); const gordu = depo.al("yazili_gordu", ""), sv = Math.min(8, Math.max(5, +SINIF.seviye || 8));
+    try { const r = await sb.from("belgeler").select("id,olusturma,sinif,kitle,yayinda"); const gordu = depo.al("yazili_gordu", ""), sv = Math.min(12, Math.max(1, aktifSeviye()));
       ROZET_EK.yazili = (r.data || []).filter(b => b.sinif === sv && b.kitle === "herkes" && b.yayinda && (!gordu || b.olusturma > gordu)).length; } catch (e) {}
   } catch (e) {}
   rozetYenile();
