@@ -5687,6 +5687,25 @@ function etkinlikEsle() { const M = new Map();
   VERI.forEach(f => { [[f.kesif, "kesif.html"], [f.pek, "pekistirme.html"]].forEach(([u, ad]) => { const y = siteYolu(u); if (y) M.set(y, `etkinlik/${f.kod}/${ad}`); }); });
   Object.values(ATOLYE).flat().forEach(a => { const y = siteYolu(a[2]); if (y) M.set(y, `atolye/${a[0]}.html`); });
   return M; }
+// 17.11.2026 · birim klasörü düzeni: Matematik\<düzey>\<tema>\<KOD - Ad>\portal\ (birim.json → {"kod": "5.1.1", ...})
+// depodaki yerler değişmez; yalnız bilgisayardaki kaynak klasör birim birimdir
+async function birimKodlari(F) { const M = new Map();
+  for (const f of F) { const y = (f.webkitRelativePath || f.name).replace(/\\/g, "/"); const m = y.match(/^(.*\/portal(?:\/[^/]+)?)\/birim\.json$/i); if (!m) continue;
+    try { const j = JSON.parse(await f.text()); if (j && j.kod) M.set(m[1], { kod: String(j.kod).replace(/^MAT\./, ""), brans: String(j.brans || "MAT").toUpperCase() }); } catch (e) {} }
+  return M; }
+function birimDepoYeri(tam, BK) {
+  tam = tam.replace(/\\/g, "/"); let K = null;   // dosya, birim.json'u olan en yakın üst klasöre aittir (bir birim klasöründe iki kazanım: portal\M.8.1.1.2a\, portal\M.8.1.1.2b\)
+  for (const k of BK.keys()) if (tam.startsWith(k + "/") && (!K || k.length > K.length)) K = k;
+  if (!K) return null; const B = BK.get(K), r = tam.slice(K.length + 1), kod = B.kod; let x;
+  if (/^(kesif|pekistirme)\.html$/i.test(r)) return `etkinlik/${kod}/${r.toLowerCase()}`;
+  if (/^(cozum|sb-cozum|cozum-odasi)\.html$/i.test(r)) return `cozum/${kod}/${r.toLowerCase()}`;
+  if (/^ekran\.html$/i.test(r)) return `ekran/${kod}.html`;
+  if (/^konu\.pdf$/i.test(r)) return `pdf/${B.brans}.${kod}_Konu_Anlatimi.pdf`;
+  if ((x = r.match(/^soru\/AU\.js$/i))) return `soru/AU-${kod}.js`;
+  if ((x = r.match(/^soru\/((?:F|B|SB)\d{1,2})\.js$/i))) return `soru/${kod}-${x[1].toUpperCase()}.js`;
+  if ((x = r.match(/^ses\/([0-9a-z])\/([0-9a-z]{1,13}\.mp3)$/))) return `ses/${x[1]}/${x[2]}`;
+  if ((x = r.match(/^atolye\/([a-z0-9-]+\.html)$/i))) return `atolye/${x[1]}`;
+  return null; }
 // seçilen klasördeki bir dosyanın depodaki yeri (yoksa null):
 //   …/pdf/x.pdf → pdf/x.pdf · …/soru/x.js → soru/x.js · …/<1-sinif … 12-sinif | lgs>/… → çözüm, etkinlik ya da atölye
 function depoYeri(tam, C, E) {
@@ -5802,18 +5821,20 @@ function icerikTasimaKarti() {
     kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = false);
   }
   const inp = h("input", { type: "file", multiple: true, webkitdirectory: true, style: "display:none" });
-  inp.onchange = () => { const F = [...inp.files]; inp.value = ""; const C = cozumEsle(), E = etkinlikEsle(), D = [];
-    F.forEach(f => { const y = depoYeri(f.webkitRelativePath || f.name, C, E); if (y) D.push({ yol: y, f }); });
-    const PF = F.filter(f => /(^|[\/])program[\/]/i.test(f.webkitRelativePath || "")), pDur = h("p", { class: "not", role: "status" });
+  inp.onchange = async () => { const F = [...inp.files]; inp.value = ""; const C = cozumEsle(), E = etkinlikEsle(), D = [];
+    // 17.11.2026 birim klasörü düzeni: Matematik klasörü seçilirse yalnız <birim>\portal\ klasörleri okunur (birim.json kodu verir)
+    const BK = await birimKodlari(F), birimModu = BK.size > 0;
+    F.forEach(f => { const yol = f.webkitRelativePath || f.name, y = birimModu ? birimDepoYeri(yol, BK) : depoYeri(yol, C, E); if (y) D.push({ yol: y, f }); });
+    const PF = birimModu ? [] : F.filter(f => /(^|[\/])program[\/]/i.test(f.webkitRelativePath || "")), pDur = h("p", { class: "not", role: "status" });
     const progCalis = async () => { if (!PF.length) return; durum.after(pDur); kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = true);
       try { await programKlasorYukle(PF, t => pDur.textContent = t); } catch (e) { pDur.textContent = "Program içerikleri: " + hataMetni(e); }
       kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = false); };
     if (D.length) yukle("içerikler", D).then(progCalis);
     else if (PF.length) { durum.textContent = "Okul içeriği yok; program klasörü işleniyor."; progCalis(); }
-    else durum.textContent = "Seçilen klasörde yüklenecek içerik bulunamadı. “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin."; };
-  const dug = h("button", { class: "btn ana tasi-dug", type: "button", on: { click: () => inp.click() } }, "📁 _ozel_icerik klasörünü seç ve yükle");
+    else durum.textContent = birimModu ? "Birim klasörlerinde yüklenecek dosya bulunamadı." : "Seçilen klasörde yüklenecek içerik bulunamadı. “Matematik” ya da “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin."; };
+  const dug = h("button", { class: "btn ana tasi-dug", type: "button", on: { click: () => inp.click() } }, "📁 Matematik ya da _ozel_icerik klasörünü seç ve yükle");
   const kart = h("div", { class: "kart" }, h("h3", {}, "İçerikleri özel depoya taşı"), durum, yukSat,
-    h("p", { class: "not" }, "“_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru), etkinliklerin sesli yönergeleri (ses) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; program klasöründeki olimpiyat, TYT, AYT, KPSS ve ALES föyleri, testleri ve çözümleri de Program içerikleri listesine eklenir (klasör adları: olimpiyat, tyt, ayt, kpss, ales). Depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
+    h("p", { class: "not" }, "Yeni düzen: “Keşfet ve Çöz › Matematik” klasörünü seçin; yalnız birim klasörlerindeki “portal” klasörleri yüklenir (öğretmen PDF'leri ve kaynak dosyalar yüklenmez). Eski düzen: “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru), etkinliklerin sesli yönergeleri (ses) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; program klasöründeki olimpiyat, TYT, AYT, KPSS ve ALES föyleri, testleri ve çözümleri de Program içerikleri listesine eklenir (klasör adları: olimpiyat, tyt, ayt, kpss, ales). Depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
     h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, dug, inp), say);
   return kart;
 }
