@@ -1653,6 +1653,30 @@ const IK = {
 };
 const ikon = n => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("aria-hidden", "true"); s.innerHTML = IK[n]; return s; };
 const kac = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// 17.11.2026: test bitince sıradaki adım önerisi (merdiven kuralı). Fasikül testi %70+ → sonraki test;
+// İlk Adım %70+ → aynı konunun Standart testi; İlk Adım %70 altı → yanlışları incele, tekrar çöz;
+// Standart %50+ → sıradaki konunun İlk Adım testi; Standart %50 altı → aynı konunun İlk Adım testi.
+function sonrakiOneri(tid, yz) {
+  const x = TID[tid]; if (!x) return null; const t = x.t, f = x.f, T = f.testler, bul = (tip, no) => T.find(z => z.tip === tip && z.no === no);
+  const ad = z => tad(z), iki = T.some(z => z.tip === "SB" && z.no > 12), id = z => `${f.kod}-${z.tip}${z.no}`;
+  let m = null, h = null;
+  if (t.tip === "F") { const n = bul("F", t.no + 1) || bul("B", 1);
+    if (yz >= 70) { m = n ? `Çok iyi! Sıradaki teste geçmek ister misin?` : "Fasikül testlerini bitirdin. Soru bankasına geçebilirsin."; h = n || (iki ? bul("SB", 1) : T.find(z => z.tip === "SB")); }
+    else m = "Geçmeden önce yanlış yaptığın soruların çözümlerine bak; sonra bu testi tekrar çözebilirsin."; }
+  else if (iki && (t.tip === "SB" || (t.tip === "B" && t.no > 1))) {
+    const ilk = t.tip === "SB" ? t.no <= 12 : t.no === 2, k = t.tip === "SB" ? (ilk ? t.no : t.no - 12) : null;
+    const es = t.tip === "SB" ? bul("SB", ilk ? k + 12 : k) : bul("B", ilk ? 3 : 2), sonrakiIlk = t.tip === "SB" ? ((k < 12 && bul("SB", k + 1)) || bul("B", 2)) : null;
+    if (ilk && yz >= 70) { m = "Bu konunun İlk Adım testini başardın. Aynı konunun Standart testine geçmek ister misin?"; h = es; }
+    else if (ilk) m = "Standart teste geçmeden önce yanlışlarının çözümüne bak ve bu İlk Adım testini tekrar çöz. %70'e ulaşınca Standart test açılmaya hazır.";
+    else if (yz >= 50) { m = sonrakiIlk ? "Bu konunun Standart testini de geçtin. Sıradaki konuya geçmek ister misin?" : "Soru bankasının bütün konularını bitirdin."; h = sonrakiIlk; }
+    else { m = "Bu konu biraz daha pekişmeli. Aynı konunun İlk Adım testine dönmek ister misin?"; h = es; } }
+  else if (t.tip === "SB" || t.tip === "B") { const n = bul(t.tip, t.no + 1); if (yz >= 70 && n) { m = "Sıradaki teste geçmek ister misin?"; h = n; } }
+  return m ? { m, h: h ? id(h) : null, ad: h ? ad(h) : "" } : null;
+}
+window.__oneriAc = tid => { try { $("#dlg").close(); } catch (e) {} optikAc(tid); };
+const oneriHtml = (tid, yz) => { const o = sonrakiOneri(tid, yz); if (!o) return "";
+  return `<div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--lacivert2)"><p style="margin:0 0 8px;font-weight:700">${o.m}</p>` +
+    (o.h ? `<button type="button" class="btn ana" onclick="__oneriAc('${o.h}')">${o.ad} →</button>` : "") + `</div>`; };
 function bilgi(html) { $("#dlgIc").innerHTML = html; const d = $("#dlg"); try { d.showModal(); } catch (e) { d.setAttribute("open", ""); } }
 $("#dlgKapat").onclick = () => { const d = $("#dlg"); try { d.close(); } catch (e) { d.removeAttribute("open"); } };
 const logoNokta = () => h("div", { class: "logo", "aria-hidden": "true" }, h("i", { class: "d" }), h("i"), h("i"), h("i", { class: "d" }));
@@ -3038,13 +3062,13 @@ async function optikAc(tid, ilk, ops) {
       if (tekrar) { try { const r = await q(sb.rpc("test_tekrar", { p_test: tid, p_cevaplar: cev.map(z => z || "-").join("") })), ilkS = benimSonuc()[tid];
           const rec = { test_id: tid, cevaplar: cev.map(z => z || "-").join(""), isaret: r.isaret, dogru: r.dogru, yanlis: r.yanlis, bos: r.bos, yuzde: r.yuzde, tarih: new Date().toISOString() };
           ((DENEME[BEN.id] = DENEME[BEN.id] || {})[tid] = DENEME[BEN.id][tid] || []).push(rec); try { localStorage.removeItem("kvcp_" + tkA); } catch (e) {}
-          bilgi(`<h3 style="margin-bottom:8px">Tekrar çözüm kaydedildi</h3><p class="sayi" style="font-size:22px;margin:6px 0">${r.dogru} D · ${r.yanlis} Y · ${r.bos} B · %${r.yuzde}</p><p>İlk denemen %${ilkS ? ilkS.yuzde : "–"} idi${ilkS ? (r.yuzde > ilkS.yuzde ? `; ${r.yuzde - ilkS.yuzde} puan ilerledin. Harika!` : r.yuzde === ilkS.yuzde ? "; aynı kaldı." : "; yanlışlarının çözümlerine bir daha bak.") : "."}</p><p class="not">İlk sonucun değişmedi; öğretmenin ilk denemeni görür.</p>`);
+          bilgi(`<h3 style="margin-bottom:8px">Tekrar çözüm kaydedildi</h3><p class="sayi" style="font-size:22px;margin:6px 0">${r.dogru} D · ${r.yanlis} Y · ${r.bos} B · %${r.yuzde}</p><p>İlk denemen %${ilkS ? ilkS.yuzde : "–"} idi${ilkS ? (r.yuzde > ilkS.yuzde ? `; ${r.yuzde - ilkS.yuzde} puan ilerledin. Harika!` : r.yuzde === ilkS.yuzde ? "; aynı kaldı." : "; yanlışlarının çözümlerine bir daha bak.") : "."}</p><p class="not">İlk sonucun değişmedi; öğretmenin ilk denemeni görür.</p>` + oneriHtml(tid, r.yuzde));
           optikAc(tid, null, { deneme: rec }); }
         catch (e) { document.querySelectorAll(".gonder").forEach(z => { z.disabled = false; z.textContent = "Gönder"; }); bilgi(`<h3>Gönderilemedi</h3><p>${kac(/test_tekrar|PGRST20[25]/i.test(String(e && e.message)) ? "Tekrar çözme kurulmamış (43_olcme.sql)." : hataMetni(e))}</p>`); } return; }
       try { const r = await q(sb.rpc("test_gonder", { p_test: tid, p_cevaplar: cev.map(z => z || "-").join("") }));
         ANAHTAR[tid] = r.anahtar; SONUC[BEN.id][tid] = { test_id: tid, cevaplar: cev.map(z => z || "-").join(""), isaret: r.isaret, dogru: r.dogru, yanlis: r.yanlis, bos: r.bos, yuzde: r.yuzde, tarih: new Date().toISOString() };
         bulutSil(taslakAnahtar(tid)); try { localStorage.removeItem("kvcp_" + sonraA); } catch (e) {}
-        bilgi(`<h3 style="margin-bottom:8px">Test gönderildi</h3><p class="sayi" style="font-size:22px;margin:6px 0">${r.dogru} D · ${r.yanlis} Y · ${r.bos} B · %${r.yuzde}</p><p>Şimdi soruları tek tek inceleyebilir, yanlış yaptıklarının çözümünü görebilirsin.</p>`);
+        bilgi(`<h3 style="margin-bottom:8px">Test gönderildi</h3><p class="sayi" style="font-size:22px;margin:6px 0">${r.dogru} D · ${r.yanlis} Y · ${r.bos} B · %${r.yuzde}</p><p>Şimdi soruları tek tek inceleyebilir, yanlış yaptıklarının çözümünü görebilirsin.</p>` + oneriHtml(tid, r.yuzde));
         optikAc(tid); (r.yuzde === 100 ? odulKontrol() : Promise.resolve()).then(oyunKontrol); }
       catch (e) { document.querySelectorAll(".gonder").forEach(z => { z.disabled = false; z.textContent = "Gönder"; }); bilgi(`<h3>Gönderilemedi</h3><p>${kac(hataMetni(e))}</p><p class="not">Cevapların bu cihazda saklı; tekrar deneyebilirsin.</p>`); } } } }, "Gönder");
     b.classList.add("gonder"); return b;
