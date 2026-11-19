@@ -4960,8 +4960,10 @@ function tahtaBilesen(anahtar, kaynak, { kalemAcik = false, buyuk = false, alanA
     if (oran) { const w = Math.round(Math.max(200, Math.min((resim.naturalWidth || 800) * 1.7, KW / (1 + oran), H / ar) * TAHTA_AYAR.zoom)), ih = Math.round(w * ar), sw = w + Math.round(w * oran);
       const enAlt = C.s.reduce((m, z) => Math.max(m, ...z.p.map(q => q[1])), 0) * sw; resim.style.width = w + "px"; alan.style.width = Math.round(w * oran) + "px"; alan.style.height = Math.round(Math.max(ih, H, enAlt + 60)) + "px"; requestAnimationFrame(ciz); return; }
     // soru sütunu sabit genişlikte (sayfanın %58'i); görsel herkes için aynı ölçekle yerleşir, çalışma alanı hep aynı yerden başlar
-    const Q = Math.round(KW * .58), f = Q / ref * TAHTA_AYAR.zoom, nw = resim.naturalWidth || 800;
-    let w = nw * f; if (w * ar > H) w = Math.max(w * .75, H / ar);   // çok uzun soru: biraz küçülür, kalanı kaydırılır
+    // 20.11.2026: soru görseli ilk açılışta soru sütununu enine doldurur (tablette sorular çok küçük kalıyordu).
+    // Dar görseller en çok 2,4 katına büyütülür; çok uzun soru biraz küçülür, kalanı kaydırılır.
+    const Q = Math.round(KW * .58), nw = resim.naturalWidth || 800;
+    let w = Math.min(Q, nw * 2.4) * TAHTA_AYAR.zoom; if (w * ar > H) w = Math.max(w * .75, H / ar);
     w = Math.round(Math.max(160, w)); const ih = Math.round(w * ar), sutun = Math.max(Q, w);
     resim.style.width = w + "px"; resim.style.marginRight = (sutun - w) + "px"; alan.style.width = Math.max(220, KW - sutun) + "px"; alan.style.height = Math.max(ih, H) + "px"; requestAnimationFrame(ciz); };
   if (sunum) { const yeniden = () => { if (kok.isConnected) sunumBoyut(); else { removeEventListener("resize", yeniden); document.removeEventListener("fullscreenchange", yeniden); } }; addEventListener("resize", yeniden); document.addEventListener("fullscreenchange", () => setTimeout(yeniden, 60)); }
