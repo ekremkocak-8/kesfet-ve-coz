@@ -3166,7 +3166,11 @@ async function sinavTakvimYukle(zorla) {
 const sinavUygun = d => { d = +d || 0; return Object.keys(SINAV_TUR).filter(k => k === "lgs" ? d === 8 : k === "yks" ? d >= 9 && d <= 13 : k === "kpss" ? d >= 12 : k === "ales" ? d === 14 : d >= 5 && d <= 12); };
 const sinavVarsayilan = d => { d = +d || 0; return d === 8 ? ["lgs"] : d >= 11 && d <= 13 ? ["yks"] : d === 14 ? ["kpss", "ales"] : []; };
 const ogrDuzey = o => +(o && o.duzey) || +(o && o.seviye) || (typeof SINIF !== "undefined" && SINIF && +SINIF.seviye) || 0;
-const sinavlarim = o => { const d = ogrDuzey(o), U = sinavUygun(d), L = o && o.sinavlar && o.sinavlar.length ? o.sinavlar : sinavVarsayilan(d); return L.filter(k => U.includes(k)); };
+// 19.11.2026: sınav seçilmemişse önce öğrencinin PROGRAMINA bakılır (olimpiyat sınıfındaki 8. sınıf öğrencisine LGS sayacı çıkmasın)
+const sinavProgramdan = o => { const P = o && Array.isArray(o.programlar) && o.programlar.length ? programlarim(o) : null; if (!P) return null;
+  const yks = ogrDuzey(o) >= 11 ? "yks" : null;   // YKS sayacı varsayılan olarak 11. sınıftan; 9–10 isterse Sınavlarım'dan ekler
+  const M = { lgs: "lgs", tyt: yks, ayt: yks, olimpiyat: "olimpiyat", kpss: "kpss", ales: "ales" }; return [...new Set(P.map(k => M[k]).filter(Boolean))]; };
+const sinavlarim = o => { const d = ogrDuzey(o), U = sinavUygun(d), L = o && o.sinavlar && o.sinavlar.length ? o.sinavlar : (sinavProgramdan(o) || sinavVarsayilan(d)); return L.filter(k => U.includes(k)); };
 // ---------- programlar (69_programlar.sql, 09.11.2026): öğrenci Kitaplığım'da yalnız kendi programının içeriğini görür ----------
 const PROGRAM_TUR = {
   okul: { ad: "Okul konuları", alt: "Kendi sınıf düzeyinin müfredatı", ik: "🎒" },
@@ -3971,7 +3975,7 @@ function konuYoluSayfa(ic) {
   const tumu = gruplar.flatMap(g => g[2]), sira = tumu.find(x => x.durum !== "bitti");
   // başlık
   // 16.11.2026: başlıktaki düğmeler büyütüldü (yol-ust-dug) ve alt başlıkta hangi kipte olunduğu yazıyor
-  ic.append(bas(`${f.kod} ${f.ad}`, `${f.dizi === "LGS" ? "LGS" : (f.seviye || 7) + ". sınıf"} · ${f.tema || ""} · ${kip === "test" ? "testler" : "konu öğrenme"}`, h("div", { class: "yol-ust" },
+  ic.append(bas(`${f.kod} ${f.ad}`, `${f.dizi ? f.dizi : (f.seviye || 7) + ". sınıf"} · ${f.tema || ""} · ${kip === "test" ? "testler" : "konu öğrenme"}`, h("div", { class: "yol-ust" },
     h("button", { class: "btn yol-ust-dug", type: "button", on: { click: git_("kitap") } }, "← Kitaplığım"),
     h("button", { class: "btn yol-ust-dug", type: "button", on: { click: () => kip === "test" ? konuYolu(f, {}) : testleriAc(f) } }, kip === "test" ? "Konuyu öğren →" : "Testler →"),
     sira ? h("button", { class: "btn ana yol-ust-dug", type: "button", on: { click: sira.eylem } }, "Sıradaki adım →") : null)));
@@ -4657,7 +4661,9 @@ async function yonKonuVideo(ic) {
   try { await kvideoYukle(); } catch (e) {}
   if (!Object.keys(KVIDEO).length) { try { await q(sb.from("konu_video").select("id").limit(1)); } catch (e) { ic.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, /konu_video|PGRST20[25]|does not exist/i.test(String(e && e.message)) ? "Bu bölüm kurulmamış: Supabase'te 38_konu_video.sql çalıştırılmalı." : hataMetni(e)))); return; } }
   const K = VERI.filter(f => !f.ek), sv = h("select", { "aria-label": "Sınıf" }), konu = h("select", { "aria-label": "Konu", style: "min-width:260px" });
-  [...new Set(K.map(f => `${fBrans(f)}|${f.seviye || 7}|${f.dizi || ""}`))].forEach(k => { const [b, s_, d] = k.split("|"); sv.append(h("option", { value: k }, `${BRANS_AD[b] || b} · ${d === "LGS" ? "LGS" : s_ + ". sınıf"}`)); });
+  // 19.11.2026: ALES/KPSS/TYT gibi seviyesiz diziler "7. sınıf" diye yazılıyordu (listede üç kez "Matematik · 7. sınıf"); dizi adı yazılır, düzeyler sayısal sırada
+  [...new Set(K.map(f => `${fBrans(f)}|${f.seviye || 7}|${f.dizi || ""}`))].sort((x, y) => { const X = x.split("|"), Y = y.split("|"); return X[0].localeCompare(Y[0], "tr") || (!!X[2] - !!Y[2]) || (+X[1] - +Y[1]) || X[2].localeCompare(Y[2], "tr"); })
+    .forEach(k => { const [b, s_, d] = k.split("|"); sv.append(h("option", { value: k }, `${BRANS_AD[b] || b} · ${d ? d : s_ + ". sınıf"}`)); });
   sv.value = depo.al("kv_sv", sv.value) || sv.value;
   const liste = h("div", { class: "liste" }), durum = h("p", { class: "not", role: "status" });
   const konuDoldur = () => { const [b, s_, d] = sv.value.split("|"); konu.innerHTML = ""; K.filter(f => fBrans(f) === b && String(f.seviye || 7) === s_ && (f.dizi || "") === d).forEach(f => konu.append(h("option", { value: f.kod }, `${f.kod} ${f.ad}${(KVIDEO[f.kod] || []).length ? ` (${KVIDEO[f.kod].length} video)` : ""}`))); };
@@ -5563,7 +5569,7 @@ function bransListesi() {
 function bransCubugu() {
   // 06.11.2026: öğretmen bir sınıf seçtiyse yalnız o sınıfın düzeyi gösterilir; başka seviye düğmesi çıkmaz (yalnız yönetici seviyeler arasında geçer)
   const sinifDuzeyi = ROL === "ogt" && SINIF && +SINIF.seviye ? +SINIF.seviye : 0; if (sinifDuzeyi) SEVIYE_SEC = null;
-  const L = bransListesi(), SV = ROL === "ogr" || sinifDuzeyi ? [] : [...new Set(VERI.filter(f => fBrans(f) === BRANS).map(f => +(f.seviye || 7)))].sort();
+  const L = bransListesi(), SV = ROL === "ogr" || sinifDuzeyi ? [] : [...new Set(VERI.filter(f => fBrans(f) === BRANS).map(f => +(f.seviye || 7)))].sort((a, b) => a - b);
   if (ROL !== "ogr" && SV.length && !SV.includes(aktifSeviye()) && !SEVIYE_SEC) SEVIYE_SEC = SV.includes(+((SINIF && SINIF.seviye) || 7)) ? null : SV[0];
   if (L.length < 2 && SV.length < 2) return null;
   const k = h("div", { class: "brans-cubuk", role: "tablist", "aria-label": "Branş ve seviye" });
@@ -6478,7 +6484,7 @@ function gbRaporAgac(S) {
     const f = gbKonu(r.cikti_kod) || (r.tur === "kavram" ? VERI.find(x => kavramKimlik(x) === r.alt) : null);
     if (!f || r.tur === "genel") { genel.push(r); return; }
     const tk = `${fBrans(f)}|${f.seviye || 7}|${f.dizi || ""}|${f.tema_no}`;
-    const tm = T[tk] = T[tk] || { ad: `${BRANS_AD[fBrans(f)] || fBrans(f)} · ${f.seviye || 7}. sınıf · ${f.dizi === "LGS" ? "LGS · Ünite" : "Tema"} ${f.tema_no} · ${f.tema}`, sira: [fBrans(f), f.seviye || 7, f.dizi || "", f.tema_no], konular: {}, kavram: [] };
+    const tm = T[tk] = T[tk] || { ad: `${BRANS_AD[fBrans(f)] || fBrans(f)} · ${f.seviye ? f.seviye + ". sınıf · " : ""}${f.dizi ? f.dizi + " · Ünite" : "Tema"} ${f.tema_no} · ${f.tema}`, sira: [fBrans(f), f.seviye || 7, f.dizi || "", f.tema_no], konular: {}, kavram: [] };
     if (r.tur === "kavram") { tm.kavram.push(r); return; }
     const k = tm.konular[f.kod] = tm.konular[f.kod] || { f, bolum: {} };
     const b = r.tur === "soru" ? ((TID[r.test_id] && TID[r.test_id].t.tip) || "F") : r.tur;
@@ -6741,7 +6747,7 @@ async icerik(ic) {
   const bS = h("select", { "aria-label": "Branş" }), kS = h("select", { "aria-label": "Konu" });
   KATALOG_BRANS.forEach(b => bS.append(h("option", { value: b }, BRANS_AD[b] || b))); bS.value = KATALOG_BRANS.includes(BRANS) ? BRANS : KATALOG_BRANS[0];
   const sS = h("select", { "aria-label": "Seviye" });
-  const kDol = () => { BRANS = bS.value; depo.yaz("brans", BRANS); const SV = [...new Set(VERI.filter(f => fBrans(f) === BRANS).map(f => +(f.seviye || 7)))].sort();
+  const kDol = () => { BRANS = bS.value; depo.yaz("brans", BRANS); const SV = [...new Set(VERI.filter(f => fBrans(f) === BRANS).map(f => +(f.seviye || 7)))].sort((a, b) => a - b);
     sS.innerHTML = ""; SV.forEach(v => sS.append(h("option", { value: v }, SEVIYE_AD[v] || `${v}. sınıf`))); if (!SV.includes(aktifSeviye())) SEVIYE_SEC = SV[0] || 7; sS.value = aktifSeviye(); konuDoldur(kS, "yon_konu"); };
   sS.onchange = () => { SEVIYE_SEC = +sS.value; konuDoldur(kS, "yon_konu"); depo.yaz("yon_soru", 0); cizOkul(); };
 
@@ -6793,7 +6799,7 @@ async icerik(ic) {
 
     const duzeyDoldur = () => {
       const p = progS.value; secProg = p; depo.yaz("yon_prog", p);
-      const duzeyler = [...new Set(L.filter(i => i.program === p).map(i => i.duzey).filter(Boolean))].sort();
+      const duzeyler = [...new Set(L.filter(i => i.program === p).map(i => i.duzey).filter(Boolean))].sort((a, b) => +a - +b);
       duzeyS.innerHTML = "";
       if (!duzeyler.length) duzeyS.append(h("option", { value: "" }, "—"));
       else duzeyler.forEach(d => duzeyS.append(h("option", { value: d }, d)));
@@ -7681,7 +7687,7 @@ async function ogrAnaliz(ic) {
     al.append(h("div", { class: "satir tikla", role: "button", tabIndex: 0, on: { click: () => konuDetay(f) } }, h("div", { class: "ad" }, `${f.kod} ${f.ad}`,
       h("small", {}, `En çok ${(sa => /^\d+$/.test(sa) ? sa + ". süreç" : sa)(surecAd(enz[0], f))} sorularında zorlanıyorsun${zz != null && zz < 50 ? `; zor sorularda %${zz}` : ""}. Önce konu anlatımını tekrar et, sonra etkinlikleri yap.`)), h("span", { class: "etiket sayi e-" + renk(A.p) }, `%${A.p}`))); });
   if (!zayif.length && baslanmamis.length) al.append(h("div", { class: "satir tikla", role: "button", tabIndex: 0, on: { click: () => konuDetay(baslanmamis[0].f) } }, h("div", { class: "ad" }, `Yeni konu: ${baslanmamis[0].f.kod} ${baslanmamis[0].f.ad}`, h("small", {}, coz.length ? "Çalıştığın bütün konularda iyisin. Sıradaki konuya geç." : "İlk testini çözerek başla.")), h("span", { class: "etiket" }, "yeni")));
-  if (!al.children.length) al.append(h("p", { class: "ekran-yok" }, "Bütün konularda %75'in üstündesin. Harika! 🎉"));
+  if (!al.children.length) al.append(h("p", { class: "ekran-yok" }, coz.length ? "Bütün konularda %75'in üstündesin. Harika! 🎉" : "Henüz test çözmedin. İlk testini çözdüğünde sıradaki adımların burada görünecek."));
   adim.append(al);
   if (zayif.length) adim.append(h("div", { class: "ok-alt", style: "margin-top:10px" }, h("button", { type: "button", class: "btn ana", on: { click: () => { depo.yaz("plan_yeni", "kamp"); SAYFA = "program"; uygulama(); scrollTo(0, 0); } } }, "Bu konular için kamp programı hazırla")));
   ic.append(adim);
@@ -8761,7 +8767,9 @@ async function rehberSayfa(ic) {
   await rhYukle();
   if (RH_HATA) { ic.append(h("section", { class: "kart" }, rhKurulmamis(RH_HATA) ? bosEkran("⚙", "Rehberlik köşesi henüz kurulmadı", "Supabase'de 47_icerik.sql çalıştırılmalı.") : h("p", { class: "ekran-yok" }, hataMetni(RH_HATA)))); return; }
   // öğrenci yalnız kendi sınıf düzeyinin rehberlerini görür; öğretmen seçili sınıfının düzeyini
-  const sv = ROL === "ogr" ? ogrDuzey(BEN) : +(SINIF && SINIF.seviye) || 0, L = RH.filter(r => r.yayinda && (!sv || ROL === "yon" || rhSiniflar(r).includes(sv)));
+  // 19.11.2026: LGS rehberleri yalnız LGS programındaki öğrenciye (8. sınıf olimpiyat öğrencisi LGS rehberi görmesin)
+  const lgsYok = ROL === "ogr" && BEN && !programlarim(BEN).includes("lgs");
+  const sv = ROL === "ogr" ? ogrDuzey(BEN) : +(SINIF && SINIF.seviye) || 0, L = RH.filter(r => r.yayinda && (!sv || ROL === "yon" || rhSiniflar(r).includes(sv)) && !(lgsYok && r.kategori === "lgs"));
   if (!L.length) { ic.append(h("section", { class: "kart" }, bosEkran("☷", "Henüz rehber yok", sv ? `${duzeyAd(sv)} için rehber eklendiğinde burada görünür.` : "Yeni rehberler eklendiğinde burada görünür."))); return; }
   const okunan = L.filter(r => RH_OKU.has(r.id)).length;
   if (ROL === "ogr") ic.append(h("section", { class: "kart", style: "padding:14px 18px" }, h("div", { class: "baslik-satir", style: "margin:0" }, h("b", {}, `${okunan} / ${L.length} rehber okundu`),
@@ -10054,7 +10062,9 @@ async function yplanYukle(zorla) {
 // 8. sınıfın LGS sekmesi de mevcut plandan sıralanır. İkinci plan girildiği an kendine geçer.
 const yplanAra = (sev, brans, prog) => (YPLAN || []).find(p => +p.seviye === +sev && p.brans === brans
   && p.egitim_yili === EGITIM_YILI && p.durum === "onayli" && (p.program || "okul") === prog);
-const yplanBul = (sev, brans = "MAT", prog = "okul") => yplanAra(sev, brans, prog) || (prog === "okul" ? null : yplanAra(sev, brans, "okul"));
+// 19.11.2026: okul planına düşme yalnız LGS için (LGS konuları 8. sınıf müfredatıyla aynı sırada). Olimpiyat, TYT, AYT, KPSS, ALES
+// içerikleri okul müfredatından farklı; kendi planı onaylanmadıysa okul planı GÖSTERİLMEZ (olimpiyat öğrencisine 8. sınıf MEB planı çıkıyordu).
+const yplanBul = (sev, brans = "MAT", prog = "okul") => yplanAra(sev, brans, prog) || (prog === "lgs" ? yplanAra(sev, brans, "okul") : null);
 // öğrencinin programlarından plana sahip olanlar (Yıllık plan sayfasındaki sekmeler)
 // Okul dersinin planı sınıf düzeyinden, hazırlık programlarının planı öğrencinin PROGRAM
 // DÜZEYİNDEN gelir: 8. sınıfta olup 10. düzey olimpiyat çalışan öğrenci 10. düzey planını görür.
@@ -10163,7 +10173,7 @@ function ypHaftalar(yer, p) {
 
 // öğrencinin geride kaldığı konular: planda geçmiş, portalda içeriği olan ama hiç çözülmemiş (ya da %50'nin altında) konular
 function ogrPlanUyari(oid) {
-  if (!SINIF) return null; const p = yplanBul(+SINIF.seviye || 0); if (!p) return null;   // 14.11.2026: Math.min(8, …) kalkti, 9-12 sinifa 8. sinif plani gosteriyordu
+  if (!SINIF) return null; if (ROL === "ogr" && !okulAcik()) return null; const p = yplanBul(+SINIF.seviye || 0); if (!p) return null;   // 14.11.2026: Math.min(8, …) kalkti, 9-12 sinifa 8. sinif plani gosteriyordu
   const D = yplanDurum(p), K = VERI.filter(f => VB(f) && !f.ek), geride = [], zayif = [];
   K.forEach(f => { if (!planVar(D.gecmis, f.kod)) return; const A = konuAnaliz(f, oid); if (!A.n) geride.push(f); else if (A.p < 50) zayif.push({ f, p: A.p }); });
   return { p, D, geride, zayif };
