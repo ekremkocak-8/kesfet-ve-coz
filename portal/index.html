@@ -4565,6 +4565,14 @@ async function depoSayfa(yol, eski, ne) {
     throw new Error(ROL === "yon" ? `Bu ${ne} özel depoda yok. Ayarlar → İçerikleri özel depoya taşı → “_ozel_icerik klasörünü seç” ile yükleyin.` : `Bu ${ne} şu an açılamıyor. Biraz sonra yeniden dene; sürerse öğretmenine haber ver.`); }
   let t = await d.data.text();
   t = t.replace(/history\.replaceState\(/g, "(function(){try{return history.replaceState.apply(history,arguments)}catch(e){}})(");
+  // 22.11.2026 (Ekrem KOÇAK: "pekiştirme etkinlikleri çok küçük"): geniş çerçevede yönerge ve görsel solda, etkinlik sağda; sığdırma ölçeği büyür
+  if (/pekistirme\.html$/.test(yol)) t = t.replace(/<\/head>/i, `<style id="kvc-genis">@media (min-aspect-ratio: 5/4) and (min-width: 900px){
+html.ek-mod .pk-kart:has(> .ic){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);grid-template-rows:auto auto auto 1fr auto;column-gap:32px;max-width:1240px!important;width:100%;align-items:start}
+html.ek-mod .pk-kart:has(> .ic) > *{grid-column:1;min-width:0}
+html.ek-mod .pk-kart:has(> .ic) > .ic{grid-column:2;grid-row:1 / 5;align-self:center}
+html.ek-mod .pk-kart:has(> .ic) > .row{grid-column:2;grid-row:5}
+html.ek-mod .pk-kart:has(> .ic) > .yon-ek{display:flex;justify-content:center}
+html.ek-mod .pk-kart:has(> .ic) > .yon-ek :is(svg,img){width:min(100%,420px);height:auto}}</style></head>`);
   return ETK_URL[yol] = URL.createObjectURL(new Blob([t], { type: "text/html" }));
 }
 const etkAdres = (f, tur) => depoSayfa(`etkinlik/${f.kod}/${tur === "kesif" ? "kesif" : "pekistirme"}.html`, tur === "kesif" ? f.kesif : f.pek, "etkinlik");
@@ -9801,6 +9809,7 @@ YONS.ogrenciler = ic => yonOgrenciler(ic);
 // Her güncellemede en üste yeni kayıt eklenir (KURULUM_ADIMLARI.txt ile aynı numaralar). Sayfa son 10 kaydı gösterir.
 const GUNCELLEMELER = [
   { no: 77, tarih: "2026-11-12", baslik: "Program testlerinde soru soru gösterim altyapısı", maddeler: ["Bir program testinin sorularının her biri ortaokuldaki gibi tek tek kesilip paketlendiyse (soru/<kimlik>.js), test artık ortaokuldaki testlerle birebir aynı şekilde açılıyor: soru soru, sağda tam optik form, numaralarla gezinme.", "Böyle bir paket henüz yoksa (bugün çoğu program testinde durum bu) otomatik olarak kitapçığın sayfa sayfa gösterildiği görünüme düşülüyor; öğrenci için fark görünmez, içerik hazır oldukça kendiliğinden soru soru gösterime geçer."] },
+  { no: 79, tarih: "2026-11-22", baslik: "Pekiştirme etkinlikleri geniş ekranda büyüdü", maddeler: ["Geniş ekranda pekiştirme etkinliğinin yönergesi ve görseli solda, etkinliğin kendisi sağda duruyor. Böylece etkinlik ekrana sığarken yazılar ve kartlar belirgin biçimde büyük görünüyor; telefonda düzen değişmedi."] },
   { no: 78, tarih: "2026-11-15", baslik: "Lise okul dersi testleri için 5 şık (A–E) desteği", maddeler: ["Ortaokul ve ilkokul testleri 4 şık (A–D) ile çalışmaya devam ediyor; bunlar için hiçbir şey değişmedi.", "VERI dizisinde secenek: 5 olarak girilmiş bir lise okul dersi testini açınca optik form ve şık düğmeleri A–E olarak çıkıyor; klavyeyle de E ile cevap verilebiliyor.", "veritabanında 76_lise_okul_5_sik.sql çalıştırılmalı: anahtar.cevap kısıtı A–E'ye genişliyor, testler.secenek kolonu ekleniyor, test_gonder() fonksiyonu güncelleniyor."], kurulum: "76_lise_okul_5_sik.sql" },
   { no: 77, tarih: "2026-11-14", baslik: "Okul dersleri ile sınav hazırlığı ayrıldı · Yıllık plan sayfası", maddeler: [
     "Kitaplığım artık okul derslerini ve sınav hazırlığını ayrı sekmelerde gösteriyor: 8. sınıfta “Okul konuları” ve “LGS”, lisede “Okul konuları”, “TYT” ve “AYT”. TYT ile AYT bağımsız iki sınav olduğu için içerikleri de ayrı duruyor; yalnız TYT'ye girecek öğrenci AYT'yi kullanmaz.",
