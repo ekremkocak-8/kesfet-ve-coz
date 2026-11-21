@@ -1456,6 +1456,9 @@ tr.soluk-satir td{color:var(--soluk)}
 .popt-k.anahtar{box-shadow:0 0 0 3px var(--iyi)}
 .prog-sonuc{display:flex;flex-direction:column;gap:10px}.ps-sayi{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}.ps-sayi b{font-size:34px}
 .pk-yardim{margin:10px 0}.pk-yardim summary{cursor:pointer;font-weight:700}.pk-ornek{white-space:pre-wrap;font-size:12.5px;background:var(--yuzey);border:1px solid var(--cizgi);border-radius:10px;padding:10px;overflow:auto}
+/* 21.11.2026: olimpiyat bölümü düğmesi (açıkken olimpiyat yeşili) */
+.olimp-dug{white-space:nowrap}
+.olimp-dug[aria-pressed=true]{background:#2f8a57;border-color:#2f8a57;color:#fff}
 </style>
 </head><body>
 <div id="kok"></div>
@@ -2791,7 +2794,7 @@ function sadelestir(ic) {
   // yalnız açıklama içeren kartlar → ince ipucu
   // 4) satır düğmeleri
   ic.querySelectorAll(".liste > .satir:not([data-sade])").forEach(sat => { sat.dataset.sade = "1";
-    const D = [...sat.querySelectorAll(":scope > button.btn, :scope > span > button.btn")].filter(b => !b.matches(".ana,.kirmizi"));
+    const D = [...sat.querySelectorAll(":scope > button.btn, :scope > span > button.btn")].filter(b => !b.matches(".ana,.kirmizi,.olimp-dug"));
     if (D.length < 2) return;
     const kutu = h("div", { class: "satir-eylem" }); D.forEach(b => kutu.append(b.closest(":scope > span") && b.parentElement !== sat ? b.parentElement : b));
     const ac_ = h("button", { type: "button", class: "btn satir-ac", "aria-expanded": "false", title: "İşlemler", "aria-label": "İşlemler" }, "⋯");
@@ -3347,12 +3350,14 @@ const kitapProgram = PL => { const a = depo.al("kitap_program", ""); if (PL.incl
   return en || PL[0] || "okul"; };
 function programKitap(ic, pr, PL, alt) {
   const T = PROGRAM_TUR[pr], d = programDuzey(BEN);
-  if (alt) { const L0 = PROG.L.filter(i => i.program === pr && i.yayinda !== false); if (!L0.length) return;
+  // 21.11.2026: içerik öğrencinin PROGRAM DÜZEYİNE göre (boş düzey = her düzey); önceden olimpiyatın bütün düzeyleri birden görünüyordu
+  const dzUy = i => i.duzey == null || !d || +i.duzey === d;
+  if (alt) { const L0 = PROG.L.filter(i => i.program === pr && i.yayinda !== false && dzUy(i)); if (!L0.length) return;
     ic.append(h("h3", { style: "margin:18px 0 0" }, "Önceki içerikler"), h("p", { class: "not", style: "margin-top:-4px" }, "Bu programın birim düzenine geçmeden önceki PDF'leri. Çözdüğün testlerin sonuçları burada durur.")); }
   else ic.append(bas("Kitaplığım", `${T.ad}${pr === "olimpiyat" && d ? ` · ${duzeyAd(d)} düzeyi` : ""} · bir konunun kartında "Konuyu öğren" düğmesine bas. Konu anlatımı, videolar, testler ve çözümler orada sırayla durur.`));
   if (!alt && PL.length > 1) ic.append(progSekme(PL, pr));
   if (!alt) { const paylas = h("div"); ic.append(paylas); ogrPaylasilanlar(paylas); }
-  const L = PROG.L.filter(i => i.program === pr && i.yayinda !== false);
+  const L = PROG.L.filter(i => i.program === pr && i.yayinda !== false && dzUy(i));
   if (!L.length) { if (alt) return; ic.append(h("div", { class: "kart" }, bosEkran(T.ik, `${T.ad} içerikleri hazırlanıyor`, "Öğretmeninin paylaştığı dosyalar bu sayfanın üstünde, canlı derslerin Derslerim'de görünür."))); return; }
   const ara = h("input", { placeholder: "Ara: bölüm, föy, test…", "aria-label": "Ara" }); if (!alt) ic.append(ara);
   const alan = h("div", { style: "display:flex;flex-direction:column;gap:14px" }); ic.append(alan);
@@ -3500,17 +3505,48 @@ async function programTestSayfaSayfa(i, don, n, SC, C, tk, ogr, ic) {
   if (Sl.length) { const son = Sl[Sl.length - 1]; if (!son.anahtar) try { const A = await q(sb.rpc("program_anahtarlarim")); son.anahtar = (A || {})[i.id] || ""; } catch (e) {} goster(son); }
   else cizF();
 }
+// 21.11.2026: hangi düzeyde hangi program seçilebilir. Olimpiyat 1–12. sınıfın HER düzeyinde isteğe bağlı
+// ek bölümdür (8. sınıftaki LGS gibi); okul konularının yanına eklenir. Seçili olup düzeye uymayan program gizlenmez.
+const programUygun = d => { d = +d || 0; return Object.keys(PROGRAM_TUR).filter(k => !d ? true : k === "okul" || k === "olimpiyat" ? d <= 12 : k === "lgs" ? d === 8 : k === "tyt" || k === "ayt" ? d >= 9 && d <= 13 : k === "kpss" ? d >= 12 : k === "ales" ? d >= 14 : true); };
 // öğrenci formu: program seçimi (Kitaplığım'da yalnız bunlar görünür) ve olimpiyat düzeyi
 function programSecici(o) {
+  let sd = ogrDuzey(o);
   let dokunuldu = !!(o.programlar && o.programlar.length);
   const kap = h("div", { class: "sinav-sec prog-sec" }), dz = h("select", { "aria-label": "Olimpiyat düzeyi" }, h("option", { value: "" }, "Sınıf düzeyiyle aynı"), ...DUZEY.filter(v => v <= 12).map(v => h("option", { value: v }, duzeyAd(v))));
   dz.value = o.program_duzey || ""; const dzK = h("label", { class: "prog-duzey" }, "Olimpiyat düzeyi", dz);
   const oku = () => [...kap.querySelectorAll("input:checked")].map(x => x.value);
   const dzGoster = () => { dzK.style.display = oku().includes("olimpiyat") ? "" : "none"; };
-  const ciz = S => { kap.innerHTML = ""; Object.entries(PROGRAM_TUR).forEach(([k, t]) => { const c = h("input", { type: "checkbox", value: k, checked: S.includes(k) }); c.onchange = () => { dokunuldu = true; dzGoster(); }; kap.append(h("label", { class: "sinav-cip", title: t.alt }, c, ` ${t.ad}`)); }); dzGoster(); };
+  const ciz = S => { kap.innerHTML = ""; const U = programUygun(sd); Object.entries(PROGRAM_TUR).forEach(([k, t]) => { if (!U.includes(k) && !S.includes(k)) return; const c = h("input", { type: "checkbox", value: k, checked: S.includes(k) }); c.onchange = () => { dokunuldu = true; dzGoster(); }; kap.append(h("label", { class: "sinav-cip", title: t.alt }, c, ` ${t.ad}`)); }); dzGoster(); };
   ciz(programlarim(o));
-  return { el: h("div", { class: "prog-sec-kap" }, kap, dzK), oku, duzey: () => (oku().includes("olimpiyat") && +dz.value) || null, yenile: d => { if (!dokunuldu) ciz(programVarsayilan(d)); },
+  return { el: h("div", { class: "prog-sec-kap" }, kap, dzK), oku, duzey: () => (oku().includes("olimpiyat") && +dz.value) || null, yenile: d => { sd = +d || 0; if (!dokunuldu) ciz(programVarsayilan(d)); else { const S = oku().filter(k => programUygun(sd).includes(k)); ciz(S.length ? S : programVarsayilan(d)); } },
     varsayilanMi: d => !dz.value && oku().join() === programVarsayilan(d).join() };
+}
+// 21.11.2026 (Ekrem KOÇAK: "1'den 12'ye kadar bütün sınıflara olimpiyat bölümü de koymalı, isteğe göre açabilmeliyim"):
+// olimpiyat öğrencinin programlarına EKLENİR ya da çıkarılır; öteki programları (okul, LGS, TYT…) değişmez.
+const olimpAcikMi = o => programlarim(o).includes("olimpiyat");
+async function olimpAyarla(o, ac) {
+  let L = programlarim(o).filter(k => k !== "olimpiyat"); if (ac) L.push("olimpiyat"); if (!L.length) L = programVarsayilan(ogrDuzey(o));
+  const dz = ac ? (o.program_duzey || null) : null;
+  await q(sb.rpc("ogrenci_program_kaydet", { p_ogr: o.id, p_programlar: L, p_duzey: dz }));
+  o.programlar = L; o.program_duzey = dz;
+}
+function olimpDug(o, bitti) {
+  const ac = olimpAcikMi(o);
+  return h("button", { class: "btn olimp-dug", type: "button", "aria-pressed": String(ac), title: ac ? "Olimpiyat bölümünü bu öğrencide kapat" : "Olimpiyat bölümünü bu öğrencide aç",
+    on: { click: async e => { const b = e.currentTarget; b.disabled = true; try { await olimpAyarla(o, !ac); bitti && bitti(null); } catch (er) { b.disabled = false; bitti && bitti(er); } } } }, ac ? "🏅 Olimpiyat açık" : "🏅 Olimpiyat kapalı");
+}
+function olimpKarti(L, duzey, yenile) {
+  if (+duzey > 12) return null;
+  const bilgi = h("span", { class: "not" }), durum = h("p", { class: "not", role: "status", style: "margin:6px 0 0" });
+  const yaz = () => { const n = L().filter(olimpAcikMi).length; bilgi.textContent = L().length ? `${n} / ${L().length} öğrencide açık` : "Sınıfta henüz öğrenci yok"; };
+  const toplu = ac => async e => { const b = e.currentTarget; b.disabled = true; durum.textContent = "Kaydediliyor…"; let n = 0, hata = null;
+    for (const o of L()) { if (olimpAcikMi(o) === ac) continue; try { await olimpAyarla(o, ac); n++; } catch (er) { hata = er; } }
+    b.disabled = false; yaz(); durum.textContent = hata ? hataMetni(hata) : n ? `${n} öğrencide olimpiyat bölümü ${ac ? "açıldı" : "kapatıldı"}.` : "Değişecek öğrenci yok."; yenile && yenile(); };
+  const k = h("div", { class: "kart olimp-kart" },
+    h("div", { class: "baslik-satir", style: "margin:0" }, h("div", {}, h("h3", { style: "margin:0" }, "🏅 Matematik olimpiyatı bölümü"), bilgi),
+      h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" }, h("button", { class: "btn ana", type: "button", on: { click: toplu(true) } }, "Bütün sınıfa aç"), h("button", { class: "btn", type: "button", on: { click: toplu(false) } }, "Bütün sınıfta kapat"))),
+    h("p", { class: "not", style: "margin:6px 0 0" }, "İsteğe bağlı ek çalışmadır (8. sınıftaki LGS bölümü gibi). Açılan öğrencinin Kitaplığım'ına \"Matematik olimpiyatı\" sekmesi eklenir; okul konuları yerinde kalır. Tek öğrenci için listedeki 🏅 düğmesini kullanın; olimpiyat düzeyi (ör. 6. sınıfta 7. düzey) öğrencinin Bilgiler penceresinden seçilir. Sonradan kaydolan öğrenci için düğmeye yeniden basın."), durum);
+  yaz(); k.yaz = yaz; return k;
 }
 async function programKaydet(o, ps, d) {
   const L = ps.oku(), dz = ps.duzey(), gonder = ps.varsayilanMi(d) ? [] : L;
@@ -4881,9 +4917,10 @@ ogrenci(ic) {
         gir.addEventListener("keydown", ev => { if (ev.key === "Enter") kay.click(); if (ev.key === "Escape") ciz(); });
         b.replaceWith(h("span", { style: "display:inline-flex;gap:6px;align-items:center" }, gir, kay, h("button", { class: "btn", type: "button", on: { click: () => ciz() } }, "Vazgeç"))); gir.select(); } } }, "Şifre belirle"),
       !SAHIP() ? null : h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; b.disabled = true; try { o.pin = await q(sb.rpc("sifre_yenile", { p_ogrenci: o.id })); o.kullanici = null; ciz(); } catch (er) { b.disabled = false; durum.textContent = hataMetni(er); } } } }, "Şifreyi yenile"),
-      null))); };
+      !SAHIP() || +(SINIF.seviye || 7) > 12 ? null : olimpDug(o, er => { durum.textContent = er ? hataMetni(er) : `${o.numara} · ${o.takma_ad}: olimpiyat bölümü ${olimpAcikMi(o) ? "açıldı" : "kapatıldı"}.`; ciz(); if (olk) olk.yaz(); })))); };
+  const olk = SAHIP() ? olimpKarti(() => OGR, SINIF.seviye || 7, () => ciz()) : null;
   ic.append(h("div", { class: "kart" }, h("p", { class: "not", style: "margin:0" }, "Öğrenci ekleme ve silme yöneticidedir. Yeni öğrenci için yöneticiye yazın. Şifresini unutan öğrencinin şifresini buradan yenileyebilir ya da belirleyebilirsiniz.")),
-    h("div", { class: "kart" }, h("h3", {}, `${OGR.length} öğrenci`), l, durum),
+    olk, h("div", { class: "kart" }, h("h3", {}, `${OGR.length} öğrenci`), l, durum),
     SAHIP() ? h("p", { class: "not" }, "Öğrenci girişte sınıfını (ör. 7), okul numarasını ve 6 haneli şifresini yazar; sınıf kodu yedek olarak da çalışır. Şifreyi kendiniz vermek için \"Şifre belirle\", rastgele yeni şifre için \"Şifreyi yenile\"ye basın; eski şifre geçersiz olur, sonuçları korunur.") : null, sinifAyarKarti()); ciz();
 },
 video(ic) {
@@ -6612,13 +6649,15 @@ async function yonOgrenciKarti(s) {
     liste.append(yonTablo(["No", "Öğrenci", "Giriş", "Şifre", "Yakın / iletişim", ""], L.map(o => h("tr", {}, h("td", { class: "sayi" }, String(o.numara)), h("td", {}, h("b", {}, o.ad && o.soyad ? `${o.ad} ${o.soyad}` : o.takma_ad)),
       h("td", {}, h("span", { class: "etiket " + (o.kullanici ? "e-iyi" : "e-orta") }, o.kullanici ? "giriş yaptı" : "henüz girmedi")), h("td", { class: "sayi" }, o.pin || "–"), h("td", { style: "white-space:normal;min-width:160px" }, h("small", {}, ogrBilgiOzet(o) || "–")),
       h("td", { class: "vt-islem" }, h("button", { class: "btn ana", type: "button", on: { click: () => ogrBilgiPencere(o, () => { durum.textContent = `${o.numara} · ${o.takma_ad}: bilgiler kaydedildi.`; ciz(); }) } }, "Bilgiler"),
+      +(s.seviye || 7) > 12 ? null : olimpDug(o, er => { durum.textContent = er ? hataMetni(er) : `${o.numara} · ${o.takma_ad}: olimpiyat bölümü ${olimpAcikMi(o) ? "açıldı" : "kapatıldı"}.`; ciz(); if (olk) olk.yaz(); }),
       h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; b.disabled = true; try { o.pin = await q(sb.rpc("sifre_yenile", { p_ogrenci: o.id })); o.kullanici = null; durum.textContent = `${o.numara} · ${o.takma_ad}: yeni şifre ${o.pin}.`; ciz(); } catch (er) { b.disabled = false; durum.textContent = hataMetni(er); } } } }, "Şifreyi yenile"),
       h("button", { class: "btn kirmizi", type: "button", on: { click: async e => { const b = e.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz? Sonuçları da silinir"; return; }
         try { await q(sb.from("ogrenciler").delete().eq("id", o.id)); L = L.filter(z => z.id !== o.id); durum.textContent = `${o.numara} · ${o.takma_ad} silindi.`; ciz(); } catch (er) { durum.textContent = hataMetni(er); } } } }, "Sil")))))); };
   try { L = await q(sb.from("ogrenciler").select("*").eq("sinif_id", s.id).order("numara")); }
   catch (e) { kap.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, hataMetni(e)))); return kap; }
+  const olk = olimpKarti(() => L, s.seviye || 7, () => ciz());
   ciz();
-  kap.append(ogrenciEkleKarti(s, () => L.map(o => o.numara), r => { L = L.concat(r).sort((a, b) => a.numara - b.numara); ciz(); }),
+  kap.append(ogrenciEkleKarti(s, () => L.map(o => o.numara), r => { L = L.concat(r).sort((a, b) => a.numara - b.numara); ciz(); }), olk || "",
     h("div", { class: "kart" }, h("h3", {}, "Öğrenciler ve şifreleri"), h("p", { class: "not" }, `Öğrenci girişte sınıf seviyesini (${s.seviye || 7}), okul numarasını ve 6 haneli şifresini yazar. Liste boş görünüyorsa Supabase'te 15_ogrenci_kaydi_yonetici.sql çalıştırılmalı.`), liste, durum));
   return kap;
 }
@@ -8770,8 +8809,11 @@ async function rehberSayfa(ic) {
   if (RH_HATA) { ic.append(h("section", { class: "kart" }, rhKurulmamis(RH_HATA) ? bosEkran("⚙", "Rehberlik köşesi henüz kurulmadı", "Supabase'de 47_icerik.sql çalıştırılmalı.") : h("p", { class: "ekran-yok" }, hataMetni(RH_HATA)))); return; }
   // öğrenci yalnız kendi sınıf düzeyinin rehberlerini görür; öğretmen seçili sınıfının düzeyini
   // 19.11.2026: LGS rehberleri yalnız LGS programındaki öğrenciye (8. sınıf olimpiyat öğrencisi LGS rehberi görmesin)
+  // 21.11.2026: künyesinde sınav yazan rehber (olimpiyat, YKS, KPSS…) yalnız o programdaki öğrenciye
   const lgsYok = ROL === "ogr" && BEN && !programlarim(BEN).includes("lgs");
-  const sv = ROL === "ogr" ? ogrDuzey(BEN) : +(SINIF && SINIF.seviye) || 0, L = RH.filter(r => r.yayinda && (!sv || ROL === "yon" || rhSiniflar(r).includes(sv)) && !(lgsYok && r.kategori === "lgs"));
+  const bSin = ROL === "ogr" && BEN ? new Set(programlarim(BEN).map(k => ({ lgs: "lgs", tyt: "yks", ayt: "yks", olimpiyat: "olimpiyat", kpss: "kpss", ales: "ales" })[k]).filter(Boolean)) : null;
+  const sinUy = r => !bSin || !Array.isArray(r.sinavlar) || !r.sinavlar.length || r.sinavlar.some(x => bSin.has(x));
+  const sv = ROL === "ogr" ? ogrDuzey(BEN) : +(SINIF && SINIF.seviye) || 0, L = RH.filter(r => r.yayinda && (!sv || ROL === "yon" || rhSiniflar(r).includes(sv)) && !(lgsYok && r.kategori === "lgs") && sinUy(r));
   if (!L.length) { ic.append(h("section", { class: "kart" }, bosEkran("☷", "Henüz rehber yok", sv ? `${duzeyAd(sv)} için rehber eklendiğinde burada görünür.` : "Yeni rehberler eklendiğinde burada görünür."))); return; }
   const okunan = L.filter(r => RH_OKU.has(r.id)).length;
   if (ROL === "ogr") ic.append(h("section", { class: "kart", style: "padding:14px 18px" }, h("div", { class: "baslik-satir", style: "margin:0" }, h("b", {}, `${okunan} / ${L.length} rehber okundu`),
