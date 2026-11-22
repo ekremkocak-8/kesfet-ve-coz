@@ -1,7 +1,8 @@
 // Keşfet ve Çöz · telefon uygulaması önbelleği (01.11.2026)
 // Portal açılışında önce internetten en yeni sürüm alınır; internet yoksa son kaydedilen sürüm açılır.
 // Supabase verileri, giriş, ödeme ve korumalı içerik (soru, PDF, çözüm) önbelleğe ALINMAZ.
-const ONBELLEK = "kvc-portal-v10";   // 22.11.2026: etkinlikler kendiliğinden tamamlanır
+const ONBELLEK = "kvc-portal-v13";   // 22.11.2026: Kitaplığım yıllık plana göre parçalı, oturum uyarısı, soru görseli ölçeği
+// önceki: kvc-portal-v10   // 22.11.2026: etkinlikler kendiliğinden tamamlanır
 // önceki: kvc-portal-v8   // 21.11.2026: olimpiyat bölümü 1–12. sınıfta isteğe bağlı; program içerikleri düzeye göre
 // önceki: kvc-portal-v6   // 19.11.2026: portal denetimi düzeltmeleri (sınav sayacı, yıllık plan, rehberlik, Analizim, seviye sırası)
 const KABUK = ["./", "./index.html", "./supabase.js", "./manifest.webmanifest", "./ikon/ikon-192.png", "./ikon/ikon-512.png", "./ikon/apple-touch-icon.png", "./ikon/favicon-32.png"];
