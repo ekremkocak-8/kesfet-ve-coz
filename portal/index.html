@@ -2332,6 +2332,7 @@ async function ogrYukle() {
   SONUC = { [BEN.id]: {} }; (await q(sb.from("sonuclar").select("*"))).forEach(s => SONUC[BEN.id][s.test_id] = s);
   videoYukle(await q(sb.from("videolar").select("test_id,no,url")));
   ETKK = { [BEN.id]: {} }; await etkYukle(sb.from("etkinlik_kayit").select("ogrenci_id,kod,tur,no,tarih"));
+  etkBekleyenGonder();   // 24.11.2026: önceki oturumda kaydedilemeyen etkinlikler gönderilir
   await auYukle();
   await krediYukle();
   await programYukle();
@@ -4809,9 +4810,16 @@ async function etkinlikAc(kod, tur, no) {
     const btn = h("span", { class: "etk-durum", role: "status", "aria-live": "polite" });
     const durumYaz = () => { const t = !!E[anahtar(buNo)]; btn.className = "etk-durum" + (t ? " tamam" : ""); btn.textContent = t ? "✓ Tamamlandı" : "Etkinliği bitirince kendiliğinden tamamlanır"; };
     durumYaz();
-    const kaydet = async () => { if (E[anahtar(buNo)]) return;
-      try { await q(sb.from("etkinlik_kayit").upsert({ ogrenci_id: BEN.id, kod, tur, no: buNo })); E[anahtar(buNo)] = true; if (no === buNo) durumYaz(); listeCiz(); }
-      catch (e) { btn.textContent = "Kaydedilemedi: " + hataMetni(e); } };
+    // 24.11.2026 Denetçi (Bulgu 80): kayıt başarısız olursa iki kez yeniden denenir; yine olmazsa etkinlik bu cihazda bekletilir,
+    // öğrenciye kalıcı uyarı gösterilir ve bağlantı/oturum gelince kendiliğinden gönderilir (etkBekleyenGonder).
+    const kaydet = async () => { if (E[anahtar(buNo)]) return; const kayit = { ogrenci_id: BEN.id, kod, tur, no: buNo };
+      let son = null;
+      for (const bekle of [0, 1500, 4000]) { if (bekle) await new Promise(r => setTimeout(r, bekle));
+        try { await q(sb.from("etkinlik_kayit").upsert(kayit)); E[anahtar(buNo)] = true; if (no === buNo) durumYaz(); listeCiz(); etkBekleyenGonder(); return; }
+        catch (e) { son = e; } }
+      if (ONIZLEME) { btn.textContent = "Kaydedilemedi: " + hataMetni(son); return; }
+      etkBekleyenEkle(kayit); E[anahtar(buNo)] = true; if (no === buNo) { durumYaz(); btn.textContent = "⚠ Kaydedilemedi; bu cihazda saklandı, bağlantı gelince gönderilecek"; } listeCiz();
+      etkKayitUyari(son); };
     ana.append(h("div", { class: "etk-ust" }, h("div", {}, h("b", {}, `${ad} ${no}`), h("span", { class: "not" }, ` · ${L[no - 1]}`)), h("div", { style: "display:flex;gap:10px;align-items:center" }, gbDugme({ brans: fBrans(f), cikti_kod: kod, tur: "etkinlik", alt: tur, no }, "💬 Geri bildirim", "btn gb-kucuk"), kilitli ? null : h("button", { class: "btn gb-kucuk tam-yanip", type: "button", on: { click: e => etkYeniSekme(f, tur, no, e.currentTarget) } }, "Tam ekran aç ↗"))),
       kilitli ? h("div", { class: "kart kilit-kart" }, h("b", {}, `🔒 ${ad} ${no} · ${L[no - 1]}`), h("p", { class: "not" }, `Bu etkinlik ${krediFiyat("etkinlik")} kredi. Bir kez açtığın etkinlik hep açık kalır.`),
         h("button", { class: "btn ana", type: "button", on: { click: async () => { if (await krediAc("etkinlik", anahtar(no), `${ad} ${no} · ${L[no - 1]}`)) ciz(); } } }, `${krediFiyat("etkinlik")} krediyle aç`))
@@ -8111,6 +8119,37 @@ function oturumDustu() { if (OTURUM_DUSTU || !ROL) return; OTURUM_DUSTU = true;
   try { bilgi(`<h3 style="margin-bottom:8px">Oturum kapandı</h3><p>${OTURUM_BITTI}</p><p class="not">Giriş ekranı açılıyor…</p>`); } catch (e) {}
   setTimeout(() => location.reload(), 1800); }
 
+// 24.11.2026 Denetçi (Bulgu 80): kaydedilemeyen etkinlikler. Kayıt bu cihazda (localStorage) öğrenci kimliğiyle saklanır;
+// öğrenci yeniden giriş yapınca, internet gelince ve bir sonraki başarılı kayıtta gönderilir. Gönderilen kayıt listeden silinir.
+const ETK_BEKLE = "kvc_etk_bekleyen";
+function etkBekleyenOku() { try { return JSON.parse(localStorage.getItem(ETK_BEKLE) || "[]"); } catch (e) { return []; } }
+function etkBekleyenYaz(L) { try { L.length ? localStorage.setItem(ETK_BEKLE, JSON.stringify(L)) : localStorage.removeItem(ETK_BEKLE); } catch (e) {} }
+function etkBekleyenEkle(k) { const L = etkBekleyenOku(); if (!L.some(x => x.ogrenci_id === k.ogrenci_id && x.kod === k.kod && x.tur === k.tur && x.no === k.no)) L.push(k); etkBekleyenYaz(L); }
+let ETK_GONDERILIYOR = false;
+async function etkBekleyenGonder() {
+  if (ETK_GONDERILIYOR || ROL !== "ogr" || ONIZLEME || typeof BEN === "undefined" || !BEN) return;
+  const L = etkBekleyenOku(), bu = L.filter(x => x.ogrenci_id === BEN.id); if (!bu.length) return;
+  ETK_GONDERILIYOR = true; let gitti = 0;
+  try { for (const k of bu) { try { await q(sb.from("etkinlik_kayit").upsert(k)); gitti++; etkBekleyenYaz(etkBekleyenOku().filter(x => !(x.ogrenci_id === k.ogrenci_id && x.kod === k.kod && x.tur === k.tur && x.no === k.no)));
+        if (ETKK && ETKK[BEN.id]) (ETKK[BEN.id][k.kod] = ETKK[BEN.id][k.kod] || {}); } catch (e) { break; } } }
+  finally { ETK_GONDERILIYOR = false; }
+  if (gitti) { const d = document.getElementById("etkUyari"); if (d && !etkBekleyenOku().some(x => x.ogrenci_id === BEN.id)) d.remove(); }
+}
+function etkKayitUyari(e) {
+  const m = (e && (e.message || e.code || e)) + "", oturum = /jwt|auth|42501|row-level|permission|401|403/i.test(m);
+  let d = document.getElementById("etkUyari");
+  if (!d) { d = h("div", { id: "etkUyari", role: "alert", style: "position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;max-width:min(560px,94vw);background:#fff4e5;border:2px solid #e8590c;border-radius:12px;padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,.18);font-size:15px;line-height:1.45" }); document.body.append(d); }
+  d.innerHTML = "";
+  d.append(h("b", {}, "⚠ Etkinliğin kaydedilemedi"),
+    h("p", { style: "margin:4px 0 8px" }, oturum ? "Oturumun kapanmış olabilir. Çıkış yapıp yeniden giriş yap; yaptığın etkinlik bu cihazda saklandı, girişten sonra kendiliğinden kaydedilecek."
+      : "İnternet bağlantısında sorun olabilir. Yaptığın etkinlik bu cihazda saklandı; bağlantı gelince kendiliğinden kaydedilecek."),
+    h("div", { style: "display:flex;gap:8px;justify-content:flex-end" },
+      h("button", { class: "btn", type: "button", on: { click: async () => { await etkBekleyenGonder(); if (etkBekleyenOku().some(x => x.ogrenci_id === BEN.id)) d.querySelector("p").textContent = "Hâlâ gönderilemedi. İnternetini kontrol et ya da çıkış yapıp yeniden giriş yap."; } } }, "Şimdi yeniden dene"),
+      h("button", { class: "btn", type: "button", on: { click: () => d.remove() } }, "Kapat")));
+  if (oturum) setTimeout(async () => { try { if (!(await oturumVarMi())) oturumDustu(); } catch (x) {} }, 2500);
+}
+addEventListener("online", () => etkBekleyenGonder());
+
 // öğretmen ve yönetici: öğrencilerden gelen "şifremi unuttum" istekleri (59_yedek_ve_sifre.sql)
 let SIFRE_ISTEK = null, SIFRE_ISTEK_ZAMAN = 0;
 async function sifreIstekYukle(zorla) { if (!(ROL === "ogt" || ROL === "yon") || ONIZLEME) return [];
@@ -9856,6 +9895,7 @@ YONS.ogrenciler = ic => yonOgrenciler(ic);
 // ---------- yönetici: son güncellemeler ve yapılacaklar ----------
 // Her güncellemede en üste yeni kayıt eklenir (KURULUM_ADIMLARI.txt ile aynı numaralar). Sayfa son 10 kaydı gösterir.
 const GUNCELLEMELER = [
+  { no: 84, tarih: "2026-11-24", baslik: "Kaydedilemeyen etkinlik kaybolmuyor", maddeler: ["Etkinlik bitince kayıt sunucuya gönderilemezse (internet ya da oturum sorunu) portal iki kez daha deniyor. Yine olmazsa etkinlik öğrencinin cihazında saklanıyor, ekranın altında \"Etkinliğin kaydedilemedi\" uyarısı ve \"Şimdi yeniden dene\" düğmesi çıkıyor.", "Saklanan etkinlikler öğrenci yeniden giriş yapınca, internet gelince ya da bir sonraki başarılı kayıtta kendiliğinden gönderiliyor. Oturum kapanmışsa öğrenci giriş ekranına yönlendiriliyor."] },
   { no: 77, tarih: "2026-11-12", baslik: "Program testlerinde soru soru gösterim altyapısı", maddeler: ["Bir program testinin sorularının her biri ortaokuldaki gibi tek tek kesilip paketlendiyse (soru/<kimlik>.js), test artık ortaokuldaki testlerle birebir aynı şekilde açılıyor: soru soru, sağda tam optik form, numaralarla gezinme.", "Böyle bir paket henüz yoksa (bugün çoğu program testinde durum bu) otomatik olarak kitapçığın sayfa sayfa gösterildiği görünüme düşülüyor; öğrenci için fark görünmez, içerik hazır oldukça kendiliğinden soru soru gösterime geçer."] },
   { no: 79, tarih: "2026-11-22", baslik: "Pekiştirme etkinlikleri geniş ekranda büyüdü", maddeler: ["Geniş ekranda pekiştirme etkinliğinin yönergesi ve görseli solda, etkinliğin kendisi sağda duruyor. Böylece etkinlik ekrana sığarken yazılar ve kartlar belirgin biçimde büyük görünüyor; telefonda düzen değişmedi."] },
   { no: 83, tarih: "2026-11-22", baslik: "Pekiştirme etkinlikleri de kendiliğinden tamamlanıyor", maddeler: ["Pekiştirme etkinliğinin son maddesi de doğru olunca etkinlik artık tamamlandı sayılıyor (önceki sürümde yalnız keşfetme etkinlikleri sayılıyordu)."] },
