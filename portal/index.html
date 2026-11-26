@@ -5778,7 +5778,8 @@ function odepo(kova) {
       return { data: Y.map(y => M[y] || { path: y, signedUrl: null, error: "not found" }), error: null }; },
     async download(y) { if (!OZEL_YOL.test(y)) return s.download(y);
       const a = await odImza([y], 600); if (a.error) return { data: null, error: a.error }; if (!a.A[y]) return OD_GECIS ? s.download(y) : { data: null, error: YOK_HATA };
-      try { const r = await fetch(a.A[y], { cache: "no-store" });
+      // 27.11.2026: tarayıcı önbelleği kullanılır (B2 dosyaları 1 saat önbellekte tutulabilir); aynı dosya tekrar istenince B2 işlem hakkı harcanmaz
+      try { const r = await fetch(a.A[y]);
         if (!r.ok) { if (r.status === 403) OD_ONB.delete(y); return { data: null, error: r.status === 404 ? YOK_HATA : { message: `HTTP ${r.status}`, statusCode: String(r.status) } }; }
         return { data: await r.blob(), error: null }; }
       catch (e) { return { data: null, error: { message: "Bağlantı kesildi" } }; } },
