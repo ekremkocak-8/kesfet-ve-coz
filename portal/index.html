@@ -5742,6 +5742,20 @@ function odepo(kova) {
     upload: (...a) => s.upload(...a)
   };
 }
+// 26.11.2026: bilgisayarda yerel kopyası kalmayan içerikler (ör. program PDF'leri) Supabase'ten doğrudan özel depoya kopyalanır.
+// Özel depoda aynı adla ve aynı boyutta bulunanlar atlanır. Supabase'teki kopyaya dokunulmaz.
+async function kalanlariKopyala(yaz) {
+  let kopya = 0, atla = 0; const hata = [];
+  const sbListe = async k => { const L = []; for (let o = 0; ; o += 1000) { const r = await sb.storage.from(DEPO).list(k, { limit: 1000, offset: o }); if (r.error) throw r.error; (r.data || []).forEach(x => L.push(x)); if (!r.data || r.data.length < 1000) break; } return L; };
+  const b2Liste = async k => { const M = new Map(); for (let o = 0; ; o += 1000) { const r = await odepo(DEPO).list(k, { limit: 1000, offset: o, yalnizB2: true }); if (r.error) throw r.error; (r.data || []).forEach(x => { if (x.id) M.set(x.name, x.metadata && x.metadata.size); }); if (!r.data || r.data.length < 1000) break; } return M; };
+  const gez = async k => { const L = await sbListe(k), F = L.filter(x => x.id), A = L.filter(x => !x.id && x.name);
+    if (F.length) { const B = await b2Liste(k), S = F.filter(x => !(B.has(x.name) && B.get(x.name) === (x.metadata && x.metadata.size))).map(x => `${k}/${x.name}`); atla += F.length - S.length;
+      for (let i = 0; i < S.length; i += 5) { const r = await odIstek({ islem: "kopyala", yollar: S.slice(i, i + 5) }); if (r.error) throw r.error;
+        kopya += (r.data.tamam || []).length; (r.data.hata || []).forEach(y => hata.push(y)); yaz(`${kopya} dosya özel depoya kopyalandı…`); } }
+    for (const a of A) await gez(`${k}/${a.name}`); };
+  for (const k of ["program", "soru", "pdf", "ekran", "cozum", "ses", "etkinlik", "atolye"]) { yaz(`${k} klasörü denetleniyor…`); await gez(k); }
+  return { kopya, atla, hata };
+}
 // içerikler B2'ye taşındıktan sonra Supabase deposundaki eski kopyaları kaldırır (yalnız yönetici).
 // Yalnız B2'de aynı adla ve aynı boyutta bulunan dosyaların Supabase kopyası kaldırılır; öbürlerine dokunulmaz.
 async function eskiKopyalariKaldir(yaz) {
@@ -6110,9 +6124,17 @@ function icerikTasimaKarti() {
     try { const r = await eskiKopyalariKaldir(t => eskiDur.textContent = t); eskiDur.textContent = `Tamam: ${r.kaldirilan} eski kopya kaldırıldı.${r.kalan ? ` ${r.kalan} dosya özel depoda bulunmadığı ya da boyutu farklı olduğu için yerinde bırakıldı; klasörü yeniden yükleyip tekrar deneyin.` : ""}`; }
     catch (er) { eskiDur.textContent = "Durdu: " + hataMetni(er); }
     kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = false); } } }, "Supabase'teki eski kopyaları kaldır");
+  const kopDur = h("p", { class: "not", role: "status", "aria-live": "polite" });
+  const kopDug = h("button", { class: "btn tasi-dug", type: "button", on: { click: async () => { kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = true);
+    try { const r = await kalanlariKopyala(t => kopDur.textContent = t);
+      kopDur.textContent = `Tamam: ${r.kopya} dosya kopyalandı, ${r.atla} dosya zaten özel depodaydı.${r.hata.length ? ` ${r.hata.length} dosya kopyalanamadı (ör. ${r.hata.slice(0, 3).join(", ")}); düğmeye yeniden basın.` : ""}`; }
+    catch (er) { kopDur.textContent = "Durdu: " + hataMetni(er) + " Düğmeye yeniden basarsanız kaldığı yerden sürer."; }
+    kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = false); } } }, "Supabase'teki kalan içerikleri özel depoya kopyala");
   const kart = h("div", { class: "kart" }, h("h3", {}, "İçerikleri özel depoya taşı"), durum, yukSat,
     h("p", { class: "not" }, "Yeni düzen: “Keşfet ve Çöz › Matematik” klasörünü seçin; yalnız birim klasörlerindeki “portal” klasörleri yüklenir (öğretmen PDF'leri ve kaynak dosyalar yüklenmez). Eski düzen: “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru), etkinliklerin sesli yönergeleri (ses) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; program klasöründeki olimpiyat, TYT, AYT, KPSS ve ALES föyleri, testleri ve çözümleri de Program içerikleri listesine eklenir (klasör adları: olimpiyat, tyt, ayt, kpss, ales). Depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
     h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, dug, inp), say,
+    h("p", { class: "not" }, "Bilgisayarınızda kopyası olmayan içerikler (ör. program PDF'leri) Supabase'ten doğrudan özel depoya kopyalanır."),
+    h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, kopDug), kopDur,
     h("p", { class: "not" }, "İçerikler özel depoya (Backblaze B2) yüklendikten sonra Supabase'teki eski kopyalar kaldırılarak Supabase kotası boşaltılır."),
     h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, eskiDug), eskiDur);
   return kart;
