@@ -4648,8 +4648,20 @@ function kvEtkAc(e, yer, oyn, sonra) {
   const tus = k => { if (k.key === "Escape") kapat(); };
   function kapat() { removeEventListener("message", dinle); removeEventListener("keydown", tus); kat.remove(); if (sonra) sonra(); try { const P = oyn && oyn(); if (P && P.playVideo) P.playVideo(); } catch (x) {} }
   addEventListener("message", dinle); addEventListener("keydown", tus); don.onclick = kapat;
+  // 27.11.2026 (Ekrem KOÇAK: "video içi etkinlikler bulunduğu ekranı kaplamıyor"): etkinlik içeriği çerçeveye göre büyütülür;
+  // sayfa kaymaz (yükseklik de hesaba katılır), adım değişince ve pencere boyutu değişince yeniden ölçülür.
+  let gz = null, mo = null; const sig = () => { clearTimeout(gz); gz = setTimeout(() => kvEtkSigdir(fr), 120); };
+  fr.onload = () => { kvEtkSigdir(fr); try { mo = new MutationObserver(sig); mo.observe(fr.contentDocument.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] }); } catch (x) {} };
+  addEventListener("resize", sig); const kapat0 = kapat; kapat = () => { removeEventListener("resize", sig); if (mo) mo.disconnect(); kapat0(); }; don.onclick = kapat;
   kvEtkSayfa(e).then(u => fr.src = u).catch(x => { fr.replaceWith(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, hataMetni(x)))); });
 }
+// çerçevedeki etkinliğin görünen içeriğini ölçer (çerçeveyi enine kaplayan arka plan öğeleri sayılmaz) ve gövdeyi yakınlaştırır
+function kvEtkSigdir(fr) { let d; try { d = fr.contentDocument; } catch (x) { return; } if (!d || !d.body) return;
+  const b = d.body, z = parseFloat(b.style.zoom) || 1, W = fr.clientWidth, H = fr.clientHeight; if (!W || !H) return;
+  let L = Infinity, R = 0, B = 0; const sy = d.defaultView.scrollY;
+  b.querySelectorAll("*").forEach(el => { const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2 || r.width >= W * .97) return; L = Math.min(L, r.left); R = Math.max(R, r.right); B = Math.max(B, r.bottom + sy); });
+  if (!(R > L)) return; const s = Math.max(.7, Math.min(1.8, W / ((R - L) / z + 40), H / (B / z + 24)));
+  if (Math.abs(s - z) > .03) b.style.zoom = s.toFixed(3); }
 // videonun altındaki etkinlik düğmeleri (istendiğinde elle açmak için)
 function kvEtkListe(v, yer, oyn) { const E = KVETK[v.id] || []; if (!E.length) return null;
   const kap = h("div", { class: "kvetk-liste" }, h("span", {}, "Video içi etkinlikler:"));
