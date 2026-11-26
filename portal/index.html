@@ -1617,15 +1617,17 @@ async function depoYukle(kova, yol, f, ops = {}) {
   if (!YUK.L.has(k) && YUK.plan.adet > 0) { YUK.plan.adet--; YUK.plan.bayt = Math.max(0, YUK.plan.bayt - (f.size || 0)); }
   const it = { ad, y: 0, t: f.size || 1, d: "suruyor" }; YUK.L.set(k, it); yukCiz();
   let ss = null; try { ss = (await sb.auth.getSession()).data.session; } catch (e) {}
-  const url = `${SB_URL}/storage/v1/object/${kova}/${yol.split("/").map(encodeURIComponent).join("/")}`;
+  // 26.11.2026: kitap içerikleri B2 özel kovasına "ozel_depo" işlevi üzerinden gider (100_ozel_depo.sql)
+  const b2 = kova === DEPO && OZEL_YOL.test(yol);
+  const url = b2 ? `${SB_URL}/functions/v1/ozel_depo?islem=yukle&yol=${encodeURIComponent(yol)}` : `${SB_URL}/storage/v1/object/${kova}/${yol.split("/").map(encodeURIComponent).join("/")}`;
   const sonuc = await new Promise(ok => { const x = new XMLHttpRequest(); x.open("POST", url);
     x.setRequestHeader("apikey", SB_KEY); x.setRequestHeader("Authorization", `Bearer ${ss ? ss.access_token : SB_KEY}`);
-    x.setRequestHeader("x-upsert", ops.upsert ? "true" : "false"); x.setRequestHeader("cache-control", `max-age=${ops.cacheControl || 3600}`);
+    if (!b2) { x.setRequestHeader("x-upsert", ops.upsert ? "true" : "false"); x.setRequestHeader("cache-control", `max-age=${ops.cacheControl || 3600}`); }
     x.setRequestHeader("Content-Type", ops.contentType || f.type || "application/octet-stream");
     let son = 0; x.upload.onprogress = e => { if (!e.lengthComputable) return; it.y = e.loaded; it.t = e.total || it.t; const t = Date.now(); if (ops.ilerle) ops.ilerle(e.loaded, e.total); if (t - son > 150) { son = t; yukCiz(); } };
     x.onload = () => { let j = null; try { j = JSON.parse(x.responseText); } catch (e) {}
       if (x.status >= 200 && x.status < 300) ok({ data: { path: yol, ...(j || {}) }, error: null });
-      else ok({ data: null, error: { message: (j && (j.message || j.error)) || `HTTP ${x.status}`, statusCode: String(j && j.statusCode || x.status) } }); };
+      else ok({ data: null, error: { message: (j && (j.hata || j.message || j.error)) || `HTTP ${x.status}`, statusCode: String(j && j.statusCode || x.status) } }); };
     x.onerror = () => ok({ data: null, error: { message: "Bağlantı kesildi" } }); x.ontimeout = () => ok({ data: null, error: { message: "Zaman aşımı" } });
     x.send(f); });
   it.d = sonuc.error ? "hata" : "bitti"; if (!sonuc.error) it.y = it.t; if (ops.ilerle && !sonuc.error) ops.ilerle(it.t, it.t); yukCiz(); return sonuc;
@@ -2268,7 +2270,7 @@ async function yonUyeler(ic) {
 }
 // ---------- dosya ödevi (19_dosya_odev.sql) ----------
 const odevKlasor = id => `odev/${id}`;
-async function klasorDosyalari(klasor) { const r = await sb.storage.from(DEPO).list(klasor, { limit: 100, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error; return (r.data || []).filter(x => x.name && x.id && !x.name.startsWith(".")); }
+async function klasorDosyalari(klasor) { const r = await odepo(DEPO).list(klasor, { limit: 100, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error; return (r.data || []).filter(x => x.name && x.id && !x.name.startsWith(".")); }
 async function dosyaOdevOgt(yer) {
   const bas_ = h("input", { id: "do-bas", maxlength: "120", placeholder: "örn. Oran ve orantı · çalışma kâğıdı" }), ack = h("textarea", { id: "do-ack", rows: "2", maxlength: "1000", placeholder: "Öğrencilere not: ne yapacaklar, nasıl teslim edecekler (isteğe bağlı)" });
   const sg = h("input", { id: "do-tarih", type: "date", value: bugun(7) }), dosya = canliBekleyenDosya("Dosyalar · ödevi alan öğrenciler indirebilir");
@@ -2303,7 +2305,7 @@ async function dosyaOdevOgt(yer) {
       const dl = h("div", { class: "canli-dosya" });
       klasorDosyalari(odevKlasor(o.id)).then(F => F.forEach(d => dl.append(h("button", { type: "button", class: "dosya-dug", on: { click: e => canliIndir(`${odevKlasor(o.id)}/${d.name}`, e.currentTarget) } }, `⬇ ${d.name} · ${boyutYaz(d.metadata?.size || 0)}`)))).catch(() => {});
       const sil = h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz?"; return; } b.disabled = true;
-        try { const F = await klasorDosyalari(odevKlasor(o.id)).catch(() => []); if (F.length) await sb.storage.from(DEPO).remove(F.map(d => `${odevKlasor(o.id)}/${d.name}`)); await q(sb.from("dosya_odev").delete().eq("id", o.id)); yukleListe(); }
+        try { const F = await klasorDosyalari(odevKlasor(o.id)).catch(() => []); if (F.length) await odepo(DEPO).remove(F.map(d => `${odevKlasor(o.id)}/${d.name}`)); await q(sb.from("dosya_odev").delete().eq("id", o.id)); yukleListe(); }
         catch (er) { b.disabled = false; b.textContent = hataMetni(er); } } } }, "Kaldır");
       liste.append(h("div", { class: "satir", style: "flex-wrap:wrap" }, h("div", { class: "ad", style: "flex:1 1 260px" }, o.baslik, h("small", {}, `${kim || "atama yok"}${o.son_gun ? ` · son gün ${gun(o.son_gun)}` : ""} · verildi ${gun(o.olusturma)}${o.aciklama ? " · " + o.aciklama : ""}`), dl,
           indiren.length ? h("small", {}, `İndirenler (${SINIF ? SINIF.ad : ""}): ${indiren.map(g => `${g.numara} ${g.takma_ad}`).join(", ")}`) : null),
@@ -4540,7 +4542,7 @@ async function cozumSayfaAc(f, tur) {
     return; }
   const yer = h("div", {}, h("p", { class: "not" }, "Yükleniyor…")); ic.append(yer);
   let V = [];
-  try { const r = await sb.storage.from(DEPO).list(`cozum/${f.kod}`); if (r.error) throw r.error; const A = new Set((r.data || []).map(x => x.name)); V = COZ_SAYFA.filter(x => A.has(x[2])); }
+  try { const r = await odepo(DEPO).list(`cozum/${f.kod}`); if (r.error) throw r.error; const A = new Set((r.data || []).map(x => x.name)); V = COZ_SAYFA.filter(x => A.has(x[2])); }
   catch (e) { yer.innerHTML = ""; yer.append(h("p", { class: "ekran-yok" }, hataMetni(e))); return; }
   yer.innerHTML = "";
   if (!V.length) { yer.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, "Bu konunun çözümleri henüz yüklenmedi."))); return; }
@@ -4549,7 +4551,7 @@ async function cozumSayfaAc(f, tur) {
   V.forEach(([t, a]) => sekme.append(h("button", { type: "button", role: "tab", "aria-selected": String(t === tur), on: { click: () => cozumSayfaAc(f, t) } }, a)));
   const cer = h("iframe", { class: "etk-cerceve", title: `${f.kod} ${(V.find(x => x[0] === tur) || [])[1]}`, allow: "autoplay; fullscreen" }), not = h("p", { class: "not" }, "Yükleniyor…");
   yer.append(V.length > 1 ? sekme : h("span"), not, cer);
-  try { const d = await sb.storage.from(DEPO).download(`cozum/${f.kod}/${V.find(x => x[0] === tur)[2]}`); if (d.error) throw d.error;
+  try { const d = await odepo(DEPO).download(`cozum/${f.kod}/${V.find(x => x[0] === tur)[2]}`); if (d.error) throw d.error;
     let t = await d.data.text();
     // sayfa kendi adresine bakıyorsa güvenli hâle getir (sayfa portalın içinde, adresi olmadan açılır)
     t = t.replace(/new URLSearchParams\(location\.search\)/g, 'new URLSearchParams("")').replace(/history\.replaceState\(/g, "(function(){try{return history.replaceState.apply(history,arguments)}catch(e){}})(");
@@ -4565,7 +4567,7 @@ const ETK_URL = {};
 // özel depodaki bir sayfayı indirip tarayıcıda açılabilir adrese (blob) çevirir; depoda yoksa eski açık adrese bakar (geçiş dönemi)
 async function depoSayfa(yol, eski, ne) {
   if (ETK_URL[yol]) return ETK_URL[yol];
-  const d = await sb.storage.from(DEPO).download(yol);
+  const d = await odepo(DEPO).download(yol);
   if (d.error) {
     if (eski) { try { const r = await fetch(eski, { method: "HEAD", cache: "no-store" }); if (r.ok) return ETK_URL[yol] = eski + "?"; } catch (e) {} }
     throw new Error(ROL === "yon" ? `Bu ${ne} özel depoda yok. Ayarlar → İçerikleri özel depoya taşı → “_ozel_icerik klasörünü seç” ile yükleyin.` : `Bu ${ne} şu an açılamıyor. Biraz sonra yeniden dene; sürerse öğretmenine haber ver.`); }
@@ -4758,13 +4760,20 @@ const etkHedef = (u, tur, no) => u.endsWith("?") ? `${u}${tur === "kesif" ? "e" 
 // "Baştan" düğmesi), pekiştirme etkinliğinde bütün maddeler "Hepsi doğru!" olunca bitti() bir kez çağrılır.
 function etkBittiMi(d, tur) {
   if (!d || !d.body) return false;
-  if (tur === "kesif") { const y = d.getElementById("yonlendir"); return !!((y && !y.hidden && /bitirdiniz/i.test(y.textContent)) || d.querySelector(".tekrar")); }
+  if (tur === "kesif") { const y = d.getElementById("yonlendir");
+    // 25.11.2026 Denetçi (Bulgu 6-4): 6.1.5–6.6.1 keşif dosyaları sade şablonda; #yonlendir yok. Orada etkinlik doğru yapılınca
+    // "Keşfettim" kutusu (.ref) görünür olur; bu an tamamlanma sayılır.
+    if (!y) { const rf = d.querySelector("#p .ref"); if (rf && !rf.classList.contains("gizli")) return true; }
+    return !!((y && !y.hidden && /bitirdiniz/i.test(y.textContent)) || d.querySelector(".tekrar")); }
   // pekiştirme: maddeli düzende son madde de doğru olunca "Bütün maddeler bitti." yazar; maddesiz düzende bütün geri bildirimler "ok" olur
   // 22.11.2026 Denetçi: bu ileti .pt-not kutusunda yazıyor ve kutu CSS ile gizli (display:none); innerText gizli yazıyı okumaz.
   // Yalnız o kutunun textContent'ine bakılır (body.textContent sayfadaki betiklerin metnini de içerir).
   const ptNot = d.querySelector(".pt-not"); if (ptNot && /Bütün maddeler bitti/.test(ptNot.textContent || "")) return true;
   if (d.querySelector(".pt-ileri")) return false;
-  const F = [...d.querySelectorAll(".fb")]; return F.length > 0 && F.every(x => !x.hidden && x.classList.contains("ok"));
+  // 25.11.2026 Denetçi (Bulgu 6-4): sade şablonda bütün maddeler aynı sayfada ayrı bölümlerdir; portal yalnız seçilen bölümü
+  // (section.goster) gösterir. Yalnız o bölümün geri bildirimine bakılır; yoksa öbür bölümlerin boş kutuları tamamlanmayı engelliyordu.
+  const sg = d.querySelector("#liste > section.goster");
+  const F = [...(sg || d).querySelectorAll(".fb")]; return F.length > 0 && F.every(x => !x.hidden && x.classList.contains("ok"));
 }
 function etkCerceve(f, tur, no, baslik, bitti) {
   const fr = h("iframe", { class: "etk-cerceve", title: baslik, allow: "autoplay; fullscreen" }), kap = h("div", { class: "etk-kap" }, h("p", { class: "not etk-yuk" }, "Etkinlik yükleniyor…"), fr);
@@ -5675,6 +5684,77 @@ function konuDoldur(sel, anahtar, suz = () => true) {
 
 // ---------- özel depo (kılavuz, föyler, ek soru setleri) ----------
 const DEPO = "kaynak";
+// 26.11.2026 (Ekrem KOÇAK: "içeriklerimiz herkese açık olmamalı, sitenin kodlarından içeriklerime ulaşılamamalı"):
+// kitap içerikleri (soru, pdf, ekran, cozum, program, ses, etkinlik, atolye) Supabase deposunda değil, Backblaze B2'deki
+// özel kovada durur. Tarayıcı kovaya doğrudan ulaşamaz; "ozel_depo" işlevi oturumu ve izni denetler (100_ozel_depo.sql)
+// ve kısa süreli imzalı adres verir. Ödevler, canlı ders, öğretmen dosyaları ve belgeler Supabase deposunda kalır.
+// odepo(DEPO), sb.storage.from(DEPO) ile aynı biçimde sonuç döner; yola bakarak doğru depoya gider.
+const OZEL_YOL = /^(soru|pdf|ekran|cozum|program|ses|etkinlik|atolye)(\/|$)/;
+// geçiş dönemi: özel depoda (B2) henüz bulunmayan dosya eski yerinden (Supabase) okunur. Eski kopyalar kaldırılınca etkisi kalmaz.
+const OD_GECIS = true;
+async function odIstek(govde) {
+  let ss = null; try { ss = (await sb.auth.getSession()).data.session; } catch (e) {}
+  if (!ss) return { data: null, error: { message: "not authenticated", statusCode: "401" } };
+  try { const r = await fetch(`${SB_URL}/functions/v1/ozel_depo`, { method: "POST", headers: { "Content-Type": "application/json", apikey: SB_KEY, Authorization: `Bearer ${ss.access_token}` }, body: JSON.stringify(govde) });
+    let j = null; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) return { data: null, error: { message: (j && (j.hata || j.message)) || (r.status === 404 ? "Özel depo işlevi (ozel_depo) kurulmamış." : `HTTP ${r.status}`), statusCode: String(r.status) } };
+    return { data: j || {}, error: null }; }
+  catch (e) { return { data: null, error: { message: "Bağlantı kesildi" } }; }
+}
+const OD_ONB = new Map();   // yol → { u: imzalı adres, t: geçerlilik sonu }; aynı dosya için işlev yeniden çağrılmaz
+async function odImza(Y, sure = 3600, indir = null) {
+  const simdi = Date.now(), A = {}, yok = [];
+  Y.forEach(y => { const o = !indir && OD_ONB.get(y); if (o && o.t > simdi) A[y] = o.u; else yok.push(y); });
+  for (let i = 0; i < yok.length; i += 200) { const P = yok.slice(i, i + 200), r = await odIstek({ islem: "imza", yollar: P, sure, indir });
+    if (r.error) return { error: r.error };
+    Object.entries(r.data.adresler || {}).forEach(([y, u]) => { A[y] = u; if (!indir) OD_ONB.set(y, { u, t: simdi + Math.max(20, Math.min(sure, 3600) - 300) * 1000 }); }); }
+  return { A };
+}
+const YOK_HATA = { message: "Object not found", statusCode: "404" };
+function odepo(kova) {
+  const s = sb.storage.from(kova); if (kova !== DEPO) return s;
+  return {
+    async list(k, o = {}) { if (!OZEL_YOL.test(k || "")) return s.list(k, o);
+      const r = await odIstek({ islem: "liste", klasor: k, limit: o.limit || 100, offset: o.offset || 0 }); if (r.error) return r;
+      if (OD_GECIS && !o.yalnizB2 && !(r.data.ogeler || []).length) return s.list(k, o);
+      return { data: (r.data.ogeler || []).map(x => x.klasor ? { name: x.ad, id: null, metadata: null } : { name: x.ad, id: `${k}/${x.ad}`, updated_at: x.tarih, metadata: { size: x.boyut } }), error: null }; },
+    async createSignedUrl(y, sure = 3600, ops = {}) { if (!OZEL_YOL.test(y)) return s.createSignedUrl(y, sure, ops);
+      const indir = ops && ops.download ? (ops.download === true ? y.split("/").pop() : String(ops.download)) : null, r = await odImza([y], sure, indir);
+      if (r.error) return { data: null, error: r.error }; if (r.A[y]) return { data: { signedUrl: r.A[y] }, error: null };
+      return OD_GECIS ? s.createSignedUrl(y, sure, ops) : { data: null, error: YOK_HATA }; },
+    async createSignedUrls(Y, sure = 3600) { const O = Y.filter(y => OZEL_YOL.test(y)), D = Y.filter(y => !OZEL_YOL.test(y)), M = {};
+      if (D.length) { const r = await s.createSignedUrls(D, sure); if (r.error) return r; (r.data || []).forEach(x => M[x.path] = x); }
+      if (O.length) { const r = await odImza(O, sure); if (r.error) return { data: null, error: r.error }; O.forEach(y => M[y] = r.A[y] ? { path: y, signedUrl: r.A[y], error: null } : { path: y, signedUrl: null, error: "not found" });
+        const E = O.filter(y => !r.A[y]); if (OD_GECIS && E.length) { const e = await s.createSignedUrls(E, sure); if (!e.error) (e.data || []).forEach(x => { if (x && x.signedUrl && !x.error) M[x.path] = x; }); } }
+      return { data: Y.map(y => M[y] || { path: y, signedUrl: null, error: "not found" }), error: null }; },
+    async download(y) { if (!OZEL_YOL.test(y)) return s.download(y);
+      const a = await odImza([y], 600); if (a.error) return { data: null, error: a.error }; if (!a.A[y]) return OD_GECIS ? s.download(y) : { data: null, error: YOK_HATA };
+      try { const r = await fetch(a.A[y], { cache: "no-store" });
+        if (!r.ok) { if (r.status === 403) OD_ONB.delete(y); return { data: null, error: r.status === 404 ? YOK_HATA : { message: `HTTP ${r.status}`, statusCode: String(r.status) } }; }
+        return { data: await r.blob(), error: null }; }
+      catch (e) { return { data: null, error: { message: "Bağlantı kesildi" } }; } },
+    async remove(Y) { const O = Y.filter(y => OZEL_YOL.test(y)), D = Y.filter(y => !OZEL_YOL.test(y)); let v = [];
+      if (D.length) { const r = await s.remove(D); if (r.error) return r; v = v.concat(r.data || []); }
+      if (OD_GECIS && O.length) await s.remove(O).catch(() => {});
+      for (let i = 0; i < O.length; i += 200) { const r = await odIstek({ islem: "sil", yollar: O.slice(i, i + 200) }); if (r.error) return r;
+        (r.data.silinen || []).forEach(y => { OD_ONB.delete(y); v.push({ name: y }); }); }
+      return { data: v, error: null }; },
+    upload: (...a) => s.upload(...a)
+  };
+}
+// içerikler B2'ye taşındıktan sonra Supabase deposundaki eski kopyaları kaldırır (yalnız yönetici).
+// Yalnız B2'de aynı adla ve aynı boyutta bulunan dosyaların Supabase kopyası kaldırılır; öbürlerine dokunulmaz.
+async function eskiKopyalariKaldir(yaz) {
+  let kaldirilan = 0, kalan = 0;
+  const sbListe = async k => { const L = []; for (let o = 0; ; o += 1000) { const r = await sb.storage.from(DEPO).list(k, { limit: 1000, offset: o }); if (r.error) throw r.error; (r.data || []).forEach(x => L.push(x)); if (!r.data || r.data.length < 1000) break; } return L; };
+  const b2Liste = async k => { const M = new Map(); for (let o = 0; ; o += 1000) { const r = await odepo(DEPO).list(k, { limit: 1000, offset: o, yalnizB2: true }); if (r.error) throw r.error; (r.data || []).forEach(x => { if (x.id) M.set(x.name, x.metadata && x.metadata.size); }); if (!r.data || r.data.length < 1000) break; } return M; };
+  const gez = async k => { const L = await sbListe(k), F = L.filter(x => x.id), A = L.filter(x => !x.id && x.name);
+    if (F.length) { const B = await b2Liste(k), S = F.filter(x => B.has(x.name) && B.get(x.name) === (x.metadata && x.metadata.size)).map(x => `${k}/${x.name}`); kalan += F.length - S.length;
+      for (let i = 0; i < S.length; i += 100) { const r = await sb.storage.from(DEPO).remove(S.slice(i, i + 100)); if (r.error) throw r.error; kaldirilan += (r.data || []).length; yaz(`${kaldirilan} eski kopya kaldırıldı…`); } }
+    for (const a of A) await gez(`${k}/${a.name}`); };
+  for (const k of ["soru", "pdf", "ekran", "cozum", "program", "ses", "etkinlik", "atolye"]) { yaz(`${k} klasörü denetleniyor…`); await gez(k); }
+  return { kaldirilan, kalan };
+}
 // 06.11.2026 Denetçi: etkinliklerin sesli yönergeleri özel depoda: kaynak/ses/<anahtarın son harfi>/<anahtar>.mp3 (63_etkinlik_ses.sql).
 // Etkinlik sayfası (portal içindeki çerçeve) okunacak cümlelerin anahtarlarını sorar; portal kısa süreli imzalı adres döner.
 const SES_ADRES = {};
@@ -5682,14 +5762,14 @@ addEventListener("message", async e => { const d = e.data; if (!d || d.kvc !== "
   if (![...document.querySelectorAll("iframe")].some(f => f.contentWindow === e.source)) return;
   const A = {}, simdi = Date.now(), yok = [];
   d.ids.filter(k => typeof k === "string" && /^[0-9a-z]{1,13}$/.test(k)).slice(0, 80).forEach(k => { const s = SES_ADRES[k]; if (s && s.t > simdi) { if (s.u) A[k] = s.u; } else yok.push(k); });
-  if (yok.length) { try { const yol = k => `ses/${k.slice(-1)}/${k}.mp3`, r = await sb.storage.from(DEPO).createSignedUrls(yok.map(yol), 3600), Y = {};
+  if (yok.length) { try { const yol = k => `ses/${k.slice(-1)}/${k}.mp3`, r = await odepo(DEPO).createSignedUrls(yok.map(yol), 3600), Y = {};
       (r.data || []).forEach(x => { if (x && x.path && x.signedUrl && !x.error) Y[x.path] = x.signedUrl; });
       yok.forEach(k => { const u = Y[yol(k)] || null; SES_ADRES[k] = { u, t: simdi + (u ? 50 * 60e3 : 10 * 60e3) }; if (u) A[k] = u; }); } catch (x) {} }
   try { e.source.postMessage({ kvc: "ses-adres-cevap", n: d.n, adresler: A }, "*"); } catch (x) {} });
 // 22.11.2026 Denetçi: oturum kapanmışsa depo "bulunamadı" der; öğrenci yanlış uyarı görmesin diye önce oturum denetlenir.
 const OTURUM_BITTI = "Oturumunuzun süresi doldu. Lütfen yeniden giriş yapınız.";
 async function oturumVarMi() { try { const s = await sb.auth.getSession(); return !!(s && s.data && s.data.session); } catch (e) { return true; } }
-const imzaliAdres = async yol => { const r = await sb.storage.from(DEPO).createSignedUrl(yol, 3600);
+const imzaliAdres = async yol => { const r = await odepo(DEPO).createSignedUrl(yol, 3600);
   if (r.error) { if (!(await oturumVarMi())) { oturumDustu(); throw new Error(OTURUM_BITTI); }
     throw new Error(/not.?found|bulunamad/i.test(r.error.message || "") ? "Dosya bulunamadı ya da size açık değil." : r.error.message); }
   return r.data.signedUrl; };
@@ -5857,7 +5937,7 @@ async function ekranBaglanti(url, kod = null) {
       if (ROL === "ogr" && !(await krediAc("etkinlik", `${f.kod}|${tur}|${no}`, ad))) return;
       const kat = okuyucuKatman(ad); kat.append(h("h3", { style: "margin:0" }, `${f.kod} · ${ad}`), etkCerceve(f, tur, no, ad)); return; }
     for (const [ad, u] of [["cozum.html", f.cozum], ["sb-cozum.html", f.sbcozum]]) { if (!u || siteYolu(u) !== yol) continue;
-      const d = await sb.storage.from(DEPO).download(`cozum/${f.kod}/${ad}`); if (d.error) throw new Error("Bu çözüm sayfası şu an açılamıyor.");
+      const d = await odepo(DEPO).download(`cozum/${f.kod}/${ad}`); if (d.error) throw new Error("Bu çözüm sayfası şu an açılamıyor.");
       let t = await d.data.text();
       t = t.replace(/new URLSearchParams\(location\.search\)/g, `new URLSearchParams(${JSON.stringify(sorgu)})`).replace(/history\.replaceState\(/g, "(function(){try{return history.replaceState.apply(history,arguments)}catch(e){}})(");
       const kat = okuyucuKatman(`${f.kod} çözüm`); kat.append(h("h3", { style: "margin:0" }, `${f.kod} · ${ad === "cozum.html" ? "Çözüm" : "Soru bankası çözümü"}`), h("iframe", { class: "etk-cerceve", title: `${f.kod} çözüm`, src: URL.createObjectURL(new Blob([t], { type: "text/html" })) })); return; }
@@ -5949,7 +6029,7 @@ async function programKlasorPlani(F) {
 async function programIceAktar(plan, yaz) {
   let V; try { V = await q(sb.from("program_icerik").select("*")); } catch (e) { throw new Error(/program_|PGRST20[25]|does not exist|42P01/i.test(String(e && (e.message || e.code))) ? "Program içerikleri kurulmamış: Supabase'te 69_programlar.sql çalıştırılmalı." : hataMetni(e)); }
   const anahtar = x => `${x.program}|${x.duzey ?? ""}|${String(x.bolum).trim()}|${x.tur}|${String(x.baslik).trim().toLocaleLowerCase("tr")}`, VM = new Map(V.map(v => [anahtar(v), v]));
-  const M = new Map(); for (let o = 0; ; o += 1000) { const r_ = await sb.storage.from(DEPO).list("program", { limit: 1000, offset: o }); if (r_.error) break; (r_.data || []).forEach(x => M.set(`program/${x.name}`, x.metadata && x.metadata.size)); if (!r_.data || r_.data.length < 1000) break; }
+  const M = new Map(); for (let o = 0; ; o += 1000) { const r_ = await odepo(DEPO).list("program", { limit: 1000, offset: o, yalnizB2: true }); if (r_.error) break; (r_.data || []).forEach(x => M.set(`program/${x.name}`, x.metadata && x.metadata.size)); if (!r_.data || r_.data.length < 1000) break; }
   const yeniId = () => crypto.randomUUID ? crypto.randomUUID() : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
   const G = []; plan.L.forEach(x => { const v = VM.get(anahtar(x)), id = v ? v.id : yeniId();
     x.id = id; x.yol = x.f ? (v && v.yol) || `program/${id}.pdf` : null; x.cozum_yol = x.cf ? (v && v.cozum_yol) || `program/${id}_cozum.pdf` : (v && v.cozum_yol) || null; x.yeni = !v;
@@ -5983,7 +6063,7 @@ function icerikTasimaKarti() {
   const say = h("p", { class: "not sayi", role: "status" }, "");
   const yuzde = h("b", { class: "sayi" }, "%0"), cubuk = h("div", { class: "yuk-cubuk buyuk", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": "0" }, h("i")), yukSat = h("div", { class: "yuk-satir", hidden: true }, cubuk, yuzde);
   async function mevcut(klasor) { const M = new Map();
-    for (let o = 0; ; o += 1000) { const r = await sb.storage.from(DEPO).list(klasor, { limit: 1000, offset: o }); if (r.error) throw r.error;
+    for (let o = 0; ; o += 1000) { const r = await odepo(DEPO).list(klasor, { limit: 1000, offset: o, yalnizB2: true }); if (r.error) throw r.error;
       (r.data || []).forEach(x => M.set(`${klasor}/${x.name}`, x.metadata && x.metadata.size)); if (!r.data || r.data.length < 1000) break; }
     return M; }
   // D: [{ yol: "pdf/x.pdf", f: File }]
@@ -6023,9 +6103,18 @@ function icerikTasimaKarti() {
     else if (PF.length) { durum.textContent = "Okul içeriği yok; program klasörü işleniyor."; progCalis(); }
     else durum.textContent = birimModu ? "Birim klasörlerinde yüklenecek dosya bulunamadı." : "Seçilen klasörde yüklenecek içerik bulunamadı. “Matematik” ya da “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin."; };
   const dug = h("button", { class: "btn ana tasi-dug", type: "button", on: { click: () => inp.click() } }, "📁 Matematik ya da _ozel_icerik klasörünü seç ve yükle");
+  const eskiDur = h("p", { class: "not", role: "status", "aria-live": "polite" });
+  const eskiDug = h("button", { class: "btn tasi-dug", type: "button", on: { click: async e => { const b = e.currentTarget;
+    if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz? Yeniden basın"; eskiDur.textContent = "Yalnız özel depoda (B2) aynı adla ve aynı boyutta bulunan dosyaların Supabase'teki kopyası kaldırılır. Bilgisayarınızdaki dosyalara dokunulmaz."; return; }
+    delete b.dataset.emin; b.textContent = "Supabase'teki eski kopyaları kaldır"; kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = true);
+    try { const r = await eskiKopyalariKaldir(t => eskiDur.textContent = t); eskiDur.textContent = `Tamam: ${r.kaldirilan} eski kopya kaldırıldı.${r.kalan ? ` ${r.kalan} dosya özel depoda bulunmadığı ya da boyutu farklı olduğu için yerinde bırakıldı; klasörü yeniden yükleyip tekrar deneyin.` : ""}`; }
+    catch (er) { eskiDur.textContent = "Durdu: " + hataMetni(er); }
+    kart.querySelectorAll(".tasi-dug").forEach(x => x.disabled = false); } } }, "Supabase'teki eski kopyaları kaldır");
   const kart = h("div", { class: "kart" }, h("h3", {}, "İçerikleri özel depoya taşı"), durum, yukSat,
     h("p", { class: "not" }, "Yeni düzen: “Keşfet ve Çöz › Matematik” klasörünü seçin; yalnız birim klasörlerindeki “portal” klasörleri yüklenir (öğretmen PDF'leri ve kaynak dosyalar yüklenmez). Eski düzen: “_Öğrenci Sitesi › _ozel_icerik” klasörünü seçin. İçindeki konu anlatımı PDF'leri (pdf), soru dosyaları (soru), etkinliklerin sesli yönergeleri (ses) ve sayfalar klasöründeki etkinlik, çözüm ve atölye sayfaları bulunur; program klasöründeki olimpiyat, TYT, AYT, KPSS ve ALES föyleri, testleri ve çözümleri de Program içerikleri listesine eklenir (klasör adları: olimpiyat, tyt, ayt, kpss, ales). Depoda olmayan ya da değişenler yüklenir. Tarayıcı “dosyaları yükle” diye sorarsa onaylayın. Yarıda kalırsa aynı klasörü yeniden seçin, kaldığı yerden devam eder. Föyler (foy) şimdilik yüklenmez."),
-    h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, dug, inp), say);
+    h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, dug, inp), say,
+    h("p", { class: "not" }, "İçerikler özel depoya (Backblaze B2) yüklendikten sonra Supabase'teki eski kopyalar kaldırılarak Supabase kotası boşaltılır."),
+    h("div", { style: "display:flex;gap:10px;flex-wrap:wrap" }, eskiDug), eskiDur);
   return kart;
 }
 async function dosyaAc(yol, dugme) {
@@ -6058,12 +6147,12 @@ async function oiAyarlar() { try { return await q(sb.from("kaynak_ayar").select(
 const oiEskiBolum = (k, ad) => k === "online" ? "online" : k === "kilavuz" ? "kilavuz" : k === "ek" ? "ek" : k === "ogrenci" ? "ozel" : /kilavuz/i.test(ad) ? "kilavuz" : "ozel";
 async function oiDosyalar() {
   const L = [];
-  for (const k of ["online", "kilavuz", "ogrenci", "ogretmen", "ek"]) { const r = await sb.storage.from(DEPO).list(k, { limit: 1000, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error;
+  for (const k of ["online", "kilavuz", "ogrenci", "ogretmen", "ek"]) { const r = await odepo(DEPO).list(k, { limit: 1000, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error;
     (r.data || []).filter(x => x.name && x.id && !x.name.startsWith(".")).forEach(x => L.push({ yol: `${k}/${x.name}`, k, x })); }
   return L;
 }
 // depodan silinip silinmediği denetlenir (izin yoksa depo hata vermeden boş döner)
-async function depoSil(yollar) { const r = await sb.storage.from(DEPO).remove(yollar); if (r.error) throw r.error; if (!(r.data || []).length) throw new Error("Dosya silinemedi: bu dosyayı silme izniniz yok."); }
+async function depoSil(yollar) { const r = await odepo(DEPO).remove(yollar); if (r.error) throw r.error; if (!(r.data || []).length) throw new Error("Dosya silinemedi: bu dosyayı silme izniniz yok."); }
 function oiYukleKart() {
   const sec = h("input", { type: "file", accept: "application/pdf,.pdf,.js,image/*,.doc,.docx,.ppt,.pptx", multiple: true });
   const bol = h("select", { "aria-label": "Bölüm" }, h("option", { value: "" }, "Hangi bölüme yüklensin?"), ...OI_BOLUM.map(([v, a]) => h("option", { value: v }, a)));
@@ -6139,11 +6228,11 @@ const CANLI_UZANTI = { pdf: "application/pdf", png: "image/png", jpg: "image/jpe
   xls: "application/vnd.ms-excel", xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" };
 const canliKlasor = id => `canli/${id}`;
 const boyutYaz = b => b >= 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
-async function canliDosyalar(id) { const r = await sb.storage.from(DEPO).list(canliKlasor(id), { limit: 100, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error;
+async function canliDosyalar(id) { const r = await odepo(DEPO).list(canliKlasor(id), { limit: 100, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error;
   return (r.data || []).filter(x => x.name && x.id && !x.name.startsWith(".")); }
 async function canliIndir(yol, b) {
   if (b) b.disabled = true;
-  try { const r = await sb.storage.from(DEPO).createSignedUrl(yol, 600, { download: yol.split("/").pop() }); if (r.error) throw r.error;
+  try { const r = await odepo(DEPO).createSignedUrl(yol, 600, { download: yol.split("/").pop() }); if (r.error) throw r.error;
     const a = h("a", { href: r.data.signedUrl }); document.body.append(a); a.click(); a.remove(); }
   catch (e) { bilgi(`<h3>Dosya indirilemedi</h3><p>${kac(hataMetni(e))}</p>`); }
   finally { if (b) b.disabled = false; }
@@ -6184,7 +6273,7 @@ function canliBekleyenDosya(baslik = "Ders dosyaları (isteğe bağlı) · bu de
 // öğrenci: derse eklenen föy, öğretmen indirilebilir yaptıysa indirilir (izin yoksa düğme görünmez)
 function canliFoyDugme(c) { if (!c.kaynak_yol) return null;
   const b = h("button", { class: "btn", type: "button", hidden: true, on: { click: e => canliIndir(c.kaynak_yol, e.currentTarget) } }, "⬇ Ders föyü");
-  sb.storage.from(DEPO).createSignedUrl(c.kaynak_yol, 60).then(r => { if (!r.error) b.hidden = false; }).catch(() => {}); return b; }
+  odepo(DEPO).createSignedUrl(c.kaynak_yol, 60).then(r => { if (!r.error) b.hidden = false; }).catch(() => {}); return b; }
 // öğretmen: dersin dosyalarını ekler, siler
 function canliDosyaYonet(c) {
   const liste = h("div", { class: "liste" }), durum = h("span", { class: "not" });
@@ -6194,7 +6283,7 @@ function canliDosyaYonet(c) {
     try { const D = await canliDosyalar(c.id); if (!D.length) liste.append(h("p", { class: "not" }, "Henüz dosya yok."));
       D.forEach(d => { const yol = `${canliKlasor(c.id)}/${d.name}`;
         const sil = h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz?"; return; }
-          const r = await sb.storage.from(DEPO).remove([yol]); if (r.error) b.textContent = r.error.message; else yenile(); } } }, "Sil");
+          const r = await odepo(DEPO).remove([yol]); if (r.error) b.textContent = r.error.message; else yenile(); } } }, "Sil");
         liste.append(h("div", { class: "satir" }, h("div", { class: "ad" }, d.name, h("small", {}, boyutYaz(d.metadata?.size || 0))), h("button", { class: "btn", type: "button", on: { click: e => canliIndir(yol, e.currentTarget) } }, "İndir"), sil)); }); }
     catch (e) { liste.append(h("p", { class: "ekran-yok" }, hataMetni(e))); } }
   inp.onchange = async () => { const F = [...inp.files]; inp.value = ""; ekle.disabled = true; await canliDosyaYukle(c.id, F, durum); ekle.disabled = false; yenile(); };
@@ -6263,7 +6352,7 @@ async function ogtCanli(ic) {
       tsG[sv].forEach(f => f.testler.forEach(t => { const tid = `${f.kod}-${t.tip}${t.no}`; g.append(h("option", { value: tid }, f.ek ? `${f.ad}` : `${f.kod} · ${tad(t)}`)); })); ts.append(g); });
     ts.value = c.test_id || "";
     const foy = h("select", { "aria-label": "Online ders föyü" }, h("option", { value: "" }, "— Seçmeyin —")); let FOY = [];
-    Promise.all([sb.storage.from(DEPO).list("online", { limit: 1000, sortBy: { column: "name", order: "asc" } }), oiAyarlar()]).then(([r, A]) => {
+    Promise.all([odepo(DEPO).list("online", { limit: 1000, sortBy: { column: "name", order: "asc" } }), oiAyarlar()]).then(([r, A]) => {
       FOY = (r.data || []).filter(x => x.name && x.id && !x.name.startsWith(".")).map(x => { const yol = `online/${x.name}`, a = (A || []).find(z => z.yol === yol); return { yol, ad: x.name.replace(/\.[^.]+$/, "").replace(/_/g, " "), indir: !!(a && a.indir) }; });
       FOY.forEach(x => foy.append(h("option", { value: x.yol }, `${x.ad}${x.indir ? " · indirilebilir" : ""}`))); foy.value = c.kaynak_yol || ""; }).catch(() => {});
     const kaynak = h("label", { style: "margin-top:10px" }, "Online ders föyü (Özel İçerikler'den)", foy,
@@ -6301,7 +6390,7 @@ async function ogtCanli(ic) {
         c.kaynak_yol ? h("button", { class: "btn", type: "button", title: "Föyü Online tahtada aç", on: { click: () => { depo.yaz("od_mod", "foy"); depo.yaz("od_foy", c.kaynak_yol); SAYFA = "tahta"; uygulama(); scrollTo(0, 0); } } }, "Föyü aç") : null,
         canliDurum(c) === "bitti" ? h("button", { class: "btn" + (c.kayit_url ? "" : " ana"), type: "button", on: { click: e => kayitEkleSatir(c, e.currentTarget) } }, c.kayit_url ? "Kaydı değiştir" : "Kaydı ekle") : null,
         h("button", { class: "btn", type: "button", on: { click: () => { const f = form(c); yeniKart.replaceWith(f); scrollTo(0, 0); } } }, "Düzenle"),
-        h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz?"; return; } try { try { const D = await canliDosyalar(c.id); if (D.length) await sb.storage.from(DEPO).remove(D.map(x => `${canliKlasor(c.id)}/${x.name}`)); } catch (er) {}
+        h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz?"; return; } try { try { const D = await canliDosyalar(c.id); if (D.length) await odepo(DEPO).remove(D.map(x => `${canliKlasor(c.id)}/${x.name}`)); } catch (er) {}
           await q(sb.from("canli_dersler").delete().eq("id", c.id)); SAYFA = "canli"; uygulama(); } catch (er) { b.textContent = hataMetni(er); } } } }, "Sil")])); });
     return l; };
   ic.append(h("div", { class: "kart" }, h("h3", {}, "Yaklaşan dersler"), satirlar(CANLI.filter(c => canliDurum(c) !== "bitti"), "Planlanmış ders yok.")),
@@ -9229,7 +9318,7 @@ function odKonu(ic) {
 async function odFoy(ic) {
   const yer = h("p", { class: "not" }, "Föyler yükleniyor…"); ic.append(yer);
   let L = [];
-  try { const r = await sb.storage.from(DEPO).list("online", { limit: 1000, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error;
+  try { const r = await odepo(DEPO).list("online", { limit: 1000, sortBy: { column: "name", order: "asc" } }); if (r.error) throw r.error;
     (r.data || []).filter(x => x.name && x.id && /\.pdf$/i.test(x.name)).forEach(x => L.push({ yol: `online/${x.name}`, ad: x.name.replace(/\.pdf$/i, "").replace(/_/g, " ") })); }
   catch (e) { yer.remove(); ic.append(h("div", { class: "kart" }, h("p", { class: "ekran-yok" }, /bucket|PGRST20[25]|does not exist/i.test(String(e.message || e)) ? "Kaynak deposu kurulmamış: Supabase'te 06_branslar_canli_kaynak.sql çalıştırılmalı." : hataMetni(e)))); return; }
   yer.remove();
@@ -10544,7 +10633,7 @@ async function yonProgramIcerik(ic) {
         i.yol ? h("button", { class: "btn", type: "button", on: { click: e => dosyaAc(i.yol, e.currentTarget) } }, "PDF") : null,
         h("button", { class: "btn", type: "button", on: { click: e => { e.currentTarget.disabled = true; sat.after(form(i)); } } }, "Düzenle"),
         h("button", { class: "btn", type: "button", on: { click: async e => { const b = e.currentTarget; if (!b.dataset.emin) { b.dataset.emin = 1; b.textContent = "Emin misiniz?"; return; }
-          try { await q(sb.from("program_icerik").delete().eq("id", i.id)); const Y = [i.yol, i.cozum_yol].filter(Boolean); if (Y.length) await sb.storage.from(DEPO).remove(Y); await yenile(); durum.textContent = "Silindi."; } catch (er) { durum.textContent = hataMetni(er); } } } }, "Sil"));
+          try { await q(sb.from("program_icerik").delete().eq("id", i.id)); const Y = [i.yol, i.cozum_yol].filter(Boolean); if (Y.length) await odepo(DEPO).remove(Y); await yenile(); durum.textContent = "Silindi."; } catch (er) { durum.textContent = hataMetni(er); } } } }, "Sil"));
         liste.append(sat); }); }); };
   ps.onchange = ciz; ds.onchange = ciz;
   const kInp = h("input", { type: "file", multiple: true, webkitdirectory: true, style: "display:none" }), kDur = h("p", { class: "not", role: "status" });
