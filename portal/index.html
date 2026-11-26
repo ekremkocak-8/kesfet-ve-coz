@@ -4565,13 +4565,15 @@ async function cozumSayfaAc(f, tur) {
 // sayfa bir kez indirilir, tarayıcıda adres (blob) olarak açılır; hangi etkinlik açılacağı #e3 / #p2 ile söylenir
 const ETK_URL = {};
 // özel depodaki bir sayfayı indirip tarayıcıda açılabilir adrese (blob) çevirir; depoda yoksa eski açık adrese bakar (geçiş dönemi)
+// 26.11.2026: ekran sürümlerindeki yazı tipi adresleri (üretim bilgisayarındaki file:/// yolları) sitedeki portal/yazitipi klasörüne çevrilir
+const yaziTipiYolu = t => t.replace(/file:\/\/\/home\/claude\/stil\/(katex\/)?fonts\//g, (m, k) => new URL(`yazitipi/${k ? "katex/" : ""}`, location.href).href);
 async function depoSayfa(yol, eski, ne) {
   if (ETK_URL[yol]) return ETK_URL[yol];
   const d = await odepo(DEPO).download(yol);
   if (d.error) {
     if (eski) { try { const r = await fetch(eski, { method: "HEAD", cache: "no-store" }); if (r.ok) return ETK_URL[yol] = eski + "?"; } catch (e) {} }
     throw new Error(ROL === "yon" ? `Bu ${ne} özel depoda yok. Ayarlar → İçerikleri özel depoya taşı → “_ozel_icerik klasörünü seç” ile yükleyin.` : `Bu ${ne} şu an açılamıyor. Biraz sonra yeniden dene; sürerse öğretmenine haber ver.`); }
-  let t = await d.data.text();
+  let t = yaziTipiYolu(await d.data.text());
   t = t.replace(/history\.replaceState\(/g, "(function(){try{return history.replaceState.apply(history,arguments)}catch(e){}})(");
   // 22.11.2026 (Ekrem KOÇAK: "pekiştirme etkinlikleri çok küçük"): geniş çerçevede yönerge ve görsel solda, etkinlik sağda; sığdırma ölçeği büyür
   if (/pekistirme\.html$/.test(yol)) t = t.replace(/<\/head>/i, `<style id="kvc-genis">@media (min-aspect-ratio: 5/4) and (min-width: 900px){
@@ -10799,7 +10801,9 @@ OGRS.odevler = ic => ogrOdevlerim(ic);
 (async () => { try { const u = new URLSearchParams(location.search), rt = u.get("rapor"); if (rt && /^[0-9a-f-]{36}$/i.test(rt)) return raporGoster(rt);
     const sv = u.get("sinav"); if (sv && /^[0-9a-f-]{36}$/i.test(sv)) { depo.yaz("ac_sinav", { id: sv, k: u.get("k") || "" }); history.replaceState(null, "", location.pathname + location.hash); } } catch (e) {}
   // 17.11.2026: veri_ek.json — index.html'de kaydı olmayan konular (veri_tara.py üretir); yeni konu için index.html düzenlenmez
-  try { const r = await fetch("veri_ek.json?v=" + Date.now(), { cache: "no-store" }); if (r.ok) { const E = await r.json(); (E.konular || []).forEach(e => { if (e && e.kod && !VERI.some(f => f.kod === e.kod)) VERI.push(e); }); } } catch (e) {}
+  try { const r = await fetch("veri_ek.json?v=" + Date.now(), { cache: "no-store" }); if (r.ok) { const E = await r.json(); (E.konular || []).forEach(e => { if (e && e.kod && !VERI.some(f => f.kod === e.kod)) {
+      // 26.11.2026: ek konuların testleri de katalog dizinlerine eklenir (önceden TID'de yoktu; test açılmıyordu)
+      const fi = VERI.push(e) - 1; AUK[e.kod] = e; (e.testler || []).forEach(t => { const x = { id: `${e.kod}-${t.tip}${t.no}`, f: e, t, fi }; TEST.push(x); TID[x.id] = x; }); } }); } } catch (e) {}
   try { const { data } = await sb.auth.getSession(); if (data.session && KURTARMA) parolaYenileEkrani(); else if (data.session) await yukle(); else giris(); } catch (e) { giris(hataMetni(e)); } })();
 
 </script>
